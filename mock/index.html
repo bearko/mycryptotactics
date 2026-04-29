@@ -97,77 +97,187 @@
     .node-btn.shop { border-left: 4px solid var(--accent); }
     .node-btn.boss { border-left: 4px solid #9a6ac4; font-weight: 600; }
 
-    /* Combat */
-    #combatView .combat-top {
+    /* Combat — arena + duelists */
+    #combatView.combat-panel { padding: 0; overflow: hidden; }
+    .combat-arena {
+      position: relative;
+      min-height: 300px;
+      border-radius: 10px 10px 0 0;
+      overflow: hidden;
+    }
+    .combat-bg {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center 35%;
+      background-repeat: no-repeat;
+      filter: saturate(0.92) brightness(0.55);
+    }
+    .combat-bg::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, #0a0812cc 0%, transparent 22%, transparent 78%, #0a0812cc 100%),
+        linear-gradient(180deg, transparent 40%, #120e18ee 100%);
+      pointer-events: none;
+    }
+    .combat-arena-inner {
+      position: relative;
+      z-index: 1;
       display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
+      align-items: stretch;
       justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 1rem;
+      gap: 0.5rem;
+      padding: 1rem 0.85rem 1.25rem;
+      min-height: 300px;
     }
-    .hero-strip {
+    .duelist {
+      flex: 1;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 0.75rem;
+      text-align: center;
+      max-width: 42%;
     }
-    .hero-strip img { width: 56px; height: 56px; border-radius: 8px; object-fit: cover; border: 2px solid var(--accent); }
-    .bars { font-size: 0.8rem; }
-    .bar-line { margin: 0.2rem 0; display: flex; align-items: center; gap: 0.35rem; }
-    .bar-line img { width: 18px; height: 18px; }
-    .enemy-box {
-      background: #15121c;
-      border: 1px solid var(--border);
+    .duelist-tag {
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 0.35rem;
+    }
+    .portrait-card {
+      background: linear-gradient(180deg, #1a1628e6 0%, #0f0d16f0 100%);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 0.65rem 0.75rem 0.75rem;
+      width: 100%;
+      max-width: 200px;
+      box-shadow: 0 12px 32px #000a, inset 0 1px 0 #ffffff14;
+    }
+    .portrait-card.hero-side { border-color: #6a8a5a88; box-shadow: 0 0 24px #3d5c3a44, 0 12px 32px #000a; }
+    .portrait-card.enemy-side { border-color: #9a4a5888; box-shadow: 0 0 24px #5c2a3044, 0 12px 32px #000a; }
+    .portrait-card img.portrait-lg {
+      width: 100%;
+      max-width: 120px;
+      height: 120px;
+      object-fit: cover;
       border-radius: 8px;
-      padding: 0.75rem;
-      min-width: 200px;
-      display: flex;
-      gap: 0.75rem;
-      align-items: center;
+      margin: 0 auto 0.4rem;
+      display: block;
+      border: 2px solid #0006;
     }
-    .enemy-box img { width: 64px; height: 64px; object-fit: contain; border-radius: 6px; background: #0d0b12; }
-    .intent { font-size: 0.75rem; color: #f0c090; margin-top: 0.35rem; }
+    .portrait-card.enemy-side img.portrait-lg { object-fit: contain; background: #0a0810; }
+    .duelist-name { font-weight: 700; font-size: 0.9rem; margin-bottom: 0.35rem; }
+    .bars { font-size: 0.75rem; text-align: left; }
+    .bar-line { margin: 0.2rem 0; display: flex; align-items: center; gap: 0.35rem; }
+    .bar-line img { width: 16px; height: 16px; flex-shrink: 0; }
+    .vs-column {
+      flex: 0 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0 0.25rem;
+      min-width: 5.5rem;
+    }
+    .vs-mark {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--accent);
+      text-shadow: 0 0 20px #c4a35a66;
+      letter-spacing: 0.05em;
+    }
+    .intent-bubble {
+      font-size: 0.68rem;
+      color: #ffd4a8;
+      text-align: center;
+      line-height: 1.35;
+      padding: 0.45rem 0.5rem;
+      background: #1a1018cc;
+      border: 1px solid #6a4048;
+      border-radius: 8px;
+      max-width: 7.5rem;
+    }
     .energy-pill {
       display: inline-flex;
       align-items: center;
       gap: 0.25rem;
-      background: #1a3040;
+      background: #0d2430ee;
       color: var(--energy);
-      padding: 0.25rem 0.6rem;
+      padding: 0.3rem 0.65rem;
       border-radius: 999px;
       font-weight: 600;
-      font-size: 0.9rem;
-      margin-bottom: 0.5rem;
+      font-size: 0.8rem;
+      border: 1px solid #2a5560;
+    }
+    .combat-footer {
+      padding: 0.75rem 1rem 1rem;
+      border-top: 1px solid var(--border);
+      background: var(--panel);
+      border-radius: 0 0 10px 10px;
     }
     .hand {
       display: flex;
       flex-wrap: wrap;
       gap: 0.5rem;
-      min-height: 120px;
+      min-height: 148px;
       align-items: flex-end;
       padding: 0.5rem 0;
     }
     .card {
-      width: 108px;
-      min-height: 140px;
-      border-radius: 8px;
+      width: 118px;
+      min-height: 168px;
+      border-radius: 10px;
       border: 2px solid #5a5068;
-      padding: 0.45rem;
+      padding: 0.35rem;
       cursor: pointer;
-      font-size: 0.68rem;
-      line-height: 1.25;
+      font-size: 0.62rem;
+      line-height: 1.2;
       transition: transform 0.1s, box-shadow 0.1s;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
+      overflow: hidden;
     }
-    .card:hover:not(.disabled) { transform: translateY(-4px); box-shadow: 0 8px 20px #0008; }
+    .card:hover:not(.disabled) { transform: translateY(-5px); box-shadow: 0 10px 24px #0009; }
     .card.disabled { opacity: 0.35; cursor: not-allowed; }
-    .card.atk { background: linear-gradient(160deg, var(--card-atk), #1a1218); }
-    .card.skl { background: linear-gradient(160deg, var(--card-skl), #121a20); }
-    .card .cost { font-weight: 700; color: var(--energy); font-size: 0.85rem; }
-    .card .name { font-weight: 600; color: var(--text); margin: 0.25rem 0; }
-    .card .desc { color: var(--muted); }
+    .card.atk { background: linear-gradient(165deg, #3a2832 0%, #120d12 100%); }
+    .card.skl { background: linear-gradient(165deg, #283240 0%, #0d1218 100%); }
+    .card .card-cost {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      font-weight: 800;
+      color: var(--energy);
+      font-size: 0.8rem;
+      text-shadow: 0 1px 2px #000;
+    }
+    .card { position: relative; }
+    .card-ext-img {
+      width: 100%;
+      height: 52px;
+      object-fit: contain;
+      margin: 0.15rem 0 0.2rem;
+      filter: drop-shadow(0 2px 4px #0006);
+    }
+    .card-ext-name {
+      font-weight: 700;
+      color: var(--text);
+      font-size: 0.62rem;
+      line-height: 1.15;
+      margin-bottom: 0.15rem;
+      min-height: 2.2em;
+    }
+    .card-skill-row {
+      display: flex;
+      align-items: center;
+      gap: 0.2rem;
+      margin-bottom: 0.15rem;
+    }
+    .card-skill-row img { width: 14px; height: 14px; flex-shrink: 0; }
+    .card-skill-name { font-size: 0.58rem; color: var(--accent); font-weight: 600; }
+    .card .card-desc { color: var(--muted); font-size: 0.58rem; flex: 1; }
     .combat-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem; }
     button.action {
       background: var(--border);
@@ -185,11 +295,11 @@
     .log {
       font-size: 0.72rem;
       color: var(--muted);
-      max-height: 100px;
+      max-height: 88px;
       overflow-y: auto;
-      margin-top: 0.75rem;
+      margin-top: 0.65rem;
       border-top: 1px solid var(--border);
-      padding-top: 0.5rem;
+      padding-top: 0.45rem;
     }
     .log p { margin: 0.15rem 0; }
 
@@ -254,37 +364,47 @@
       <p style="font-size:0.75rem;color:var(--muted);margin:0.5rem 0 0">戦闘勝利でカード報酬とゴールド。休憩で HP 回復。店でカード購入（モック）。</p>
     </div>
 
-    <div id="combatView" class="panel hidden">
-      <div class="combat-top">
-        <div>
-          <div class="hero-strip">
-            <img id="leaderImg" alt="" />
-            <div>
-              <div style="font-weight:600" id="leaderName">—</div>
+    <div id="combatView" class="panel combat-panel hidden">
+      <div class="combat-arena">
+        <div id="combatBg" class="combat-bg" role="presentation"></div>
+        <div class="combat-arena-inner">
+          <div class="duelist">
+            <span class="duelist-tag">Leader</span>
+            <div class="portrait-card hero-side">
+              <img id="leaderImg" class="portrait-lg" alt="" />
+              <div class="duelist-name" id="leaderName">—</div>
               <div class="bars">
                 <div class="bar-line"><img alt="" data-stat="hp" /> HP <span id="pHp">0</span> / <span id="pHpMax">0</span></div>
                 <div class="bar-line">🛡 ブロック <span id="pBlock">0</span></div>
               </div>
             </div>
           </div>
-          <div class="energy-pill">⚡ エナジー <span id="energyVal">0</span> / <span id="energyMax">3</span></div>
-        </div>
-        <div class="enemy-box">
-          <img id="enemyImg" alt="" />
-          <div>
-            <div style="font-weight:600" id="enemyName">—</div>
-            <div class="bar-line"><img alt="" data-stat="hp" /> <span id="eHp">0</span></div>
-            <div class="bar-line">🛡 <span id="eBlock">0</span></div>
-            <div class="intent" id="enemyIntent">—</div>
+          <div class="vs-column">
+            <span class="vs-mark">VS</span>
+            <div class="energy-pill">⚡ <span id="energyVal">0</span> / <span id="energyMax">3</span></div>
+            <div class="intent-bubble" id="enemyIntent">—</div>
+          </div>
+          <div class="duelist">
+            <span class="duelist-tag">Enemy</span>
+            <div class="portrait-card enemy-side">
+              <img id="enemyImg" class="portrait-lg" alt="" />
+              <div class="duelist-name" id="enemyName">—</div>
+              <div class="bars">
+                <div class="bar-line"><img alt="" data-stat="hp" /> <span id="eHp">0</span></div>
+                <div class="bar-line">🛡 <span id="eBlock">0</span></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <p style="font-size:0.75rem;color:var(--muted);margin:0 0 0.5rem">手札のカードをクリックでプレイ。エナジーが足りないカードは灰色。</p>
-      <div id="hand" class="hand" role="list"></div>
-      <div class="combat-actions">
-        <button type="button" class="action primary" id="btnEndTurn">ターン終了</button>
+      <div class="combat-footer">
+        <p style="font-size:0.72rem;color:var(--muted);margin:0 0 0.5rem">エクステンションカードをクリックでプレイ。コストは ⚡。足りないカードは灰色。</p>
+        <div id="hand" class="hand" role="list"></div>
+        <div class="combat-actions">
+          <button type="button" class="action primary" id="btnEndTurn">ターン終了</button>
+        </div>
+        <div class="log" id="clog" aria-live="polite"></div>
       </div>
-      <div class="log" id="clog" aria-live="polite"></div>
     </div>
 
     <div id="shopView" class="panel hidden">
@@ -320,8 +440,18 @@
 
     const LEADER = { heroId: 1002, nameJa: "甲斐姫", hpMax: 70, img: () => img("Image/Heroes/1002.png") };
     const ENEMY_IMG = (id) => img("Image/Enemies/" + id + ".png");
+    const EXT_IMG = (id) => img("Image/Extensions/" + id + ".png");
+    const BATTLE_BG = (fileId) => img("Image/Backgrounds/" + fileId + ".png");
 
-    /** @typedef {{ id: string, name: string, cost: number, type: 'atk'|'skl', text: string, play: (s: any) => void }} CardDef */
+    function battleIconUrl(iconFileName) {
+      if (!iconFileName) return img("Image/BattleIcons/Parameters/phy.png");
+      const normalized = iconFileName.toLowerCase();
+      const folder =
+        normalized.startsWith("buf_") || normalized.startsWith("dbf_") ? "Buffs" : "Parameters";
+      return img("Image/BattleIcons/" + folder + "/" + normalized);
+    }
+
+    /** @typedef {{ libraryKey: string, extId: number, extNameJa: string, skillNameJa: string, skillIcon: string, cost: number, type: 'atk'|'skl', text: string, play: (s: any) => void }} CardDef */
 
     function shuffle(a) {
       const arr = a.slice();
@@ -333,35 +463,105 @@
     }
 
     const CARD_LIBRARY = {
-      strike: {
-        id: "strike", name: "突撃", cost: 1, type: "atk", text: "敵に 6 ダメージ",
-        play(s) { dealDamage(s, 6); },
+      ext1001: {
+        libraryKey: "ext1001",
+        extId: 1001,
+        extNameJa: "ノービスブレード",
+        skillNameJa: "ノービススラッシュ",
+        skillIcon: "phy.png",
+        cost: 1,
+        type: "atk",
+        text: "先頭の敵に PHY の 50〜60% 相当のダメージ（モック: 7）",
+        play(s) { dealDamage(s, 7); },
       },
-      defend: {
-        id: "defend", name: "堅陣", cost: 1, type: "skl", text: "ブロック +5",
-        play(s) { s.playerBlock += 5; clog("ブロック +5"); },
-      },
-      read: {
-        id: "read", name: "読破", cost: 1, type: "skl", text: "カードを 2 枚引く",
-        play(s) { drawCards(s, 2); },
-      },
-      bash: {
-        id: "bash", name: "喝采", cost: 2, type: "atk", text: "10 ダメージ。敵に脆弱（次の攻撃 +4）",
+      ext1002: {
+        libraryKey: "ext1002",
+        extId: 1002,
+        extNameJa: "ノービスマスケット",
+        skillNameJa: "ノービスショット",
+        skillIcon: "int.png",
+        cost: 1,
+        type: "atk",
+        text: "敵全体への INT ダメージを簡略化：5 ダメージ＋脆弱",
         play(s) {
-          dealDamage(s, 10);
-          s.enemyVulnerable = 4;
-          clog("敵に脆弱を付与");
+          dealDamage(s, 5);
+          s.enemyVulnerable = Math.max(s.enemyVulnerable || 0, 3);
+          clog("敵に脆弱（次の攻撃で追加ダメージ）");
         },
       },
-      tact: {
-        id: "tact", name: "奇策", cost: 1, type: "skl", text: "ブロック 3。次ターンエナジー +1",
+      ext1003: {
+        libraryKey: "ext1003",
+        extId: 1003,
+        extNameJa: "ノービスペン",
+        skillNameJa: "リカバリー",
+        skillIcon: "hp.png",
+        cost: 1,
+        type: "skl",
+        text: "HP が最も低い味方＝自分を回復係数の 30〜40%（モック: 8）",
+        play(s) {
+          const heal = 8;
+          const before = s.playerHp;
+          s.playerHp = Math.min(s.playerHpMax, s.playerHp + heal);
+          clog("リカバリー: HP +" + (s.playerHp - before));
+        },
+      },
+      ext1004: {
+        libraryKey: "ext1004",
+        extId: 1004,
+        extNameJa: "ノービスアーマー",
+        skillNameJa: "ノービスプロテクション",
+        skillIcon: "BUF_phy.png",
+        cost: 1,
+        type: "skl",
+        text: "自身の PHY を 5〜10% アップのイメージでブロック +7",
+        play(s) {
+          s.playerBlock += 7;
+          clog("ノービスプロテクション: ブロック +7");
+        },
+      },
+      ext1005: {
+        libraryKey: "ext1005",
+        extId: 1005,
+        extNameJa: "ノービスホース",
+        skillNameJa: "ノービスチャージ",
+        skillIcon: "BUF_agi.png",
+        cost: 1,
+        type: "skl",
+        text: "AGI 10% アップのイメージ：ブロック +3、次ターン ⚡+1",
         play(s) {
           s.playerBlock += 3;
           s.bonusEnergyNext = (s.bonusEnergyNext || 0) + 1;
-          clog("ブロック +3、次ターン +⚡1");
+          clog("ノービスチャージ: 次ターン +⚡1");
         },
       },
+      ext1006: {
+        libraryKey: "ext1006",
+        extId: 1006,
+        extNameJa: "ノービスカタナ",
+        skillNameJa: "ノービスイアイ",
+        skillIcon: "phy.png",
+        cost: 1,
+        type: "atk",
+        text: "先頭の敵に PHY の 45〜55% 相当（モック: 8）",
+        play(s) { dealDamage(s, 8); },
+      },
+      ext1008: {
+        libraryKey: "ext1008",
+        extId: 1008,
+        extNameJa: "ノービスブック",
+        skillNameJa: "ノービスリーディング",
+        skillIcon: "int.png",
+        cost: 1,
+        type: "skl",
+        text: "敵全体 INT ダメージのイメージでカードを 2 枚引く",
+        play(s) { drawCards(s, 2); },
+      },
     };
+
+    function copyCard(key) {
+      const def = CARD_LIBRARY[key];
+      return { ...def, play: def.play };
+    }
 
     function dealDamage(s, base) {
       let v = base + (s.enemyVulnerable || 0);
@@ -395,9 +595,9 @@
 
     function makeStarterDeck() {
       const d = [];
-      for (let i = 0; i < 5; i++) d.push({ ...CARD_LIBRARY.strike });
-      for (let i = 0; i < 4; i++) d.push({ ...CARD_LIBRARY.defend });
-      d.push({ ...CARD_LIBRARY.read });
+      for (let i = 0; i < 5; i++) d.push(copyCard("ext1001"));
+      for (let i = 0; i < 4; i++) d.push(copyCard("ext1004"));
+      d.push(copyCard("ext1008"));
       return shuffle(d);
     }
 
@@ -517,8 +717,10 @@
         enemyName: boss ? "門番：影の軍勢" : elite ? "精鋭" : "斥候",
         enemyImgId: enemyId,
       };
-      combat.drawPile = shuffle(combat.deck.map((c) => ({ ...c })));
+      combat.drawPile = shuffle(combat.deck.map((c) => copyCard(c.libraryKey)));
       showView("combat");
+      const bgFile = boss ? "1004" : elite ? "1002" : "1001";
+      document.getElementById("combatBg").style.backgroundImage = "url('" + BATTLE_BG(bgFile) + "')";
       document.getElementById("leaderImg").src = LEADER.img();
       document.getElementById("leaderName").textContent = LEADER.nameJa;
       document.getElementById("enemyImg").src = ENEMY_IMG(enemyId);
@@ -530,8 +732,8 @@
 
     function intentText() {
       const it = combat.enemyIntent;
-      if (it.kind === "attack") return "次の意図: 攻撃 " + it.value;
-      if (it.kind === "block") return "次の意図: ブロック " + it.value + " → 次に攻撃";
+      if (it.kind === "attack") return "次の意図\n攻撃 " + it.value;
+      if (it.kind === "block") return "次の意図\nブロック " + it.value;
       return "—";
     }
 
@@ -571,7 +773,26 @@
       combat.hand.forEach((card, idx) => {
         const el = document.createElement("div");
         el.className = "card " + card.type + (card.cost > combat.energy ? " disabled" : "");
-        el.innerHTML = `<div><span class="cost">${card.cost}</span> <span class="name">${card.name}</span></div><div class="desc">${card.text}</div>`;
+        el.innerHTML =
+          '<span class="card-cost">' +
+          card.cost +
+          "</span>" +
+          '<img class="card-ext-img" src="' +
+          EXT_IMG(card.extId) +
+          '" alt="" />' +
+          '<div class="card-ext-name">' +
+          card.extNameJa +
+          "</div>" +
+          '<div class="card-skill-row">' +
+          '<img src="' +
+          battleIconUrl(card.skillIcon) +
+          '" alt="" />' +
+          '<span class="card-skill-name">' +
+          card.skillNameJa +
+          "</span></div>" +
+          '<div class="card-desc">' +
+          card.text +
+          "</div>";
         el.addEventListener("click", () => playCard(idx));
         handEl.appendChild(el);
       });
@@ -624,7 +845,7 @@
     function endCombatWin() {
       gold += combat.boss ? 100 : combat.elite ? 45 : 28;
       clog("勝利！");
-      const pool = shuffle(["bash", "tact", "read", "strike", "defend"]);
+      const pool = shuffle(["ext1002", "ext1005", "ext1003", "ext1006", "ext1001"]);
       const picks = pool.slice(0, 3).map((k) => CARD_LIBRARY[k]);
       const overlay = document.getElementById("rewardOverlay");
       const box = document.getElementById("rewardPicks");
@@ -634,9 +855,16 @@
         b.type = "button";
         b.className = "node-btn";
         b.style.borderLeftColor = "var(--accent)";
-        b.textContent = `${def.name} (${def.cost}) — ${def.text}`;
+        b.textContent =
+          def.extNameJa +
+          "（⚡" +
+          def.cost +
+          "）「" +
+          def.skillNameJa +
+          "」— " +
+          def.text;
         b.addEventListener("click", () => {
-          if (combat) combat.deck.push({ ...def });
+          if (combat) combat.deck.push(copyCard(def.libraryKey));
           closeReward();
           advanceAfterNode();
         });
@@ -681,21 +909,22 @@
       const list = document.getElementById("shopList");
       list.innerHTML = "";
       const offers = [
-        { name: "喝采（カード）", price: 95, key: "bash" },
-        { name: "奇策（カード）", price: 85, key: "tact" },
-        { name: "突撃（カード）", price: 45, key: "strike" },
+        { label: "ノービスカタナ", price: 95, key: "ext1006" },
+        { label: "ノービスホース", price: 85, key: "ext1005" },
+        { label: "ノービスマスケット", price: 70, key: "ext1002" },
       ];
       offers.forEach((o) => {
+        const def = CARD_LIBRARY[o.key];
         const b = document.createElement("button");
         b.type = "button";
         b.className = "node-btn shop";
         b.style.width = "100%";
-        b.textContent = `${o.name} — ${o.price} GUM`;
+        b.textContent = o.label + " — " + o.price + " GUM（「" + def.skillNameJa + "」）";
         b.addEventListener("click", () => {
           if (gold < o.price) return;
           gold -= o.price;
           ensureRunState();
-          runState.deck.push({ ...CARD_LIBRARY[o.key] });
+          runState.deck.push(copyCard(o.key));
           b.disabled = true;
           syncResources();
         });
