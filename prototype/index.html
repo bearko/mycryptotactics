@@ -31,33 +31,6 @@
       align-items: center;
       padding: 0.75rem;
     }
-    .app-topbar {
-      width: 100%;
-      max-width: 900px;
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      margin-bottom: 0.5rem;
-      min-height: 2.25rem;
-    }
-    .btn-help {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 2.25rem;
-      height: 2.25rem;
-      padding: 0;
-      border-radius: 50%;
-      border: 1px solid var(--border);
-      background: var(--panel);
-      color: var(--accent);
-      font-size: 1.05rem;
-      font-weight: 700;
-      cursor: pointer;
-      line-height: 1;
-    }
-    .btn-help:hover { border-color: var(--accent); background: #2a2438; }
-    .btn-help:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     .wrap { width: 100%; max-width: 900px; }
     .panel {
       background: var(--panel);
@@ -76,6 +49,27 @@
     }
     .resources .res { display: flex; align-items: center; gap: 0.35rem; font-size: 0.85rem; color: var(--muted); }
     .resources img { width: 22px; height: 22px; object-fit: contain; }
+    .btn-help {
+      margin-left: auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      min-width: 22px;
+      padding: 0;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: var(--accent);
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    .btn-help:hover { border-color: var(--accent); background: #2a2438; }
+    .btn-help:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
     #mapView .map-title { font-size: 0.9rem; color: var(--accent); margin: 0 0 0.5rem; }
     .map-row {
@@ -546,14 +540,12 @@
   </style>
 </head>
 <body>
-  <div class="app-topbar">
-    <button type="button" class="btn-help" id="btnHelpOpen" aria-label="ヘルプを開く" title="ヘルプ">?</button>
-  </div>
   <div class="wrap">
     <div class="resources" aria-label="ランリソース">
       <span class="res"><img alt="GUM" data-icon="gum" /> <span id="goldVal">0</span></span>
       <span class="res"><img alt="HP" data-stat="hp" /> <span id="hpMapVal">—</span></span>
       <span class="res">層 <span id="layerVal">1</span> / 4</span>
+      <button type="button" class="btn-help" id="btnHelpOpen" aria-label="ヘルプを開く" title="ヘルプ">?</button>
     </div>
 
     <div id="mapView" class="panel">
