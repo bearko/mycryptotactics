@@ -243,7 +243,7 @@
       image-rendering: crisp-edges;
       animation: portrait-sprite-fx 0.75s steps(8) forwards;
       opacity: 0.95;
-      transform: scale(1.65);
+      transform: scale(6.6);
       transform-origin: center center;
     }
     @keyframes portrait-sprite-fx {
@@ -405,15 +405,15 @@
     }
 
     @media (max-width: 420px) {
-      .hand { --fan-w: 52px; }
+      .hand { --fan-w: 56px; }
     }
     .hand {
-      --fan-w: 58px;
+      --fan-w: 62px;
       display: flex;
       justify-content: center;
       align-items: flex-end;
-      min-height: 178px;
-      padding: 0.35rem 0.5rem 0.55rem;
+      min-height: 220px;
+      padding: 0.45rem 0.5rem 0.65rem;
       width: 100%;
       position: relative;
       perspective: 800px;
@@ -425,11 +425,11 @@
       max-width: var(--fan-w);
       min-width: var(--fan-w);
       height: 156px;
-      margin-left: calc(-0.58 * var(--fan-w));
+      margin-left: calc(-0.72 * var(--fan-w));
       --peek-lift: 0px;
       z-index: var(--i);
       transform-origin: 50% 100%;
-      transform: translateY(var(--peek-lift)) rotate(var(--rot, 0deg));
+      transform: translateY(var(--peek-lift)) rotate(var(--rot, 0deg)) scaleX(3) scaleY(1.5);
       transition: transform 0.18s ease, box-shadow 0.18s, margin 0.18s, filter 0.18s;
     }
     .hand .card:first-child { margin-left: 0; }
@@ -760,28 +760,26 @@
     button.action:disabled { opacity: 0.45; cursor: not-allowed; }
     button.primary { background: #4a3d6a; border: 1px solid var(--accent); }
 
-    #rewardOverlay {
-      position: fixed;
-      inset: 0;
-      background: #000c;
+    #rewardView {
+      max-width: 520px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #rewardView .reward-intro {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin: 0 0 0.75rem;
+      line-height: 1.45;
+    }
+    #rewardView .reward-picks {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 50;
-      padding: 1rem;
+      flex-direction: column;
+      gap: 0.5rem;
     }
-    #rewardOverlay.hidden { display: none; }
-    .reward-box {
-      background: var(--panel);
-      border: 2px solid var(--accent);
-      border-radius: 12px;
-      padding: 1.25rem;
-      max-width: 420px;
-      width: 100%;
+    #rewardView .reward-picks button {
+      text-align: left;
+      padding: 0;
     }
-    .reward-box h3 { margin: 0 0 1rem; font-size: 1rem; }
-    .reward-picks { display: flex; flex-direction: column; gap: 0.5rem; }
-    .reward-picks button { text-align: left; padding: 0.65rem; }
 
     #gameOver { text-align: center; padding: 2rem; }
     footer {
@@ -1003,6 +1001,13 @@
       <p id="gameOverMsg" style="color:var(--muted)"></p>
       <button type="button" class="action primary" id="btnRestart" style="margin-top:1rem">もう一度</button>
     </div>
+
+    <div id="rewardView" class="panel hidden">
+      <p class="map-title">報酬選択</p>
+      <p class="reward-intro">バトル勝利おめでとうございます。追加するカードを 1 枚選ぶか、スキップしてマップへ戻ります。</p>
+      <div class="reward-picks" id="rewardPicks"></div>
+      <button type="button" class="action" id="btnSkipReward" style="margin-top:0.75rem;width:100%">スキップ（報酬なし）</button>
+    </div>
   </div>
 
   <div id="deckModal" class="hidden" aria-hidden="true" role="dialog" aria-labelledby="deckModalTitle">
@@ -1018,12 +1023,6 @@
     <div class="cutin-inner" id="cutinInner">
       <p class="cutin-title" id="cutinTitle">—</p>
       <p class="cutin-sub" id="cutinSub">タップで続行</p>
-    </div>
-  </div>
-    <div class="reward-box">
-      <h3>報酬：カードを 1 枚選ぶ（スキップ可）</h3>
-      <div class="reward-picks" id="rewardPicks"></div>
-      <button type="button" class="action" id="btnSkipReward" style="margin-top:0.75rem;width:100%">スキップ</button>
     </div>
   </div>
 
@@ -1062,10 +1061,10 @@
           </ul>
           <h3>戦闘</h3>
           <ul>
-            <li>手札は<strong>扇状に重なったカード</strong>です。PC はカードに載せると効果の説明が開き、クリックでプレイ。スマホは<strong>長押し</strong>で説明を出し、<strong>指を離すときもカードの上</strong>ならプレイ（外に出してから離すとキャンセル）。</li>
+            <li>手札は<strong>扇状に重なったカード</strong>です。PC はカードに載せると詳細が開き、クリックでプレイ。スマホは<strong>タップで即プレイ</strong>、または<strong>長押し</strong>で詳細を出したうえで、指を離す位置のカードがプレイされます（長押し中に他のカードへ指を滑らせて詳細を切り替え可能）。</li>
             <li>エナジーは手札の上に <code>⚡ 現在 / 最大</code> で表示されます。</li>
             <li><strong>ターン終了</strong>は右端。左の山札アイコンから<strong>残りデッキ枚数と内訳</strong>（引く順は非表示）を確認できます。</li>
-            <li>敵撃破後は<strong>結果カットイン</strong>が出ます。タップで報酬へ。敗北時もカットインのあとラン終了画面へ。</li>
+            <li>敵撃破後は<strong>VICTORY カットイン</strong> → タップで<strong>報酬選択画面</strong>へ。カードを 1 枚選ぶかスキップでマップに戻ります。</li>
           </ul>
           <h3>その他</h3>
           <ul>

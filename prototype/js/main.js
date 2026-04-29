@@ -44,6 +44,8 @@ let pendingShopNodeId = null;
 let cutinKind = null;
 /** @type {null | { resolve: () => void }} */
 let cutinResolve = null;
+/** 勝利直後の同期用スナップショット（報酬画面で deck に加える） */
+let postCombatSnapshot = null;
 /** @type {HTMLAudioElement | null} */
 let bgmAudio = null;
 
@@ -517,6 +519,8 @@ function showView(name) {
   document.getElementById("combatView").classList.toggle("hidden", name !== "combat");
   document.getElementById("shopView").classList.toggle("hidden", name !== "shop");
   document.getElementById("gameOver").classList.toggle("hidden", name !== "over");
+  const rv = document.getElementById("rewardView");
+  if (rv) rv.classList.toggle("hidden", name !== "reward");
 }
 
 function startCombatFromMapNode(node) {
@@ -721,22 +725,171 @@ function refreshHandPeekLift() {
   });
 }
 
+function playCardByRef(cardRef) {
+  if (!combat || view !== "combat") return;
+  const idx = combat.hand.indexOf(cardRef);
+  if (idx < 0) return;
+  playCard(idx);
+}
+
 function bindHandCard(el, idx, card) {
   let holdTimer = null;
   let longPressArmed = false;
-  let selectionCancelled = false;
   let startX = 0;
   let startY = 0;
+  let lastX = 0;
+  let lastY = 0;
+  let activeTouchId = null;
+
   const cancelHold = () => {
     if (holdTimer) {
       clearTimeout(holdTimer);
       holdTimer = null;
     }
     longPressArmed = false;
-    selectionCancelled = false;
+    activeTouchId = null;
     el.classList.remove("card--peek");
     el.style.setProperty("--peek-lift", "0px");
+    document.removeEventListener("touchmove", onDocTouchMove, true);
+    document.removeEventListener("touchend", onDocTouchEnd, true);
+    document.removeEventListener("touchcancel", onDocTouchCancel, true);
   };
+
+  function setPeekForElement(_targetEl, clientX, clientY) {
+    const cards = Array.from(document.querySelectorAll("#hand .card"));
+    let hit = null;
+    for (const c of cards) {
+      if (c.classList.contains("disabled")) continue;
+      const r = c.getBoundingClientRect();
+      if (
+        clientX >= r.left &&
+        clientX <= r.right &&
+        clientY >= r.top &&
+        clientY <= r.bottom
+      ) {
+        hit = c;
+        break;
+      }
+    }
+    cards.forEach((c) => {
+      c.classList.remove("card--peek");
+      c.style.setProperty("--peek-lift", "0px");
+    });
+    if (hit) {
+      hit.classList.add("card--peek");
+      refreshHandPeekLift();
+    }
+  };
+
+  const onDocTouchMove = (ev) => {
+    if (activeTouchId === null) return;
+    const t =
+      Array.from(ev.touches).find((x) => x.identifier === activeTouchId) ||
+      Array.from(ev.changedTouches).find((x) => x.identifier === activeTouchId);
+    if (!t) return;
+    lastX = t.clientX;
+    lastY = t.clientY;
+    if (holdTimer) {
+      const dx = t.clientX - startX;
+      const dy = t.clientY - startY;
+      if (dx * dx + dy * dy > 12 * 12) {
+        clearTimeout(holdTimer);
+        holdTimer = null;
+      }
+    }
+    if (longPressArmed) {
+      setPeekForElement(null, lastX, lastY);
+    }
+  };
+
+  const finishTouchInteraction = (ev) => {
+    const t =
+      Array.from(ev.changedTouches).find((x) => x.identifier === activeTouchId) ||
+      ev.changedTouches[0];
+    document.removeEventListener("touchmove", onDocTouchMove, true);
+    document.removeEventListener("touchend", onDocTouchEnd, true);
+    document.removeEventListener("touchcancel", onDocTouchCancel, true);
+    if (holdTimer) {
+      clearTimeout(holdTimer);
+      holdTimer = null;
+    }
+    if (longPressArmed && t) {
+      const cards = Array.from(document.querySelectorAll("#hand .card"));
+      let hitIdx = -1;
+      for (let i = 0; i < cards.length; i++) {
+        const c = cards[i];
+        if (c.classList.contains("disabled")) continue;
+        const r = c.getBoundingClientRect();
+        if (
+          t.clientX >= r.left &&
+          t.clientX <= r.right &&
+          t.clientY >= r.top &&
+          t.clientY <= r.bottom
+        ) {
+          hitIdx = i;
+          break;
+        }
+      }
+      cards.forEach((c) => {
+        c.classList.remove("card--peek");
+        c.style.setProperty("--peek-lift", "0px");
+      });
+      if (
+        hitIdx >= 0 &&
+        combat &&
+        combat.hand[hitIdx] &&
+        combat.hand[hitIdx].cost <= combat.energy
+      ) {
+        playCardByRef(combat.hand[hitIdx]);
+      }
+    } else {
+      el.classList.remove("card--peek");
+      el.style.setProperty("--peek-lift", "0px");
+      if (!longPressArmed && t && combat) {
+        const cards = Array.from(document.querySelectorAll("#hand .card"));
+        let hitIdx = -1;
+        for (let i = 0; i < cards.length; i++) {
+          const c = cards[i];
+          if (c.classList.contains("disabled")) continue;
+          const r = c.getBoundingClientRect();
+          if (
+            t.clientX >= r.left &&
+            t.clientX <= r.right &&
+            t.clientY >= r.top &&
+            t.clientY <= r.bottom
+          ) {
+            hitIdx = i;
+            break;
+          }
+        }
+        if (
+          hitIdx >= 0 &&
+          combat.hand[hitIdx] &&
+          combat.hand[hitIdx].cost <= combat.energy
+        ) {
+          playCardByRef(combat.hand[hitIdx]);
+        }
+      }
+    }
+    longPressArmed = false;
+    activeTouchId = null;
+  };
+
+  const onDocTouchEnd = (ev) => {
+    if (activeTouchId === null) return;
+    if (
+      !Array.from(ev.changedTouches).some((x) => x.identifier === activeTouchId)
+    ) {
+      return;
+    }
+    finishTouchInteraction(ev);
+  };
+
+  const onDocTouchCancel = (ev) => {
+    if (activeTouchId === null) return;
+    cancelHold();
+  };
+
   const onPeek = () => {
     document.querySelectorAll("#hand .card--peek").forEach((c) => {
       if (c !== el) {
@@ -747,6 +900,7 @@ function bindHandCard(el, idx, card) {
     el.classList.add("card--peek");
     refreshHandPeekLift();
   };
+
   el.addEventListener("mouseenter", () => {
     if (window.matchMedia("(pointer: fine)").matches) onPeek();
   });
@@ -762,80 +916,32 @@ function bindHandCard(el, idx, card) {
     if (card.cost > combat.energy || el.classList.contains("disabled")) return;
     playCard(idx);
   });
+
   el.addEventListener(
     "touchstart",
     (ev) => {
       if (ev.touches.length !== 1) return;
       const t = ev.touches[0];
+      activeTouchId = t.identifier;
       startX = t.clientX;
       startY = t.clientY;
-    longPressArmed = false;
-    selectionCancelled = false;
-    el.style.setProperty("--peek-lift", "0px");
-    if (holdTimer) clearTimeout(holdTimer);
+      lastX = t.clientX;
+      lastY = t.clientY;
+      longPressArmed = false;
+      selectionCancelled = false;
+      el.style.setProperty("--peek-lift", "0px");
+      if (holdTimer) clearTimeout(holdTimer);
+      document.addEventListener("touchmove", onDocTouchMove, true);
+      document.addEventListener("touchend", onDocTouchEnd, true);
+      document.addEventListener("touchcancel", onDocTouchCancel, true);
       holdTimer = setTimeout(() => {
         holdTimer = null;
         longPressArmed = true;
-        onPeek();
-      }, 380);
+        setPeekForElement(null, lastX, lastY);
+      }, 320);
     },
     { passive: true }
   );
-  el.addEventListener(
-    "touchmove",
-    (ev) => {
-      const t = ev.touches[0];
-      if (!t) return;
-      if (holdTimer) {
-        const dx = t.clientX - startX;
-        const dy = t.clientY - startY;
-        if (dx * dx + dy * dy > 14 * 14) cancelHold();
-        return;
-      }
-      if (!longPressArmed || selectionCancelled) return;
-      const r = el.getBoundingClientRect();
-      const inside =
-        t.clientX >= r.left &&
-        t.clientX <= r.right &&
-        t.clientY >= r.top &&
-        t.clientY <= r.bottom;
-      if (!inside) {
-        selectionCancelled = true;
-        el.classList.remove("card--peek");
-        el.style.setProperty("--peek-lift", "0px");
-      }
-    },
-    { passive: true }
-  );
-  el.addEventListener("touchend", (ev) => {
-    if (holdTimer) {
-      clearTimeout(holdTimer);
-      holdTimer = null;
-    }
-    if (longPressArmed && !selectionCancelled) {
-      const r = el.getBoundingClientRect();
-      const t = ev.changedTouches && ev.changedTouches[0];
-      el.classList.remove("card--peek");
-      el.style.setProperty("--peek-lift", "0px");
-      if (
-        t &&
-        t.clientX >= r.left &&
-        t.clientX <= r.right &&
-        t.clientY >= r.top &&
-        t.clientY <= r.bottom &&
-        card.cost <= combat.energy &&
-        !el.classList.contains("disabled")
-      ) {
-        playCard(idx);
-      }
-    } else if (!longPressArmed) {
-      el.classList.remove("card--peek");
-      el.style.setProperty("--peek-lift", "0px");
-    }
-    longPressArmed = false;
-    selectionCancelled = false;
-  });
-  el.addEventListener("touchcancel", cancelHold);
 }
 
 function renderCombat() {
@@ -874,7 +980,7 @@ function renderCombat() {
     el.style.setProperty("--n", String(Math.max(n - 1, 1)));
     const centerIdx = Math.floor((n - 1) / 2);
     const rel = idx - centerIdx;
-    const rot = rel === 0 ? 0 : rel < 0 ? 5 * Math.abs(rel) : -5 * rel;
+    const rot = rel === 0 ? 0 : rel < 0 ? -5 * Math.abs(rel) : 5 * rel;
     el.style.setProperty("--rot", rot + "deg");
     const summaryLines =
       typeof card.effectSummaryLines === "function"
@@ -1018,107 +1124,125 @@ function endCombatWin() {
     "ext2004",
   ]);
   const picks = pool.slice(0, 3).map((k) => CARD_LIBRARY[k]);
+  postCombatSnapshot = {
+    playerHp: combat.playerHp,
+    playerHpMax: combat.playerHpMax,
+    deck: combat.deck.map((c) => ({ ...c })),
+    mapNodeId: combat.mapNodeId,
+    playerPhy: combat.playerPhy,
+    playerInt: combat.playerInt,
+    playerAgi: combat.playerAgi,
+    enemyPhy: combat.enemyPhy,
+    enemyInt: combat.enemyInt,
+  };
   stopBgm();
-  showCutin("win").then(() => openRewardOverlay(picks));
+  showCutin("win").then(() => {
+    openRewardScreen(picks);
+  });
 }
 
-function openRewardOverlay(picks) {
-  const overlay = document.getElementById("rewardOverlay");
-  const box = document.getElementById("rewardPicks");
-  box.innerHTML = "";
-  picks.forEach((def) => {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.className = "reward-card-btn";
-    const mockS = {
-      ...combat,
-      playerPhy: combat.playerPhy,
-      playerInt: combat.playerInt,
-      playerAgi: combat.playerAgi,
-      enemyPhy: combat.enemyPhy,
-      enemyInt: combat.enemyInt,
-    };
-    const summaryLines =
-      typeof def.effectSummaryLines === "function"
-        ? def.effectSummaryLines(mockS)
-        : typeof def.previewLines === "function"
-          ? def.previewLines(mockS)
-          : [];
-    const detailLines =
-      typeof def.previewLines === "function"
+function buildRewardPickButton(def, mockS) {
+  const b = document.createElement("button");
+  b.type = "button";
+  b.className = "reward-card-btn";
+  const summaryLines =
+    typeof def.effectSummaryLines === "function"
+      ? def.effectSummaryLines(mockS)
+      : typeof def.previewLines === "function"
         ? def.previewLines(mockS)
-        : summaryLines;
-    const helpKeys =
-      typeof def.peekHelpKeys === "function" ? def.peekHelpKeys() : [];
-    b.innerHTML =
-      '<div class="reward-card-inner ' +
-      def.type +
-      '">' +
-      '<div class="card-top-row">' +
-      '<span class="card-cost-badge"><span class="cost-zeus" aria-hidden="true">⚡</span>' +
-      def.cost +
-      "</span>" +
-      '<img class="card-skill-corner" src="' +
-      battleIconUrl(def.skillIcon) +
-      '" alt="" />' +
-      "</div>" +
-      '<div class="card-ext-name">' +
-      escapeHtml(def.extNameJa) +
-      "</div>" +
-      '<img class="card-ext-img" src="' +
-      EXT_IMG(def.extId) +
-      '" alt="" />' +
-      '<div class="card-effect-summary">' +
-      summaryLines.map((t) => "<p>" + escapeHtml(t) + "</p>").join("") +
-      "</div>" +
-      '<div class="reward-card-detail">' +
-      detailLines.map((t) => "<p>" + escapeHtml(t) + "</p>").join("") +
-      (helpKeys.length
-        ? '<div class="card-peek-help">' +
-          buildPeekHelpHtml(helpKeys) +
-          "</div>"
-        : "") +
-      "</div>" +
-      "</div>";
+        : [];
+  const detailLines =
+    typeof def.previewLines === "function"
+      ? def.previewLines(mockS)
+      : summaryLines;
+  const helpKeys =
+    typeof def.peekHelpKeys === "function" ? def.peekHelpKeys() : [];
+  b.innerHTML =
+    '<div class="reward-card-inner ' +
+    def.type +
+    '">' +
+    '<div class="card-top-row">' +
+    '<span class="card-cost-badge"><span class="cost-zeus" aria-hidden="true">⚡</span>' +
+    def.cost +
+    "</span>" +
+    '<img class="card-skill-corner" src="' +
+    battleIconUrl(def.skillIcon) +
+    '" alt="" />' +
+    "</div>" +
+    '<div class="card-ext-name">' +
+    escapeHtml(def.extNameJa) +
+    "</div>" +
+    '<img class="card-ext-img" src="' +
+    EXT_IMG(def.extId) +
+    '" alt="" />' +
+    '<div class="card-effect-summary">' +
+    summaryLines.map((t) => "<p>" + escapeHtml(t) + "</p>").join("") +
+    "</div>" +
+    '<div class="reward-card-detail">' +
+    detailLines.map((t) => "<p>" + escapeHtml(t) + "</p>").join("") +
+    (helpKeys.length
+      ? '<div class="card-peek-help">' + buildPeekHelpHtml(helpKeys) + "</div>"
+      : "") +
+    "</div>" +
+    "</div>";
+  return b;
+}
+
+function openRewardScreen(picks) {
+  combat = null;
+  const box = document.getElementById("rewardPicks");
+  if (!box || !postCombatSnapshot) return;
+  box.innerHTML = "";
+  const mockS = {
+    playerPhy: postCombatSnapshot.playerPhy,
+    playerInt: postCombatSnapshot.playerInt,
+    playerAgi: postCombatSnapshot.playerAgi,
+    enemyPhy: postCombatSnapshot.enemyPhy,
+    enemyInt: postCombatSnapshot.enemyInt,
+  };
+  picks.forEach((def) => {
+    const b = buildRewardPickButton(def, mockS);
     b.addEventListener("click", () => {
-      if (combat) combat.deck.push(copyCard(def.libraryKey));
-      closeReward();
-      advanceAfterNode();
+      advanceAfterRewardPick(def.libraryKey);
     });
     box.appendChild(b);
   });
-  overlay.classList.remove("hidden");
-  overlay.setAttribute("aria-hidden", "false");
+  showView("reward");
+  syncResources();
 }
 
-function closeReward() {
-  const overlay = document.getElementById("rewardOverlay");
-  overlay.classList.add("hidden");
-  overlay.setAttribute("aria-hidden", "true");
-}
-
-function advanceAfterNode() {
-  if (combat) {
-    runState.playerHp = combat.playerHp;
-    runState.playerHpMax = combat.playerHpMax;
-    runState.deck = combat.deck.map((c) => ({ ...c }));
-    const mid = combat.mapNodeId;
-    if (mid) {
-      runState.pathNodeIds.push(mid);
-      runState.lastMapNodeId = mid;
-      if (mapNodeById(mid)?.type === "boss") {
-        runState.runComplete = true;
-        playSeClear();
-      }
-    }
-    combat = null;
+/** @param {string | null} libraryKey null = skip */
+function advanceAfterRewardPick(libraryKey) {
+  if (!postCombatSnapshot) {
+    showView("map");
+    renderMap();
+    return;
   }
+  ensureRunState();
+  runState.playerHp = postCombatSnapshot.playerHp;
+  runState.playerHpMax = postCombatSnapshot.playerHpMax;
+  runState.deck = postCombatSnapshot.deck.map((c) => ({ ...c }));
+  if (libraryKey) {
+    runState.deck.push(copyCard(libraryKey));
+  }
+  const mid = postCombatSnapshot.mapNodeId;
+  if (mid) {
+    runState.pathNodeIds.push(mid);
+    runState.lastMapNodeId = mid;
+    if (mapNodeById(mid)?.type === "boss") {
+      runState.runComplete = true;
+      playSeClear();
+    }
+  }
+  combat = null;
+  postCombatSnapshot = null;
   showView("map");
   renderMap();
 }
 
 function endCombatLoss() {
   stopBgm();
+  postCombatSnapshot = null;
   showCutin("lose").then(() => {
     showView("over");
     document.getElementById("gameOverMsg").textContent =
@@ -1162,8 +1286,8 @@ function resetRun() {
   combat = null;
   runState = null;
   pendingShopNodeId = null;
+  postCombatSnapshot = null;
   stopBgm();
-  closeReward();
   dismissCutin();
   showView("map");
   renderMap();
@@ -1246,8 +1370,7 @@ function init() {
     dismissCutin();
   });
   document.getElementById("btnSkipReward").addEventListener("click", () => {
-    closeReward();
-    advanceAfterNode();
+    advanceAfterRewardPick(null);
   });
   document.getElementById("btnLeaveShop").addEventListener("click", () => {
     ensureRunState();
