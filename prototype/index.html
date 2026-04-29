@@ -365,6 +365,7 @@
       border-radius: 8px;
       max-width: 100%;
       margin-top: 0.35rem;
+      margin-bottom: 0;
       letter-spacing: 0.04em;
     }
     .intent-bubble .intent-label {
@@ -400,9 +401,21 @@
     .hand-energy-row {
       display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: space-between;
       gap: 0.5rem;
-      margin-bottom: 0.35rem;
+      margin-bottom: 0.45rem;
+      flex-wrap: nowrap;
+      min-width: 0;
+    }
+    .hand-energy-row .energy-pill {
+      flex-shrink: 0;
+    }
+    .hand-energy-row .hand-energy-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      flex-shrink: 0;
     }
     .energy-pill {
       display: inline-flex;
@@ -699,15 +712,6 @@
     .card-help-block:first-child { margin-top: 0; }
     .card-help-block strong { color: #f0d878; }
 
-    .combat-actions {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 0.5rem;
-      flex-wrap: nowrap;
-      margin-top: 0.45rem;
-      width: 100%;
-    }
     .btn-deck-pile {
       display: inline-flex;
       flex-direction: column;
@@ -1065,10 +1069,6 @@
                 <img id="enemyImg" class="portrait-lg" alt="" />
               </div>
               <div class="duelist-name" id="enemyName">—</div>
-              <div class="intent-bubble" id="enemyIntentWrap" aria-live="polite">
-                <span class="intent-label">NEXT ACTION</span>
-                <span id="enemyIntent">—</span>
-              </div>
               <div class="stat-compact">
                 <div class="stat-row">
                   <img alt="" data-stat="hp" />
@@ -1091,6 +1091,10 @@
                   <span id="enemy-shield" class="stat-anchor stat-values"><span id="eShield">0</span></span>
                 </div>
               </div>
+              <div class="intent-bubble" id="enemyIntentWrap" aria-live="polite">
+                <span class="intent-label">NEXT ACTION</span>
+                <span id="enemyIntent">—</span>
+              </div>
             </div>
           </div>
         </div>
@@ -1101,16 +1105,16 @@
       <div class="combat-footer">
         <div class="hand-energy-row">
           <span class="energy-pill">⚡ <span id="energyVal">0</span> / <span id="energyMax">3</span></span>
+          <div class="hand-energy-actions">
+            <button type="button" class="btn-deck-pile" id="btnDeckOpen" aria-label="残りデッキを表示">
+              <img alt="" data-icon="deck" width="20" height="20" />
+              <span class="btn-deck-pile__count" id="deckPileCount">0</span>
+            </button>
+            <button type="button" class="action primary" id="btnEndTurn">ターン終了</button>
+          </div>
         </div>
         <div class="hand-scroll">
           <div id="hand" class="hand" role="list"></div>
-        </div>
-        <div class="combat-actions">
-          <button type="button" class="btn-deck-pile" id="btnDeckOpen" aria-label="残りデッキを表示">
-            <img alt="" data-icon="deck" width="20" height="20" />
-            <span class="btn-deck-pile__count" id="deckPileCount">0</span>
-          </button>
-          <button type="button" class="action primary" id="btnEndTurn">ターン終了</button>
         </div>
       </div>
     </div>
@@ -1188,7 +1192,7 @@
           <h3>戦闘</h3>
           <ul>
             <li>手札は<strong>扇状に重なったカード</strong>です。<strong>PC</strong>は<strong>1回目のクリックでフォーカス</strong>（枠と詳細）、<strong>同じカードをもう一度クリックで使用</strong>します。<strong>スマホ</strong>も同様に、<strong>1回目のタップでフォーカス</strong>、<strong>同じカード上でもう一度タップで使用</strong>です（スクロール時の誤使用を防ぐため、離しただけでは使いません）。指を別のカードへ滑らせてから離すと、そのカードにフォーカスが移ります。</li>
-            <li>エナジーは手札の上に <code>⚡ 現在 / 最大</code> で表示されます。</li>
+            <li>エナジー <code>⚡ 現在 / 最大</code> とデッキ確認・ターン終了は<strong>手札の上の同じ行</strong>に並びます。</li>
             <li><strong>ターン終了</strong>は右端。左の山札アイコンから<strong>残りデッキ枚数と内訳</strong>（引く順は非表示）を確認できます。</li>
             <li>敵撃破後は<strong>VICTORY</strong>が表示されます。少し待ってから<strong>もう一度タップ</strong>すると報酬選択へ進みます（勝利直後の指を離す動作では閉じません）。</li>
           </ul>
