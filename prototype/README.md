@@ -10,6 +10,7 @@
 | `js/cards.js` | エクステンション由来のカード定義・`battleIconUrl` |
 | `js/map.js` | マップ層ノード定義 |
 | `js/constants.js` | アセット URL、リーダー基礎ステ、BGM/SE（含 `Audio/SE/Battle/`） |
+| `js/help.js` | ヘルプオーバーレイ（目的・操作・パラメーター・バトルの章切替、Esc で閉じる） |
 
 ルートの [index.html](../index.html) は `/prototype/index.html` にリダイレクトします。
 

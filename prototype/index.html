@@ -31,6 +31,33 @@
       align-items: center;
       padding: 0.75rem;
     }
+    .app-topbar {
+      width: 100%;
+      max-width: 900px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      margin-bottom: 0.5rem;
+      min-height: 2.25rem;
+    }
+    .btn-help {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.25rem;
+      height: 2.25rem;
+      padding: 0;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: var(--accent);
+      font-size: 1.05rem;
+      font-weight: 700;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .btn-help:hover { border-color: var(--accent); background: #2a2438; }
+    .btn-help:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     .wrap { width: 100%; max-width: 900px; }
     .panel {
       background: var(--panel);
@@ -435,9 +462,92 @@
       font-size: 0.58rem;
       opacity: 0.9;
     }
-  </style>
+
+    /* Help overlay */
+    #helpOverlay {
+      position: fixed;
+      inset: 0;
+      background: #000c;
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.75rem;
+    }
+    #helpOverlay.hidden { display: none; }
+    .help-dialog {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 520px;
+      max-height: min(88vh, 640px);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 16px 48px #000a;
+    }
+    .help-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.65rem 0.85rem;
+      border-bottom: 1px solid var(--border);
+      gap: 0.5rem;
+    }
+    .help-header h2 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+    .help-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      padding: 0.5rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+      background: #15121c;
+    }
+    .help-nav-btn {
+      font-size: 0.68rem;
+      padding: 0.35rem 0.55rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .help-nav-btn:hover { color: var(--text); border-color: #5a5068; }
+    .help-nav-btn--active {
+      color: var(--text);
+      border-color: var(--accent);
+      background: #2a2438;
+    }
+    .help-body {
+      overflow-y: auto;
+      padding: 0.85rem 1rem 1rem;
+      font-size: 0.82rem;
+      line-height: 1.55;
+      color: #dcd4e8;
+    }
+    .help-body h3 {
+      margin: 0.75rem 0 0.4rem;
+      font-size: 0.88rem;
+      color: var(--accent);
+    }
+    .help-body h3:first-child { margin-top: 0; }
+    .help-body p { margin: 0.4rem 0; }
+    .help-body ul { margin: 0.35rem 0; padding-left: 1.15rem; }
+    .help-body li { margin: 0.25rem 0; }
+    .help-body a { color: var(--energy); }
+    .help-body code { font-size: 0.78em; background: #0f0c14; padding: 0.1em 0.35em; border-radius: 4px; }
+    .help-page { display: none; }
+    .help-page--active { display: block; }
 </head>
 <body>
+  <div class="app-topbar">
+    <button type="button" class="btn-help" id="btnHelpOpen" aria-label="ヘルプを開く" title="ヘルプ">?</button>
+  </div>
   <div class="wrap">
     <div class="resources" aria-label="ランリソース">
       <span class="res"><img alt="GUM" data-icon="gum" /> <span id="goldVal">0</span></span>
@@ -567,6 +677,85 @@
     <a href="https://github.com/bearko/mycryptoheroes" target="_blank" rel="noopener">bearko/mycryptoheroes</a>
     <span class="footer-tech">仕様駆動 · データ分離 JS · 手札3列 · ドット絵は <code>image-rendering: pixelated</code>（ニアレストネイバー系。バイキュービックは低解像度でぼやけるため未使用）</span>
   </footer>
+
+  <div id="helpOverlay" class="hidden" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+    <div class="help-dialog">
+      <div class="help-header">
+        <h2 id="helpTitle">ヘルプ</h2>
+        <button type="button" class="action" id="btnHelpClose">閉じる</button>
+      </div>
+      <div class="help-nav" role="tablist" aria-label="ヘルプの章">
+        <button type="button" class="help-nav-btn help-nav-btn--active" data-help-nav="goal" role="tab" aria-selected="true">目的</button>
+        <button type="button" class="help-nav-btn" data-help-nav="controls" role="tab" aria-selected="false">操作</button>
+        <button type="button" class="help-nav-btn" data-help-nav="params" role="tab" aria-selected="false">パラメーター</button>
+        <button type="button" class="help-nav-btn" data-help-nav="battle" role="tab" aria-selected="false">バトル</button>
+      </div>
+      <div class="help-body">
+        <section class="help-page help-page--active" data-help-page="goal">
+          <h3>ゲームの目的</h3>
+          <p>このプロトタイプは、<strong>マップ上でノードを選びながら進むローグライク</strong>と、<strong>ターン制のカードバトル</strong>を組み合わせた体験の検証用です。</p>
+          <p>ゴールド（GUM）を稼ぎ、デッキにエクステンション由来のカードを加えながら、最終層のボスを倒してランをクリアすることを目指します。</p>
+          <p>歴史偉人をリーダーに据え、<a href="https://github.com/bearko/mycryptoheroes" target="_blank" rel="noopener">mycryptoheroes</a> のアセットで見た目を構成しています（利用はリポジトリのライセンスに従ってください）。</p>
+        </section>
+        <section class="help-page" data-help-page="controls">
+          <h3>操作方法</h3>
+          <h3>マップ</h3>
+          <ul>
+            <li>層ごとに表示される<strong>ノードボタン</strong>をタップして進みます（遭遇戦・篝火・店・ボスなど）。</li>
+            <li><strong>篝火</strong>で HP が回復し、次の層へ進みます。</li>
+            <li><strong>店</strong>では GUM を消費してカードを購入できます。「立ち去る」で次の層へ。</li>
+          </ul>
+          <h3>戦闘</h3>
+          <ul>
+            <li>手札の<strong>カード</strong>をタップしてプレイ。右上の <strong>⚡ と数字</strong>がそのターンの<strong>エナジーコスト</strong>です。</li>
+            <li>エナジーは手札の上に <code>⚡ 現在 / 最大</code> で表示されます。</li>
+            <li><strong>ターン終了</strong>で手札を捨て、敵が <strong>NEXT ACTION</strong> に従って行動したあと、次の自分のターンが始まります。</li>
+            <li>敵を倒すと<strong>報酬</strong>が表示されます。カードを 1 枚選ぶかスキップできます。</li>
+          </ul>
+          <h3>その他</h3>
+          <ul>
+            <li>ラン終了画面の<strong>もう一度</strong>で最初からやり直せます。</li>
+            <li>このヘルプは <kbd>Esc</kbd> でも閉じられます。</li>
+          </ul>
+        </section>
+        <section class="help-page" data-help-page="params">
+          <h3>パラメーター（画面上の意味）</h3>
+          <p>リーダーと敵のカード下は<strong>3行</strong>で、ラベルなしの<strong>アイコン＋数値</strong>だけを表示しています。</p>
+          <ul>
+            <li><strong>HP</strong> — 0 になると敗北（味方）または撃破（敵）。表示は <code>現在/最大</code>。</li>
+            <li><strong>PHY</strong> — 物理攻撃の基礎ステータス。PHY 依存スキルのダメージに使われます。</li>
+            <li><strong>INT</strong> — 知略攻撃の基礎ステータス。INT 依存スキルや回復係数に関わります。</li>
+            <li><strong>AGI</strong> — 原作の「チャージ」は使わず、このプロトでは<strong>クリティカル率</strong>に反映されます。</li>
+            <li><strong>🛡 ガード</strong> — ターン中に受ける PHY/INT ダメージを、数値分だけ先に削る軽減層です（味方はターン開始で 0 にリセット）。</li>
+            <li><strong>✦ シールド</strong> — <strong>特殊ダメージ</strong>（最大 HP 割合など）だけを先に吸収します。PHY/INT 通常攻撃には効きません。</li>
+          </ul>
+          <p>詳しい原作の定義は <a href="https://www.mycryptoheroes.net/ja/help-posts/7iMLBLL1sMJ9Rlk2Fv2Zmj" target="_blank" rel="noopener">MCH ヘルプ：パラメーター</a> を参照してください。</p>
+        </section>
+        <section class="help-page" data-help-page="battle">
+          <h3>バトルロジック（概要）</h3>
+          <p>数式は <strong>My Crypto Heroes 公式ヘルプ</strong>に沿った簡略実装です。一次ソースへのリンクを併記します。</p>
+          <h3>ダメージとカット率</h3>
+          <ul>
+            <li>PHY 攻撃を受ける側のカット率: <code>min(40%, floor(相手PHY ÷ 2))</code></li>
+            <li>INT 攻撃を受ける側のカット率: <code>min(40%, floor(相手INT ÷ 2))</code></li>
+            <li>PHY/INT 依存の最終ダメージは概ね<br><code>floor(攻撃側ステ × スキル% ÷ 100 × (100 − カット率) ÷ 100)</code></li>
+          </ul>
+          <p><a href="https://www.mycryptoheroes.net/ja/help-posts/11ek6KSt0fq0x5gdUeKlie" target="_blank" rel="noopener">ヘルプ：ダメージとカット率</a></p>
+          <h3>クリティカル</h3>
+          <p>一定確率で追加ダメージ。追加分は<strong>バフ・デバフを除いた戦闘開始時の基礎 PHY/INT</strong>で再計算し、カット率も適用します。</p>
+          <p><a href="https://www.mycryptoheroes.net/ja/help-posts/3HfmOjuWDSyw1isnhnLSfv" target="_blank" rel="noopener">ヘルプ：クリティカル</a></p>
+          <h3>回復</h3>
+          <p>INT 系の回復では回復係数 <code>(術者INT + 対象PHY) ÷ 2</code> に、スキルの回復%を掛けた量が HP に入ります。</p>
+          <p><a href="https://www.mycryptoheroes.net/ja/help-posts/7iMLBLL1sMJ9Rlk2Fv2Zmj" target="_blank" rel="noopener">ヘルプ：パラメーター（回復係数）</a></p>
+          <h3>シールド</h3>
+          <p>PHY/INT 依存の通常ダメージには無効で、特殊ダメージのみシールドが減り、溢れた分が HP に入ります。</p>
+          <p><a href="https://www.mycryptoheroes.net/ja/help-posts/2mNToh5xAynqPi6V23S9xc" target="_blank" rel="noopener">ヘルプ：シールド値</a></p>
+          <h3>実装の詳細</h3>
+          <p>リポジトリ内の <code>docs/specs/SPEC-002-prototype.md</code> §11 と <code>prototype/js/battle-mch.js</code> にコードレベルの説明があります。</p>
+        </section>
+      </div>
+    </div>
+  </div>
 
   <script type="module" src="./js/main.js"></script>
 </body>

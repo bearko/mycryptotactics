@@ -23,6 +23,7 @@ import {
   rollCrit,
   applyDamageThroughShield,
 } from "./battle-mch.js";
+import { initHelp } from "./help.js";
 
 let gold = 75;
 let layerIndex = 0;
@@ -714,6 +715,7 @@ function init() {
   });
   document.getElementById("btnRestart").addEventListener("click", resetRun);
   wireAssets();
+  initHelp();
   showView("map");
   renderMap();
 }
