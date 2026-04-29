@@ -72,14 +72,78 @@
     .btn-help:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
     #mapView .map-title { font-size: 0.9rem; color: var(--accent); margin: 0 0 0.5rem; }
-    .map-row {
-      display: flex;
-      gap: 0.75rem;
-      flex-wrap: wrap;
-      margin-bottom: 0.75rem;
-      align-items: center;
+    .map-graph {
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      min-height: 220px;
+      background: #0f0c14;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      display: block;
     }
-    .map-row-label { font-size: 0.75rem; color: var(--muted); min-width: 4.5rem; }
+    .map-edge {
+      stroke: #3d3550;
+      stroke-width: 0.35;
+      fill: none;
+    }
+    .map-edge--active {
+      stroke: #6a8b7a;
+      stroke-width: 0.55;
+    }
+    .map-start-dot { fill: #5a5068; stroke: #8a8199; stroke-width: 0.2; }
+    .map-start-label {
+      font-size: 2.2px;
+      fill: var(--muted);
+      font-family: system-ui, sans-serif;
+    }
+    .map-node-shape {
+      stroke-width: 0.35;
+      transition: fill 0.15s, stroke 0.15s;
+    }
+    .map-node--reachable .map-node-shape {
+      fill: #2a4a38;
+      stroke: #6ecf8a;
+    }
+    .map-node--current .map-node-shape {
+      fill: #4a3d20;
+      stroke: var(--accent);
+      stroke-width: 0.5;
+    }
+    .map-node--visited .map-node-shape {
+      fill: #2a3548;
+      stroke: #5a7a9a;
+    }
+    .map-node--skipped .map-node-shape,
+    .map-node--locked .map-node-shape {
+      fill: #1a1820;
+      stroke: #3a3540;
+      opacity: 0.45;
+    }
+    .map-node-cap {
+      font-size: 2.4px;
+      fill: var(--text);
+      font-family: system-ui, sans-serif;
+      pointer-events: none;
+    }
+    .map-node-type {
+      font-size: 2px;
+      fill: var(--muted);
+      font-family: system-ui, sans-serif;
+      pointer-events: none;
+    }
+    .map-node--locked .map-node-cap,
+    .map-node--locked .map-node-type,
+    .map-node--skipped .map-node-cap,
+    .map-node--skipped .map-node-type {
+      opacity: 0.5;
+    }
+    .map-legend {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin: 0.5rem 0 0;
+      line-height: 1.45;
+    }
     .node-btn {
       background: var(--map-node);
       border: 2px solid var(--border);
@@ -163,6 +227,30 @@
       max-width: 120px;
       margin: 0 auto 0.4rem;
     }
+    .portrait-fx {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 120px;
+      height: 120px;
+      margin-left: -60px;
+      margin-top: -60px;
+      pointer-events: none;
+      z-index: 4;
+      background-repeat: no-repeat;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      animation: portrait-sprite-fx 0.75s steps(8) forwards;
+      opacity: 0.95;
+    }
+    @keyframes portrait-sprite-fx {
+      from { background-position: 0 0; }
+      to { background-position: -800px 0; }
+    }
+    .portrait-fx--heal { opacity: 0.88; filter: saturate(1.15) hue-rotate(-8deg); }
+    .portrait-fx--buff { opacity: 0.82; }
+    .portrait-fx--debuff { opacity: 0.82; filter: hue-rotate(12deg); }
+    .portrait-fx--area { opacity: 0.85; }
     .portrait-card img.portrait-lg {
       width: 100%;
       max-width: 120px;
@@ -298,7 +386,7 @@
       align-items: center;
       justify-content: center;
       gap: 0.5rem;
-      margin-bottom: 0.45rem;
+      margin-bottom: 0.35rem;
     }
     .energy-pill {
       display: inline-flex;
@@ -313,32 +401,56 @@
       border: 1px solid #2a5560;
     }
 
-    .hand {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 0.4rem;
-      min-height: 0;
-      padding: 0.15rem 0 0.35rem;
-      width: 100%;
+    @media (max-width: 420px) {
+      .hand { --fan-w: 46px; }
     }
-    .card {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      min-height: 168px;
+      padding: 0.25rem 0.5rem 0.5rem;
       width: 100%;
-      max-width: 100%;
-      min-width: 0;
-      min-height: 158px;
+      position: relative;
+      perspective: 800px;
+    }
+    .hand .card {
+      position: relative;
+      flex: 0 0 var(--fan-w);
+      width: var(--fan-w);
+      max-width: var(--fan-w);
+      min-width: var(--fan-w);
+      height: 148px;
+      margin-left: calc(-0.62 * var(--fan-w));
+      z-index: var(--i);
+      transform-origin: 50% 100%;
+      transform: rotate(calc((var(--i) - (var(--n) / 2)) * 7deg))
+        translateY(calc(-0.9px * (var(--i) - (var(--n) / 2)) * (var(--i) - (var(--n) / 2))));
+      transition: transform 0.12s ease, box-shadow 0.12s, margin 0.12s, filter 0.12s;
+    }
+    .hand .card:first-child { margin-left: 0; }
+    .hand .card:hover:not(.disabled),
+    .hand .card.card--peek:not(.disabled) {
+      z-index: 50;
+      transform: rotate(calc((var(--i) - (var(--n) / 2)) * 5deg)) translateY(-18px) scale(1.06);
+      box-shadow: 0 14px 28px #000b;
+    }
+
+    .card {
       border-radius: 10px;
       border: 2px solid #5a5068;
-      padding: 1.55rem 0.35rem 0.4rem;
-      cursor: pointer;
+      padding: 1.55rem 0.2rem 0.35rem;
+      cursor: default;
       font-size: 0.62rem;
       line-height: 1.18;
-      transition: transform 0.1s, box-shadow 0.1s;
       display: flex;
       flex-direction: column;
-      overflow: hidden;
+      overflow: visible;
       position: relative;
+      user-select: none;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
     }
-    .card:hover:not(.disabled) { transform: translateY(-3px); box-shadow: 0 8px 18px #0009; }
+    .card:hover:not(.disabled) { filter: brightness(1.03); }
     .card.disabled { opacity: 0.35; cursor: not-allowed; }
     .card.atk { background: linear-gradient(165deg, #3a2832 0%, #120d12 100%); }
     .card.skl { background: linear-gradient(165deg, #283240 0%, #0d1218 100%); }
@@ -380,9 +492,9 @@
     .card-cost-badge .cost-zeus { font-size: 0.78rem; line-height: 1; }
     .card-ext-img {
       width: 100%;
-      height: 42px;
+      height: 126px;
       object-fit: contain;
-      margin: 0.15rem 0 0.2rem;
+      margin: 0.1rem 0 0.15rem;
       filter: drop-shadow(0 2px 4px #0006);
       image-rendering: pixelated;
       image-rendering: crisp-edges;
@@ -390,19 +502,197 @@
     .card-ext-name {
       font-weight: 700;
       color: var(--text);
-      font-size: 0.68rem;
-      line-height: 1.15;
-      margin-bottom: 0.2rem;
-      min-height: 2.1em;
-    }
-    .card .card-desc {
-      color: #c8bdd5;
       font-size: 0.62rem;
-      flex: 1;
-      line-height: 1.22;
+      line-height: 1.12;
+      margin-bottom: 0.1rem;
+      min-height: 2.2em;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+    .card-peek-layer {
+      display: none;
+      position: absolute;
+      left: 50%;
+      bottom: 0.15rem;
+      transform: translateX(-50%) translateY(0);
+      width: min(240px, 78vw);
+      z-index: 60;
+      pointer-events: none;
+    }
+    .card--peek .card-peek-layer { display: block; }
+    .card-peek-inner {
+      background: #0a0814f2;
+      border: 1px solid var(--accent);
+      border-radius: 8px;
+      padding: 0.45rem 0.5rem 0.5rem;
+      box-shadow: 0 12px 32px #000c;
+      font-size: 0.62rem;
+      line-height: 1.35;
+      color: #e8e0f0;
+      text-align: left;
+    }
+    .card-peek-lines p {
+      margin: 0.15rem 0;
+    }
+    .card-help-block {
+      margin-top: 0.35rem;
+      padding-top: 0.35rem;
+      border-top: 1px solid #3d3550;
+      font-size: 0.58rem;
+      color: var(--muted);
+    }
+    .card-help-block strong { color: #f0d878; }
+
+    .combat-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      flex-wrap: nowrap;
+      margin-top: 0.45rem;
+      width: 100%;
+    }
+    .btn-deck-pile {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.25rem 0.4rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #15121c;
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.62rem;
+      line-height: 1.1;
+      gap: 0.1rem;
+    }
+    .btn-deck-pile:hover { border-color: var(--accent); }
+    .btn-deck-pile__count {
+      font-weight: 800;
+      font-size: 1rem;
+      color: var(--energy);
+      font-variant-numeric: tabular-nums;
     }
 
-    .combat-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.45rem; }
+    #deckModal {
+      position: fixed;
+      inset: 0;
+      background: #000a;
+      z-index: 120;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    #deckModal.hidden { display: none; }
+    .deck-modal-box {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem;
+      max-width: 360px;
+      width: 100%;
+      max-height: min(80vh, 480px);
+      display: flex;
+      flex-direction: column;
+    }
+    .deck-modal-box h3 { margin: 0 0 0.35rem; font-size: 0.95rem; }
+    .deck-modal-meta { font-size: 0.72rem; color: var(--muted); margin-bottom: 0.5rem; }
+    #deckModalList {
+      overflow-y: auto;
+      font-size: 0.78rem;
+      line-height: 1.45;
+    }
+    .deck-modal-row { padding: 0.25rem 0; border-bottom: 1px solid #2a2438; }
+
+    #cutinOverlay {
+      position: fixed;
+      inset: 0;
+      z-index: 150;
+      background: radial-gradient(ellipse at center, #1a1028ee 0%, #050308f2 70%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      animation: cutin-bg-pulse 0.6s ease-out;
+    }
+    #cutinOverlay.hidden { display: none; }
+    @keyframes cutin-bg-pulse {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .cutin-inner {
+      text-align: center;
+      padding: 1.5rem;
+      animation: cutin-pop 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    @keyframes cutin-pop {
+      from { transform: scale(0.85); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .cutin-title {
+      font-size: clamp(2rem, 8vw, 3.2rem);
+      font-weight: 900;
+      letter-spacing: 0.2em;
+      text-shadow: 0 0 40px #c4a35a88, 0 0 8px #fff4;
+      margin: 0;
+    }
+    .cutin--win .cutin-title {
+      color: #e8f4ff;
+      background: linear-gradient(180deg, #fff 0%, #8ecfff 45%, #4a90d9 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .cutin--lose .cutin-title {
+      color: #c45c6a;
+      text-shadow: 0 0 32px #8a2030cc;
+    }
+    .cutin-sub {
+      margin-top: 1.25rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .reward-card-btn {
+      width: 100%;
+      padding: 0;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      text-align: left;
+    }
+    .reward-card-inner {
+      border-radius: 10px;
+      border: 2px solid #5a5068;
+      padding: 1.55rem 0.45rem 0.55rem;
+      min-height: 200px;
+      position: relative;
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+    .reward-card-btn:hover .reward-card-inner {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px #0008;
+      border-color: var(--accent);
+    }
+    .reward-card-inner.atk {
+      background: linear-gradient(165deg, #3a2832 0%, #120d12 100%);
+    }
+    .reward-card-inner .card-ext-img {
+      height: 126px;
+    }
+    .reward-card-lines {
+      margin-top: 0.35rem;
+      font-size: 0.68rem;
+      line-height: 1.35;
+      color: #c8bdd5;
+    }
+    .reward-card-lines p { margin: 0.2rem 0; }
     button.action {
       background: var(--border);
       color: var(--text);
@@ -544,12 +834,12 @@
     <div class="resources" aria-label="ランリソース">
       <span class="res"><img alt="GUM" data-icon="gum" /> <span id="goldVal">0</span></span>
       <span class="res"><img alt="HP" data-stat="hp" /> <span id="hpMapVal">—</span></span>
-      <span class="res">層 <span id="layerVal">1</span> / 4</span>
+      <span class="res">層 <span id="layerVal">入口</span></span>
       <button type="button" class="btn-help" id="btnHelpOpen" aria-label="ヘルプを開く" title="ヘルプ">?</button>
     </div>
 
     <div id="mapView" class="panel">
-      <p class="map-title">道を選ぶ（ノードをクリック）</p>
+      <p class="map-title">マップ（接続を矢印で確認し、緑のノードから進む）</p>
       <div id="mapRows"></div>
       <p style="font-size:0.75rem;color:var(--muted);margin:0.5rem 0 0">企画書 §3 に沿ったラン内ループ。ロジックは <code>prototype/js/</code>。</p>
     </div>
@@ -638,6 +928,10 @@
         </div>
         <div id="hand" class="hand" role="list"></div>
         <div class="combat-actions">
+          <button type="button" class="btn-deck-pile" id="btnDeckOpen" aria-label="残りデッキを表示">
+            <img alt="" data-icon="deck" width="20" height="20" />
+            <span class="btn-deck-pile__count" id="deckPileCount">0</span>
+          </button>
           <button type="button" class="action primary" id="btnEndTurn">ターン終了</button>
         </div>
       </div>
@@ -657,7 +951,21 @@
     </div>
   </div>
 
-  <div id="rewardOverlay" class="hidden" aria-hidden="true">
+  <div id="deckModal" class="hidden" aria-hidden="true" role="dialog" aria-labelledby="deckModalTitle">
+    <div class="deck-modal-box">
+      <h3 id="deckModalTitle">残りデッキ</h3>
+      <p class="deck-modal-meta" id="deckModalCount"></p>
+      <div id="deckModalList"></div>
+      <button type="button" class="action" id="deckModalClose" style="margin-top:0.75rem;width:100%">閉じる</button>
+    </div>
+  </div>
+
+  <div id="cutinOverlay" class="hidden" aria-hidden="true">
+    <div class="cutin-inner" id="cutinInner">
+      <p class="cutin-title" id="cutinTitle">—</p>
+      <p class="cutin-sub" id="cutinSub">タップで続行</p>
+    </div>
+  </div>
     <div class="reward-box">
       <h3>報酬：カードを 1 枚選ぶ（スキップ可）</h3>
       <div class="reward-picks" id="rewardPicks"></div>
