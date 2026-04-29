@@ -31,7 +31,7 @@ import {
 } from "./battle-mch.js";
 import { initHelp } from "./help.js";
 
-const MAP_START = { id: "START", layer: -1, x: 6, y: 50 };
+const MAP_START = { id: "START", layer: -1, x: 50, y: 92 };
 
 let gold = 75;
 let view = "map";
@@ -44,6 +44,8 @@ let pendingShopNodeId = null;
 let cutinKind = null;
 /** @type {null | { resolve: () => void }} */
 let cutinResolve = null;
+/** 勝利カットイン: 表示直後の誤タップを無視 */
+let cutinWinIgnoreUntil = 0;
 /** 勝利直後の同期用スナップショット（報酬画面で deck に加える） */
 let postCombatSnapshot = null;
 /** @type {HTMLAudioElement | null} */
@@ -393,6 +395,17 @@ function renderMap() {
   po.setAttribute("fill", "#5a5068");
   mk.appendChild(po);
   defs.appendChild(mk);
+  for (const node of MAP_NODES) {
+    if (node.type !== "fight" || !node.enemyImgId) continue;
+    const clip = document.createElementNS("http://www.w3.org/2000/svg", "clipPath");
+    clip.setAttribute("id", "mapEnemyClip-" + node.id);
+    const cc = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    cc.setAttribute("cx", String(node.x));
+    cc.setAttribute("cy", String(node.y));
+    cc.setAttribute("r", "3.5");
+    clip.appendChild(cc);
+    defs.appendChild(clip);
+  }
   svg.appendChild(defs);
 
   const edgeG = document.createElementNS("http://www.w3.org/2000/svg", "g");
@@ -430,10 +443,10 @@ function renderMap() {
   startG.appendChild(sc);
   const st = document.createElementNS("http://www.w3.org/2000/svg", "text");
   st.setAttribute("x", String(MAP_START.x));
-  st.setAttribute("y", String(MAP_START.y - 5));
+  st.setAttribute("y", String(MAP_START.y + 7.5));
   st.setAttribute("text-anchor", "middle");
   st.setAttribute("class", "map-start-label");
-  st.textContent = "START";
+  st.textContent = "入口";
   startG.appendChild(st);
   svg.appendChild(startG);
 
@@ -463,7 +476,7 @@ function renderMap() {
     ty.textContent =
       node.type === "fight"
         ? node.elite
-          ? "精鋭"
+          ? "精鋭戦闘"
           : "戦闘"
         : node.type === "rest"
           ? "休憩"
@@ -479,11 +492,29 @@ function renderMap() {
     svg.appendChild(g);
   }
 
+  const fightImgG = document.createElementNS("http://www.w3.org/2000/svg", "g");
+  fightImgG.setAttribute("class", "map-fight-icons");
+  for (const node of MAP_NODES) {
+    if (node.type !== "fight" || !node.enemyImgId) continue;
+    const img = document.createElementNS("http://www.w3.org/2000/svg", "image");
+    img.setAttribute("href", ENEMY_IMG(node.enemyImgId));
+    img.setAttributeNS("http://www.w3.org/1999/xlink", "href", ENEMY_IMG(node.enemyImgId));
+    img.setAttribute("x", String(node.x - 3.8));
+    img.setAttribute("y", String(node.y - 3.8));
+    img.setAttribute("width", "7.6");
+    img.setAttribute("height", "7.6");
+    img.setAttribute("clip-path", "url(#mapEnemyClip-" + node.id + ")");
+    img.setAttribute("preserveAspectRatio", "xMidYMid slice");
+    img.setAttribute("class", "map-node-enemy-img");
+    fightImgG.appendChild(img);
+  }
+  svg.appendChild(fightImgG);
+
   host.appendChild(svg);
   const legend = document.createElement("p");
   legend.className = "map-legend";
   legend.innerHTML =
-    "金枠＝現在地 · 緑＝次に選べるノード · 灰＝通れない／見送った経路。接続矢印で先の休憩・店・ボスを読む。";
+    "「始まりの塔」— 下から上へ進みます。金枠＝現在地 · 緑＝次に選べる · 灰＝見送り／未到達。戦闘ノードの丸の上に敵アイコンが載ります。";
   host.appendChild(legend);
   syncResources();
 }
@@ -531,7 +562,14 @@ function startCombatFromMapNode(node) {
   const boss = node.type === "boss";
   const elite = !!node.elite;
   const enemyHp = boss ? 72 : elite ? 48 : 32;
-  const enemyId = boss ? 505 : elite ? 418 : 314;
+  const enemyId =
+    node.type === "fight" && node.enemyImgId != null
+      ? node.enemyImgId
+      : boss
+        ? 505
+        : elite
+          ? 418
+          : 314;
   const pPhy = LEADER.basePhy;
   const pInt = LEADER.baseInt;
   const pAgi = LEADER.baseAgi;
@@ -965,11 +1003,6 @@ function renderCombat() {
       .map((t) => "<p>" + escapeHtml(t) + "</p>")
       .join("");
     el.innerHTML =
-      '<div class="card-bg-ext">' +
-      '<img class="card-ext-img" src="' +
-      EXT_IMG(card.extId) +
-      '" alt="" />' +
-      "</div>" +
       '<div class="card-fg">' +
       '<div class="card-top-row">' +
       '<span class="card-cost-badge"><span class="cost-zeus" aria-hidden="true">⚡</span>' +
@@ -979,6 +1012,12 @@ function renderCombat() {
       escapeHtml(card.extNameJa) +
       "</div>" +
       "</div>" +
+      '<div class="card-mid">' +
+      '<div class="card-mid-bg">' +
+      '<img class="card-ext-img" src="' +
+      EXT_IMG(card.extId) +
+      '" alt="" />' +
+      "</div></div>" +
       '<img class="card-skill-corner" src="' +
       battleIconUrl(card.skillIcon) +
       '" alt="" />' +
@@ -1057,7 +1096,8 @@ function showCutin(kind) {
   const sub = document.getElementById("cutinSub");
   if (kind === "win") {
     title.textContent = "VICTORY";
-    sub.textContent = "タップで報酬へ";
+    sub.textContent = "タップして次へ";
+    cutinWinIgnoreUntil = performance.now() + 480;
   } else {
     title.textContent = "DEFEAT";
     sub.textContent = "タップで続行";
@@ -1070,6 +1110,7 @@ function showCutin(kind) {
 
 function dismissCutin() {
   if (!cutinKind) return;
+  if (cutinKind === "win" && performance.now() < cutinWinIgnoreUntil) return;
   const overlay = document.getElementById("cutinOverlay");
   overlay.classList.add("hidden");
   overlay.setAttribute("aria-hidden", "true");
@@ -1105,6 +1146,7 @@ function endCombatWin() {
     enemyPhy: combat.enemyPhy,
     enemyInt: combat.enemyInt,
   };
+  combat = null;
   stopBgm();
   showCutin("win").then(() => {
     openRewardScreen(picks);
@@ -1131,11 +1173,6 @@ function buildRewardPickButton(def, mockS) {
     '<div class="reward-card-inner ' +
     def.type +
     '">' +
-    '<div class="card-bg-ext">' +
-    '<img class="card-ext-img" src="' +
-    EXT_IMG(def.extId) +
-    '" alt="" />' +
-    "</div>" +
     '<div class="card-fg">' +
     '<div class="card-top-row">' +
     '<span class="card-cost-badge"><span class="cost-zeus" aria-hidden="true">⚡</span>' +
@@ -1145,6 +1182,12 @@ function buildRewardPickButton(def, mockS) {
     escapeHtml(def.extNameJa) +
     "</div>" +
     "</div>" +
+    '<div class="card-mid">' +
+    '<div class="card-mid-bg">' +
+    '<img class="card-ext-img" src="' +
+    EXT_IMG(def.extId) +
+    '" alt="" />' +
+    "</div></div>" +
     '<img class="card-skill-corner" src="' +
     battleIconUrl(def.skillIcon) +
     '" alt="" />' +
@@ -1163,7 +1206,6 @@ function buildRewardPickButton(def, mockS) {
 }
 
 function openRewardScreen(picks) {
-  combat = null;
   const box = document.getElementById("rewardPicks");
   if (!box || !postCombatSnapshot) return;
   box.innerHTML = "";

@@ -1,23 +1,26 @@
 /**
- * ラン用マップ（全フロアをノード＋接続で表現。1:1 / 1:n / n:n の合流・分岐を含む）
- * 座標は SVG viewBox 0..100 内のパーセント。
+ * ラン用マップ「始まりの塔」— 下→上に進むノード＋接続（合流・分岐）
+ * 座標は SVG viewBox 0..100（x=横位置、y=小さいほど上）
  */
 
 /** @typedef {'fight'|'rest'|'shop'|'boss'} NodeType */
 
-/** @type {{ id: string, layer: number, type: NodeType, label: string, x: number, y: number, elite?: boolean }[]} */
+/**
+ * fight: label は短名、戦闘種別は描画側で「戦闘」+ enemyImgId
+ * @type {{ id: string, layer: number, type: NodeType, label: string, x: number, y: number, elite?: boolean, enemyImgId?: number }[]}
+ */
 export const MAP_NODES = [
-  { id: "L0A", layer: 0, type: "fight", label: "遭遇・東回廊", x: 22, y: 28 },
-  { id: "L0B", layer: 0, type: "fight", label: "遭遇・西回廊", x: 22, y: 72 },
-  { id: "L1A", layer: 1, type: "fight", label: "遭遇戦", x: 42, y: 22 },
-  { id: "L1B", layer: 1, type: "rest", label: "篝火", x: 42, y: 50 },
-  { id: "L1C", layer: 1, type: "fight", label: "遭遇戦", x: 42, y: 78 },
-  { id: "L2A", layer: 2, type: "shop", label: "店", x: 62, y: 32 },
-  { id: "L2B", layer: 2, type: "fight", label: "強敵", x: 62, y: 68, elite: true },
-  { id: "BOSS", layer: 3, type: "boss", label: "ボス戦", x: 84, y: 50 },
+  { id: "L0A", layer: 0, type: "fight", label: "遭遇", x: 38, y: 82, enemyImgId: 314 },
+  { id: "L0B", layer: 0, type: "fight", label: "遭遇", x: 62, y: 82, enemyImgId: 314 },
+  { id: "L1A", layer: 1, type: "fight", label: "遭遇", x: 32, y: 64, enemyImgId: 314 },
+  { id: "L1B", layer: 1, type: "rest", label: "篝火", x: 50, y: 64 },
+  { id: "L1C", layer: 1, type: "fight", label: "遭遇", x: 68, y: 64, enemyImgId: 314 },
+  { id: "L2A", layer: 2, type: "shop", label: "店", x: 40, y: 44 },
+  { id: "L2B", layer: 2, type: "fight", label: "遭遇", x: 60, y: 44, elite: true, enemyImgId: 418 },
+  { id: "BOSS", layer: 3, type: "boss", label: "ボス", x: 50, y: 22, enemyImgId: 505 },
 ];
 
-/** [from, to] 有向辺。START から第0層へ。 */
+/** [from, to] 有向辺（下 START から上へ） */
 export const MAP_EDGES = [
   ["START", "L0A"],
   ["START", "L0B"],
@@ -46,7 +49,6 @@ export function mapNodeById(id) {
 }
 
 /**
- * 直前に選んだノードから到達可能な次ノード id（同一層は不可）
  * @param {string | null} lastNodeId
  */
 export function reachableNextNodeIds(lastNodeId) {
