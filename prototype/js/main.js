@@ -365,6 +365,8 @@ function mapNodeClass(node) {
 
 function renderMap() {
   const host = document.getElementById("mapRows");
+  const prevLeg = document.getElementById("mapDynLegend");
+  if (prevLeg) prevLeg.remove();
   host.innerHTML = "";
   ensureRunState();
   if (runState.runComplete) {
@@ -513,9 +515,30 @@ function renderMap() {
   host.appendChild(svg);
   const legend = document.createElement("p");
   legend.className = "map-legend";
+  legend.id = "mapDynLegend";
   legend.innerHTML =
     "「始まりの塔」— 下から上へ進みます。金枠＝現在地 · 緑＝次に選べる · 灰＝見送り／未到達。戦闘ノードの丸の上に敵アイコンが載ります。";
-  host.appendChild(legend);
+  const mapPanel = host.parentNode;
+  if (mapPanel && host.nextSibling) {
+    mapPanel.insertBefore(legend, host.nextSibling);
+  } else if (mapPanel) {
+    mapPanel.appendChild(legend);
+  } else {
+    host.appendChild(legend);
+  }
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      const curId = runState.lastMapNodeId;
+      const y = curId ? nodeXY(curId).y : MAP_START.y;
+      const frac = y / 100;
+      const wrap = host;
+      const target = frac * wrap.scrollHeight - wrap.clientHeight / 2;
+      wrap.scrollTop = Math.max(
+        0,
+        Math.min(target, Math.max(0, wrap.scrollHeight - wrap.clientHeight))
+      );
+    });
+  });
   syncResources();
 }
 
@@ -1003,24 +1026,26 @@ function renderCombat() {
       .map((t) => "<p>" + escapeHtml(t) + "</p>")
       .join("");
     el.innerHTML =
+      '<div class="card-art-full">' +
+      '<img class="card-ext-img" src="' +
+      EXT_IMG(card.extId) +
+      '" alt="" />' +
+      "</div>" +
+      '<div class="card-tint"></div>' +
       '<div class="card-fg">' +
-      '<div class="card-top-row">' +
+      '<div class="card-header">' +
+      '<div class="card-header-icons">' +
       '<span class="card-cost-badge"><span class="cost-zeus" aria-hidden="true">⚡</span>' +
       card.cost +
       "</span>" +
+      '<img class="card-skill-corner" src="' +
+      battleIconUrl(card.skillIcon) +
+      '" alt="" />' +
+      "</div>" +
       '<div class="card-ext-name">' +
       escapeHtml(card.extNameJa) +
       "</div>" +
       "</div>" +
-      '<div class="card-mid">' +
-      '<div class="card-mid-bg">' +
-      '<img class="card-ext-img" src="' +
-      EXT_IMG(card.extId) +
-      '" alt="" />' +
-      "</div></div>" +
-      '<img class="card-skill-corner" src="' +
-      battleIconUrl(card.skillIcon) +
-      '" alt="" />' +
       '<div class="card-effect-summary">' +
       summaryBody +
       "</div>" +
@@ -1173,24 +1198,26 @@ function buildRewardPickButton(def, mockS) {
     '<div class="reward-card-inner ' +
     def.type +
     '">' +
+    '<div class="card-art-full">' +
+    '<img class="card-ext-img" src="' +
+    EXT_IMG(def.extId) +
+    '" alt="" />' +
+    "</div>" +
+    '<div class="card-tint"></div>' +
     '<div class="card-fg">' +
-    '<div class="card-top-row">' +
+    '<div class="card-header">' +
+    '<div class="card-header-icons">' +
     '<span class="card-cost-badge"><span class="cost-zeus" aria-hidden="true">⚡</span>' +
     def.cost +
     "</span>" +
+    '<img class="card-skill-corner" src="' +
+    battleIconUrl(def.skillIcon) +
+    '" alt="" />' +
+    "</div>" +
     '<div class="card-ext-name">' +
     escapeHtml(def.extNameJa) +
     "</div>" +
     "</div>" +
-    '<div class="card-mid">' +
-    '<div class="card-mid-bg">' +
-    '<img class="card-ext-img" src="' +
-    EXT_IMG(def.extId) +
-    '" alt="" />' +
-    "</div></div>" +
-    '<img class="card-skill-corner" src="' +
-    battleIconUrl(def.skillIcon) +
-    '" alt="" />' +
     '<div class="card-effect-summary">' +
     summaryLines.map((t) => "<p>" + escapeHtml(t) + "</p>").join("") +
     "</div>" +
