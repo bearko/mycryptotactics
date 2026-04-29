@@ -48,6 +48,8 @@ let cutinResolve = null;
 let cutinWinIgnoreUntil = 0;
 /** 勝利直後の同期用スナップショット（報酬画面で deck に加える） */
 let postCombatSnapshot = null;
+/** 手札でフォーカス中のインデックス（二段階タップ／クリックで使用） */
+let handFocusedIdx = -1;
 /** @type {HTMLAudioElement | null} */
 let bgmAudio = null;
 
@@ -783,19 +785,50 @@ function buildPeekHelpHtml(keys) {
 
 function refreshHandPeekLift() {
   requestAnimationFrame(() => {
-    document.querySelectorAll("#hand .card.card--peek").forEach((el) => {
-      const sum = el.querySelector(".card-effect-summary");
-      if (!sum) {
-        el.style.setProperty("--peek-lift", "0px");
-        return;
-      }
-      const full = sum.scrollHeight;
-      const vis = sum.clientHeight;
-      const need = Math.max(0, full - vis);
-      const lift = need > 2 ? Math.min(48, need + 8) : 0;
-      el.style.setProperty("--peek-lift", lift + "px");
-    });
+    document
+      .querySelectorAll("#hand .card.card--peek, #hand .card.card--focused")
+      .forEach((el) => {
+        const sum = el.querySelector(".card-effect-summary");
+        if (!sum) {
+          el.style.setProperty("--peek-lift", "0px");
+          return;
+        }
+        const full = sum.scrollHeight;
+        const vis = sum.clientHeight;
+        const need = Math.max(0, full - vis);
+        const lift = need > 2 ? Math.min(48, need + 8) : 0;
+        el.style.setProperty("--peek-lift", lift + "px");
+      });
   });
+}
+
+function clearHandFocus() {
+  handFocusedIdx = -1;
+  document.querySelectorAll("#hand .card").forEach((c) => {
+    c.classList.remove("card--focused", "card--peek");
+    c.style.setProperty("--peek-lift", "0px");
+  });
+}
+
+/** @param {number} idx */
+function setHandFocusByIndex(idx) {
+  const cards = Array.from(document.querySelectorAll("#hand .card"));
+  cards.forEach((c) => {
+    c.classList.remove("card--focused", "card--peek");
+    c.style.setProperty("--peek-lift", "0px");
+  });
+  if (
+    idx >= 0 &&
+    idx < cards.length &&
+    cards[idx] &&
+    !cards[idx].classList.contains("disabled")
+  ) {
+    handFocusedIdx = idx;
+    cards[idx].classList.add("card--focused", "card--peek");
+    refreshHandPeekLift();
+  } else {
+    handFocusedIdx = -1;
+  }
 }
 
 function playCardByRef(cardRef) {
@@ -824,27 +857,8 @@ function handIndexAtPoint(clientX, clientY) {
   return -1;
 }
 
-function setHandPeekAt(clientX, clientY) {
-  const idx = handIndexAtPoint(clientX, clientY);
-  const cards = Array.from(document.querySelectorAll("#hand .card"));
-  cards.forEach((c) => {
-    c.classList.remove("card--peek");
-    c.style.setProperty("--peek-lift", "0px");
-  });
-  if (idx >= 0 && cards[idx]) {
-    cards[idx].classList.add("card--peek");
-    refreshHandPeekLift();
-  }
-}
-
 let handTouchBound = false;
 let handTouchId = null;
-let handLongPress = false;
-let handHoldTimer = null;
-let handStartX = 0;
-let handStartY = 0;
-let handLastX = 0;
-let handLastY = 0;
 
 function bindHandTouchDelegation() {
   const handEl = document.getElementById("hand");
@@ -852,7 +866,6 @@ function bindHandTouchDelegation() {
   handTouchBound = true;
 
   const removeDocListeners = () => {
-    document.removeEventListener("touchmove", onHandDocMove, true);
     document.removeEventListener("touchend", onHandDocEnd, true);
     document.removeEventListener("touchcancel", onHandDocCancel, true);
   };
@@ -860,30 +873,6 @@ function bindHandTouchDelegation() {
   const resetGestureState = () => {
     removeDocListeners();
     handTouchId = null;
-    handLongPress = false;
-    if (handHoldTimer) {
-      clearTimeout(handHoldTimer);
-      handHoldTimer = null;
-    }
-  };
-
-  const onHandDocMove = (ev) => {
-    if (handTouchId === null || view !== "combat" || !combat) return;
-    const t =
-      Array.from(ev.touches).find((x) => x.identifier === handTouchId) ||
-      Array.from(ev.changedTouches).find((x) => x.identifier === handTouchId);
-    if (!t) return;
-    handLastX = t.clientX;
-    handLastY = t.clientY;
-    if (handHoldTimer) {
-      const dx = t.clientX - handStartX;
-      const dy = t.clientY - handStartY;
-      if (dx * dx + dy * dy > 12 * 12) {
-        clearTimeout(handHoldTimer);
-        handHoldTimer = null;
-      }
-    }
-    setHandPeekAt(handLastX, handLastY);
   };
 
   const onHandDocEnd = (ev) => {
@@ -897,33 +886,30 @@ function bindHandTouchDelegation() {
       Array.from(ev.changedTouches).find((x) => x.identifier === handTouchId) ||
       ev.changedTouches[0];
     removeDocListeners();
-    if (handHoldTimer) {
-      clearTimeout(handHoldTimer);
-      handHoldTimer = null;
-    }
     const releaseIdx = handIndexAtPoint(t.clientX, t.clientY);
-    document.querySelectorAll("#hand .card").forEach((c) => {
-      c.classList.remove("card--peek");
-      c.style.setProperty("--peek-lift", "0px");
-    });
-    if (
-      combat &&
-      view === "combat" &&
-      releaseIdx >= 0 &&
-      combat.hand[releaseIdx] &&
-      combat.hand[releaseIdx].cost <= combat.energy
-    ) {
-      playCardByRef(combat.hand[releaseIdx]);
+    if (!combat || view !== "combat") {
+      handTouchId = null;
+      return;
+    }
+    if (releaseIdx < 0) {
+      clearHandFocus();
+      handTouchId = null;
+      return;
+    }
+    const c = combat.hand[releaseIdx];
+    if (!c || c.cost > combat.energy) {
+      handTouchId = null;
+      return;
+    }
+    if (handFocusedIdx === releaseIdx) {
+      playCardByRef(c);
+    } else {
+      setHandFocusByIndex(releaseIdx);
     }
     handTouchId = null;
-    handLongPress = false;
   };
 
   const onHandDocCancel = () => {
-    document.querySelectorAll("#hand .card").forEach((c) => {
-      c.classList.remove("card--peek");
-      c.style.setProperty("--peek-lift", "0px");
-    });
     resetGestureState();
   };
 
@@ -934,51 +920,26 @@ function bindHandTouchDelegation() {
       resetGestureState();
       const t = ev.touches[0];
       handTouchId = t.identifier;
-      handStartX = t.clientX;
-      handStartY = t.clientY;
-      handLastX = t.clientX;
-      handLastY = t.clientY;
-      handLongPress = false;
-      setHandPeekAt(handLastX, handLastY);
-      document.addEventListener("touchmove", onHandDocMove, true);
       document.addEventListener("touchend", onHandDocEnd, true);
       document.addEventListener("touchcancel", onHandDocCancel, true);
-      handHoldTimer = setTimeout(() => {
-        handHoldTimer = null;
-        handLongPress = true;
-        setHandPeekAt(handLastX, handLastY);
-      }, 380);
     },
     { passive: true }
   );
 }
 
 function bindHandCard(el, idx, card) {
-  const onPeek = () => {
-    document.querySelectorAll("#hand .card--peek").forEach((c) => {
-      if (c !== el) {
-        c.classList.remove("card--peek");
-        c.style.setProperty("--peek-lift", "0px");
-      }
-    });
-    el.classList.add("card--peek");
-    refreshHandPeekLift();
-  };
-
-  el.addEventListener("mouseenter", () => {
-    if (window.matchMedia("(pointer: fine)").matches) onPeek();
-  });
-  el.addEventListener("mouseleave", () => {
-    if (window.matchMedia("(pointer: fine)").matches) {
-      el.classList.remove("card--peek");
-      el.style.setProperty("--peek-lift", "0px");
-    }
-  });
   el.addEventListener("click", (ev) => {
     if (!window.matchMedia("(pointer: fine)").matches) return;
     ev.preventDefault();
     if (card.cost > combat.energy || el.classList.contains("disabled")) return;
-    playCard(idx);
+    const cards = Array.from(document.querySelectorAll("#hand .card"));
+    const myIdx = cards.indexOf(el);
+    if (myIdx < 0) return;
+    if (handFocusedIdx === myIdx) {
+      playCard(idx);
+    } else {
+      setHandFocusByIndex(myIdx);
+    }
   });
 }
 
@@ -1007,6 +968,7 @@ function renderCombat() {
   diffUiFloats();
   const handEl = document.getElementById("hand");
   handEl.innerHTML = "";
+  handFocusedIdx = -1;
   const n = combat.hand.length;
   handEl.style.setProperty("--n-cards", String(Math.max(n, 1)));
   combat.hand.forEach((card, idx) => {
@@ -1046,7 +1008,6 @@ function renderCombat() {
       '<div class="card-tint"></div>' +
       '<div class="card-fg">' +
       '<div class="card-header">' +
-      '<div class="card-top-cluster">' +
       '<div class="card-header-icons">' +
       '<span class="card-cost-badge"><span class="cost-zeus" aria-hidden="true">⚡</span>' +
       card.cost +
@@ -1055,10 +1016,9 @@ function renderCombat() {
       battleIconUrl(card.skillIcon) +
       '" alt="" />' +
       "</div>" +
+      "</div>" +
       '<div class="card-ext-name">' +
       escapeHtml(card.extNameJa) +
-      "</div>" +
-      "</div>" +
       "</div>" +
       '<div class="card-effect-summary">' +
       summaryBody +
@@ -1214,7 +1174,6 @@ function buildRewardPickButton(def, mockS) {
       '<div class="card-tint"></div>' +
       '<div class="card-fg">' +
       '<div class="card-header">' +
-      '<div class="card-top-cluster">' +
       '<div class="card-header-icons">' +
       '<span class="card-cost-badge"><span class="cost-zeus" aria-hidden="true">⚡</span>' +
       def.cost +
@@ -1223,10 +1182,9 @@ function buildRewardPickButton(def, mockS) {
       battleIconUrl(def.skillIcon) +
       '" alt="" />' +
       "</div>" +
+      "</div>" +
       '<div class="card-ext-name">' +
       escapeHtml(def.extNameJa) +
-      "</div>" +
-      "</div>" +
       "</div>" +
       '<div class="card-effect-summary">' +
       summaryLines.map((t) => "<p>" + escapeHtml(t) + "</p>").join("") +

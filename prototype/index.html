@@ -548,21 +548,13 @@
       top: 0;
       left: 0;
       right: 0;
-      z-index: 5;
+      z-index: 8;
       display: flex;
       flex-direction: row;
       align-items: flex-start;
       justify-content: flex-start;
       padding: 0.2rem 0.26rem 0.18rem;
       pointer-events: none;
-    }
-    .card-top-cluster {
-      flex: 1 1 auto;
-      min-width: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 0.12rem;
     }
     .card-header-icons {
       display: flex;
@@ -579,10 +571,14 @@
       height: 24px;
     }
     .card-ext-name {
-      width: 100%;
-      min-width: 0;
+      position: absolute;
+      left: 0.22rem;
+      right: 0.22rem;
+      bottom: 35%;
+      z-index: 7;
       margin: 0;
-      padding: 0 0.06rem 0;
+      padding: 0 0.06rem;
+      max-height: 2.36em;
       text-align: left;
       font-size: clamp(0.52rem, 2.6vw, calc(0.58rem + 4px));
       line-height: 1.12;
@@ -593,7 +589,7 @@
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
-      align-self: stretch;
+      pointer-events: none;
     }
     .card:hover:not(.disabled) { filter: brightness(1.03); }
     .card.disabled { opacity: 0.35; cursor: not-allowed; }
@@ -1191,7 +1187,7 @@
           </ul>
           <h3>戦闘</h3>
           <ul>
-            <li>手札は<strong>扇状に重なったカード</strong>です。PC はカードに載せると詳細が開き、クリックでプレイ。<strong>スマホ</strong>は手札エリアで<strong>指を置いたカードにフォーカス（白枠）</strong>が付き、<strong>同じカードの上で指を離すとプレイ</strong>します。長押しで詳細を出したまま、他のカードへ指を滑らせてフォーカスを切り替えられます。</li>
+            <li>手札は<strong>扇状に重なったカード</strong>です。<strong>PC</strong>は<strong>1回目のクリックでフォーカス</strong>（枠と詳細）、<strong>同じカードをもう一度クリックで使用</strong>します。<strong>スマホ</strong>も同様に、<strong>1回目のタップでフォーカス</strong>、<strong>同じカード上でもう一度タップで使用</strong>です（スクロール時の誤使用を防ぐため、離しただけでは使いません）。指を別のカードへ滑らせてから離すと、そのカードにフォーカスが移ります。</li>
             <li>エナジーは手札の上に <code>⚡ 現在 / 最大</code> で表示されます。</li>
             <li><strong>ターン終了</strong>は右端。左の山札アイコンから<strong>残りデッキ枚数と内訳</strong>（引く順は非表示）を確認できます。</li>
             <li>敵撃破後は<strong>VICTORY</strong>が表示されます。少し待ってから<strong>もう一度タップ</strong>すると報酬選択へ進みます（勝利直後の指を離す動作では閉じません）。</li>
