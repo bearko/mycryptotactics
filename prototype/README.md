@@ -9,7 +9,7 @@
 | `js/battle-mch.js` | MCH ヘルプ準拠のカット率・PHY/INT ダメージ・回復係数・クリ補助計算・シールド通過 |
 | `js/cards.js` | エクステンション由来のカード定義・`battleIconUrl` |
 | `js/map.js` | マップ層ノード定義 |
-| `js/constants.js` | アセット URL、リーダー基礎ステ、音声パス |
+| `js/constants.js` | アセット URL、リーダー基礎ステ、BGM/SE（含 `Audio/SE/Battle/`） |
 
 ルートの [index.html](../index.html) は `/prototype/index.html` にリダイレクトします。
 

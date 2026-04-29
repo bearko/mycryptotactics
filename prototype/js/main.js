@@ -59,6 +59,25 @@ function playSeClear() {
   } catch (_) {}
 }
 
+/** @param {'hit'|'heal'|'buff'|'debuff'|'area'} kind */
+function playBattleSe(kind) {
+  const url =
+    kind === "heal"
+      ? AUDIO_URLS.seBattleHeal()
+      : kind === "buff"
+        ? AUDIO_URLS.seBattleBuff()
+        : kind === "debuff"
+          ? AUDIO_URLS.seBattleDebuff()
+          : kind === "area"
+            ? AUDIO_URLS.seBattleAreaDamage()
+            : AUDIO_URLS.seBattleSingleDamage();
+  try {
+    const a = new Audio(url);
+    a.volume = 0.48;
+    a.play().catch(() => {});
+  } catch (_) {}
+}
+
 function clog(msg) {
   const el = document.getElementById("clog");
   const p = document.createElement("p");
@@ -135,6 +154,7 @@ function dealPhySkillToEnemy(s, skillPct) {
   total = applyGuardToDamage("enemy", total);
   s.enemyHp = Math.max(0, s.enemyHp - total);
   flashPortrait("enemy");
+  if (total > 0) playBattleSe("hit");
   clog(
     `PHY攻撃 ${skillPct}% → 基礎${base} カット${cut}% 合計${base + critBonus}` +
       (critBonus ? " +CRIT" + critBonus : "") +
@@ -165,6 +185,7 @@ function dealIntSkillToEnemy(s, minPct, maxPct) {
   total = applyGuardToDamage("enemy", total);
   s.enemyHp = Math.max(0, s.enemyHp - total);
   flashPortrait("enemy");
+  if (total > 0) playBattleSe("hit");
   clog(
     `INT攻撃 ${skillPct}% → 基礎${base} カット${cut}%` +
       (critBonus ? " +CRIT" + critBonus : "") +
@@ -178,6 +199,7 @@ function healPlayerFromIntSkill(s, minPct, maxPct) {
   const heal = Math.max(0, Math.floor((coef * pct) / 100));
   const before = s.playerHp;
   s.playerHp = Math.min(s.playerHpMax, s.playerHp + heal);
+  if (s.playerHp > before) playBattleSe("heal");
   clog(`リカバリー: 係数${coef.toFixed(1)}×${pct}% → HP+${s.playerHp - before}`);
 }
 
@@ -199,6 +221,7 @@ function dealPhySkillFromEnemyToPlayer(s, skillPct) {
   total = applyGuardToDamage("player", total);
   s.playerHp = Math.max(0, s.playerHp - total);
   flashPortrait("player");
+  if (total > 0) playBattleSe("hit");
   clog(
     `敵 PHY ${skillPct}% → 被ダメージ ${total}` +
       (critBonus ? "（含CRIT " + critBonus + "）" : "")
@@ -219,6 +242,7 @@ const battleApi = {
   dealIntSkillToEnemy,
   healPlayerFromIntSkill,
   drawCards,
+  playBattleSe,
 };
 
 const { CARD_LIBRARY, copyCard, makeStarterDeck } = createCardRuntime(
@@ -465,8 +489,8 @@ function renderCombat() {
   document.getElementById("pAgi").textContent = String(combat.playerAgi);
   document.getElementById("pGuard").textContent = String(combat.playerGuard);
   document.getElementById("pShield").textContent = String(combat.playerShield);
-  document.getElementById("eHp").textContent =
-    String(combat.enemyHp) + " / " + String(combat.enemyHpMax);
+  document.getElementById("eHp").textContent = String(combat.enemyHp);
+  document.getElementById("eHpMax").textContent = String(combat.enemyHpMax);
   document.getElementById("ePhy").textContent = String(combat.enemyPhy);
   document.getElementById("eInt").textContent = String(combat.enemyInt);
   document.getElementById("eAgi").textContent = String(combat.enemyAgi);
@@ -482,7 +506,10 @@ function renderCombat() {
     const el = document.createElement("div");
     el.className = "card " + card.type + (card.cost > combat.energy ? " disabled" : "");
     el.innerHTML =
-      '<span class="card-cost-badge">' +
+      '<img class="card-skill-corner" src="' +
+      battleIconUrl(card.skillIcon) +
+      '" alt="" />' +
+      '<span class="card-cost-badge"><span class="cost-zeus" aria-hidden="true">⚡</span>' +
       card.cost +
       "</span>" +
       '<img class="card-ext-img" src="' +
@@ -491,13 +518,6 @@ function renderCombat() {
       '<div class="card-ext-name">' +
       card.extNameJa +
       "</div>" +
-      '<div class="card-skill-row">' +
-      '<img src="' +
-      battleIconUrl(card.skillIcon) +
-      '" alt="" />' +
-      '<span class="card-skill-name">' +
-      card.skillNameJa +
-      "</span></div>" +
       '<div class="card-desc">' +
       card.text +
       "</div>";
@@ -539,8 +559,10 @@ function enemyTurn() {
     dealPhySkillFromEnemyToPlayer(combat, it.phyPct);
   } else if (it.kind === "guard") {
     combat.enemyGuard += it.value;
+    playBattleSe("buff");
     clog("敵はガード +" + it.value);
   } else if (it.kind === "special") {
+    playBattleSe("area");
     dealSpecialMaxHpPercentToPlayer(combat, it.pct);
   }
   if (combat.playerHp <= 0) {

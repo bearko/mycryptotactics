@@ -15,9 +15,11 @@ export function battleIconUrl(iconFileName) {
  *   dealIntSkillToEnemy: (s: any, minPct: number, maxPct: number) => void,
  *   healPlayerFromIntSkill: (s: any, minPct: number, maxPct: number) => void,
  *   drawCards: (s: any, n: number) => void,
+ *   playBattleSe: (kind: 'hit'|'heal'|'buff'|'debuff'|'area') => void,
  * }} api
  */
 function makeCardLibrary(clog, api) {
+  const se = api.playBattleSe;
   return {
     ext1001: {
       libraryKey: "ext1001",
@@ -27,7 +29,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      text: "先頭の敵に PHY の 50〜60%（MCH 式: カット率・クリ適用）",
+      text: "敵に PHY 割合ダメージ",
       play(s) {
         api.dealPhySkillToEnemy(s, 50, 60);
       },
@@ -40,10 +42,11 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      text: "敵全体 INT の 25〜30%（カット率適用）。INT デバフ -2",
+      text: "敵に INT 割合ダメージ。敵 INT を下げる",
       play(s) {
         api.dealIntSkillToEnemy(s, 25, 30);
         s.enemyInt = Math.max(1, s.enemyInt - 2);
+        se("debuff");
         clog("敵 INT -2");
       },
     },
@@ -55,7 +58,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "hp.png",
       cost: 1,
       type: "skl",
-      text: "回復係数×30〜40%（(自分INT+自分PHY)/2）",
+      text: "自分の HP を回復",
       play(s) {
         api.healPlayerFromIntSkill(s, 30, 40);
       },
@@ -68,8 +71,9 @@ function makeCardLibrary(clog, api) {
       skillIcon: "BUF_phy.png",
       cost: 1,
       type: "skl",
-      text: "PHY+2。ガード（PHY依存の軽減値）+7",
+      text: "PHY とガードを上げる",
       play(s) {
+        se("buff");
         s.playerPhy += 2;
         s.playerGuard += 7;
         clog("ノービスプロテクション: PHY+2、ガード+7");
@@ -83,8 +87,9 @@ function makeCardLibrary(clog, api) {
       skillIcon: "BUF_agi.png",
       cost: 1,
       type: "skl",
-      text: "AGI+3（クリ率↑）。ガード+3、次ターン⚡+1",
+      text: "AGI・ガードを上げ、次ターンのエナジーが増える",
       play(s) {
+        se("buff");
         s.playerAgi += 3;
         s.playerGuard += 3;
         s.bonusEnergyNext = (s.bonusEnergyNext || 0) + 1;
@@ -99,7 +104,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      text: "先頭の敵に PHY の 45〜55%（MCH 式）",
+      text: "敵に PHY 割合ダメージ",
       play(s) {
         api.dealPhySkillToEnemy(s, 45, 55);
       },
@@ -112,8 +117,9 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "skl",
-      text: "INT+1。カード2枚。敵に INT 15〜20%",
+      text: "INT を上げ、カードを引き、敵に INT 割合ダメージ",
       play(s) {
+        api.playBattleSe("buff");
         s.playerInt += 1;
         api.drawCards(s, 2);
         api.dealIntSkillToEnemy(s, 15, 20);

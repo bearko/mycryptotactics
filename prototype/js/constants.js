@@ -21,4 +21,9 @@ export const BATTLE_BG = (fileId) => img("Image/Backgrounds/" + fileId + ".png")
 export const AUDIO_URLS = {
   bgmPvp: () => audioUrl("Audio/BGM/pvp.mp3"),
   seClear: () => audioUrl("Audio/SE/clear.wav"),
+  seBattleSingleDamage: () => audioUrl("Audio/SE/Battle/1_single_damage.mp3"),
+  seBattleAreaDamage: () => audioUrl("Audio/SE/Battle/2_area_damage.mp3"),
+  seBattleHeal: () => audioUrl("Audio/SE/Battle/3_heal_resurrection.mp3"),
+  seBattleBuff: () => audioUrl("Audio/SE/Battle/4_buff.mp3"),
+  seBattleDebuff: () => audioUrl("Audio/SE/Battle/5_debuff_status_effect.mp3"),
 };

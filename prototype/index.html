@@ -162,17 +162,31 @@
       25% { transform: translateX(-4px); filter: brightness(1.4) saturate(1.2); }
       75% { transform: translateX(4px); filter: brightness(1.25); }
     }
-    .duelist-name { font-weight: 700; font-size: 0.9rem; margin-bottom: 0.35rem; }
-    .bars { font-size: 0.72rem; text-align: left; }
-    .bar-line {
-      margin: 0.18rem 0;
+    .duelist-name { font-weight: 700; font-size: 0.85rem; margin-bottom: 0.25rem; }
+    .stat-compact {
+      font-size: 0.68rem;
+      text-align: center;
+      width: 100%;
+    }
+    .stat-row {
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 0.35rem;
+      margin: 0.12rem 0;
+      min-height: 1.15rem;
       position: relative;
     }
-    .bar-line img { width: 16px; height: 16px; flex-shrink: 0; }
-    .stat-anchor { position: relative; display: inline; min-height: 1em; }
+    .stat-row img { width: 14px; height: 14px; flex-shrink: 0; object-fit: contain; }
+    .stat-row .stat-values {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+    }
+    .stat-row .slash { color: var(--muted); font-weight: 500; }
+    .stat-anchor { position: relative; display: inline-block; min-height: 1em; }
 
     .stat-float {
       position: absolute;
@@ -290,13 +304,13 @@
       width: 100%;
       max-width: 100%;
       min-width: 0;
-      min-height: 148px;
+      min-height: 158px;
       border-radius: 10px;
       border: 2px solid #5a5068;
-      padding: 1.35rem 0.25rem 0.32rem;
+      padding: 1.55rem 0.35rem 0.4rem;
       cursor: pointer;
-      font-size: 0.58rem;
-      line-height: 1.12;
+      font-size: 0.62rem;
+      line-height: 1.18;
       transition: transform 0.1s, box-shadow 0.1s;
       display: flex;
       flex-direction: column;
@@ -307,28 +321,47 @@
     .card.disabled { opacity: 0.35; cursor: not-allowed; }
     .card.atk { background: linear-gradient(165deg, #3a2832 0%, #120d12 100%); }
     .card.skl { background: linear-gradient(165deg, #283240 0%, #0d1218 100%); }
+    .card-skill-corner {
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      width: 26px;
+      height: 26px;
+      padding: 2px;
+      object-fit: contain;
+      background: #0d0a12cc;
+      border: 1px solid #4a4058;
+      border-radius: 6px;
+      z-index: 2;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
     .card-cost-badge {
       position: absolute;
-      top: 4px;
-      right: 4px;
-      min-width: 1.35rem;
-      height: 1.35rem;
+      top: 5px;
+      right: 5px;
+      min-width: 2rem;
+      height: 1.45rem;
+      padding: 0 0.35rem;
       display: flex;
       align-items: center;
       justify-content: center;
+      gap: 0.12rem;
       font-weight: 800;
       color: var(--energy);
-      font-size: 0.75rem;
-      background: #0a1520dd;
+      font-size: 0.82rem;
+      background: #0a1520ee;
       border: 1px solid #2a5560;
       border-radius: 6px;
       text-shadow: 0 1px 2px #000;
+      z-index: 2;
     }
+    .card-cost-badge .cost-zeus { font-size: 0.78rem; line-height: 1; }
     .card-ext-img {
       width: 100%;
-      height: 38px;
+      height: 42px;
       object-fit: contain;
-      margin: 0 0 0.1rem;
+      margin: 0.15rem 0 0.2rem;
       filter: drop-shadow(0 2px 4px #0006);
       image-rendering: pixelated;
       image-rendering: crisp-edges;
@@ -336,20 +369,17 @@
     .card-ext-name {
       font-weight: 700;
       color: var(--text);
-      font-size: 0.54rem;
-      line-height: 1.1;
-      margin-bottom: 0.08rem;
-      min-height: 2em;
+      font-size: 0.68rem;
+      line-height: 1.15;
+      margin-bottom: 0.2rem;
+      min-height: 2.1em;
     }
-    .card-skill-row {
-      display: flex;
-      align-items: center;
-      gap: 0.12rem;
-      margin-bottom: 0.08rem;
+    .card .card-desc {
+      color: #c8bdd5;
+      font-size: 0.62rem;
+      flex: 1;
+      line-height: 1.22;
     }
-    .card-skill-row img { width: 12px; height: 12px; flex-shrink: 0; }
-    .card-skill-name { font-size: 0.5rem; color: var(--accent); font-weight: 600; line-height: 1.05; }
-    .card .card-desc { color: var(--muted); font-size: 0.5rem; flex: 1; }
 
     .combat-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.45rem; }
     button.action {
@@ -432,26 +462,27 @@
                 <img id="leaderImg" class="portrait-lg" alt="" />
               </div>
               <div class="duelist-name" id="leaderName">—</div>
-              <div class="bars">
-                <div class="bar-line">
+              <div class="stat-compact">
+                <div class="stat-row">
                   <img alt="" data-stat="hp" />
-                  HP <span id="player-hp" class="stat-anchor"><span id="pHp">0</span> / <span id="pHpMax">0</span></span>
+                  <span class="stat-values">
+                    <span id="player-hp" class="stat-anchor"><span id="pHp">0</span><span class="slash">/</span><span id="pHpMax">0</span></span>
+                  </span>
                 </div>
-                <div class="bar-line">
+                <div class="stat-row">
                   <img alt="" data-stat="phy" />
-                  PHY <span id="player-phy" class="stat-anchor"><span id="pPhy">0</span></span>
-                </div>
-                <div class="bar-line">
+                  <span id="player-phy" class="stat-anchor stat-values"><span id="pPhy">0</span></span>
                   <img alt="" data-stat="int" />
-                  INT <span id="player-int" class="stat-anchor"><span id="pInt">0</span></span>
+                  <span id="player-int" class="stat-anchor stat-values"><span id="pInt">0</span></span>
+                  <img id="pAgiStatIcon" alt="" width="14" height="14" style="object-fit:contain" />
+                  <span id="player-agi" class="stat-anchor stat-values"><span id="pAgi">0</span></span>
                 </div>
-                <div class="bar-line">
-                  <img id="pAgiStatIcon" alt="" width="16" height="16" style="object-fit:contain" />
-                  AGI <span id="player-agi" class="stat-anchor"><span id="pAgi">0</span></span>
-                  <span style="font-size:0.58rem;color:var(--muted)">（クリ率）</span>
+                <div class="stat-row">
+                  <span aria-hidden="true" style="font-size:0.85rem">🛡</span>
+                  <span id="player-guard" class="stat-anchor stat-values"><span id="pGuard">0</span></span>
+                  <span aria-hidden="true" style="font-size:0.85rem;margin-left:0.15rem">✦</span>
+                  <span id="player-shield" class="stat-anchor stat-values"><span id="pShield">0</span></span>
                 </div>
-                <div class="bar-line">🛡 ガード <span id="player-guard" class="stat-anchor"><span id="pGuard">0</span></span></div>
-                <div class="bar-line">✦ シールド <span id="player-shield" class="stat-anchor"><span id="pShield">0</span></span></div>
               </div>
             </div>
           </div>
@@ -469,25 +500,27 @@
                 <span class="intent-label">NEXT ACTION</span>
                 <span id="enemyIntent">—</span>
               </div>
-              <div class="bars">
-                <div class="bar-line">
+              <div class="stat-compact">
+                <div class="stat-row">
                   <img alt="" data-stat="hp" />
-                  <span id="enemy-hp" class="stat-anchor"><span id="eHp">0</span></span>
+                  <span class="stat-values">
+                    <span id="enemy-hp" class="stat-anchor"><span id="eHp">0</span><span class="slash">/</span><span id="eHpMax">0</span></span>
+                  </span>
                 </div>
-                <div class="bar-line">
+                <div class="stat-row">
                   <img alt="" data-stat="phy" />
-                  PHY <span id="ePhy">0</span>
-                </div>
-                <div class="bar-line">
+                  <span id="ePhy" class="stat-values">0</span>
                   <img alt="" data-stat="int" />
-                  INT <span id="enemy-int" class="stat-anchor"><span id="eInt">0</span></span>
+                  <span id="enemy-int" class="stat-anchor stat-values"><span id="eInt">0</span></span>
+                  <img id="eAgiStatIcon" alt="" width="14" height="14" style="object-fit:contain" />
+                  <span id="eAgi" class="stat-values">0</span>
                 </div>
-                <div class="bar-line">
-                  <img id="eAgiStatIcon" alt="" width="16" height="16" style="object-fit:contain" />
-                  AGI <span id="eAgi">0</span>
+                <div class="stat-row">
+                  <span aria-hidden="true" style="font-size:0.85rem">🛡</span>
+                  <span id="enemy-guard" class="stat-anchor stat-values"><span id="eGuard">0</span></span>
+                  <span aria-hidden="true" style="font-size:0.85rem;margin-left:0.15rem">✦</span>
+                  <span id="enemy-shield" class="stat-anchor stat-values"><span id="eShield">0</span></span>
                 </div>
-                <div class="bar-line">🛡 ガード <span id="enemy-guard" class="stat-anchor"><span id="eGuard">0</span></span></div>
-                <div class="bar-line">✦ シールド <span id="enemy-shield" class="stat-anchor"><span id="eShield">0</span></span></div>
               </div>
             </div>
           </div>
