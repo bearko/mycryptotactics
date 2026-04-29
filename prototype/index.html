@@ -226,6 +226,7 @@
       width: 100%;
       max-width: 120px;
       margin: 0 auto 0.4rem;
+      overflow: visible;
     }
     .portrait-fx {
       position: absolute;
@@ -242,6 +243,8 @@
       image-rendering: crisp-edges;
       animation: portrait-sprite-fx 0.75s steps(8) forwards;
       opacity: 0.95;
+      transform: scale(1.65);
+      transform-origin: center center;
     }
     @keyframes portrait-sprite-fx {
       from { background-position: 0 0; }
@@ -402,13 +405,15 @@
     }
 
     @media (max-width: 420px) {
-      .hand { --fan-w: 46px; }
+      .hand { --fan-w: 52px; }
     }
+    .hand {
+      --fan-w: 58px;
       display: flex;
       justify-content: center;
       align-items: flex-end;
-      min-height: 168px;
-      padding: 0.25rem 0.5rem 0.5rem;
+      min-height: 178px;
+      padding: 0.35rem 0.5rem 0.55rem;
       width: 100%;
       position: relative;
       perspective: 800px;
@@ -419,36 +424,57 @@
       width: var(--fan-w);
       max-width: var(--fan-w);
       min-width: var(--fan-w);
-      height: 148px;
-      margin-left: calc(-0.62 * var(--fan-w));
+      height: 156px;
+      margin-left: calc(-0.58 * var(--fan-w));
+      --peek-lift: 0px;
       z-index: var(--i);
       transform-origin: 50% 100%;
-      transform: rotate(calc((var(--i) - (var(--n) / 2)) * 7deg))
-        translateY(calc(-0.9px * (var(--i) - (var(--n) / 2)) * (var(--i) - (var(--n) / 2))));
-      transition: transform 0.12s ease, box-shadow 0.12s, margin 0.12s, filter 0.12s;
+      transform: translateY(var(--peek-lift)) rotate(var(--rot, 0deg));
+      transition: transform 0.18s ease, box-shadow 0.18s, margin 0.18s, filter 0.18s;
     }
     .hand .card:first-child { margin-left: 0; }
     .hand .card:hover:not(.disabled),
     .hand .card.card--peek:not(.disabled) {
-      z-index: 50;
-      transform: rotate(calc((var(--i) - (var(--n) / 2)) * 5deg)) translateY(-18px) scale(1.06);
-      box-shadow: 0 14px 28px #000b;
+      z-index: 80;
+      box-shadow: 0 0 0 2px #fff, 0 0 18px #8ecfff99, 0 14px 28px #000b;
+      filter: brightness(1.04);
     }
-
     .card {
       border-radius: 10px;
-      border: 2px solid #5a5068;
-      padding: 1.55rem 0.2rem 0.35rem;
+      border: 2px solid #6a5a88;
+      padding: 0.35rem 0.28rem 0.32rem;
       cursor: default;
       font-size: 0.62rem;
       line-height: 1.18;
       display: flex;
       flex-direction: column;
-      overflow: visible;
+      overflow: hidden;
       position: relative;
       user-select: none;
       touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
+    }
+    .card-top-row {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.2rem;
+      min-height: 2.85rem;
+      padding-right: 0.15rem;
+      z-index: 3;
+    }
+    .card-top-row .card-cost-badge {
+      position: relative;
+      top: auto;
+      right: auto;
+      order: 0;
+    }
+    .card-top-row .card-skill-corner {
+      position: relative;
+      top: auto;
+      left: auto;
+      order: 1;
     }
     .card:hover:not(.disabled) { filter: brightness(1.03); }
     .card.disabled { opacity: 0.35; cursor: not-allowed; }
@@ -458,13 +484,13 @@
       position: absolute;
       top: 5px;
       left: 5px;
-      width: 26px;
-      height: 26px;
+      width: 22px;
+      height: 22px;
       padding: 2px;
       object-fit: contain;
       background: #0d0a12cc;
       border: 1px solid #4a4058;
-      border-radius: 6px;
+      border-radius: 5px;
       z-index: 2;
       image-rendering: pixelated;
       image-rendering: crisp-edges;
@@ -473,52 +499,75 @@
       position: absolute;
       top: 5px;
       right: 5px;
-      min-width: 2rem;
-      height: 1.45rem;
-      padding: 0 0.35rem;
-      display: flex;
+      min-width: 1.75rem;
+      height: 1.28rem;
+      padding: 0 0.28rem;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 0.12rem;
+      gap: 0.1rem;
       font-weight: 800;
       color: var(--energy);
-      font-size: 0.82rem;
+      font-size: 0.72rem;
       background: #0a1520ee;
       border: 1px solid #2a5560;
-      border-radius: 6px;
+      border-radius: 5px;
       text-shadow: 0 1px 2px #000;
       z-index: 2;
     }
     .card-cost-badge .cost-zeus { font-size: 0.78rem; line-height: 1; }
-    .card-ext-img {
-      width: 100%;
-      height: 126px;
-      object-fit: contain;
-      margin: 0.1rem 0 0.15rem;
-      filter: drop-shadow(0 2px 4px #0006);
-      image-rendering: pixelated;
-      image-rendering: crisp-edges;
-    }
     .card-ext-name {
       font-weight: 700;
       color: var(--text);
-      font-size: 0.62rem;
-      line-height: 1.12;
-      margin-bottom: 0.1rem;
-      min-height: 2.2em;
+      font-size: 0.58rem;
+      line-height: 1.1;
+      margin: 0.12rem 0 0.08rem;
+      text-align: center;
+      min-height: 2.1em;
       overflow: hidden;
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
     }
+    .card-ext-img {
+      width: 100%;
+      flex: 1 1 auto;
+      min-height: 0;
+      max-height: 56px;
+      object-fit: contain;
+      margin: 0.05rem 0 0.12rem;
+      filter: drop-shadow(0 2px 4px #0006);
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+    .card-effect-summary {
+      flex: 0 0 auto;
+      max-height: 2.65rem;
+      overflow: hidden;
+      background: #d8d0e4;
+      color: #1a1420;
+      border-radius: 5px;
+      padding: 0.22rem 0.28rem;
+      font-size: 0.52rem;
+      font-weight: 700;
+      line-height: 1.25;
+      text-align: left;
+    }
+    .card-effect-summary p {
+      margin: 0.06rem 0;
+    }
+    .card--peek .card-effect-summary {
+      max-height: none;
+      overflow: visible;
+    }
     .card-peek-layer {
       display: none;
       position: absolute;
       left: 50%;
-      bottom: 0.15rem;
-      transform: translateX(-50%) translateY(0);
-      width: min(240px, 78vw);
-      z-index: 60;
+      bottom: calc(100% - 4px);
+      transform: translateX(-50%);
+      width: min(248px, 86vw);
+      z-index: 90;
       pointer-events: none;
     }
     .card--peek .card-peek-layer { display: block; }
@@ -536,13 +585,17 @@
     .card-peek-lines p {
       margin: 0.15rem 0;
     }
-    .card-help-block {
+    .card-peek-help {
       margin-top: 0.35rem;
       padding-top: 0.35rem;
       border-top: 1px solid #3d3550;
+    }
+    .card-help-block {
       font-size: 0.58rem;
       color: var(--muted);
+      margin-top: 0.28rem;
     }
+    .card-help-block:first-child { margin-top: 0; }
     .card-help-block strong { color: #f0d878; }
 
     .combat-actions {
@@ -670,8 +723,8 @@
     .reward-card-inner {
       border-radius: 10px;
       border: 2px solid #5a5068;
-      padding: 1.55rem 0.45rem 0.55rem;
-      min-height: 200px;
+      padding: 0.4rem 0.45rem 0.55rem;
+      min-height: 220px;
       position: relative;
       transition: transform 0.1s, box-shadow 0.1s;
     }
@@ -683,16 +736,17 @@
     .reward-card-inner.atk {
       background: linear-gradient(165deg, #3a2832 0%, #120d12 100%);
     }
-    .reward-card-inner .card-ext-img {
-      height: 126px;
+    .reward-card-inner.skl {
+      background: linear-gradient(165deg, #283240 0%, #0d1218 100%);
     }
-    .reward-card-lines {
-      margin-top: 0.35rem;
-      font-size: 0.68rem;
+    .reward-card-detail {
+      margin-top: 0.45rem;
+      font-size: 0.65rem;
       line-height: 1.35;
       color: #c8bdd5;
+      text-align: left;
     }
-    .reward-card-lines p { margin: 0.2rem 0; }
+    .reward-card-detail p { margin: 0.18rem 0; }
     button.action {
       background: var(--border);
       color: var(--text);

@@ -669,18 +669,56 @@ function diffUiFloats() {
   }
 }
 
-function cardHelpHtml() {
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+const PEEK_HELP_SNIPPETS = {
+  guard:
+    "<strong>ガード</strong> — ターン中、PHY/INT ダメージを数値分だけ先に吸収（味方はターン開始で 0）。",
+  shield:
+    "<strong>シールド</strong> — 特殊ダメージ（最大 HP 割合など）のみ吸収。PHY/INT 通常攻撃には無効。",
+  energy:
+    "<strong>⚡ エナジー</strong> — ターンで使える行動コスト。次ターン開始時に最大まで回復。",
+  draw:
+    "<strong>ドロー</strong> — 山札から手札へカードを引く。山が空なら捨て札をシャッフルして山にする。",
+  phy: "<strong>PHY</strong> — 物理攻撃の基礎値。PHY 依存スキルのダメージに使う。",
+  int: "<strong>INT</strong> — 知略の基礎値。INT 攻撃や回復係数に関わる。",
+  agi: "<strong>AGI</strong> — このプロトでは主にクリティカル率に反映。",
+  hp: "<strong>HP</strong> — 0 で敗北。回復は最大値を超えない。",
+};
+
+/** @param {string[]} keys */
+function buildPeekHelpHtml(keys) {
+  if (!keys || !keys.length) return "";
+  const parts = keys.map((k) => PEEK_HELP_SNIPPETS[k]).filter(Boolean);
+  if (!parts.length) return "";
   return (
-    '<div class="card-help-block">' +
-    "<strong>ガード</strong> — ターン中、PHY/INT ダメージを数値分だけ先に吸収します（味方はターン開始で 0）。" +
-    "</div>" +
-    '<div class="card-help-block">' +
-    "<strong>シールド</strong> — 特殊ダメージ（最大 HP 割合など）のみ吸収。通常攻撃には無効です。" +
-    "</div>" +
-    '<div class="card-help-block">' +
-    "<strong>⚡ エナジー</strong> — ターンごとに回復。カード右上の数がコストです。" +
+    '<div class="card-peek-help">' +
+    parts.map((h) => '<div class="card-help-block">' + h + "</div>").join("") +
     "</div>"
   );
+}
+
+function refreshHandPeekLift() {
+  requestAnimationFrame(() => {
+    document.querySelectorAll("#hand .card.card--peek").forEach((el) => {
+      const sum = el.querySelector(".card-effect-summary");
+      if (!sum) {
+        el.style.setProperty("--peek-lift", "0px");
+        return;
+      }
+      const full = sum.scrollHeight;
+      const vis = sum.clientHeight;
+      const need = Math.max(0, full - vis);
+      const lift = need > 2 ? Math.min(48, need + 8) : 0;
+      el.style.setProperty("--peek-lift", lift + "px");
+    });
+  });
 }
 
 function bindHandCard(el, idx, card) {
@@ -697,12 +735,17 @@ function bindHandCard(el, idx, card) {
     longPressArmed = false;
     selectionCancelled = false;
     el.classList.remove("card--peek");
+    el.style.setProperty("--peek-lift", "0px");
   };
   const onPeek = () => {
     document.querySelectorAll("#hand .card--peek").forEach((c) => {
-      if (c !== el) c.classList.remove("card--peek");
+      if (c !== el) {
+        c.classList.remove("card--peek");
+        c.style.setProperty("--peek-lift", "0px");
+      }
     });
     el.classList.add("card--peek");
+    refreshHandPeekLift();
   };
   el.addEventListener("mouseenter", () => {
     if (window.matchMedia("(pointer: fine)").matches) onPeek();
@@ -710,6 +753,7 @@ function bindHandCard(el, idx, card) {
   el.addEventListener("mouseleave", () => {
     if (window.matchMedia("(pointer: fine)").matches) {
       el.classList.remove("card--peek");
+      el.style.setProperty("--peek-lift", "0px");
     }
   });
   el.addEventListener("click", (ev) => {
@@ -725,9 +769,10 @@ function bindHandCard(el, idx, card) {
       const t = ev.touches[0];
       startX = t.clientX;
       startY = t.clientY;
-      longPressArmed = false;
-      selectionCancelled = false;
-      if (holdTimer) clearTimeout(holdTimer);
+    longPressArmed = false;
+    selectionCancelled = false;
+    el.style.setProperty("--peek-lift", "0px");
+    if (holdTimer) clearTimeout(holdTimer);
       holdTimer = setTimeout(() => {
         holdTimer = null;
         longPressArmed = true;
@@ -757,6 +802,7 @@ function bindHandCard(el, idx, card) {
       if (!inside) {
         selectionCancelled = true;
         el.classList.remove("card--peek");
+        el.style.setProperty("--peek-lift", "0px");
       }
     },
     { passive: true }
@@ -770,6 +816,7 @@ function bindHandCard(el, idx, card) {
       const r = el.getBoundingClientRect();
       const t = ev.changedTouches && ev.changedTouches[0];
       el.classList.remove("card--peek");
+      el.style.setProperty("--peek-lift", "0px");
       if (
         t &&
         t.clientX >= r.left &&
@@ -783,6 +830,7 @@ function bindHandCard(el, idx, card) {
       }
     } else if (!longPressArmed) {
       el.classList.remove("card--peek");
+      el.style.setProperty("--peek-lift", "0px");
     }
     longPressArmed = false;
     selectionCancelled = false;
@@ -824,30 +872,50 @@ function renderCombat() {
       (card.cost > combat.energy ? " disabled" : "");
     el.style.setProperty("--i", String(idx));
     el.style.setProperty("--n", String(Math.max(n - 1, 1)));
-    const lines =
+    const centerIdx = Math.floor((n - 1) / 2);
+    const rel = idx - centerIdx;
+    const rot = rel === 0 ? 0 : rel < 0 ? 5 * Math.abs(rel) : -5 * rel;
+    el.style.setProperty("--rot", rot + "deg");
+    const summaryLines =
+      typeof card.effectSummaryLines === "function"
+        ? card.effectSummaryLines(combat)
+        : typeof card.previewLines === "function"
+          ? card.previewLines(combat)
+          : [card.text || ""];
+    const detailLines =
       typeof card.previewLines === "function"
         ? card.previewLines(combat)
-        : [card.text || ""];
-    const body = lines.map((t) => "<p>" + t + "</p>").join("");
+        : summaryLines;
+    const helpKeys =
+      typeof card.peekHelpKeys === "function" ? card.peekHelpKeys() : [];
+    const detailBody = detailLines.map((t) => "<p>" + escapeHtml(t) + "</p>").join("");
+    const summaryBody = summaryLines
+      .map((t) => "<p>" + escapeHtml(t) + "</p>")
+      .join("");
     el.innerHTML =
-      '<img class="card-skill-corner" src="' +
-      battleIconUrl(card.skillIcon) +
-      '" alt="" />' +
+      '<div class="card-top-row">' +
       '<span class="card-cost-badge"><span class="cost-zeus" aria-hidden="true">⚡</span>' +
       card.cost +
       "</span>" +
+      '<img class="card-skill-corner" src="' +
+      battleIconUrl(card.skillIcon) +
+      '" alt="" />' +
+      "</div>" +
+      '<div class="card-ext-name">' +
+      escapeHtml(card.extNameJa) +
+      "</div>" +
       '<img class="card-ext-img" src="' +
       EXT_IMG(card.extId) +
       '" alt="" />' +
-      '<div class="card-ext-name">' +
-      card.extNameJa +
+      '<div class="card-effect-summary">' +
+      summaryBody +
       "</div>" +
       '<div class="card-peek-layer" aria-hidden="true">' +
       '<div class="card-peek-inner">' +
       '<div class="card-peek-lines">' +
-      body +
+      detailBody +
       "</div>" +
-      cardHelpHtml() +
+      buildPeekHelpHtml(helpKeys) +
       "</div></div>";
     bindHandCard(el, idx, card);
     handEl.appendChild(el);
@@ -970,28 +1038,46 @@ function openRewardOverlay(picks) {
       enemyPhy: combat.enemyPhy,
       enemyInt: combat.enemyInt,
     };
-    const lines =
+    const summaryLines =
+      typeof def.effectSummaryLines === "function"
+        ? def.effectSummaryLines(mockS)
+        : typeof def.previewLines === "function"
+          ? def.previewLines(mockS)
+          : [];
+    const detailLines =
       typeof def.previewLines === "function"
         ? def.previewLines(mockS)
-        : [];
+        : summaryLines;
+    const helpKeys =
+      typeof def.peekHelpKeys === "function" ? def.peekHelpKeys() : [];
     b.innerHTML =
       '<div class="reward-card-inner ' +
       def.type +
       '">' +
-      '<img class="card-skill-corner" src="' +
-      battleIconUrl(def.skillIcon) +
-      '" alt="" />' +
+      '<div class="card-top-row">' +
       '<span class="card-cost-badge"><span class="cost-zeus" aria-hidden="true">⚡</span>' +
       def.cost +
       "</span>" +
+      '<img class="card-skill-corner" src="' +
+      battleIconUrl(def.skillIcon) +
+      '" alt="" />' +
+      "</div>" +
+      '<div class="card-ext-name">' +
+      escapeHtml(def.extNameJa) +
+      "</div>" +
       '<img class="card-ext-img" src="' +
       EXT_IMG(def.extId) +
       '" alt="" />' +
-      '<div class="card-ext-name">' +
-      def.extNameJa +
+      '<div class="card-effect-summary">' +
+      summaryLines.map((t) => "<p>" + escapeHtml(t) + "</p>").join("") +
       "</div>" +
-      '<div class="reward-card-lines">' +
-      lines.map((t) => "<p>" + t + "</p>").join("") +
+      '<div class="reward-card-detail">' +
+      detailLines.map((t) => "<p>" + escapeHtml(t) + "</p>").join("") +
+      (helpKeys.length
+        ? '<div class="card-peek-help">' +
+          buildPeekHelpHtml(helpKeys) +
+          "</div>"
+        : "") +
       "</div>" +
       "</div>";
     b.addEventListener("click", () => {

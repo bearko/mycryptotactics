@@ -39,6 +39,9 @@ function estHealInt(casterInt, targetPhy, minPct, maxPct) {
   return Math.max(0, Math.floor((coef * pct) / 100));
 }
 
+/** カード下の簡易効果行（「パラメーター名　数値」形式） */
+/** @typedef {('guard'|'shield'|'energy'|'draw'|'phy'|'int'|'agi'|'hp')[]} PeekHelpKey */
+
 /**
  * @param {(msg: string) => void} clog
  * @param {{
@@ -62,6 +65,13 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
+      effectSummaryLines(s) {
+        const d = estPhyHit(s.playerPhy, s.enemyPhy, 50, 60);
+        return [`敵にダメージ　${d}`];
+      },
+      peekHelpKeys() {
+        return [];
+      },
       previewLines(s) {
         const d = estPhyHit(s.playerPhy, s.enemyPhy, 50, 60);
         return [`敵1体に ${d} ダメージ（PHY ${50}〜${60}% 想定）`];
@@ -78,6 +88,13 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
+      effectSummaryLines(s) {
+        const d = estIntHit(s.playerInt, s.enemyInt, 25, 30);
+        return [`敵にダメージ　${d}`, "INT　−2（敵）"];
+      },
+      peekHelpKeys() {
+        return ["int"];
+      },
       previewLines(s) {
         const d = estIntHit(s.playerInt, s.enemyInt, 25, 30);
         return [`敵1体に ${d} ダメージ（INT ${25}〜${30}%）`, "敵の INT を 2 下げる"];
@@ -98,6 +115,14 @@ function makeCardLibrary(clog, api) {
       skillIcon: "hp.png",
       cost: 1,
       type: "skl",
+      effectSummaryLines(s) {
+        const lo = estHealInt(s.playerInt, s.playerPhy, 30, 30);
+        const hi = estHealInt(s.playerInt, s.playerPhy, 40, 40);
+        return [`HP　+${lo}〜${hi}`];
+      },
+      peekHelpKeys() {
+        return ["hp"];
+      },
       previewLines(s) {
         const lo = estHealInt(s.playerInt, s.playerPhy, 30, 30);
         const hi = estHealInt(s.playerInt, s.playerPhy, 40, 40);
@@ -115,6 +140,12 @@ function makeCardLibrary(clog, api) {
       skillIcon: "BUF_phy.png",
       cost: 1,
       type: "skl",
+      effectSummaryLines() {
+        return ["PHY　+2", "ガード　+7"];
+      },
+      peekHelpKeys() {
+        return ["phy", "guard"];
+      },
       previewLines() {
         return ["PHY を +2", "ガードを 7 得る（ターン終了まで有効）"];
       },
@@ -134,6 +165,12 @@ function makeCardLibrary(clog, api) {
       skillIcon: "BUF_agi.png",
       cost: 1,
       type: "skl",
+      effectSummaryLines() {
+        return ["AGI　+3", "ガード　+3", "次ターン ⚡　+1"];
+      },
+      peekHelpKeys() {
+        return ["agi", "guard", "energy"];
+      },
       previewLines() {
         return [
           "AGI を +3",
@@ -158,6 +195,13 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
+      effectSummaryLines(s) {
+        const d = estPhyHit(s.playerPhy, s.enemyPhy, 45, 55);
+        return [`敵にダメージ　${d}`];
+      },
+      peekHelpKeys() {
+        return [];
+      },
       previewLines(s) {
         const d = estPhyHit(s.playerPhy, s.enemyPhy, 45, 55);
         return [`敵1体に ${d} ダメージ（PHY ${45}〜${55}%）`];
@@ -174,6 +218,13 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "skl",
+      effectSummaryLines(s) {
+        const d = estIntHit(s.playerInt + 1, s.enemyInt, 15, 20);
+        return ["INT　+1", "ドロー　2", `敵にダメージ　${d}`];
+      },
+      peekHelpKeys() {
+        return ["int", "draw"];
+      },
       previewLines(s) {
         const d = estIntHit(s.playerInt + 1, s.enemyInt, 15, 20);
         return [
@@ -198,6 +249,13 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
+      effectSummaryLines(s) {
+        const d = estPhyHit(s.playerPhy, s.enemyPhy, 45, 55);
+        return [`敵にダメージ　${d}`];
+      },
+      peekHelpKeys() {
+        return [];
+      },
       previewLines(s) {
         const d = estPhyHit(s.playerPhy, s.enemyPhy, 45, 55);
         return [`敵1体に ${d} ダメージ（PHY ${45}〜${55}%）`];
@@ -214,6 +272,14 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
+      effectSummaryLines(s) {
+        const d = estPhyHit(s.playerPhy, s.enemyPhy, 40, 40);
+        const agiDown = Math.max(1, Math.floor(s.playerPhy * 0.03));
+        return [`敵にダメージ　${d}`, `AGI　−${agiDown}（敵）`];
+      },
+      peekHelpKeys() {
+        return ["agi"];
+      },
       previewLines(s) {
         const d = estPhyHit(s.playerPhy, s.enemyPhy, 40, 40);
         const agiDown = Math.max(1, Math.floor(s.playerPhy * 0.03));
@@ -236,6 +302,14 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
+      effectSummaryLines(s) {
+        const d = estIntHit(s.playerInt, s.enemyInt, 15, 20);
+        const intDown = Math.max(1, Math.floor(s.playerInt * 0.06));
+        return [`敵にダメージ　${d}`, `INT　−${intDown}（敵）`];
+      },
+      peekHelpKeys() {
+        return ["int"];
+      },
       previewLines(s) {
         const d = estIntHit(s.playerInt, s.enemyInt, 15, 20);
         const intDown = Math.max(1, Math.floor(s.playerInt * 0.06));
@@ -262,6 +336,14 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
+      effectSummaryLines(s) {
+        const d = estPhyHit(s.playerPhy, s.enemyPhy, 30, 40);
+        const selfDown = Math.max(1, Math.floor(s.playerPhy * 0.09));
+        return [`敵にダメージ　${d}`, `PHY　−${selfDown}（自分）`];
+      },
+      peekHelpKeys() {
+        return ["phy"];
+      },
       previewLines(s) {
         const d = estPhyHit(s.playerPhy, s.enemyPhy, 30, 40);
         const selfDown = Math.max(1, Math.floor(s.playerPhy * 0.09));
@@ -288,6 +370,13 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 2,
       type: "atk",
+      effectSummaryLines(s) {
+        const d = estPhyHit(s.playerPhy, s.enemyPhy, 55, 65);
+        return [`敵にダメージ　${d}`];
+      },
+      peekHelpKeys() {
+        return [];
+      },
       previewLines(s) {
         const d = estPhyHit(s.playerPhy, s.enemyPhy, 55, 65);
         return [`敵1体に ${d} ダメージ（PHY ${55}〜${65}%）`];
@@ -304,6 +393,13 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 2,
       type: "atk",
+      effectSummaryLines(s) {
+        const d = estIntHit(s.playerInt, s.enemyInt, 30, 35);
+        return [`敵にダメージ　${d}`];
+      },
+      peekHelpKeys() {
+        return [];
+      },
       previewLines(s) {
         const d = estIntHit(s.playerInt, s.enemyInt, 30, 35);
         return [`敵全体に相当する ${d} ダメージ（INT ${30}〜${35}%・単体敵プロト）`];
@@ -321,6 +417,14 @@ function makeCardLibrary(clog, api) {
       skillIcon: "BUF_phy.png",
       cost: 2,
       type: "skl",
+      effectSummaryLines(s) {
+        const lo = Math.max(1, Math.floor(s.playerPhy * 0.1));
+        const hi = Math.max(1, Math.floor(s.playerPhy * 0.15));
+        return [`PHY　+${lo}〜${hi}`];
+      },
+      peekHelpKeys() {
+        return ["phy"];
+      },
       previewLines(s) {
         const lo = Math.max(1, Math.floor(s.playerPhy * 0.1));
         const hi = Math.max(1, Math.floor(s.playerPhy * 0.15));
@@ -343,6 +447,13 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 2,
       type: "atk",
+      effectSummaryLines(s) {
+        const d = estPhyHit(s.playerPhy, s.enemyPhy, 50, 60);
+        return [`敵にダメージ　${d}`];
+      },
+      peekHelpKeys() {
+        return [];
+      },
       previewLines(s) {
         const d = estPhyHit(s.playerPhy, s.enemyPhy, 50, 60);
         return [`敵1体に ${d} ダメージ（PHY ${50}〜${60}%）`];
@@ -359,6 +470,13 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 2,
       type: "atk",
+      effectSummaryLines(s) {
+        const d = estPhyHit(s.playerPhy, s.enemyPhy, 50, 60);
+        return [`敵にダメージ　${d}`];
+      },
+      peekHelpKeys() {
+        return [];
+      },
       previewLines(s) {
         const d = estPhyHit(s.playerPhy, s.enemyPhy, 50, 60);
         return [`敵1体に ${d} ダメージ（PHY ${50}〜${60}%）`];
@@ -375,6 +493,13 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 2,
       type: "atk",
+      effectSummaryLines(s) {
+        const d = estPhyHit(s.playerPhy, s.enemyPhy, 40, 50);
+        return [`敵にダメージ　${d}`];
+      },
+      peekHelpKeys() {
+        return [];
+      },
       previewLines(s) {
         const d = estPhyHit(s.playerPhy, s.enemyPhy, 40, 50);
         return [`敵1体に ${d} ダメージ（PHY ${40}〜${50}%・高INT相手想定）`];
@@ -391,7 +516,13 @@ export function createCardRuntime(clog, api) {
   const CARD_LIBRARY = makeCardLibrary(clog, api);
   function copyCard(key) {
     const def = CARD_LIBRARY[key];
-    return { ...def, play: def.play, previewLines: def.previewLines };
+    return {
+      ...def,
+      play: def.play,
+      previewLines: def.previewLines,
+      effectSummaryLines: def.effectSummaryLines,
+      peekHelpKeys: def.peekHelpKeys,
+    };
   }
   function makeStarterDeck() {
     const d = [];
