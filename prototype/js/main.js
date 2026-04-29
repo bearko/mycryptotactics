@@ -935,6 +935,7 @@ function renderCombat() {
   const handEl = document.getElementById("hand");
   handEl.innerHTML = "";
   const n = combat.hand.length;
+  handEl.style.setProperty("--n-cards", String(Math.max(n, 1)));
   combat.hand.forEach((card, idx) => {
     const el = document.createElement("div");
     el.className =
@@ -964,19 +965,22 @@ function renderCombat() {
       .map((t) => "<p>" + escapeHtml(t) + "</p>")
       .join("");
     el.innerHTML =
+      '<div class="card-bg-ext">' +
+      '<img class="card-ext-img" src="' +
+      EXT_IMG(card.extId) +
+      '" alt="" />' +
+      "</div>" +
+      '<div class="card-fg">' +
       '<div class="card-top-row">' +
       '<span class="card-cost-badge"><span class="cost-zeus" aria-hidden="true">⚡</span>' +
       card.cost +
       "</span>" +
-      '<img class="card-skill-corner" src="' +
-      battleIconUrl(card.skillIcon) +
-      '" alt="" />' +
-      "</div>" +
       '<div class="card-ext-name">' +
       escapeHtml(card.extNameJa) +
       "</div>" +
-      '<img class="card-ext-img" src="' +
-      EXT_IMG(card.extId) +
+      "</div>" +
+      '<img class="card-skill-corner" src="' +
+      battleIconUrl(card.skillIcon) +
       '" alt="" />' +
       '<div class="card-effect-summary">' +
       summaryBody +
@@ -987,7 +991,8 @@ function renderCombat() {
       detailBody +
       "</div>" +
       buildPeekHelpHtml(helpKeys) +
-      "</div></div>";
+      "</div></div>" +
+      "</div>";
     bindHandCard(el, idx, card);
     handEl.appendChild(el);
   });
@@ -1126,19 +1131,22 @@ function buildRewardPickButton(def, mockS) {
     '<div class="reward-card-inner ' +
     def.type +
     '">' +
+    '<div class="card-bg-ext">' +
+    '<img class="card-ext-img" src="' +
+    EXT_IMG(def.extId) +
+    '" alt="" />' +
+    "</div>" +
+    '<div class="card-fg">' +
     '<div class="card-top-row">' +
     '<span class="card-cost-badge"><span class="cost-zeus" aria-hidden="true">⚡</span>' +
     def.cost +
     "</span>" +
-    '<img class="card-skill-corner" src="' +
-    battleIconUrl(def.skillIcon) +
-    '" alt="" />' +
-    "</div>" +
     '<div class="card-ext-name">' +
     escapeHtml(def.extNameJa) +
     "</div>" +
-    '<img class="card-ext-img" src="' +
-    EXT_IMG(def.extId) +
+    "</div>" +
+    '<img class="card-skill-corner" src="' +
+    battleIconUrl(def.skillIcon) +
     '" alt="" />' +
     '<div class="card-effect-summary">' +
     summaryLines.map((t) => "<p>" + escapeHtml(t) + "</p>").join("") +
@@ -1148,6 +1156,7 @@ function buildRewardPickButton(def, mockS) {
     (helpKeys.length
       ? '<div class="card-peek-help">' + buildPeekHelpHtml(helpKeys) + "</div>"
       : "") +
+    "</div>" +
     "</div>" +
     "</div>";
   return b;
