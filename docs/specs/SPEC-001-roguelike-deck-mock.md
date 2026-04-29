@@ -5,12 +5,12 @@
 | ID | SPEC-001 |
 | 状態 | Accepted |
 | 作成日 | 2026-05-01 |
-| 最終更新 | 2026-05-01 |
+| 最終更新 | 2026-05-02 |
 | 作者 | プロジェクト |
 
 ## 1. 概要
 
-ブラウザで開ける単一 HTML（`mock/index.html`）により、**分岐マップ → ターン制カード戦闘 → 報酬** の体験をデモする。アセットは [bearko/mycryptoheroes](https://github.com/bearko/mycryptoheroes) の raw URL を参照する。
+**分岐マップ → ターン制カード戦闘 → 報酬** の体験要件を定義する。実装の正は [SPEC-002](./SPEC-002-prototype.md) の `prototype/`。`mock/index.html` はプロトタイプへリダイレクトするに留める。アセットは [bearko/mycryptoheroes](https://github.com/bearko/mycryptoheroes) の raw URL を参照する。
 
 ## 2. 背景と動機
 
@@ -20,7 +20,7 @@
 
 ### 目標（Goals）
 
-- コード変更なしで URL からモックを閲覧できる。
+- デプロイ URL からプレイ用ページを閲覧できる。
 - 対峙型の戦闘 UI と Backgrounds / Extensions 由来のカード表現が分かる。
 
 ### 非目標（Non-goals）
@@ -55,7 +55,7 @@
 
 ### 互換性
 
-- ルート `index.html` は `/mock/index.html` へ誘導し、Vercel で `/` が開けること。
+- ルート `index.html` は **プレイ用エントリ**（現行: `/prototype/index.html`）へ誘導し、Vercel で `/` が開けること。
 
 ## 6. 非機能要件
 
@@ -68,11 +68,11 @@
 
 ## 8. 受け入れ基準
 
-- [ ] `mock/index.html` をローカルまたはデプロイ URL で開き、マップから戦闘に入れる。
+- [ ] プレイ用 URL（`prototype/index.html`）でマップから戦闘に入れる。
 - [ ] 戦闘画面でリーダーと敵が左右対峙し、背景が表示される。
 - [ ] 手札カードに Extension 画像とスキル名・効果説明が表示され、プレイで敵 HP が変化する。
 - [ ] 戦闘勝利後に報酬選択またはスキップでマップに戻れる。
-- [ ] ルート URL からモックに到達できる（`index.html` のリダイレクト）。
+- [ ] ルート URL からプレイ用に到達できる（`index.html` のリダイレクト）。
 
 ## 9. テストと証跡
 
@@ -83,3 +83,4 @@
 | 日付 | 版 | 変更内容 |
 |------|-----|----------|
 | 2026-05-01 | 1.0 | 初版（SPEC 駆動の基準 SPEC として追加） |
+| 2026-05-02 | 1.1 | 実装を prototype に移行。ルート・mock のリダイレクトを追記 |

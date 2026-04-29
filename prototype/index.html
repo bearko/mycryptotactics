@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>クロノ・デッキ（プロトタイプ）</title>
+  <link rel="preconnect" href="https://raw.githubusercontent.com" />
+  <style>
+    :root {
+      --bg: #121018;
+      --panel: #1e1a28;
+      --border: #3d3550;
+      --text: #e6e0f0;
+      --muted: #8a8199;
+      --accent: #c4a35a;
+      --energy: #5ab4c4;
+      --danger: #c45c6a;
+      --map-node: #2a2438;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", "Hiragino Sans", sans-serif;
+      background: radial-gradient(ellipse at top, #1f1a2e 0%, var(--bg) 55%);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0.75rem;
+    }
+    header {
+      width: 100%;
+      max-width: 900px;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+    header h1 { margin: 0; font-size: 1.1rem; font-weight: 600; }
+    header .tag {
+      font-size: 0.7rem;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+    }
+    .wrap { width: 100%; max-width: 900px; }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+    }
+    .hidden { display: none !important; }
+    .resources {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+    .resources .res { display: flex; align-items: center; gap: 0.35rem; font-size: 0.85rem; color: var(--muted); }
+    .resources img { width: 22px; height: 22px; object-fit: contain; }
+
+    #mapView .map-title { font-size: 0.9rem; color: var(--accent); margin: 0 0 0.5rem; }
+    .map-row {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.75rem;
+      align-items: center;
+    }
+    .map-row-label { font-size: 0.75rem; color: var(--muted); min-width: 4.5rem; }
+    .node-btn {
+      background: var(--map-node);
+      border: 2px solid var(--border);
+      color: var(--text);
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      min-width: 7rem;
+      text-align: center;
+    }
+    .node-btn:hover:not(:disabled) { border-color: var(--accent); }
+    .node-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .node-btn.fight { border-left: 4px solid var(--danger); }
+    .node-btn.rest { border-left: 4px solid #5a8b6a; }
+    .node-btn.shop { border-left: 4px solid var(--accent); }
+    .node-btn.boss { border-left: 4px solid #9a6ac4; font-weight: 600; }
+
+    #combatView.combat-panel { padding: 0; overflow: hidden; }
+    .combat-arena {
+      position: relative;
+      min-height: 300px;
+      border-radius: 10px 10px 0 0;
+      overflow: hidden;
+    }
+    .combat-bg {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center 35%;
+      background-repeat: no-repeat;
+      filter: saturate(0.92) brightness(0.55);
+    }
+    .combat-bg::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, #0a0812cc 0%, transparent 22%, transparent 78%, #0a0812cc 100%),
+        linear-gradient(180deg, transparent 40%, #120e18ee 100%);
+      pointer-events: none;
+    }
+    .combat-arena-inner {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: stretch;
+      justify-content: space-between;
+      gap: 0.5rem;
+      padding: 1rem 0.85rem 1.25rem;
+      min-height: 300px;
+    }
+    .duelist {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      max-width: 42%;
+    }
+    .duelist-tag {
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 0.35rem;
+    }
+    .portrait-card {
+      background: linear-gradient(180deg, #1a1628e6 0%, #0f0d16f0 100%);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 0.65rem 0.75rem 0.75rem;
+      width: 100%;
+      max-width: 200px;
+      box-shadow: 0 12px 32px #000a, inset 0 1px 0 #ffffff14;
+    }
+    .portrait-card.hero-side { border-color: #6a8a5a88; box-shadow: 0 0 24px #3d5c3a44, 0 12px 32px #000a; }
+    .portrait-card.enemy-side { border-color: #9a4a5888; box-shadow: 0 0 24px #5c2a3044, 0 12px 32px #000a; }
+    .portrait-card img.portrait-lg {
+      width: 100%;
+      max-width: 120px;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin: 0 auto 0.4rem;
+      display: block;
+      border: 2px solid #0006;
+    }
+    .portrait-card.enemy-side img.portrait-lg { object-fit: contain; background: #0a0810; }
+    .duelist-name { font-weight: 700; font-size: 0.9rem; margin-bottom: 0.35rem; }
+    .bars { font-size: 0.75rem; text-align: left; }
+    .bar-line { margin: 0.2rem 0; display: flex; align-items: center; gap: 0.35rem; }
+    .bar-line img { width: 16px; height: 16px; flex-shrink: 0; }
+    .vs-column {
+      flex: 0 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0 0.25rem;
+      min-width: 5.5rem;
+    }
+    .vs-mark {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--accent);
+      text-shadow: 0 0 20px #c4a35a66;
+      letter-spacing: 0.05em;
+    }
+    .intent-bubble {
+      font-size: 0.68rem;
+      color: #ffd4a8;
+      text-align: center;
+      line-height: 1.35;
+      padding: 0.45rem 0.5rem;
+      background: #1a1018cc;
+      border: 1px solid #6a4048;
+      border-radius: 8px;
+      max-width: 7.5rem;
+    }
+    .energy-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      background: #0d2430ee;
+      color: var(--energy);
+      padding: 0.3rem 0.65rem;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      border: 1px solid #2a5560;
+    }
+    .combat-footer {
+      padding: 0.75rem 1rem 1rem;
+      border-top: 1px solid var(--border);
+      background: var(--panel);
+      border-radius: 0 0 10px 10px;
+    }
+    /* 手札: 常に3列（狭い画面でも5枚がスクロールなしで収まる） */
+    .hand {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.4rem;
+      min-height: 0;
+      padding: 0.5rem 0;
+      width: 100%;
+    }
+    .card {
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      min-height: 152px;
+      border-radius: 10px;
+      border: 2px solid #5a5068;
+      padding: 0.3rem 0.28rem 0.35rem;
+      cursor: pointer;
+      font-size: 0.58rem;
+      line-height: 1.15;
+      transition: transform 0.1s, box-shadow 0.1s;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+    .card:hover:not(.disabled) { transform: translateY(-3px); box-shadow: 0 8px 18px #0009; }
+    .card.disabled { opacity: 0.35; cursor: not-allowed; }
+    .card.atk { background: linear-gradient(165deg, #3a2832 0%, #120d12 100%); }
+    .card.skl { background: linear-gradient(165deg, #283240 0%, #0d1218 100%); }
+    .card .card-cost {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      font-weight: 800;
+      color: var(--energy);
+      font-size: 0.72rem;
+      text-shadow: 0 1px 2px #000;
+    }
+    .card-ext-img {
+      width: 100%;
+      height: 40px;
+      object-fit: contain;
+      margin: 0.1rem 0 0.12rem;
+      filter: drop-shadow(0 2px 4px #0006);
+    }
+    .card-ext-name {
+      font-weight: 700;
+      color: var(--text);
+      font-size: 0.55rem;
+      line-height: 1.12;
+      margin-bottom: 0.1rem;
+      min-height: 2.1em;
+    }
+    .card-skill-row {
+      display: flex;
+      align-items: center;
+      gap: 0.15rem;
+      margin-bottom: 0.1rem;
+    }
+    .card-skill-row img { width: 12px; height: 12px; flex-shrink: 0; }
+    .card-skill-name { font-size: 0.52rem; color: var(--accent); font-weight: 600; line-height: 1.1; }
+    .card .card-desc { color: var(--muted); font-size: 0.52rem; flex: 1; }
+    .combat-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem; }
+    button.action {
+      background: var(--border);
+      color: var(--text);
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+    button.action:hover:not(:disabled) { filter: brightness(1.12); }
+    button.action:disabled { opacity: 0.45; cursor: not-allowed; }
+    button.primary { background: #4a3d6a; border: 1px solid var(--accent); }
+
+    .log {
+      font-size: 0.72rem;
+      color: var(--muted);
+      max-height: 88px;
+      overflow-y: auto;
+      margin-top: 0.65rem;
+      border-top: 1px solid var(--border);
+      padding-top: 0.45rem;
+    }
+    .log p { margin: 0.15rem 0; }
+
+    #rewardOverlay {
+      position: fixed;
+      inset: 0;
+      background: #000c;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      padding: 1rem;
+    }
+    #rewardOverlay.hidden { display: none; }
+    .reward-box {
+      background: var(--panel);
+      border: 2px solid var(--accent);
+      border-radius: 12px;
+      padding: 1.25rem;
+      max-width: 420px;
+      width: 100%;
+    }
+    .reward-box h3 { margin: 0 0 1rem; font-size: 1rem; }
+    .reward-picks { display: flex; flex-direction: column; gap: 0.5rem; }
+    .reward-picks button { text-align: left; padding: 0.65rem; }
+
+    #gameOver { text-align: center; padding: 2rem; }
+    footer {
+      margin-top: auto;
+      padding-top: 1rem;
+      font-size: 0.65rem;
+      color: var(--muted);
+      text-align: center;
+      max-width: 720px;
+    }
+    footer a { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <header>
+    <img id="brandIcon" alt="" width="36" height="36" style="border-radius:8px" />
+    <div>
+      <h1>クロノ・デッキ（プロトタイプ）</h1>
+      <span class="tag">仕様駆動 · データ分離 JS · 手札3列</span>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <div class="resources" aria-label="ランリソース">
+      <span class="res"><img alt="GUM" data-icon="gum" /> <span id="goldVal">0</span></span>
+      <span class="res"><img alt="HP" data-stat="hp" /> <span id="hpMapVal">—</span></span>
+      <span class="res">層 <span id="layerVal">1</span> / 4</span>
+    </div>
+
+    <div id="mapView" class="panel">
+      <p class="map-title">道を選ぶ（ノードをクリック）</p>
+      <div id="mapRows"></div>
+      <p style="font-size:0.75rem;color:var(--muted);margin:0.5rem 0 0">企画書 §3 に沿ったラン内ループのプロト。ロジックは <code>prototype/js/</code>。</p>
+    </div>
+
+    <div id="combatView" class="panel combat-panel hidden">
+      <div class="combat-arena">
+        <div id="combatBg" class="combat-bg" role="presentation"></div>
+        <div class="combat-arena-inner">
+          <div class="duelist">
+            <span class="duelist-tag">Leader</span>
+            <div class="portrait-card hero-side">
+              <img id="leaderImg" class="portrait-lg" alt="" />
+              <div class="duelist-name" id="leaderName">—</div>
+              <div class="bars">
+                <div class="bar-line"><img alt="" data-stat="hp" /> HP <span id="pHp">0</span> / <span id="pHpMax">0</span></div>
+                <div class="bar-line">🛡 ブロック <span id="pBlock">0</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="vs-column">
+            <span class="vs-mark">VS</span>
+            <div class="energy-pill">⚡ <span id="energyVal">0</span> / <span id="energyMax">3</span></div>
+            <div class="intent-bubble" id="enemyIntent">—</div>
+          </div>
+          <div class="duelist">
+            <span class="duelist-tag">Enemy</span>
+            <div class="portrait-card enemy-side">
+              <img id="enemyImg" class="portrait-lg" alt="" />
+              <div class="duelist-name" id="enemyName">—</div>
+              <div class="bars">
+                <div class="bar-line"><img alt="" data-stat="hp" /> <span id="eHp">0</span></div>
+                <div class="bar-line">🛡 <span id="eBlock">0</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="combat-footer">
+        <p style="font-size:0.72rem;color:var(--muted);margin:0 0 0.5rem">手札は <strong>3列</strong>。エクステンションをタップでプレイ（⚡コスト）。</p>
+        <div id="hand" class="hand" role="list"></div>
+        <div class="combat-actions">
+          <button type="button" class="action primary" id="btnEndTurn">ターン終了</button>
+        </div>
+        <div class="log" id="clog" aria-live="polite"></div>
+      </div>
+    </div>
+
+    <div id="shopView" class="panel hidden">
+      <p style="margin-top:0;font-weight:600;color:var(--accent)">店</p>
+      <p style="font-size:0.8rem;color:var(--muted)">ゴールドでカードを購入。</p>
+      <div id="shopList" style="display:flex;flex-direction:column;gap:0.5rem;margin:1rem 0"></div>
+      <button type="button" class="action" id="btnLeaveShop">立ち去る</button>
+    </div>
+
+    <div id="gameOver" class="panel hidden">
+      <h2 style="margin:0 0 0.5rem">ラン終了</h2>
+      <p id="gameOverMsg" style="color:var(--muted)"></p>
+      <button type="button" class="action primary" id="btnRestart" style="margin-top:1rem">もう一度</button>
+    </div>
+  </div>
+
+  <div id="rewardOverlay" class="hidden" aria-hidden="true">
+    <div class="reward-box">
+      <h3>報酬：カードを 1 枚選ぶ（スキップ可）</h3>
+      <div class="reward-picks" id="rewardPicks"></div>
+      <button type="button" class="action" id="btnSkipReward" style="margin-top:0.75rem;width:100%">スキップ</button>
+    </div>
+  </div>
+
+  <footer>
+    企画: <code>docs/CHRONO_TACTICS_DESIGN.md</code> · SPEC: <code>docs/specs/SPEC-002-prototype.md</code> ·
+    <a href="https://github.com/bearko/mycryptoheroes" target="_blank" rel="noopener">bearko/mycryptoheroes</a>
+  </footer>
+
+  <script type="module" src="./js/main.js"></script>
+</body>
+</html>

@@ -21,8 +21,9 @@
 
 **流れの要約**: 憲章を読む → 対象の SPEC を [SPEC-INDEX.md](docs/specs/SPEC-INDEX.md) から特定する → 実装 → PR に受け入れ基準と確認証跡を書く。
 
-## プロダクト文書とモック
+## プロダクト文書とプロトタイプ
 
-- 企画メモ: [docs/CHRONO_TACTICS_DESIGN.md](docs/CHRONO_TACTICS_DESIGN.md)（高レベル。実装の契約は SPEC に落とす）
-- モック: `mock/index.html`（ルートの [index.html](index.html) から誘導）。アセットは [bearko/mycryptoheroes](https://github.com/bearko/mycryptoheroes) の raw URL を参照
-- 現行モックの仕様: [docs/specs/SPEC-001-roguelike-deck-mock.md](docs/specs/SPEC-001-roguelike-deck-mock.md)
+- 企画メモ: [docs/CHRONO_TACTICS_DESIGN.md](docs/CHRONO_TACTICS_DESIGN.md)
+- **プレイ用**: [prototype/index.html](prototype/index.html)（ES モジュール。ルート [index.html](index.html) から誘導）。アセットは [bearko/mycryptoheroes](https://github.com/bearko/mycryptoheroes) の raw URL
+- 旧 URL `mock/index.html` → プロトタイプへリダイレクト
+- 仕様: [SPEC-001](docs/specs/SPEC-001-roguelike-deck-mock.md)（体験要件） / [SPEC-002](docs/specs/SPEC-002-prototype.md)（プロト構成・手札3列）

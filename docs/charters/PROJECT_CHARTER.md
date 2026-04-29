@@ -11,7 +11,7 @@
 
 ### 含む（In scope）
 
-- 静的 HTML モック（`mock/`）、企画・仕様ドキュメント（`docs/`）、Vercel 等でのホスティング。
+- 静的 HTML モック（`mock/` はプロトタイプへのリダイレクト）、**プロトタイプ**（`prototype/`）、企画・仕様ドキュメント（`docs/`）、Vercel 等でのホスティング。
 - [bearko/mycryptoheroes](https://github.com/bearko/mycryptoheroes) 由来アセットの **参照**（利用条件は同リポジトリのライセンスに従う）。
 - SPEC / 憲章に沿った機能追加・バグ修正。
 
