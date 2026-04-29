@@ -3,170 +3,228 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>クロノ・タクティクス（モック）</title>
+  <title>クロノ・デッキ（モック）— ローグライク × カード</title>
   <link rel="preconnect" href="https://raw.githubusercontent.com" />
   <style>
     :root {
-      --bg: #1a1510;
-      --panel: #2d261c;
-      --border: #5c4d32;
-      --text: #e8dcc8;
-      --muted: #9a8b6f;
-      --accent: #c9a227;
-      --ally: #3d6b4a;
-      --enemy: #8b3a3a;
-      --tile: #3a3428;
-      --tile-hover: #4a4334;
-      --selected: #c9a22744;
+      --bg: #121018;
+      --panel: #1e1a28;
+      --border: #3d3550;
+      --text: #e6e0f0;
+      --muted: #8a8199;
+      --accent: #c4a35a;
+      --energy: #5ab4c4;
+      --danger: #c45c6a;
+      --card-atk: #4a3038;
+      --card-skl: #303d4a;
+      --map-node: #2a2438;
+      --map-line: #4a4160;
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
       min-height: 100vh;
       font-family: "Segoe UI", "Hiragino Sans", sans-serif;
-      background: var(--bg);
+      background: radial-gradient(ellipse at top, #1f1a2e 0%, var(--bg) 55%);
       color: var(--text);
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 1rem;
+      padding: 0.75rem;
     }
     header {
       width: 100%;
-      max-width: 960px;
+      max-width: 900px;
       display: flex;
       align-items: center;
-      gap: 1rem;
-      margin-bottom: 1rem;
-      padding-bottom: 1rem;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.75rem;
       border-bottom: 1px solid var(--border);
     }
-    header h1 {
-      margin: 0;
-      font-size: 1.25rem;
-      font-weight: 600;
-    }
+    header h1 { margin: 0; font-size: 1.1rem; font-weight: 600; }
     header .tag {
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       color: var(--muted);
       border: 1px solid var(--border);
-      padding: 0.2rem 0.5rem;
+      padding: 0.15rem 0.45rem;
       border-radius: 4px;
     }
-    .layout {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1.25rem;
-      justify-content: center;
-      align-items: flex-start;
-      max-width: 960px;
-    }
+    .wrap { width: 100%; max-width: 900px; }
     .panel {
       background: var(--panel);
       border: 1px solid var(--border);
-      border-radius: 8px;
+      border-radius: 10px;
       padding: 1rem;
+      margin-bottom: 0.75rem;
     }
+    .hidden { display: none !important; }
     .resources {
       display: flex;
+      flex-wrap: wrap;
       gap: 1rem;
-      flex-wrap: wrap;
       align-items: center;
+      margin-bottom: 0.75rem;
     }
-    .resources .res {
-      display: flex;
-      align-items: center;
-      gap: 0.35rem;
-      font-size: 0.85rem;
-      color: var(--muted);
-    }
+    .resources .res { display: flex; align-items: center; gap: 0.35rem; font-size: 0.85rem; color: var(--muted); }
     .resources img { width: 22px; height: 22px; object-fit: contain; }
-    .board-wrap {
-      padding: 0.5rem;
-    }
-    .board {
-      display: grid;
-      grid-template-columns: repeat(6, 52px);
-      grid-template-rows: repeat(6, 52px);
-      gap: 3px;
-      background: #0d0b08;
-      padding: 4px;
-      border-radius: 6px;
-    }
-    .cell {
-      width: 52px;
-      height: 52px;
-      background: var(--tile);
-      border-radius: 4px;
-      cursor: pointer;
-      position: relative;
+
+    /* Map */
+    #mapView .map-title { font-size: 0.9rem; color: var(--accent); margin: 0 0 0.5rem; }
+    .map-row {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.12s;
-    }
-    .cell:hover { background: var(--tile-hover); }
-    .cell.move-range { outline: 2px solid var(--accent); outline-offset: -2px; }
-    .cell.attack-range { outline: 2px dashed #e07050; outline-offset: -2px; }
-    .cell.selected-tile { background: var(--selected); }
-    .unit-portrait {
-      width: 44px;
-      height: 44px;
-      border-radius: 4px;
-      object-fit: cover;
-      border: 2px solid var(--border);
-      image-rendering: pixelated;
-    }
-    .unit-portrait.ally { border-color: #5a9a6a; }
-    .unit-portrait.enemy { border-color: #c45c5c; }
-    .side-rail {
-      min-width: 280px;
-      max-width: 320px;
-    }
-    .side-rail h2 {
-      margin: 0 0 0.75rem;
-      font-size: 0.95rem;
-      color: var(--accent);
-    }
-    .stat-row {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin: 0.35rem 0;
-      font-size: 0.8rem;
-    }
-    .stat-row img { width: 20px; height: 20px; }
-    .log {
-      font-size: 0.75rem;
-      color: var(--muted);
-      max-height: 140px;
-      overflow-y: auto;
-      line-height: 1.45;
-      margin-top: 0.75rem;
-      padding-top: 0.75rem;
-      border-top: 1px solid var(--border);
-    }
-    .log p { margin: 0.25rem 0; }
-    .btn-row {
-      display: flex;
-      gap: 0.5rem;
+      gap: 0.75rem;
       flex-wrap: wrap;
-      margin-top: 0.75rem;
+      margin-bottom: 0.75rem;
+      align-items: center;
     }
-    button {
+    .map-row-label { font-size: 0.75rem; color: var(--muted); min-width: 4.5rem; }
+    .node-btn {
+      background: var(--map-node);
+      border: 2px solid var(--border);
+      color: var(--text);
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      min-width: 7rem;
+      text-align: center;
+    }
+    .node-btn:hover:not(:disabled) { border-color: var(--accent); }
+    .node-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .node-btn.fight { border-left: 4px solid var(--danger); }
+    .node-btn.rest { border-left: 4px solid #5a8b6a; }
+    .node-btn.shop { border-left: 4px solid var(--accent); }
+    .node-btn.boss { border-left: 4px solid #9a6ac4; font-weight: 600; }
+
+    /* Combat */
+    #combatView .combat-top {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+    .hero-strip {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .hero-strip img { width: 56px; height: 56px; border-radius: 8px; object-fit: cover; border: 2px solid var(--accent); }
+    .bars { font-size: 0.8rem; }
+    .bar-line { margin: 0.2rem 0; display: flex; align-items: center; gap: 0.35rem; }
+    .bar-line img { width: 18px; height: 18px; }
+    .enemy-box {
+      background: #15121c;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem;
+      min-width: 200px;
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+    .enemy-box img { width: 64px; height: 64px; object-fit: contain; border-radius: 6px; background: #0d0b12; }
+    .intent { font-size: 0.75rem; color: #f0c090; margin-top: 0.35rem; }
+    .energy-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      background: #1a3040;
+      color: var(--energy);
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+    .hand {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      min-height: 120px;
+      align-items: flex-end;
+      padding: 0.5rem 0;
+    }
+    .card {
+      width: 108px;
+      min-height: 140px;
+      border-radius: 8px;
+      border: 2px solid #5a5068;
+      padding: 0.45rem;
+      cursor: pointer;
+      font-size: 0.68rem;
+      line-height: 1.25;
+      transition: transform 0.1s, box-shadow 0.1s;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .card:hover:not(.disabled) { transform: translateY(-4px); box-shadow: 0 8px 20px #0008; }
+    .card.disabled { opacity: 0.35; cursor: not-allowed; }
+    .card.atk { background: linear-gradient(160deg, var(--card-atk), #1a1218); }
+    .card.skl { background: linear-gradient(160deg, var(--card-skl), #121a20); }
+    .card .cost { font-weight: 700; color: var(--energy); font-size: 0.85rem; }
+    .card .name { font-weight: 600; color: var(--text); margin: 0.25rem 0; }
+    .card .desc { color: var(--muted); }
+    .combat-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem; }
+    button.action {
       background: var(--border);
       color: var(--text);
       border: none;
-      padding: 0.45rem 0.85rem;
-      border-radius: 6px;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
       cursor: pointer;
-      font-size: 0.8rem;
+      font-size: 0.85rem;
     }
-    button:hover { filter: brightness(1.1); }
-    button:disabled { opacity: 0.45; cursor: not-allowed; }
+    button.action:hover:not(:disabled) { filter: brightness(1.12); }
+    button.action:disabled { opacity: 0.45; cursor: not-allowed; }
+    button.primary { background: #4a3d6a; border: 1px solid var(--accent); }
+
+    .log {
+      font-size: 0.72rem;
+      color: var(--muted);
+      max-height: 100px;
+      overflow-y: auto;
+      margin-top: 0.75rem;
+      border-top: 1px solid var(--border);
+      padding-top: 0.5rem;
+    }
+    .log p { margin: 0.15rem 0; }
+
+    /* Reward overlay */
+    #rewardOverlay {
+      position: fixed;
+      inset: 0;
+      background: #000c;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      padding: 1rem;
+    }
+    #rewardOverlay.hidden { display: none; }
+    .reward-box {
+      background: var(--panel);
+      border: 2px solid var(--accent);
+      border-radius: 12px;
+      padding: 1.25rem;
+      max-width: 420px;
+      width: 100%;
+    }
+    .reward-box h3 { margin: 0 0 1rem; font-size: 1rem; }
+    .reward-picks { display: flex; flex-direction: column; gap: 0.5rem; }
+    .reward-picks button { text-align: left; padding: 0.65rem; }
+
+    #gameOver {
+      text-align: center;
+      padding: 2rem;
+    }
     footer {
-      margin-top: 1.5rem;
-      font-size: 0.7rem;
+      margin-top: auto;
+      padding-top: 1rem;
+      font-size: 0.65rem;
       color: var(--muted);
       text-align: center;
       max-width: 720px;
@@ -176,299 +234,504 @@
 </head>
 <body>
   <header>
-    <img id="brandIcon" alt="" width="40" height="40" style="border-radius:8px" />
+    <img id="brandIcon" alt="" width="36" height="36" style="border-radius:8px" />
     <div>
-      <h1>クロノ・タクティクス（UI モック）</h1>
-      <span class="tag">アセット: bearko/mycryptoheroes（GitHub raw）</span>
+      <h1>クロノ・デッキ（UI モック）</h1>
+      <span class="tag">Slay the Spire 系ローグライク × カード / アセット: mycryptoheroes raw</span>
     </div>
   </header>
 
-  <div class="layout">
-    <div class="panel board-wrap">
-      <div class="resources" aria-label="リソース表示例">
-        <span class="res"><img alt="GUM" data-icon="gum" /> GUM 1,240</span>
-        <span class="res"><img alt="CP" data-icon="cp" /> CP 86</span>
-        <span class="res"><img alt="CE" data-icon="ce" /> CE 12.5k</span>
-        <span class="res"><img alt="" data-icon="emblem" /> エンブレム</span>
-      </div>
-      <p style="font-size:0.8rem;color:var(--muted);margin:0.75rem 0 0.5rem">
-        味方（緑枠）をクリックで選択 → 青枠マスに移動 / 赤枠の隣で「攻撃」
-      </p>
-      <div id="board" class="board" role="grid" aria-label="戦術盤6x6"></div>
-      <div class="btn-row">
-        <button type="button" id="btnAttack" disabled>攻撃（隣接敵）</button>
-        <button type="button" id="btnWait">待機</button>
-        <button type="button" id="btnEndTurn">敵ターンへ</button>
-      </div>
+  <div class="wrap">
+    <div class="resources" aria-label="ランリソース">
+      <span class="res"><img alt="GUM" data-icon="gum" /> <span id="goldVal">0</span></span>
+      <span class="res"><img alt="HP" data-stat="hp" /> <span id="hpMapVal">—</span></span>
+      <span class="res">層 <span id="layerVal">1</span> / 4</span>
     </div>
 
-    <div class="panel side-rail">
-      <h2>選択ユニット</h2>
-      <div id="detailEmpty" style="font-size:0.85rem;color:var(--muted)">ユニットを選択してください。</div>
-      <div id="detail" style="display:none">
-        <img id="detailImg" class="unit-portrait ally" alt="" width="72" height="72" style="width:72px;height:72px;margin-bottom:0.5rem" />
-        <div id="detailName" style="font-weight:600;margin-bottom:0.5rem"></div>
-        <div class="stat-row"><img alt="HP" data-stat="hp" /> <span id="stHp"></span></div>
-        <div class="stat-row"><img alt="PHY" data-stat="phy" /> <span id="stPhy"></span></div>
-        <div class="stat-row"><img alt="INT" data-stat="int" /> <span id="stInt"></span></div>
-        <div class="stat-row"><img alt="AGI" data-stat="buf_agi" /> <span id="stAgi"></span></div>
+    <div id="mapView" class="panel">
+      <p class="map-title">道を選ぶ（ノードをクリック）</p>
+      <div id="mapRows"></div>
+      <p style="font-size:0.75rem;color:var(--muted);margin:0.5rem 0 0">戦闘勝利でカード報酬とゴールド。休憩で HP 回復。店でカード購入（モック）。</p>
+    </div>
+
+    <div id="combatView" class="panel hidden">
+      <div class="combat-top">
+        <div>
+          <div class="hero-strip">
+            <img id="leaderImg" alt="" />
+            <div>
+              <div style="font-weight:600" id="leaderName">—</div>
+              <div class="bars">
+                <div class="bar-line"><img alt="" data-stat="hp" /> HP <span id="pHp">0</span> / <span id="pHpMax">0</span></div>
+                <div class="bar-line">🛡 ブロック <span id="pBlock">0</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="energy-pill">⚡ エナジー <span id="energyVal">0</span> / <span id="energyMax">3</span></div>
+        </div>
+        <div class="enemy-box">
+          <img id="enemyImg" alt="" />
+          <div>
+            <div style="font-weight:600" id="enemyName">—</div>
+            <div class="bar-line"><img alt="" data-stat="hp" /> <span id="eHp">0</span></div>
+            <div class="bar-line">🛡 <span id="eBlock">0</span></div>
+            <div class="intent" id="enemyIntent">—</div>
+          </div>
+        </div>
       </div>
-      <div class="log" id="log" aria-live="polite"></div>
+      <p style="font-size:0.75rem;color:var(--muted);margin:0 0 0.5rem">手札のカードをクリックでプレイ。エナジーが足りないカードは灰色。</p>
+      <div id="hand" class="hand" role="list"></div>
+      <div class="combat-actions">
+        <button type="button" class="action primary" id="btnEndTurn">ターン終了</button>
+      </div>
+      <div class="log" id="clog" aria-live="polite"></div>
+    </div>
+
+    <div id="shopView" class="panel hidden">
+      <p style="margin-top:0;font-weight:600;color:var(--accent)">店</p>
+      <p style="font-size:0.8rem;color:var(--muted)">ゴールドでカードを購入（簡易）。</p>
+      <div id="shopList" style="display:flex;flex-direction:column;gap:0.5rem;margin:1rem 0"></div>
+      <button type="button" class="action" id="btnLeaveShop">立ち去る</button>
+    </div>
+
+    <div id="gameOver" class="panel hidden">
+      <h2 style="margin:0 0 0.5rem">ラン終了</h2>
+      <p id="gameOverMsg" style="color:var(--muted)"></p>
+      <button type="button" class="action primary" id="btnRestart" style="margin-top:1rem">もう一度</button>
+    </div>
+  </div>
+
+  <div id="rewardOverlay" class="hidden" aria-hidden="true">
+    <div class="reward-box">
+      <h3>報酬：カードを 1 枚選ぶ（スキップ可）</h3>
+      <div class="reward-picks" id="rewardPicks"></div>
+      <button type="button" class="action" id="btnSkipReward" style="margin-top:0.75rem;width:100%">スキップ</button>
     </div>
   </div>
 
   <footer>
-    画像は <a href="https://github.com/bearko/mycryptoheroes" target="_blank" rel="noopener">bearko/mycryptoheroes</a> を参照。
-    本番利用前にライセンスを確認してください。企画の詳細は <code>docs/CHRONO_TACTICS_DESIGN.md</code> を参照。
+    企画: <code>docs/CHRONO_TACTICS_DESIGN.md</code> — 画像:
+    <a href="https://github.com/bearko/mycryptoheroes" target="_blank" rel="noopener">bearko/mycryptoheroes</a>
   </footer>
 
   <script>
     const BASE = "https://raw.githubusercontent.com/bearko/mycryptoheroes/main/";
     const img = (path) => BASE + path;
 
-    const UNITS = [
-      { id: "a1", side: "ally", heroId: 1001, nameJa: "コナン・ドイル", hp: 192, phy: 25, int: 69, agi: 138, x: 1, y: 4 },
-      { id: "a2", side: "ally", heroId: 1002, nameJa: "甲斐姫", hp: 162, phy: 79, int: 45, agi: 118, x: 0, y: 3 },
-      { id: "e1", side: "enemy", heroId: 1003, nameJa: "張遼（敵）", hp: 222, phy: 67, int: 62, agi: 93, x: 5, y: 2 },
-      { id: "e2", side: "enemy", heroId: 1004, nameJa: "シートン（敵）", hp: 345, phy: 66, int: 69, agi: 46, x: 4, y: 4 },
-    ];
+    const LEADER = { heroId: 1002, nameJa: "甲斐姫", hpMax: 70, img: () => img("Image/Heroes/1002.png") };
+    const ENEMY_IMG = (id) => img("Image/Enemies/" + id + ".png");
 
-    let selectedId = null;
-    let phase = "ally";
-    const W = 6, H = 6;
+    /** @typedef {{ id: string, name: string, cost: number, type: 'atk'|'skl', text: string, play: (s: any) => void }} CardDef */
 
-    function heroPortrait(id) {
-      return img("Image/Heroes/" + id + ".png");
+    function shuffle(a) {
+      const arr = a.slice();
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
     }
 
-    function logLine(msg) {
-      const el = document.getElementById("log");
+    const CARD_LIBRARY = {
+      strike: {
+        id: "strike", name: "突撃", cost: 1, type: "atk", text: "敵に 6 ダメージ",
+        play(s) { dealDamage(s, 6); },
+      },
+      defend: {
+        id: "defend", name: "堅陣", cost: 1, type: "skl", text: "ブロック +5",
+        play(s) { s.playerBlock += 5; clog("ブロック +5"); },
+      },
+      read: {
+        id: "read", name: "読破", cost: 1, type: "skl", text: "カードを 2 枚引く",
+        play(s) { drawCards(s, 2); },
+      },
+      bash: {
+        id: "bash", name: "喝采", cost: 2, type: "atk", text: "10 ダメージ。敵に脆弱（次の攻撃 +4）",
+        play(s) {
+          dealDamage(s, 10);
+          s.enemyVulnerable = 4;
+          clog("敵に脆弱を付与");
+        },
+      },
+      tact: {
+        id: "tact", name: "奇策", cost: 1, type: "skl", text: "ブロック 3。次ターンエナジー +1",
+        play(s) {
+          s.playerBlock += 3;
+          s.bonusEnergyNext = (s.bonusEnergyNext || 0) + 1;
+          clog("ブロック +3、次ターン +⚡1");
+        },
+      },
+    };
+
+    function dealDamage(s, base) {
+      let v = base + (s.enemyVulnerable || 0);
+      s.enemyVulnerable = 0;
+      const blocked = Math.min(s.enemyBlock, v);
+      s.enemyBlock -= blocked;
+      v -= blocked;
+      s.enemyHp = Math.max(0, s.enemyHp - v);
+      clog(blocked ? `敵に ${v} ダメージ（ブロックで ${blocked} 軽減）` : `敵に ${v} ダメージ`);
+    }
+
+    function drawCards(s, n) {
+      for (let i = 0; i < n; i++) {
+        if (!s.drawPile.length) {
+          if (!s.discardPile.length) break;
+          s.drawPile = shuffle(s.discardPile);
+          s.discardPile = [];
+          clog("捨て札をシャッフルして山に");
+        }
+        if (!s.drawPile.length) break;
+        s.hand.push(s.drawPile.pop());
+      }
+    }
+
+    function clog(msg) {
+      const el = document.getElementById("clog");
       const p = document.createElement("p");
       p.textContent = msg;
       el.insertBefore(p, el.firstChild);
     }
 
-    function unitAt(x, y) {
-      return UNITS.find((u) => u.x === x && u.y === y && u.hp > 0);
+    function makeStarterDeck() {
+      const d = [];
+      for (let i = 0; i < 5; i++) d.push({ ...CARD_LIBRARY.strike });
+      for (let i = 0; i < 4; i++) d.push({ ...CARD_LIBRARY.defend });
+      d.push({ ...CARD_LIBRARY.read });
+      return shuffle(d);
     }
 
-    function manhattan(a, b) {
-      return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
-    }
+    const MAP_LAYERS = [
+      { label: "第1層", nodes: [{ type: "fight", label: "遭遇戦" }, { type: "fight", label: "遭遇戦" }] },
+      { label: "第2層", nodes: [{ type: "fight", label: "遭遇戦" }, { type: "rest", label: "篝火" }] },
+      { label: "第3層", nodes: [{ type: "shop", label: "店" }, { type: "fight", label: "強敵", elite: true }] },
+      { label: "ボス", nodes: [{ type: "boss", label: "ボス戦" }] },
+    ];
 
-    function getSelected() {
-      return UNITS.find((u) => u.id === selectedId);
-    }
+    let gold = 75;
+    let layerIndex = 0;
+    let view = "map";
+    /** @type {null | { deck: any[], playerHp: number, playerHpMax: number }} */
+    let runState = null;
+    let combat = null;
 
-    function adjacentEnemies(u) {
-      return UNITS.filter(
-        (e) => e.side === "enemy" && e.hp > 0 && manhattan(u, e) === 1
-      );
-    }
-
-    function renderBoard() {
-      const board = document.getElementById("board");
-      board.innerHTML = "";
-      const sel = getSelected();
-      const moveCells = new Set();
-      const atkCells = new Set();
-      if (sel && sel.side === "ally" && phase === "ally" && sel.hp > 0) {
-        for (let dy = -1; dy <= 1; dy++) {
-          for (let dx = -1; dx <= 1; dx++) {
-            if (Math.abs(dx) + Math.abs(dy) !== 1) continue;
-            const nx = sel.x + dx, ny = sel.y + dy;
-            if (nx < 0 || nx >= W || ny < 0 || ny >= H) continue;
-            if (!unitAt(nx, ny)) moveCells.add(nx + "," + ny);
-          }
-        }
-        adjacentEnemies(sel).forEach((e) => atkCells.add(e.x + "," + e.y));
+    function ensureRunState() {
+      if (!runState) {
+        runState = {
+          deck: makeStarterDeck(),
+          playerHp: LEADER.hpMax,
+          playerHpMax: LEADER.hpMax,
+        };
       }
-
-      for (let y = 0; y < H; y++) {
-        for (let x = 0; x < W; x++) {
-          const cell = document.createElement("div");
-          cell.className = "cell";
-          cell.dataset.x = x;
-          cell.dataset.y = y;
-          const key = x + "," + y;
-          if (sel && sel.x === x && sel.y === y) cell.classList.add("selected-tile");
-          if (moveCells.has(key)) cell.classList.add("move-range");
-          if (atkCells.has(key)) cell.classList.add("attack-range");
-
-          const u = unitAt(x, y);
-          if (u) {
-            const im = document.createElement("img");
-            im.className = "unit-portrait " + (u.side === "ally" ? "ally" : "enemy");
-            im.src = heroPortrait(u.heroId);
-            im.alt = u.nameJa;
-            cell.appendChild(im);
-          }
-
-          cell.addEventListener("click", () => onCellClick(x, y));
-          board.appendChild(cell);
-        }
-      }
-      updateButtons();
     }
 
-    function updateDetail() {
-      const u = getSelected();
-      const empty = document.getElementById("detailEmpty");
-      const detail = document.getElementById("detail");
-      if (!u || u.side !== "ally") {
-        empty.style.display = u && u.side === "enemy" ? "none" : "block";
-        detail.style.display = u && u.side === "enemy" ? "block" : "none";
-        if (u && u.side === "enemy") {
-          document.getElementById("detailImg").src = heroPortrait(u.heroId);
-          document.getElementById("detailImg").className = "unit-portrait enemy";
-          document.getElementById("detailName").textContent = u.nameJa + "（敵）";
-          document.getElementById("stHp").textContent = "HP " + u.hp;
-          document.getElementById("stPhy").textContent = "PHY " + u.phy;
-          document.getElementById("stInt").textContent = "INT " + u.int;
-          document.getElementById("stAgi").textContent = "AGI " + u.agi;
-        } else if (!u) {
-          detail.style.display = "none";
-          empty.style.display = "block";
-        }
+    function syncResources() {
+      document.getElementById("goldVal").textContent = String(gold);
+      document.getElementById("layerVal").textContent =
+        layerIndex < MAP_LAYERS.length ? String(layerIndex + 1) : "クリア";
+      ensureRunState();
+      document.getElementById("hpMapVal").textContent =
+        `${runState.playerHp}/${runState.playerHpMax}`;
+    }
+
+    function renderMap() {
+      const host = document.getElementById("mapRows");
+      host.innerHTML = "";
+      if (layerIndex >= MAP_LAYERS.length) {
+        host.innerHTML =
+          "<p style='color:var(--accent);margin:0 0 0.75rem'>このランをクリアしました。</p>" +
+          "<button type='button' class='action primary' id='btnRestartClear'>もう一度</button>";
+        document.getElementById("btnRestartClear").addEventListener("click", resetRun);
+        syncResources();
         return;
       }
-      empty.style.display = "none";
-      detail.style.display = "block";
-      document.getElementById("detailImg").src = heroPortrait(u.heroId);
-      document.getElementById("detailImg").className = "unit-portrait ally";
-      document.getElementById("detailName").textContent = u.nameJa;
-      document.getElementById("stHp").textContent = "HP " + u.hp;
-      document.getElementById("stPhy").textContent = "PHY " + u.phy;
-      document.getElementById("stInt").textContent = "INT " + u.int;
-      document.getElementById("stAgi").textContent = "AGI " + u.agi;
+      const layer = MAP_LAYERS[layerIndex];
+      const row = document.createElement("div");
+      row.className = "map-row";
+      const lab = document.createElement("span");
+      lab.className = "map-row-label";
+      lab.textContent = layer.label;
+      row.appendChild(lab);
+      layer.nodes.forEach((node, idx) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "node-btn " + (node.type === "fight" ? "fight" : node.type === "rest" ? "rest" : node.type === "shop" ? "shop" : "boss");
+        b.textContent = node.label;
+        b.addEventListener("click", () => enterNode(node));
+        row.appendChild(b);
+      });
+      host.appendChild(row);
+      syncResources();
     }
 
-    function updateButtons() {
-      const sel = getSelected();
-      const atk = document.getElementById("btnAttack");
-      const canAct = phase === "ally" && sel && sel.side === "ally" && sel.hp > 0;
-      atk.disabled = !canAct || adjacentEnemies(sel).length === 0;
+    function showView(name) {
+      view = name;
+      document.getElementById("mapView").classList.toggle("hidden", name !== "map");
+      document.getElementById("combatView").classList.toggle("hidden", name !== "combat");
+      document.getElementById("shopView").classList.toggle("hidden", name !== "shop");
+      document.getElementById("gameOver").classList.toggle("hidden", name !== "over");
     }
 
-    function onCellClick(x, y) {
-      const clicked = unitAt(x, y);
-      if (phase !== "ally") return;
-
-      if (clicked && clicked.side === "ally" && clicked.hp > 0) {
-        selectedId = clicked.id;
-        renderBoard();
-        updateDetail();
-        logLine(clicked.nameJa + " を選択");
+    function enterNode(node) {
+      if (node.type === "rest") {
+        ensureRunState();
+        const heal = Math.floor(runState.playerHpMax * 0.35);
+        runState.playerHp = Math.min(runState.playerHpMax, runState.playerHp + heal);
+        layerIndex++;
+        renderMap();
         return;
       }
-
-      const sel = getSelected();
-      if (!sel || sel.side !== "ally" || sel.hp <= 0) return;
-
-      if (!clicked && manhattan(sel, { x, y }) === 1) {
-        sel.x = x;
-        sel.y = y;
-        logLine(sel.nameJa + " が移動しました (" + x + "," + y + ")");
-        renderBoard();
-        updateDetail();
+      if (node.type === "shop") {
+        openShop();
         return;
       }
+      startCombat(node.elite, node.type === "boss");
+    }
 
-      if (clicked && clicked.side === "enemy" && manhattan(sel, clicked) === 1) {
-        const dmg = Math.floor(sel.phy * 0.8 + sel.int * 0.2);
-        clicked.hp = Math.max(0, clicked.hp - dmg);
-        logLine(sel.nameJa + " の攻撃 → " + clicked.nameJa + " に " + dmg + " ダメージ");
-        if (clicked.hp <= 0) logLine(clicked.nameJa + " を撃破");
-        renderBoard();
-        updateDetail();
+    function startCombat(elite, boss) {
+      ensureRunState();
+      const deck = runState.deck.map((c) => ({ ...c }));
+      const playerHpMax = runState.playerHpMax;
+      const playerHp = runState.playerHp;
+      const enemyHp = boss ? 72 : elite ? 48 : 32;
+      const enemyId = boss ? 505 : elite ? 418 : 314;
+      combat = {
+        deck,
+        drawPile: [],
+        discardPile: [],
+        hand: [],
+        playerHp,
+        playerHpMax,
+        playerBlock: 0,
+        energy: 3,
+        energyMax: 3,
+        enemyHp,
+        enemyHpMax: enemyHp,
+        enemyBlock: 0,
+        enemyVulnerable: 0,
+        bonusEnergyNext: 0,
+        enemyIntent: { kind: "attack", value: boss ? 14 : elite ? 10 : 7 },
+        turn: 1,
+        elite: !!elite,
+        boss: !!boss,
+        enemyName: boss ? "門番：影の軍勢" : elite ? "精鋭" : "斥候",
+        enemyImgId: enemyId,
+      };
+      combat.drawPile = shuffle(combat.deck.map((c) => ({ ...c })));
+      showView("combat");
+      document.getElementById("leaderImg").src = LEADER.img();
+      document.getElementById("leaderName").textContent = LEADER.nameJa;
+      document.getElementById("enemyImg").src = ENEMY_IMG(enemyId);
+      document.getElementById("enemyName").textContent = combat.enemyName;
+      document.getElementById("clog").innerHTML = "";
+      clog(boss ? "ボス戦開始！" : "戦闘開始");
+      startPlayerTurn();
+    }
+
+    function intentText() {
+      const it = combat.enemyIntent;
+      if (it.kind === "attack") return "次の意図: 攻撃 " + it.value;
+      if (it.kind === "block") return "次の意図: ブロック " + it.value + " → 次に攻撃";
+      return "—";
+    }
+
+    function rollNextIntent() {
+      const r = Math.random();
+      if (combat.boss) {
+        combat.enemyIntent = r < 0.5
+          ? { kind: "attack", value: 12 + Math.floor(Math.random() * 6) }
+          : { kind: "block", value: 10 };
+      } else {
+        combat.enemyIntent = r < 0.55
+          ? { kind: "attack", value: 5 + Math.floor(Math.random() * 6) }
+          : { kind: "block", value: 6 };
       }
     }
 
-    document.getElementById("btnAttack").addEventListener("click", () => {
-      const sel = getSelected();
-      if (!sel || phase !== "ally") return;
-      const foes = adjacentEnemies(sel);
-      if (!foes.length) return;
-      const t = foes[0];
-      const dmg = Math.floor(sel.phy * 0.9 + 10);
-      t.hp = Math.max(0, t.hp - dmg);
-      logLine(sel.nameJa + " の攻撃 → " + t.nameJa + " に " + dmg + " ダメージ");
-      if (t.hp <= 0) logLine(t.nameJa + " を撃破");
-      renderBoard();
-      updateDetail();
-    });
+    function startPlayerTurn() {
+      combat.playerBlock = 0;
+      combat.energy = combat.energyMax + (combat.bonusEnergyNext || 0);
+      combat.bonusEnergyNext = 0;
+      drawCards(combat, 5);
+      rollNextIntent();
+      renderCombat();
+    }
 
-    document.getElementById("btnWait").addEventListener("click", () => {
-      const sel = getSelected();
-      if (sel && phase === "ally") logLine((sel.nameJa || "ユニット") + " は待機");
-    });
+    function renderCombat() {
+      document.getElementById("pHp").textContent = String(combat.playerHp);
+      document.getElementById("pHpMax").textContent = String(combat.playerHpMax);
+      document.getElementById("pBlock").textContent = String(combat.playerBlock);
+      document.getElementById("eHp").textContent = String(combat.enemyHp) + " / " + String(combat.enemyHpMax);
+      document.getElementById("eBlock").textContent = String(combat.enemyBlock);
+      document.getElementById("energyVal").textContent = String(combat.energy);
+      document.getElementById("energyMax").textContent = String(combat.energyMax);
+      document.getElementById("enemyIntent").textContent = intentText();
+      const handEl = document.getElementById("hand");
+      handEl.innerHTML = "";
+      combat.hand.forEach((card, idx) => {
+        const el = document.createElement("div");
+        el.className = "card " + card.type + (card.cost > combat.energy ? " disabled" : "");
+        el.innerHTML = `<div><span class="cost">${card.cost}</span> <span class="name">${card.name}</span></div><div class="desc">${card.text}</div>`;
+        el.addEventListener("click", () => playCard(idx));
+        handEl.appendChild(el);
+      });
+      syncResources();
+    }
+
+    function playCard(idx) {
+      const card = combat.hand[idx];
+      if (!card || card.cost > combat.energy) return;
+      combat.energy -= card.cost;
+      combat.hand.splice(idx, 1);
+      combat.discardPile.push(card);
+      card.play(combat);
+      if (combat.enemyHp <= 0) {
+        endCombatWin();
+        return;
+      }
+      renderCombat();
+    }
+
+    function enemyTurn() {
+      const it = combat.enemyIntent;
+      if (it.kind === "attack") {
+        let dmg = it.value;
+        const blk = Math.min(combat.playerBlock, dmg);
+        combat.playerBlock -= blk;
+        dmg -= blk;
+        combat.playerHp -= dmg;
+        clog(`敵の攻撃 → ${dmg} ダメージ` + (blk ? `（ブロック ${blk}）` : ""));
+      } else {
+        combat.enemyBlock += it.value;
+        clog("敵はブロックを構えた");
+      }
+      if (combat.playerHp <= 0) {
+        endCombatLoss();
+        return;
+      }
+      combat.turn++;
+      startPlayerTurn();
+    }
 
     document.getElementById("btnEndTurn").addEventListener("click", () => {
-      if (phase === "ally") {
-        phase = "enemy";
-        logLine("--- 敵ターン（簡易 AI）---");
-        const enemies = UNITS.filter((u) => u.side === "enemy" && u.hp > 0);
-        const allies = UNITS.filter((u) => u.side === "ally" && u.hp > 0);
-        enemies.forEach((e) => {
-          if (!allies.length) return;
-          let target = allies[0];
-          let best = 999;
-          allies.forEach((a) => {
-            const d = manhattan(e, a);
-            if (d < best) {
-              best = d;
-              target = a;
-            }
-          });
-          if (best === 1) {
-            const dmg = Math.floor(e.phy * 0.75);
-            target.hp = Math.max(0, target.hp - dmg);
-            logLine(e.nameJa + " の反撃 → " + target.nameJa + " に " + dmg);
-          } else {
-            const dx = target.x > e.x ? 1 : target.x < e.x ? -1 : 0;
-            const dy = target.y > e.y ? 1 : target.y < e.y ? -1 : 0;
-            let nx = e.x + dx, ny = e.y + dy;
-            if (nx < 0 || nx >= W) nx = e.x;
-            if (ny < 0 || ny >= H) ny = e.y;
-            if (!unitAt(nx, ny)) {
-              e.x = nx;
-              e.y = ny;
-              logLine(e.nameJa + " が接近");
-            }
-          }
-        });
-        phase = "ally";
-        selectedId = UNITS.find((u) => u.side === "ally" && u.hp > 0)?.id || null;
-        logLine("--- 味方ターン ---");
-        renderBoard();
-        updateDetail();
-      }
+      if (!combat || view !== "combat") return;
+      combat.hand.forEach((c) => combat.discardPile.push(c));
+      combat.hand = [];
+      renderCombat();
+      enemyTurn();
     });
+
+    function endCombatWin() {
+      gold += combat.boss ? 100 : combat.elite ? 45 : 28;
+      clog("勝利！");
+      const pool = shuffle(["bash", "tact", "read", "strike", "defend"]);
+      const picks = pool.slice(0, 3).map((k) => CARD_LIBRARY[k]);
+      const overlay = document.getElementById("rewardOverlay");
+      const box = document.getElementById("rewardPicks");
+      box.innerHTML = "";
+      picks.forEach((def) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "node-btn";
+        b.style.borderLeftColor = "var(--accent)";
+        b.textContent = `${def.name} (${def.cost}) — ${def.text}`;
+        b.addEventListener("click", () => {
+          if (combat) combat.deck.push({ ...def });
+          closeReward();
+          advanceAfterNode();
+        });
+        box.appendChild(b);
+      });
+      overlay.classList.remove("hidden");
+      overlay.setAttribute("aria-hidden", "false");
+    }
+
+    function closeReward() {
+      const overlay = document.getElementById("rewardOverlay");
+      overlay.classList.add("hidden");
+      overlay.setAttribute("aria-hidden", "true");
+    }
+
+    document.getElementById("btnSkipReward").addEventListener("click", () => {
+      closeReward();
+      advanceAfterNode();
+    });
+
+    function advanceAfterNode() {
+      if (combat) {
+        runState.playerHp = combat.playerHp;
+        runState.playerHpMax = combat.playerHpMax;
+        runState.deck = combat.deck.map((c) => ({ ...c }));
+        combat = null;
+      }
+      layerIndex++;
+      showView("map");
+      renderMap();
+    }
+
+    function endCombatLoss() {
+      showView("over");
+      document.getElementById("gameOverMsg").textContent = "HP が 0 になりました。デッキとマップの立ち回りを調整して再挑戦しよう。";
+      combat = null;
+      runState = null;
+    }
+
+    function openShop() {
+      showView("shop");
+      const list = document.getElementById("shopList");
+      list.innerHTML = "";
+      const offers = [
+        { name: "喝采（カード）", price: 95, key: "bash" },
+        { name: "奇策（カード）", price: 85, key: "tact" },
+        { name: "突撃（カード）", price: 45, key: "strike" },
+      ];
+      offers.forEach((o) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "node-btn shop";
+        b.style.width = "100%";
+        b.textContent = `${o.name} — ${o.price} GUM`;
+        b.addEventListener("click", () => {
+          if (gold < o.price) return;
+          gold -= o.price;
+          ensureRunState();
+          runState.deck.push({ ...CARD_LIBRARY[o.key] });
+          b.disabled = true;
+          syncResources();
+        });
+        list.appendChild(b);
+      });
+    }
+
+    document.getElementById("btnLeaveShop").addEventListener("click", () => {
+      layerIndex++;
+      showView("map");
+      renderMap();
+    });
+
+    function resetRun() {
+      gold = 75;
+      layerIndex = 0;
+      combat = null;
+      runState = null;
+      closeReward();
+      showView("map");
+      renderMap();
+    }
+    document.getElementById("btnRestart").addEventListener("click", resetRun);
 
     document.querySelectorAll("[data-icon]").forEach((el) => {
       const key = el.getAttribute("data-icon");
-      const paths = {
-        gum: "Image/Icons/gum.png",
-        cp: "Image/Icons/cp.png",
-        ce: "Image/Icons/ce.png",
-        emblem: "Image/Icons/emblem.webp",
-      };
+      const paths = { gum: "Image/Icons/gum.png", cp: "Image/Icons/cp.png", ce: "Image/Icons/ce.png" };
       el.src = img(paths[key]);
     });
-
     document.querySelectorAll("[data-stat]").forEach((el) => {
-      const key = el.getAttribute("data-stat");
-      const sub = key === "hp" || key === "phy" || key === "int" ? "Parameters" : "Buffs";
-      const file = key === "buf_agi" ? "buf_agi.png" : key + ".png";
-      el.src = img("Image/BattleIcons/" + sub + "/" + file);
+      el.src = img("Image/BattleIcons/Parameters/" + el.getAttribute("data-stat") + ".png");
     });
-
     document.getElementById("brandIcon").src = img("Image/Icons/mch_icon.png");
 
-    logLine("モック起動: 味方を選んで移動・攻撃を試してください。");
-    selectedId = "a1";
-    renderBoard();
-    updateDetail();
+    showView("map");
+    renderMap();
   </script>
 </body>
 </html>
