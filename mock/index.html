@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>クロノ・タクティクス（モック）</title>
+  <link rel="preconnect" href="https://raw.githubusercontent.com" />
+  <style>
+    :root {
+      --bg: #1a1510;
+      --panel: #2d261c;
+      --border: #5c4d32;
+      --text: #e8dcc8;
+      --muted: #9a8b6f;
+      --accent: #c9a227;
+      --ally: #3d6b4a;
+      --enemy: #8b3a3a;
+      --tile: #3a3428;
+      --tile-hover: #4a4334;
+      --selected: #c9a22744;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", "Hiragino Sans", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1rem;
+    }
+    header {
+      width: 100%;
+      max-width: 960px;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+    header .tag {
+      font-size: 0.75rem;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+    }
+    .layout {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+      justify-content: center;
+      align-items: flex-start;
+      max-width: 960px;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+    }
+    .resources {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .resources .res {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    .resources img { width: 22px; height: 22px; object-fit: contain; }
+    .board-wrap {
+      padding: 0.5rem;
+    }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(6, 52px);
+      grid-template-rows: repeat(6, 52px);
+      gap: 3px;
+      background: #0d0b08;
+      padding: 4px;
+      border-radius: 6px;
+    }
+    .cell {
+      width: 52px;
+      height: 52px;
+      background: var(--tile);
+      border-radius: 4px;
+      cursor: pointer;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.12s;
+    }
+    .cell:hover { background: var(--tile-hover); }
+    .cell.move-range { outline: 2px solid var(--accent); outline-offset: -2px; }
+    .cell.attack-range { outline: 2px dashed #e07050; outline-offset: -2px; }
+    .cell.selected-tile { background: var(--selected); }
+    .unit-portrait {
+      width: 44px;
+      height: 44px;
+      border-radius: 4px;
+      object-fit: cover;
+      border: 2px solid var(--border);
+      image-rendering: pixelated;
+    }
+    .unit-portrait.ally { border-color: #5a9a6a; }
+    .unit-portrait.enemy { border-color: #c45c5c; }
+    .side-rail {
+      min-width: 280px;
+      max-width: 320px;
+    }
+    .side-rail h2 {
+      margin: 0 0 0.75rem;
+      font-size: 0.95rem;
+      color: var(--accent);
+    }
+    .stat-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0.35rem 0;
+      font-size: 0.8rem;
+    }
+    .stat-row img { width: 20px; height: 20px; }
+    .log {
+      font-size: 0.75rem;
+      color: var(--muted);
+      max-height: 140px;
+      overflow-y: auto;
+      line-height: 1.45;
+      margin-top: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--border);
+    }
+    .log p { margin: 0.25rem 0; }
+    .btn-row {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 0.75rem;
+    }
+    button {
+      background: var(--border);
+      color: var(--text);
+      border: none;
+      padding: 0.45rem 0.85rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+    button:hover { filter: brightness(1.1); }
+    button:disabled { opacity: 0.45; cursor: not-allowed; }
+    footer {
+      margin-top: 1.5rem;
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-align: center;
+      max-width: 720px;
+    }
+    footer a { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <header>
+    <img id="brandIcon" alt="" width="40" height="40" style="border-radius:8px" />
+    <div>
+      <h1>クロノ・タクティクス（UI モック）</h1>
+      <span class="tag">アセット: bearko/mycryptoheroes（GitHub raw）</span>
+    </div>
+  </header>
+
+  <div class="layout">
+    <div class="panel board-wrap">
+      <div class="resources" aria-label="リソース表示例">
+        <span class="res"><img alt="GUM" data-icon="gum" /> GUM 1,240</span>
+        <span class="res"><img alt="CP" data-icon="cp" /> CP 86</span>
+        <span class="res"><img alt="CE" data-icon="ce" /> CE 12.5k</span>
+        <span class="res"><img alt="" data-icon="emblem" /> エンブレム</span>
+      </div>
+      <p style="font-size:0.8rem;color:var(--muted);margin:0.75rem 0 0.5rem">
+        味方（緑枠）をクリックで選択 → 青枠マスに移動 / 赤枠の隣で「攻撃」
+      </p>
+      <div id="board" class="board" role="grid" aria-label="戦術盤6x6"></div>
+      <div class="btn-row">
+        <button type="button" id="btnAttack" disabled>攻撃（隣接敵）</button>
+        <button type="button" id="btnWait">待機</button>
+        <button type="button" id="btnEndTurn">敵ターンへ</button>
+      </div>
+    </div>
+
+    <div class="panel side-rail">
+      <h2>選択ユニット</h2>
+      <div id="detailEmpty" style="font-size:0.85rem;color:var(--muted)">ユニットを選択してください。</div>
+      <div id="detail" style="display:none">
+        <img id="detailImg" class="unit-portrait ally" alt="" width="72" height="72" style="width:72px;height:72px;margin-bottom:0.5rem" />
+        <div id="detailName" style="font-weight:600;margin-bottom:0.5rem"></div>
+        <div class="stat-row"><img alt="HP" data-stat="hp" /> <span id="stHp"></span></div>
+        <div class="stat-row"><img alt="PHY" data-stat="phy" /> <span id="stPhy"></span></div>
+        <div class="stat-row"><img alt="INT" data-stat="int" /> <span id="stInt"></span></div>
+        <div class="stat-row"><img alt="AGI" data-stat="buf_agi" /> <span id="stAgi"></span></div>
+      </div>
+      <div class="log" id="log" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <footer>
+    画像は <a href="https://github.com/bearko/mycryptoheroes" target="_blank" rel="noopener">bearko/mycryptoheroes</a> を参照。
+    本番利用前にライセンスを確認してください。企画の詳細は <code>docs/CHRONO_TACTICS_DESIGN.md</code> を参照。
+  </footer>
+
+  <script>
+    const BASE = "https://raw.githubusercontent.com/bearko/mycryptoheroes/main/";
+    const img = (path) => BASE + path;
+
+    const UNITS = [
+      { id: "a1", side: "ally", heroId: 1001, nameJa: "コナン・ドイル", hp: 192, phy: 25, int: 69, agi: 138, x: 1, y: 4 },
+      { id: "a2", side: "ally", heroId: 1002, nameJa: "甲斐姫", hp: 162, phy: 79, int: 45, agi: 118, x: 0, y: 3 },
+      { id: "e1", side: "enemy", heroId: 1003, nameJa: "張遼（敵）", hp: 222, phy: 67, int: 62, agi: 93, x: 5, y: 2 },
+      { id: "e2", side: "enemy", heroId: 1004, nameJa: "シートン（敵）", hp: 345, phy: 66, int: 69, agi: 46, x: 4, y: 4 },
+    ];
+
+    let selectedId = null;
+    let phase = "ally";
+    const W = 6, H = 6;
+
+    function heroPortrait(id) {
+      return img("Image/Heroes/" + id + ".png");
+    }
+
+    function logLine(msg) {
+      const el = document.getElementById("log");
+      const p = document.createElement("p");
+      p.textContent = msg;
+      el.insertBefore(p, el.firstChild);
+    }
+
+    function unitAt(x, y) {
+      return UNITS.find((u) => u.x === x && u.y === y && u.hp > 0);
+    }
+
+    function manhattan(a, b) {
+      return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+    }
+
+    function getSelected() {
+      return UNITS.find((u) => u.id === selectedId);
+    }
+
+    function adjacentEnemies(u) {
+      return UNITS.filter(
+        (e) => e.side === "enemy" && e.hp > 0 && manhattan(u, e) === 1
+      );
+    }
+
+    function renderBoard() {
+      const board = document.getElementById("board");
+      board.innerHTML = "";
+      const sel = getSelected();
+      const moveCells = new Set();
+      const atkCells = new Set();
+      if (sel && sel.side === "ally" && phase === "ally" && sel.hp > 0) {
+        for (let dy = -1; dy <= 1; dy++) {
+          for (let dx = -1; dx <= 1; dx++) {
+            if (Math.abs(dx) + Math.abs(dy) !== 1) continue;
+            const nx = sel.x + dx, ny = sel.y + dy;
+            if (nx < 0 || nx >= W || ny < 0 || ny >= H) continue;
+            if (!unitAt(nx, ny)) moveCells.add(nx + "," + ny);
+          }
+        }
+        adjacentEnemies(sel).forEach((e) => atkCells.add(e.x + "," + e.y));
+      }
+
+      for (let y = 0; y < H; y++) {
+        for (let x = 0; x < W; x++) {
+          const cell = document.createElement("div");
+          cell.className = "cell";
+          cell.dataset.x = x;
+          cell.dataset.y = y;
+          const key = x + "," + y;
+          if (sel && sel.x === x && sel.y === y) cell.classList.add("selected-tile");
+          if (moveCells.has(key)) cell.classList.add("move-range");
+          if (atkCells.has(key)) cell.classList.add("attack-range");
+
+          const u = unitAt(x, y);
+          if (u) {
+            const im = document.createElement("img");
+            im.className = "unit-portrait " + (u.side === "ally" ? "ally" : "enemy");
+            im.src = heroPortrait(u.heroId);
+            im.alt = u.nameJa;
+            cell.appendChild(im);
+          }
+
+          cell.addEventListener("click", () => onCellClick(x, y));
+          board.appendChild(cell);
+        }
+      }
+      updateButtons();
+    }
+
+    function updateDetail() {
+      const u = getSelected();
+      const empty = document.getElementById("detailEmpty");
+      const detail = document.getElementById("detail");
+      if (!u || u.side !== "ally") {
+        empty.style.display = u && u.side === "enemy" ? "none" : "block";
+        detail.style.display = u && u.side === "enemy" ? "block" : "none";
+        if (u && u.side === "enemy") {
+          document.getElementById("detailImg").src = heroPortrait(u.heroId);
+          document.getElementById("detailImg").className = "unit-portrait enemy";
+          document.getElementById("detailName").textContent = u.nameJa + "（敵）";
+          document.getElementById("stHp").textContent = "HP " + u.hp;
+          document.getElementById("stPhy").textContent = "PHY " + u.phy;
+          document.getElementById("stInt").textContent = "INT " + u.int;
+          document.getElementById("stAgi").textContent = "AGI " + u.agi;
+        } else if (!u) {
+          detail.style.display = "none";
+          empty.style.display = "block";
+        }
+        return;
+      }
+      empty.style.display = "none";
+      detail.style.display = "block";
+      document.getElementById("detailImg").src = heroPortrait(u.heroId);
+      document.getElementById("detailImg").className = "unit-portrait ally";
+      document.getElementById("detailName").textContent = u.nameJa;
+      document.getElementById("stHp").textContent = "HP " + u.hp;
+      document.getElementById("stPhy").textContent = "PHY " + u.phy;
+      document.getElementById("stInt").textContent = "INT " + u.int;
+      document.getElementById("stAgi").textContent = "AGI " + u.agi;
+    }
+
+    function updateButtons() {
+      const sel = getSelected();
+      const atk = document.getElementById("btnAttack");
+      const canAct = phase === "ally" && sel && sel.side === "ally" && sel.hp > 0;
+      atk.disabled = !canAct || adjacentEnemies(sel).length === 0;
+    }
+
+    function onCellClick(x, y) {
+      const clicked = unitAt(x, y);
+      if (phase !== "ally") return;
+
+      if (clicked && clicked.side === "ally" && clicked.hp > 0) {
+        selectedId = clicked.id;
+        renderBoard();
+        updateDetail();
+        logLine(clicked.nameJa + " を選択");
+        return;
+      }
+
+      const sel = getSelected();
+      if (!sel || sel.side !== "ally" || sel.hp <= 0) return;
+
+      if (!clicked && manhattan(sel, { x, y }) === 1) {
+        sel.x = x;
+        sel.y = y;
+        logLine(sel.nameJa + " が移動しました (" + x + "," + y + ")");
+        renderBoard();
+        updateDetail();
+        return;
+      }
+
+      if (clicked && clicked.side === "enemy" && manhattan(sel, clicked) === 1) {
+        const dmg = Math.floor(sel.phy * 0.8 + sel.int * 0.2);
+        clicked.hp = Math.max(0, clicked.hp - dmg);
+        logLine(sel.nameJa + " の攻撃 → " + clicked.nameJa + " に " + dmg + " ダメージ");
+        if (clicked.hp <= 0) logLine(clicked.nameJa + " を撃破");
+        renderBoard();
+        updateDetail();
+      }
+    }
+
+    document.getElementById("btnAttack").addEventListener("click", () => {
+      const sel = getSelected();
+      if (!sel || phase !== "ally") return;
+      const foes = adjacentEnemies(sel);
+      if (!foes.length) return;
+      const t = foes[0];
+      const dmg = Math.floor(sel.phy * 0.9 + 10);
+      t.hp = Math.max(0, t.hp - dmg);
+      logLine(sel.nameJa + " の攻撃 → " + t.nameJa + " に " + dmg + " ダメージ");
+      if (t.hp <= 0) logLine(t.nameJa + " を撃破");
+      renderBoard();
+      updateDetail();
+    });
+
+    document.getElementById("btnWait").addEventListener("click", () => {
+      const sel = getSelected();
+      if (sel && phase === "ally") logLine((sel.nameJa || "ユニット") + " は待機");
+    });
+
+    document.getElementById("btnEndTurn").addEventListener("click", () => {
+      if (phase === "ally") {
+        phase = "enemy";
+        logLine("--- 敵ターン（簡易 AI）---");
+        const enemies = UNITS.filter((u) => u.side === "enemy" && u.hp > 0);
+        const allies = UNITS.filter((u) => u.side === "ally" && u.hp > 0);
+        enemies.forEach((e) => {
+          if (!allies.length) return;
+          let target = allies[0];
+          let best = 999;
+          allies.forEach((a) => {
+            const d = manhattan(e, a);
+            if (d < best) {
+              best = d;
+              target = a;
+            }
+          });
+          if (best === 1) {
+            const dmg = Math.floor(e.phy * 0.75);
+            target.hp = Math.max(0, target.hp - dmg);
+            logLine(e.nameJa + " の反撃 → " + target.nameJa + " に " + dmg);
+          } else {
+            const dx = target.x > e.x ? 1 : target.x < e.x ? -1 : 0;
+            const dy = target.y > e.y ? 1 : target.y < e.y ? -1 : 0;
+            let nx = e.x + dx, ny = e.y + dy;
+            if (nx < 0 || nx >= W) nx = e.x;
+            if (ny < 0 || ny >= H) ny = e.y;
+            if (!unitAt(nx, ny)) {
+              e.x = nx;
+              e.y = ny;
+              logLine(e.nameJa + " が接近");
+            }
+          }
+        });
+        phase = "ally";
+        selectedId = UNITS.find((u) => u.side === "ally" && u.hp > 0)?.id || null;
+        logLine("--- 味方ターン ---");
+        renderBoard();
+        updateDetail();
+      }
+    });
+
+    document.querySelectorAll("[data-icon]").forEach((el) => {
+      const key = el.getAttribute("data-icon");
+      const paths = {
+        gum: "Image/Icons/gum.png",
+        cp: "Image/Icons/cp.png",
+        ce: "Image/Icons/ce.png",
+        emblem: "Image/Icons/emblem.webp",
+      };
+      el.src = img(paths[key]);
+    });
+
+    document.querySelectorAll("[data-stat]").forEach((el) => {
+      const key = el.getAttribute("data-stat");
+      const sub = key === "hp" || key === "phy" || key === "int" ? "Parameters" : "Buffs";
+      const file = key === "buf_agi" ? "buf_agi.png" : key + ".png";
+      el.src = img("Image/BattleIcons/" + sub + "/" + file);
+    });
+
+    document.getElementById("brandIcon").src = img("Image/Icons/mch_icon.png");
+
+    logLine("モック起動: 味方を選んで移動・攻撃を試してください。");
+    selectedId = "a1";
+    renderBoard();
+    updateDetail();
+  </script>
+</body>
+</html>
