@@ -8,8 +8,16 @@ export function battleIconUrl(iconFileName) {
   return img("Image/BattleIcons/" + folder + "/" + normalized);
 }
 
-/** @param {(msg: string) => void} clog */
-function makeCardLibrary(clog, dealDamage, drawCards) {
+/**
+ * @param {(msg: string) => void} clog
+ * @param {{
+ *   dealPhySkillToEnemy: (s: any, minPct: number, maxPct: number) => void,
+ *   dealIntSkillToEnemy: (s: any, minPct: number, maxPct: number) => void,
+ *   healPlayerFromIntSkill: (s: any, minPct: number, maxPct: number) => void,
+ *   drawCards: (s: any, n: number) => void,
+ * }} api
+ */
+function makeCardLibrary(clog, api) {
   return {
     ext1001: {
       libraryKey: "ext1001",
@@ -19,9 +27,9 @@ function makeCardLibrary(clog, dealDamage, drawCards) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      text: "先頭の敵に PHY の 50〜60% 相当のダメージ（プロト: 7）",
+      text: "先頭の敵に PHY の 50〜60%（MCH 式: カット率・クリ適用）",
       play(s) {
-        dealDamage(s, 7);
+        api.dealPhySkillToEnemy(s, 50, 60);
       },
     },
     ext1002: {
@@ -32,11 +40,11 @@ function makeCardLibrary(clog, dealDamage, drawCards) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      text: "敵全体 INT ダメージの簡略：5 ダメージ＋脆弱",
+      text: "敵全体 INT の 25〜30%（カット率適用）。INT デバフ -2",
       play(s) {
-        dealDamage(s, 5);
-        s.enemyVulnerable = Math.max(s.enemyVulnerable || 0, 3);
-        clog("敵に脆弱（次の攻撃で追加ダメージ）");
+        api.dealIntSkillToEnemy(s, 25, 30);
+        s.enemyInt = Math.max(1, s.enemyInt - 2);
+        clog("敵 INT -2");
       },
     },
     ext1003: {
@@ -47,12 +55,9 @@ function makeCardLibrary(clog, dealDamage, drawCards) {
       skillIcon: "hp.png",
       cost: 1,
       type: "skl",
-      text: "最低 HP の味方＝自分を 30〜40% 回復のイメージ（プロト: +8）",
+      text: "回復係数×30〜40%（(自分INT+自分PHY)/2）",
       play(s) {
-        const heal = 8;
-        const before = s.playerHp;
-        s.playerHp = Math.min(s.playerHpMax, s.playerHp + heal);
-        clog("リカバリー: HP +" + (s.playerHp - before));
+        api.healPlayerFromIntSkill(s, 30, 40);
       },
     },
     ext1004: {
@@ -63,12 +68,11 @@ function makeCardLibrary(clog, dealDamage, drawCards) {
       skillIcon: "BUF_phy.png",
       cost: 1,
       type: "skl",
-      text: "PHY 5〜10% アップのイメージ：PHY +2、ブロック +7",
+      text: "PHY+2。ガード（PHY依存の軽減値）+7",
       play(s) {
-        const add = 2;
-        s.playerPhy = (s.playerPhy || 0) + add;
-        s.playerBlock += 7;
-        clog("ノービスプロテクション: PHY +" + add + "、ブロック +7");
+        s.playerPhy += 2;
+        s.playerGuard += 7;
+        clog("ノービスプロテクション: PHY+2、ガード+7");
       },
     },
     ext1005: {
@@ -79,11 +83,12 @@ function makeCardLibrary(clog, dealDamage, drawCards) {
       skillIcon: "BUF_agi.png",
       cost: 1,
       type: "skl",
-      text: "AGI 10% アップのイメージ：ブロック +3、次ターン ⚡+1",
+      text: "AGI+3（クリ率↑）。ガード+3、次ターン⚡+1",
       play(s) {
-        s.playerBlock += 3;
+        s.playerAgi += 3;
+        s.playerGuard += 3;
         s.bonusEnergyNext = (s.bonusEnergyNext || 0) + 1;
-        clog("ノービスチャージ: 次ターン +⚡1");
+        clog("ノービスチャージ: AGI+3、ガード+3、次ターン+⚡1");
       },
     },
     ext1006: {
@@ -94,9 +99,9 @@ function makeCardLibrary(clog, dealDamage, drawCards) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      text: "先頭の敵に PHY の 45〜55% 相当（プロト: 8）",
+      text: "先頭の敵に PHY の 45〜55%（MCH 式）",
       play(s) {
-        dealDamage(s, 8);
+        api.dealPhySkillToEnemy(s, 45, 55);
       },
     },
     ext1008: {
@@ -107,17 +112,19 @@ function makeCardLibrary(clog, dealDamage, drawCards) {
       skillIcon: "int.png",
       cost: 1,
       type: "skl",
-      text: "敵全体 INT のイメージでカードを 2 枚引く。INT +1",
+      text: "INT+1。カード2枚。敵に INT 15〜20%",
       play(s) {
-        s.playerInt = (s.playerInt || 0) + 1;
-        drawCards(s, 2);
+        s.playerInt += 1;
+        api.drawCards(s, 2);
+        api.dealIntSkillToEnemy(s, 15, 20);
       },
     },
   };
 }
 
-export function createCardRuntime(clog, dealDamage, drawCards) {
-  const CARD_LIBRARY = makeCardLibrary(clog, dealDamage, drawCards);
+/** @param {object} api */
+export function createCardRuntime(clog, api) {
+  const CARD_LIBRARY = makeCardLibrary(clog, api);
   function copyCard(key) {
     const def = CARD_LIBRARY[key];
     return { ...def, play: def.play };

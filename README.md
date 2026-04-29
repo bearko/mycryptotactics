@@ -30,4 +30,4 @@
 - 企画メモ: [docs/CHRONO_TACTICS_DESIGN.md](docs/CHRONO_TACTICS_DESIGN.md)（§7 に体験設計の柱）
 - **プレイ用**: [prototype/index.html](prototype/index.html)（ES モジュール。ルート [index.html](index.html) から誘導）。アセット・BGM/SE は [bearko/mycryptoheroes](https://github.com/bearko/mycryptoheroes) の raw URL
 - 旧 URL `mock/index.html` → プロトタイプへリダイレクト
-- 仕様: [SPEC-001](docs/specs/SPEC-001-roguelike-deck-mock.md)（体験要件） / [SPEC-002](docs/specs/SPEC-002-prototype.md)（プロト構成・戦闘UX・手札3列）
+- 仕様: [SPEC-001](docs/specs/SPEC-001-roguelike-deck-mock.md)（体験要件） / [SPEC-002](docs/specs/SPEC-002-prototype.md)（プロト構成・戦闘UX・**MCH 式戦闘 §11**）

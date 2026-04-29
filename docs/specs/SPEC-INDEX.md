@@ -8,7 +8,7 @@
 |----|------|------|------|
 | SPEC-000 | 仕様テンプレート | Accepted（ひな形） | [SPEC-000-template.md](./SPEC-000-template.md) |
 | SPEC-001 | ローグライク・デッキ観覧用モック | Accepted | [SPEC-001-roguelike-deck-mock.md](./SPEC-001-roguelike-deck-mock.md) |
-| SPEC-002 | ブラウザプロトタイプ（モジュール・戦闘UX・手札3列） | Accepted | [SPEC-002-prototype.md](./SPEC-002-prototype.md) |
+| SPEC-002 | ブラウザプロトタイプ（MCH 式戦闘・UX・手札3列） | Accepted | [SPEC-002-prototype.md](./SPEC-002-prototype.md) |
 
 ## レビュー中・草案
 

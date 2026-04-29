@@ -12,6 +12,17 @@ import {
   BATTLE_BG,
   AUDIO_URLS,
 } from "./constants.js";
+import {
+  cutRateFromPhy,
+  cutRateFromInt,
+  randomSkillRatePct,
+  phyIntDamageAfterCut,
+  criticalBonusDamage,
+  healingCoefficientIntCaster,
+  critRateFromAgi,
+  rollCrit,
+  applyDamageThroughShield,
+} from "./battle-mch.js";
 
 let gold = 75;
 let layerIndex = 0;
@@ -55,7 +66,7 @@ function clog(msg) {
   el.insertBefore(p, el.firstChild);
 }
 
-/** @param {'player-hp'|'player-block'|'player-phy'|'player-int'|'enemy-hp'|'enemy-block'} anchorId */
+/** @param {string} anchorId */
 function spawnStatFloat(anchorId, delta) {
   if (!delta) return;
   const host = document.getElementById(anchorId);
@@ -79,15 +90,14 @@ function flashPortrait(which) {
   setTimeout(() => wrap.classList.remove("portrait-hit"), 380);
 }
 
-function dealDamage(s, base) {
-  let v = base + (s.enemyVulnerable || 0);
-  s.enemyVulnerable = 0;
-  const blocked = Math.min(s.enemyBlock, v);
-  s.enemyBlock -= blocked;
-  v -= blocked;
-  s.enemyHp = Math.max(0, s.enemyHp - v);
-  flashPortrait("enemy");
-  clog(blocked ? `敵に ${v} ダメージ（ブロックで ${blocked} 軽減）` : `敵に ${v} ダメージ`);
+/** PHY/INT 依存ダメージをガードで軽減（残ダメージを返す） */
+function applyGuardToDamage(target, raw) {
+  const key = target === "player" ? "playerGuard" : "enemyGuard";
+  let g = combat[key] || 0;
+  if (g <= 0 || raw <= 0) return raw;
+  const use = Math.min(g, raw);
+  combat[key] = g - use;
+  return raw - use;
 }
 
 function drawCards(s, n) {
@@ -103,10 +113,117 @@ function drawCards(s, n) {
   }
 }
 
+/**
+ * @param {number} skillPct skill の PHY% 係数
+ */
+function dealPhySkillToEnemy(s, skillPct) {
+  const cut = cutRateFromPhy(s.enemyPhy);
+  let base = phyIntDamageAfterCut(s.playerPhy, skillPct, cut);
+  let critBonus = 0;
+  if (rollCrit(critRateFromAgi(s.playerAgi))) {
+    critBonus = criticalBonusDamage(
+      s.playerPhyBase,
+      skillPct,
+      s.enemyPhyBase,
+      "phy"
+    );
+    clog("クリティカル（PHY）");
+  }
+  let vuln = s.enemyVulnerable || 0;
+  let total = base + critBonus + vuln;
+  s.enemyVulnerable = 0;
+  total = applyGuardToDamage("enemy", total);
+  s.enemyHp = Math.max(0, s.enemyHp - total);
+  flashPortrait("enemy");
+  clog(
+    `PHY攻撃 ${skillPct}% → 基礎${base} カット${cut}% 合計${base + critBonus}` +
+      (critBonus ? " +CRIT" + critBonus : "") +
+      (vuln ? " +脆弱" + vuln : "") +
+      ` → HP-${total}`
+  );
+}
+
+function dealPhySkillToEnemyRange(s, minPct, maxPct) {
+  dealPhySkillToEnemy(s, randomSkillRatePct(minPct, maxPct));
+}
+
+function dealIntSkillToEnemy(s, minPct, maxPct) {
+  const skillPct = randomSkillRatePct(minPct, maxPct);
+  const cut = cutRateFromInt(s.enemyInt);
+  let base = phyIntDamageAfterCut(s.playerInt, skillPct, cut);
+  let critBonus = 0;
+  if (rollCrit(critRateFromAgi(s.playerAgi))) {
+    critBonus = criticalBonusDamage(
+      s.playerIntBase,
+      skillPct,
+      s.enemyIntBase,
+      "int"
+    );
+    clog("クリティカル（INT）");
+  }
+  let total = base + critBonus;
+  total = applyGuardToDamage("enemy", total);
+  s.enemyHp = Math.max(0, s.enemyHp - total);
+  flashPortrait("enemy");
+  clog(
+    `INT攻撃 ${skillPct}% → 基礎${base} カット${cut}%` +
+      (critBonus ? " +CRIT" + critBonus : "") +
+      ` → HP-${total}`
+  );
+}
+
+function healPlayerFromIntSkill(s, minPct, maxPct) {
+  const pct = randomSkillRatePct(minPct, maxPct);
+  const coef = healingCoefficientIntCaster(s.playerInt, s.playerPhy);
+  const heal = Math.max(0, Math.floor((coef * pct) / 100));
+  const before = s.playerHp;
+  s.playerHp = Math.min(s.playerHpMax, s.playerHp + heal);
+  clog(`リカバリー: 係数${coef.toFixed(1)}×${pct}% → HP+${s.playerHp - before}`);
+}
+
+/** 敵の PHY 攻撃（意図）。プレイヤー側カット＋クリ＋ガード */
+function dealPhySkillFromEnemyToPlayer(s, skillPct) {
+  const cut = cutRateFromPhy(s.playerPhy);
+  let base = phyIntDamageAfterCut(s.enemyPhy, skillPct, cut);
+  let critBonus = 0;
+  if (rollCrit(critRateFromAgi(s.enemyAgi))) {
+    critBonus = criticalBonusDamage(
+      s.enemyPhyBase,
+      skillPct,
+      s.playerPhyBase,
+      "phy"
+    );
+    clog("敵クリティカル（PHY）");
+  }
+  let total = base + critBonus;
+  total = applyGuardToDamage("player", total);
+  s.playerHp = Math.max(0, s.playerHp - total);
+  flashPortrait("player");
+  clog(
+    `敵 PHY ${skillPct}% → 被ダメージ ${total}` +
+      (critBonus ? "（含CRIT " + critBonus + "）" : "")
+  );
+}
+
+/** 最大 HP の一定割合（特殊ダメージ）— カット無効、シールドのみ */
+function dealSpecialMaxHpPercentToPlayer(s, pct) {
+  let raw = Math.max(0, Math.floor((s.playerHpMax * pct) / 100));
+  raw = applyDamageThroughShield(s, "player", raw);
+  s.playerHp = Math.max(0, s.playerHp - raw);
+  flashPortrait("player");
+  clog(`特殊ダメージ（最大HP ${pct}%）→ HP-${raw}`);
+}
+
+const battleApi = {
+  dealPhySkillToEnemy: (s, a, b) => dealPhySkillToEnemyRange(s, a, b),
+  dealIntSkillToEnemy,
+  healPlayerFromIntSkill,
+  drawCards,
+};
+
 const { CARD_LIBRARY, copyCard, makeStarterDeck } = createCardRuntime(
   clog,
-  dealDamage,
-  drawCards
+  battleApi
 );
 
 function ensureRunState() {
@@ -200,6 +317,12 @@ function startCombat(elite, boss) {
   const playerHp = runState.playerHp;
   const enemyHp = boss ? 72 : elite ? 48 : 32;
   const enemyId = boss ? 505 : elite ? 418 : 314;
+  const pPhy = LEADER.basePhy;
+  const pInt = LEADER.baseInt;
+  const pAgi = LEADER.baseAgi;
+  const ePhy = boss ? 26 : elite ? 20 : 14;
+  const eInt = boss ? 22 : elite ? 16 : 12;
+  const eAgi = boss ? 18 : elite ? 14 : 10;
   combat = {
     deck,
     drawPile: [],
@@ -207,19 +330,29 @@ function startCombat(elite, boss) {
     hand: [],
     playerHp,
     playerHpMax,
-    playerPhy: LEADER.basePhy,
-    playerInt: LEADER.baseInt,
-    playerBlock: 0,
+    playerPhy: pPhy,
+    playerInt: pInt,
+    playerAgi: pAgi,
+    playerPhyBase: pPhy,
+    playerIntBase: pInt,
+    playerAgiBase: pAgi,
+    playerGuard: 0,
+    playerShield: 0,
     energy: 3,
     energyMax: 3,
     enemyHp,
     enemyHpMax: enemyHp,
-    enemyPhy: boss ? 8 : elite ? 6 : 5,
-    enemyInt: boss ? 7 : elite ? 5 : 4,
-    enemyBlock: 0,
+    enemyPhy: ePhy,
+    enemyInt: eInt,
+    enemyAgi: eAgi,
+    enemyPhyBase: ePhy,
+    enemyIntBase: eInt,
+    enemyAgiBase: eAgi,
+    enemyGuard: 0,
+    enemyShield: 0,
     enemyVulnerable: 0,
     bonusEnergyNext: 0,
-    enemyIntent: { kind: "attack", value: boss ? 14 : elite ? 10 : 7 },
+    enemyIntent: { kind: "attack", phyPct: boss ? 38 : elite ? 32 : 28 },
     turn: 1,
     elite: !!elite,
     boss: !!boss,
@@ -238,34 +371,47 @@ function startCombat(elite, boss) {
   document.getElementById("enemyImg").src = ENEMY_IMG(enemyId);
   document.getElementById("enemyName").textContent = combat.enemyName;
   document.getElementById("clog").innerHTML = "";
-  clog(boss ? "ボス戦開始！" : "戦闘開始");
+  clog("戦闘開始（ダメージ・カット率・回復係数・クリは MCH ヘルプ準拠のプロト）");
   startPlayerTurn();
 }
 
 function intentText() {
   const it = combat.enemyIntent;
-  if (it.kind === "attack") return "ATK " + it.value;
-  if (it.kind === "block") return "BLOCK " + it.value;
+  if (it.kind === "attack") return "ATK PHY " + it.phyPct + "%";
+  if (it.kind === "guard") return "GUARD +" + it.value;
+  if (it.kind === "special") return "SPECIAL maxHP " + it.pct + "%";
   return "—";
 }
 
 function rollNextIntent() {
   const r = Math.random();
   if (combat.boss) {
-    combat.enemyIntent =
-      r < 0.5
-        ? { kind: "attack", value: 12 + Math.floor(Math.random() * 6) }
-        : { kind: "block", value: 10 };
+    if (r < 0.45) {
+      combat.enemyIntent = {
+        kind: "attack",
+        phyPct: 34 + Math.floor(Math.random() * 14),
+      };
+    } else if (r < 0.75) {
+      combat.enemyIntent = { kind: "guard", value: 8 + Math.floor(Math.random() * 5) };
+    } else {
+      combat.enemyIntent = { kind: "special", pct: 8 + Math.floor(Math.random() * 5) };
+    }
   } else {
-    combat.enemyIntent =
-      r < 0.55
-        ? { kind: "attack", value: 5 + Math.floor(Math.random() * 6) }
-        : { kind: "block", value: 6 };
+    if (r < 0.5) {
+      combat.enemyIntent = {
+        kind: "attack",
+        phyPct: 24 + Math.floor(Math.random() * 14),
+      };
+    } else if (r < 0.82) {
+      combat.enemyIntent = { kind: "guard", value: 5 + Math.floor(Math.random() * 5) };
+    } else {
+      combat.enemyIntent = { kind: "special", pct: 5 + Math.floor(Math.random() * 4) };
+    }
   }
 }
 
 function startPlayerTurn() {
-  combat.playerBlock = 0;
+  combat.playerGuard = 0;
   combat.energy = combat.energyMax + (combat.bonusEnergyNext || 0);
   combat.bonusEnergyNext = 0;
   drawCards(combat, 5);
@@ -276,26 +422,38 @@ function startPlayerTurn() {
 function diffUiFloats() {
   const cur = {
     playerHp: combat.playerHp,
-    playerBlock: combat.playerBlock,
+    playerGuard: combat.playerGuard,
+    playerShield: combat.playerShield,
     playerPhy: combat.playerPhy,
     playerInt: combat.playerInt,
+    playerAgi: combat.playerAgi,
     enemyHp: combat.enemyHp,
-    enemyBlock: combat.enemyBlock,
+    enemyGuard: combat.enemyGuard,
+    enemyShield: combat.enemyShield,
+    enemyInt: combat.enemyInt,
   };
   const prev = combat._lastUi;
   if (prev) {
     const dHp = cur.playerHp - prev.playerHp;
     if (dHp !== 0) spawnStatFloat("player-hp", dHp);
-    const dBlk = cur.playerBlock - prev.playerBlock;
-    if (dBlk !== 0) spawnStatFloat("player-block", dBlk);
+    const dG = cur.playerGuard - prev.playerGuard;
+    if (dG !== 0) spawnStatFloat("player-guard", dG);
+    const dSh = cur.playerShield - prev.playerShield;
+    if (dSh !== 0) spawnStatFloat("player-shield", dSh);
     const dPhy = cur.playerPhy - prev.playerPhy;
     if (dPhy !== 0) spawnStatFloat("player-phy", dPhy);
     const dInt = cur.playerInt - prev.playerInt;
     if (dInt !== 0) spawnStatFloat("player-int", dInt);
+    const dAgi = cur.playerAgi - prev.playerAgi;
+    if (dAgi !== 0) spawnStatFloat("player-agi", dAgi);
     const dEhp = cur.enemyHp - prev.enemyHp;
     if (dEhp !== 0) spawnStatFloat("enemy-hp", dEhp);
-    const dEblk = cur.enemyBlock - prev.enemyBlock;
-    if (dEblk !== 0) spawnStatFloat("enemy-block", dEblk);
+    const dEg = cur.enemyGuard - prev.enemyGuard;
+    if (dEg !== 0) spawnStatFloat("enemy-guard", dEg);
+    const dEs = cur.enemyShield - prev.enemyShield;
+    if (dEs !== 0) spawnStatFloat("enemy-shield", dEs);
+    const dEi = cur.enemyInt - prev.enemyInt;
+    if (dEi !== 0) spawnStatFloat("enemy-int", dEi);
   }
 }
 
@@ -304,12 +462,16 @@ function renderCombat() {
   document.getElementById("pHpMax").textContent = String(combat.playerHpMax);
   document.getElementById("pPhy").textContent = String(combat.playerPhy);
   document.getElementById("pInt").textContent = String(combat.playerInt);
-  document.getElementById("pBlock").textContent = String(combat.playerBlock);
+  document.getElementById("pAgi").textContent = String(combat.playerAgi);
+  document.getElementById("pGuard").textContent = String(combat.playerGuard);
+  document.getElementById("pShield").textContent = String(combat.playerShield);
   document.getElementById("eHp").textContent =
     String(combat.enemyHp) + " / " + String(combat.enemyHpMax);
   document.getElementById("ePhy").textContent = String(combat.enemyPhy);
   document.getElementById("eInt").textContent = String(combat.enemyInt);
-  document.getElementById("eBlock").textContent = String(combat.enemyBlock);
+  document.getElementById("eAgi").textContent = String(combat.enemyAgi);
+  document.getElementById("eGuard").textContent = String(combat.enemyGuard);
+  document.getElementById("eShield").textContent = String(combat.enemyShield);
   document.getElementById("energyVal").textContent = String(combat.energy);
   document.getElementById("energyMax").textContent = String(combat.energyMax);
   document.getElementById("enemyIntent").textContent = intentText();
@@ -345,11 +507,15 @@ function renderCombat() {
   syncResources();
   combat._lastUi = {
     playerHp: combat.playerHp,
-    playerBlock: combat.playerBlock,
+    playerGuard: combat.playerGuard,
+    playerShield: combat.playerShield,
     playerPhy: combat.playerPhy,
     playerInt: combat.playerInt,
+    playerAgi: combat.playerAgi,
     enemyHp: combat.enemyHp,
-    enemyBlock: combat.enemyBlock,
+    enemyGuard: combat.enemyGuard,
+    enemyShield: combat.enemyShield,
+    enemyInt: combat.enemyInt,
   };
 }
 
@@ -370,16 +536,12 @@ function playCard(idx) {
 function enemyTurn() {
   const it = combat.enemyIntent;
   if (it.kind === "attack") {
-    let dmg = it.value;
-    const blk = Math.min(combat.playerBlock, dmg);
-    combat.playerBlock -= blk;
-    dmg -= blk;
-    combat.playerHp -= dmg;
-    flashPortrait("player");
-    clog(`敵の攻撃 → ${dmg} ダメージ` + (blk ? `（ブロック ${blk}）` : ""));
-  } else {
-    combat.enemyBlock += it.value;
-    clog("敵はブロックを構えた");
+    dealPhySkillFromEnemyToPlayer(combat, it.phyPct);
+  } else if (it.kind === "guard") {
+    combat.enemyGuard += it.value;
+    clog("敵はガード +" + it.value);
+  } else if (it.kind === "special") {
+    dealSpecialMaxHpPercentToPlayer(combat, it.pct);
   }
   if (combat.playerHp <= 0) {
     endCombatLoss();
@@ -504,6 +666,11 @@ function wireAssets() {
       "Image/BattleIcons/Parameters/" + el.getAttribute("data-stat") + ".png"
     );
   });
+  const agiIcon = img("Image/BattleIcons/Buffs/buf_agi.png");
+  const pi = document.getElementById("pAgiStatIcon");
+  const ei = document.getElementById("eAgiStatIcon");
+  if (pi) pi.src = agiIcon;
+  if (ei) ei.src = agiIcon;
 }
 
 function init() {

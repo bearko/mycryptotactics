@@ -445,7 +445,13 @@
                   <img alt="" data-stat="int" />
                   INT <span id="player-int" class="stat-anchor"><span id="pInt">0</span></span>
                 </div>
-                <div class="bar-line">🛡 ブロック <span id="player-block" class="stat-anchor"><span id="pBlock">0</span></span></div>
+                <div class="bar-line">
+                  <img id="pAgiStatIcon" alt="" width="16" height="16" style="object-fit:contain" />
+                  AGI <span id="player-agi" class="stat-anchor"><span id="pAgi">0</span></span>
+                  <span style="font-size:0.58rem;color:var(--muted)">（クリ率）</span>
+                </div>
+                <div class="bar-line">🛡 ガード <span id="player-guard" class="stat-anchor"><span id="pGuard">0</span></span></div>
+                <div class="bar-line">✦ シールド <span id="player-shield" class="stat-anchor"><span id="pShield">0</span></span></div>
               </div>
             </div>
           </div>
@@ -474,9 +480,14 @@
                 </div>
                 <div class="bar-line">
                   <img alt="" data-stat="int" />
-                  INT <span id="eInt">0</span>
+                  INT <span id="enemy-int" class="stat-anchor"><span id="eInt">0</span></span>
                 </div>
-                <div class="bar-line">🛡 <span id="enemy-block" class="stat-anchor"><span id="eBlock">0</span></span></div>
+                <div class="bar-line">
+                  <img id="eAgiStatIcon" alt="" width="16" height="16" style="object-fit:contain" />
+                  AGI <span id="eAgi">0</span>
+                </div>
+                <div class="bar-line">🛡 ガード <span id="enemy-guard" class="stat-anchor"><span id="eGuard">0</span></span></div>
+                <div class="bar-line">✦ シールド <span id="enemy-shield" class="stat-anchor"><span id="eShield">0</span></span></div>
               </div>
             </div>
           </div>

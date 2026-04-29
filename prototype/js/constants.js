@@ -9,6 +9,7 @@ export const LEADER = {
   hpMax: 70,
   basePhy: 10,
   baseInt: 8,
+  baseAgi: 12,
   img: () => img("Image/Heroes/1002.png"),
 };
 
