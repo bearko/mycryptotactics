@@ -17,7 +17,16 @@ export const ENEMY_IMG = (id) => img("Image/Enemies/" + id + ".png");
 export const EXT_IMG = (id) => img("Image/Extensions/" + id + ".png");
 export const BATTLE_BG = (fileId) => img("Image/Backgrounds/" + fileId + ".png");
 
-/** mycryptoheroes リポジトリ内の BGM / SE */
+/** バトル用スプライトシート（Data/Effects/battle_effect_sprites.json と対応） */
+export const BATTLE_EFFECT_SPRITE = {
+  singleDamage: () => img("Image/Effects/Battle/01_single_damage.png"),
+  areaDamage: () => img("Image/Effects/Battle/02_area_damage.png"),
+  heal: () => img("Image/Effects/Battle/03_heal_resurrection.png"),
+  buff: () => img("Image/Effects/Battle/04_buff.png"),
+  debuff: () => img("Image/Effects/Battle/05_debuff_status_effect.png"),
+};
+
+/** cutins.json のジングル */
 export const AUDIO_URLS = {
   bgmPvp: () => audioUrl("Audio/BGM/pvp.mp3"),
   seClear: () => audioUrl("Audio/SE/clear.wav"),
@@ -26,4 +35,6 @@ export const AUDIO_URLS = {
   seBattleHeal: () => audioUrl("Audio/SE/Battle/3_heal_resurrection.mp3"),
   seBattleBuff: () => audioUrl("Audio/SE/Battle/4_buff.mp3"),
   seBattleDebuff: () => audioUrl("Audio/SE/Battle/5_debuff_status_effect.mp3"),
+  jingleWin: () => audioUrl("Audio/SE/Jingles/win.mp3"),
+  jingleLose: () => audioUrl("Audio/SE/Jingles/lose.mp3"),
 };

@@ -72,14 +72,92 @@
     .btn-help:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
     #mapView .map-title { font-size: 0.9rem; color: var(--accent); margin: 0 0 0.5rem; }
-    .map-row {
-      display: flex;
-      gap: 0.75rem;
-      flex-wrap: wrap;
-      margin-bottom: 0.75rem;
-      align-items: center;
+    .map-graph-wrap {
+      overflow-x: auto;
+      overflow-y: auto;
+      max-height: min(72vh, 520px);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #0f0c14;
+      -webkit-overflow-scrolling: touch;
     }
-    .map-row-label { font-size: 0.75rem; color: var(--muted); min-width: 4.5rem; }
+    .map-graph {
+      display: block;
+      width: 100%;
+      min-width: 280px;
+      height: auto;
+      min-height: 320px;
+      background: transparent;
+      border: none;
+      border-radius: 0;
+    }
+    .map-edge {
+      stroke: #3d3550;
+      stroke-width: 0.35;
+      fill: none;
+    }
+    .map-edge--active {
+      stroke: #6a8b7a;
+      stroke-width: 0.55;
+    }
+    .map-start-dot { fill: #5a5068; stroke: #8a8199; stroke-width: 0.2; }
+    .map-start-label {
+      font-size: 2.2px;
+      fill: var(--muted);
+      font-family: system-ui, sans-serif;
+    }
+    .map-node-shape {
+      stroke-width: 0.35;
+      transition: fill 0.15s, stroke 0.15s;
+    }
+    .map-node--reachable .map-node-shape {
+      fill: #2a4a38;
+      stroke: #6ecf8a;
+    }
+    .map-node--current .map-node-shape {
+      fill: #4a3d20;
+      stroke: var(--accent);
+      stroke-width: 0.5;
+    }
+    .map-node--visited .map-node-shape {
+      fill: #2a3548;
+      stroke: #5a7a9a;
+    }
+    .map-node--skipped .map-node-shape,
+    .map-node--locked .map-node-shape {
+      fill: #1a1820;
+      stroke: #3a3540;
+      opacity: 0.45;
+    }
+    .map-node-cap {
+      font-size: 2.4px;
+      fill: var(--text);
+      font-family: system-ui, sans-serif;
+      pointer-events: none;
+    }
+    .map-node-type {
+      font-size: 2px;
+      fill: var(--muted);
+      font-family: system-ui, sans-serif;
+      pointer-events: none;
+    }
+    .map-node--locked .map-node-cap,
+    .map-node--locked .map-node-type,
+    .map-node--skipped .map-node-cap,
+    .map-node--skipped .map-node-type {
+      opacity: 0.5;
+    }
+    .map-node-enemy-img {
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      pointer-events: none;
+    }
+    .map-legend {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin: 0.5rem 0 0;
+      line-height: 1.45;
+    }
     .node-btn {
       background: var(--map-node);
       border: 2px solid var(--border);
@@ -162,7 +240,33 @@
       width: 100%;
       max-width: 120px;
       margin: 0 auto 0.4rem;
+      overflow: visible;
     }
+    .portrait-fx {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 120px;
+      height: 120px;
+      margin: 0;
+      pointer-events: none;
+      z-index: 4;
+      background-repeat: no-repeat;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      animation: portrait-sprite-fx 0.75s steps(8) forwards;
+      opacity: 0.95;
+      transform: translate(-50%, -50%) scale(3.3);
+      transform-origin: center center;
+    }
+    @keyframes portrait-sprite-fx {
+      from { background-position: 0 0; }
+      to { background-position: -800px 0; }
+    }
+    .portrait-fx--heal { opacity: 0.88; filter: saturate(1.15) hue-rotate(-8deg); }
+    .portrait-fx--buff { opacity: 0.82; }
+    .portrait-fx--debuff { opacity: 0.82; filter: hue-rotate(12deg); }
+    .portrait-fx--area { opacity: 0.85; }
     .portrait-card img.portrait-lg {
       width: 100%;
       max-width: 120px;
@@ -261,6 +365,7 @@
       border-radius: 8px;
       max-width: 100%;
       margin-top: 0.35rem;
+      margin-bottom: 0;
       letter-spacing: 0.04em;
     }
     .intent-bubble .intent-label {
@@ -296,9 +401,21 @@
     .hand-energy-row {
       display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: space-between;
       gap: 0.5rem;
       margin-bottom: 0.45rem;
+      flex-wrap: nowrap;
+      min-width: 0;
+    }
+    .hand-energy-row .energy-pill {
+      flex-shrink: 0;
+    }
+    .hand-energy-row .hand-energy-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      flex-shrink: 0;
     }
     .energy-pill {
       display: inline-flex;
@@ -313,96 +430,445 @@
       border: 1px solid #2a5560;
     }
 
-    .hand {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 0.4rem;
-      min-height: 0;
-      padding: 0.15rem 0 0.35rem;
+    @media (max-width: 420px) {
+      .hand { --card-h: 200px; }
+    }
+    .hand-scroll {
       width: 100%;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+      overflow-x: auto;
+      overflow-y: visible;
+      -webkit-overflow-scrolling: touch;
+      padding: 0.35rem 0.25rem 0.15rem;
+      box-sizing: border-box;
+    }
+    .hand {
+      --card-w: 112px;
+      --card-h: 216px;
+      display: flex;
+      flex-wrap: nowrap;
+      justify-content: center;
+      align-items: flex-end;
+      gap: 0.55rem;
+      min-height: calc(var(--card-h) + 2.25rem);
+      padding: 0.5rem 0.75rem 0.65rem;
+      width: max-content;
+      min-width: min(100%, calc(var(--n-cards, 1) * var(--card-w) + (var(--n-cards, 1) - 1) * 0.55rem + 1.5rem));
+      margin-left: auto;
+      margin-right: auto;
+      position: relative;
+      perspective: 800px;
+      touch-action: pan-x pan-y;
+      box-sizing: border-box;
+    }
+    .hand .card {
+      position: relative;
+      flex: 0 0 var(--card-w);
+      width: var(--card-w);
+      min-width: var(--card-w);
+      max-width: var(--card-w);
+      height: var(--card-h);
+      margin-left: 0;
+      --peek-lift: 0px;
+      z-index: var(--i);
+      transform-origin: 50% 100%;
+      transform: translateY(var(--peek-lift)) rotate(var(--rot, 0deg));
+      transition: transform 0.18s ease, box-shadow 0.18s, filter 0.18s;
+    }
+    .hand .card:first-child { margin-left: 0; }
+    .hand .card:hover:not(.disabled),
+    .hand .card.card--peek:not(.disabled) {
+      z-index: 80;
+      box-shadow: 0 0 0 2px #fff, 0 0 18px #8ecfff99, 0 14px 28px #000b;
+      filter: brightness(1.04);
     }
     .card {
-      width: 100%;
-      max-width: 100%;
-      min-width: 0;
-      min-height: 158px;
       border-radius: 10px;
-      border: 2px solid #5a5068;
-      padding: 1.55rem 0.35rem 0.4rem;
-      cursor: pointer;
+      border: 2px solid #6a5a88;
+      padding: 0;
+      cursor: default;
       font-size: 0.62rem;
       line-height: 1.18;
-      transition: transform 0.1s, box-shadow 0.1s;
       display: flex;
       flex-direction: column;
       overflow: hidden;
       position: relative;
+      user-select: none;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
     }
-    .card:hover:not(.disabled) { transform: translateY(-3px); box-shadow: 0 8px 18px #0009; }
+    .card > .card-fg {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+    .card-art-full {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: 65%;
+      z-index: 1;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .card-art-full .card-ext-img {
+      width: 118%;
+      max-width: none;
+      height: 100%;
+      object-fit: contain;
+      object-position: center top;
+      opacity: 0.95;
+      filter: drop-shadow(0 2px 4px #0006);
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+    .card-tint {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      background: linear-gradient(
+        180deg,
+        rgba(12, 10, 18, 0.55) 0%,
+        rgba(12, 10, 18, 0.2) 45%,
+        transparent 65%
+      );
+    }
+    .card.atk .card-tint {
+      background: linear-gradient(
+        180deg,
+        rgba(58, 40, 50, 0.65) 0%,
+        rgba(58, 40, 50, 0.25) 48%,
+        transparent 66%
+      );
+    }
+    .card.skl .card-tint {
+      background: linear-gradient(
+        180deg,
+        rgba(40, 50, 64, 0.65) 0%,
+        rgba(40, 50, 64, 0.25) 48%,
+        transparent 66%
+      );
+    }
+    .card-header {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 8;
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      justify-content: flex-start;
+      padding: 0.2rem 0.26rem 0.18rem;
+      pointer-events: none;
+    }
+    .card-header-icons {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.22rem;
+      flex-shrink: 0;
+    }
+    .card-header-icons .card-skill-corner {
+      position: static;
+      top: auto;
+      left: auto;
+      width: 24px;
+      height: 24px;
+    }
+    .card-ext-name {
+      position: absolute;
+      left: 0.22rem;
+      right: 0.22rem;
+      bottom: 35%;
+      z-index: 7;
+      margin: 0;
+      padding: 0 0.06rem;
+      max-height: 2.36em;
+      text-align: left;
+      font-size: clamp(0.52rem, 2.6vw, calc(0.58rem + 4px));
+      line-height: 1.12;
+      font-weight: 700;
+      color: var(--text);
+      text-shadow: 0 1px 3px #000c;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .card:hover:not(.disabled) { filter: brightness(1.03); }
     .card.disabled { opacity: 0.35; cursor: not-allowed; }
-    .card.atk { background: linear-gradient(165deg, #3a2832 0%, #120d12 100%); }
-    .card.skl { background: linear-gradient(165deg, #283240 0%, #0d1218 100%); }
+    .card.atk { background: #120d12; }
+    .card.skl { background: #0d1218; }
     .card-skill-corner {
       position: absolute;
       top: 5px;
       left: 5px;
-      width: 26px;
-      height: 26px;
+      width: 22px;
+      height: 22px;
       padding: 2px;
       object-fit: contain;
       background: #0d0a12cc;
       border: 1px solid #4a4058;
-      border-radius: 6px;
+      border-radius: 5px;
       z-index: 2;
       image-rendering: pixelated;
       image-rendering: crisp-edges;
     }
     .card-cost-badge {
+      position: relative;
+      top: auto;
+      right: auto;
+      min-width: 1.85rem;
+      height: 1.38rem;
+      padding: 0 0.32rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.1rem;
+      font-weight: 800;
+      color: var(--energy);
+      font-size: calc(0.72rem + 4px);
+      background: #0a1520ee;
+      border: 1px solid #2a5560;
+      border-bottom: none;
+      border-radius: 7px 7px 0 0;
+      text-shadow: 0 1px 2px #000;
+      z-index: 3;
+      box-shadow: 0 1px 0 #0a1520ee;
+    }
+    .card-cost-badge .cost-zeus { font-size: calc(0.78rem + 4px); line-height: 1; }
+    .card-effect-summary {
       position: absolute;
-      top: 5px;
-      right: 5px;
-      min-width: 2rem;
-      height: 1.45rem;
-      padding: 0 0.35rem;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 35%;
+      max-height: 35%;
+      border-radius: 0 0 8px 8px;
+      box-sizing: border-box;
+      overflow: hidden;
+      overflow-y: auto;
+      margin: 0;
+      background: #d8d0e4;
+      color: #1a1420;
+      padding: 0.22rem 0.28rem;
+      font-size: calc(0.52rem + 6px);
+      font-weight: 700;
+      line-height: 1.28;
+      text-align: left;
+      z-index: 6;
+    }
+    .card-effect-summary p {
+      margin: 0.06rem 0;
+    }
+    .card--peek .card-effect-summary {
+      max-height: none;
+      overflow: visible;
+    }
+    .card-peek-layer {
+      display: none;
+      position: absolute;
+      left: 50%;
+      bottom: calc(100% - 4px);
+      transform: translateX(-50%);
+      width: min(248px, 86vw);
+      z-index: 100;
+      pointer-events: none;
+    }
+    .card--peek .card-peek-layer { display: block; }
+    .card-peek-inner {
+      background: #0a0814f2;
+      border: 1px solid var(--accent);
+      border-radius: 8px;
+      padding: 0.45rem 0.5rem 0.5rem;
+      box-shadow: 0 12px 32px #000c;
+      font-size: 0.62rem;
+      line-height: 1.35;
+      color: #e8e0f0;
+      text-align: left;
+    }
+    .card-peek-lines p {
+      margin: 0.15rem 0;
+    }
+    .card-peek-help {
+      margin-top: 0.35rem;
+      padding-top: 0.35rem;
+      border-top: 1px solid #3d3550;
+    }
+    .card-help-block {
+      font-size: 0.58rem;
+      color: var(--muted);
+      margin-top: 0.28rem;
+    }
+    .card-help-block:first-child { margin-top: 0; }
+    .card-help-block strong { color: #f0d878; }
+
+    .btn-deck-pile {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.25rem 0.4rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #15121c;
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.62rem;
+      line-height: 1.1;
+      gap: 0.1rem;
+    }
+    .btn-deck-pile:hover { border-color: var(--accent); }
+    .btn-deck-pile__count {
+      font-weight: 800;
+      font-size: 1rem;
+      color: var(--energy);
+      font-variant-numeric: tabular-nums;
+    }
+
+    #deckModal {
+      position: fixed;
+      inset: 0;
+      background: #000a;
+      z-index: 120;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 0.12rem;
-      font-weight: 800;
-      color: var(--energy);
-      font-size: 0.82rem;
-      background: #0a1520ee;
-      border: 1px solid #2a5560;
-      border-radius: 6px;
-      text-shadow: 0 1px 2px #000;
-      z-index: 2;
+      padding: 1rem;
     }
-    .card-cost-badge .cost-zeus { font-size: 0.78rem; line-height: 1; }
-    .card-ext-img {
+    #deckModal.hidden { display: none; }
+    .deck-modal-box {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem;
+      max-width: 360px;
       width: 100%;
-      height: 42px;
-      object-fit: contain;
-      margin: 0.15rem 0 0.2rem;
-      filter: drop-shadow(0 2px 4px #0006);
-      image-rendering: pixelated;
-      image-rendering: crisp-edges;
+      max-height: min(80vh, 480px);
+      display: flex;
+      flex-direction: column;
     }
-    .card-ext-name {
-      font-weight: 700;
-      color: var(--text);
-      font-size: 0.68rem;
-      line-height: 1.15;
-      margin-bottom: 0.2rem;
-      min-height: 2.1em;
+    .deck-modal-box h3 { margin: 0 0 0.35rem; font-size: 0.95rem; }
+    .deck-modal-meta { font-size: 0.72rem; color: var(--muted); margin-bottom: 0.5rem; }
+    #deckModalList {
+      overflow-y: auto;
+      font-size: 0.78rem;
+      line-height: 1.45;
     }
-    .card .card-desc {
-      color: #c8bdd5;
-      font-size: 0.62rem;
-      flex: 1;
-      line-height: 1.22;
+    .deck-modal-row { padding: 0.25rem 0; border-bottom: 1px solid #2a2438; }
+
+    #cutinOverlay {
+      position: fixed;
+      inset: 0;
+      z-index: 150;
+      background: radial-gradient(ellipse at center, #1a1028ee 0%, #050308f2 70%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      animation: cutin-bg-pulse 0.6s ease-out;
+    }
+    #cutinOverlay.hidden { display: none; }
+    @keyframes cutin-bg-pulse {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .cutin-inner {
+      text-align: center;
+      padding: 1.5rem;
+      animation: cutin-pop 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    @keyframes cutin-pop {
+      from { transform: scale(0.85); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .cutin-title {
+      font-size: clamp(2rem, 8vw, 3.2rem);
+      font-weight: 900;
+      letter-spacing: 0.2em;
+      text-shadow: 0 0 40px #c4a35a88, 0 0 8px #fff4;
+      margin: 0;
+    }
+    .cutin--win .cutin-title {
+      color: #e8f4ff;
+      background: linear-gradient(180deg, #fff 0%, #8ecfff 45%, #4a90d9 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .cutin--lose .cutin-title {
+      color: #c45c6a;
+      text-shadow: 0 0 32px #8a2030cc;
+    }
+    .cutin-sub {
+      margin-top: 1.25rem;
+      font-size: 0.85rem;
+      color: var(--muted);
     }
 
-    .combat-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.45rem; }
+    .reward-card-btn {
+      width: 100%;
+      padding: 0;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      text-align: left;
+    }
+    .reward-card-inner {
+      --card-w: 112px;
+      --card-h: 216px;
+      border-radius: 10px;
+      border: 2px solid #5a5068;
+      padding: 0;
+      width: var(--card-w);
+      min-width: var(--card-w);
+      max-width: var(--card-w);
+      min-height: var(--card-h);
+      height: var(--card-h);
+      position: relative;
+      display: block;
+      overflow: hidden;
+      transition: transform 0.1s, box-shadow 0.1s;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    @media (max-width: 420px) {
+      .reward-card-inner {
+        --card-h: 200px;
+      }
+    }
+    .reward-card-btn:hover .reward-card-inner {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px #0008;
+      border-color: var(--accent);
+    }
+    .reward-card-inner.atk .card-tint {
+      background: linear-gradient(
+        180deg,
+        rgba(58, 40, 50, 0.65) 0%,
+        rgba(58, 40, 50, 0.25) 48%,
+        transparent 66%
+      );
+    }
+    .reward-card-inner.skl .card-tint {
+      background: linear-gradient(
+        180deg,
+        rgba(40, 50, 64, 0.65) 0%,
+        rgba(40, 50, 64, 0.25) 48%,
+        transparent 66%
+      );
+    }
     button.action {
       background: var(--border);
       color: var(--text);
@@ -416,28 +882,32 @@
     button.action:disabled { opacity: 0.45; cursor: not-allowed; }
     button.primary { background: #4a3d6a; border: 1px solid var(--accent); }
 
-    #rewardOverlay {
-      position: fixed;
-      inset: 0;
-      background: #000c;
+    #rewardView {
+      max-width: 520px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #rewardView .reward-intro {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin: 0 0 0.75rem;
+      line-height: 1.45;
+    }
+    #rewardView .reward-picks {
       display: flex;
-      align-items: center;
+      flex-direction: row;
+      flex-wrap: wrap;
       justify-content: center;
-      z-index: 50;
-      padding: 1rem;
+      align-items: flex-start;
+      gap: 0.65rem;
     }
-    #rewardOverlay.hidden { display: none; }
-    .reward-box {
-      background: var(--panel);
-      border: 2px solid var(--accent);
-      border-radius: 12px;
-      padding: 1.25rem;
-      max-width: 420px;
-      width: 100%;
+    #rewardView .reward-picks button {
+      flex: 0 0 auto;
+      width: auto;
+      max-width: calc(var(--card-w, 112px) + 4px);
+      text-align: left;
+      padding: 0;
     }
-    .reward-box h3 { margin: 0 0 1rem; font-size: 1rem; }
-    .reward-picks { display: flex; flex-direction: column; gap: 0.5rem; }
-    .reward-picks button { text-align: left; padding: 0.65rem; }
 
     #gameOver { text-align: center; padding: 2rem; }
     footer {
@@ -544,13 +1014,13 @@
     <div class="resources" aria-label="ランリソース">
       <span class="res"><img alt="GUM" data-icon="gum" /> <span id="goldVal">0</span></span>
       <span class="res"><img alt="HP" data-stat="hp" /> <span id="hpMapVal">—</span></span>
-      <span class="res">層 <span id="layerVal">1</span> / 4</span>
+      <span class="res">層 <span id="layerVal">入口</span></span>
       <button type="button" class="btn-help" id="btnHelpOpen" aria-label="ヘルプを開く" title="ヘルプ">?</button>
     </div>
 
     <div id="mapView" class="panel">
-      <p class="map-title">道を選ぶ（ノードをクリック）</p>
-      <div id="mapRows"></div>
+      <p class="map-title">始まりの塔（下から上へ。緑のノードから進む）</p>
+      <div id="mapRows" class="map-graph-wrap" role="region" aria-label="マップ"></div>
       <p style="font-size:0.75rem;color:var(--muted);margin:0.5rem 0 0">企画書 §3 に沿ったラン内ループ。ロジックは <code>prototype/js/</code>。</p>
     </div>
 
@@ -599,10 +1069,6 @@
                 <img id="enemyImg" class="portrait-lg" alt="" />
               </div>
               <div class="duelist-name" id="enemyName">—</div>
-              <div class="intent-bubble" id="enemyIntentWrap" aria-live="polite">
-                <span class="intent-label">NEXT ACTION</span>
-                <span id="enemyIntent">—</span>
-              </div>
               <div class="stat-compact">
                 <div class="stat-row">
                   <img alt="" data-stat="hp" />
@@ -625,6 +1091,10 @@
                   <span id="enemy-shield" class="stat-anchor stat-values"><span id="eShield">0</span></span>
                 </div>
               </div>
+              <div class="intent-bubble" id="enemyIntentWrap" aria-live="polite">
+                <span class="intent-label">NEXT ACTION</span>
+                <span id="enemyIntent">—</span>
+              </div>
             </div>
           </div>
         </div>
@@ -635,10 +1105,16 @@
       <div class="combat-footer">
         <div class="hand-energy-row">
           <span class="energy-pill">⚡ <span id="energyVal">0</span> / <span id="energyMax">3</span></span>
+          <div class="hand-energy-actions">
+            <button type="button" class="btn-deck-pile" id="btnDeckOpen" aria-label="残りデッキを表示">
+              <img alt="" data-icon="deck" width="20" height="20" />
+              <span class="btn-deck-pile__count" id="deckPileCount">0</span>
+            </button>
+            <button type="button" class="action primary" id="btnEndTurn">ターン終了</button>
+          </div>
         </div>
-        <div id="hand" class="hand" role="list"></div>
-        <div class="combat-actions">
-          <button type="button" class="action primary" id="btnEndTurn">ターン終了</button>
+        <div class="hand-scroll">
+          <div id="hand" class="hand" role="list"></div>
         </div>
       </div>
     </div>
@@ -655,13 +1131,28 @@
       <p id="gameOverMsg" style="color:var(--muted)"></p>
       <button type="button" class="action primary" id="btnRestart" style="margin-top:1rem">もう一度</button>
     </div>
+
+    <div id="rewardView" class="panel hidden">
+      <p class="map-title">報酬選択</p>
+      <p class="reward-intro">バトル勝利おめでとうございます。追加するカードを 1 枚選ぶか、スキップしてマップへ戻ります。</p>
+      <div class="reward-picks" id="rewardPicks"></div>
+      <button type="button" class="action" id="btnSkipReward" style="margin-top:0.75rem;width:100%">スキップ（報酬なし）</button>
+    </div>
   </div>
 
-  <div id="rewardOverlay" class="hidden" aria-hidden="true">
-    <div class="reward-box">
-      <h3>報酬：カードを 1 枚選ぶ（スキップ可）</h3>
-      <div class="reward-picks" id="rewardPicks"></div>
-      <button type="button" class="action" id="btnSkipReward" style="margin-top:0.75rem;width:100%">スキップ</button>
+  <div id="deckModal" class="hidden" aria-hidden="true" role="dialog" aria-labelledby="deckModalTitle">
+    <div class="deck-modal-box">
+      <h3 id="deckModalTitle">残りデッキ</h3>
+      <p class="deck-modal-meta" id="deckModalCount"></p>
+      <div id="deckModalList"></div>
+      <button type="button" class="action" id="deckModalClose" style="margin-top:0.75rem;width:100%">閉じる</button>
+    </div>
+  </div>
+
+  <div id="cutinOverlay" class="hidden" aria-hidden="true">
+    <div class="cutin-inner" id="cutinInner">
+      <p class="cutin-title" id="cutinTitle">—</p>
+      <p class="cutin-sub" id="cutinSub">タップで続行</p>
     </div>
   </div>
 
@@ -694,16 +1185,16 @@
           <h3>操作方法</h3>
           <h3>マップ</h3>
           <ul>
-            <li>層ごとに表示される<strong>ノードボタン</strong>をタップして進みます（遭遇戦・篝火・店・ボスなど）。</li>
+            <li><strong>始まりの塔</strong>のマップは<strong>下から上</strong>へ進みます。接続矢印で次の休憩・店・ボスを読みます。</li>
             <li><strong>篝火</strong>で HP が回復し、次の層へ進みます。</li>
             <li><strong>店</strong>では GUM を消費してカードを購入できます。「立ち去る」で次の層へ。</li>
           </ul>
           <h3>戦闘</h3>
           <ul>
-            <li>手札の<strong>カード</strong>をタップしてプレイ。右上の <strong>⚡ と数字</strong>がそのターンの<strong>エナジーコスト</strong>です。</li>
-            <li>エナジーは手札の上に <code>⚡ 現在 / 最大</code> で表示されます。</li>
-            <li><strong>ターン終了</strong>で手札を捨て、敵が <strong>NEXT ACTION</strong> に従って行動したあと、次の自分のターンが始まります。</li>
-            <li>敵を倒すと<strong>報酬</strong>が表示されます。カードを 1 枚選ぶかスキップできます。</li>
+            <li>手札は<strong>扇状に重なったカード</strong>です。<strong>PC</strong>は<strong>1回目のクリックでフォーカス</strong>（枠と詳細）、<strong>同じカードをもう一度クリックで使用</strong>します。<strong>スマホ</strong>も同様に、<strong>1回目のタップでフォーカス</strong>、<strong>同じカード上でもう一度タップで使用</strong>です（スクロール時の誤使用を防ぐため、離しただけでは使いません）。指を別のカードへ滑らせてから離すと、そのカードにフォーカスが移ります。</li>
+            <li>エナジー <code>⚡ 現在 / 最大</code> とデッキ確認・ターン終了は<strong>手札の上の同じ行</strong>に並びます。</li>
+            <li><strong>ターン終了</strong>は右端。左の山札アイコンから<strong>残りデッキ枚数と内訳</strong>（引く順は非表示）を確認できます。</li>
+            <li>敵撃破後は<strong>VICTORY</strong>が表示されます。少し待ってから<strong>もう一度タップ</strong>すると報酬選択へ進みます（勝利直後の指を離す動作では閉じません）。</li>
           </ul>
           <h3>その他</h3>
           <ul>
