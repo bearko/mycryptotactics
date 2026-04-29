@@ -526,17 +526,29 @@ function renderMap() {
   } else {
     host.appendChild(legend);
   }
+  const scrollMapToCurrentNode = () => {
+    const wrap = host;
+    if (!wrap || !svg.isConnected) return;
+    const curId = runState.lastMapNodeId || "START";
+    const pt = nodeXY(curId);
+    const vb = svg.viewBox.baseVal;
+    const vbW = vb.width || 100;
+    const vbH = vb.height || 100;
+    const wrapRect = wrap.getBoundingClientRect();
+    const svgRect = svg.getBoundingClientRect();
+    const nx = svgRect.left + (pt.x / vbW) * svgRect.width;
+    const ny = svgRect.top + (pt.y / vbH) * svgRect.height;
+    const contentY = wrap.scrollTop + (ny - wrapRect.top);
+    const contentX = wrap.scrollLeft + (nx - wrapRect.left);
+    const maxY = Math.max(0, wrap.scrollHeight - wrap.clientHeight);
+    const maxX = Math.max(0, wrap.scrollWidth - wrap.clientWidth);
+    wrap.scrollTop = Math.max(0, Math.min(contentY - wrap.clientHeight / 2, maxY));
+    wrap.scrollLeft = Math.max(0, Math.min(contentX - wrap.clientWidth / 2, maxX));
+  };
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
-      const curId = runState.lastMapNodeId;
-      const y = curId ? nodeXY(curId).y : MAP_START.y;
-      const frac = y / 100;
-      const wrap = host;
-      const target = frac * wrap.scrollHeight - wrap.clientHeight / 2;
-      wrap.scrollTop = Math.max(
-        0,
-        Math.min(target, Math.max(0, wrap.scrollHeight - wrap.clientHeight))
-      );
+      scrollMapToCurrentNode();
+      setTimeout(scrollMapToCurrentNode, 60);
     });
   });
   syncResources();
@@ -1034,6 +1046,7 @@ function renderCombat() {
       '<div class="card-tint"></div>' +
       '<div class="card-fg">' +
       '<div class="card-header">' +
+      '<div class="card-top-cluster">' +
       '<div class="card-header-icons">' +
       '<span class="card-cost-badge"><span class="cost-zeus" aria-hidden="true">⚡</span>' +
       card.cost +
@@ -1044,6 +1057,7 @@ function renderCombat() {
       "</div>" +
       '<div class="card-ext-name">' +
       escapeHtml(card.extNameJa) +
+      "</div>" +
       "</div>" +
       "</div>" +
       '<div class="card-effect-summary">' +
@@ -1188,47 +1202,37 @@ function buildRewardPickButton(def, mockS) {
       : typeof def.previewLines === "function"
         ? def.previewLines(mockS)
         : [];
-  const detailLines =
-    typeof def.previewLines === "function"
-      ? def.previewLines(mockS)
-      : summaryLines;
-  const helpKeys =
-    typeof def.peekHelpKeys === "function" ? def.peekHelpKeys() : [];
   b.innerHTML =
-    '<div class="reward-card-inner ' +
-    def.type +
-    '">' +
-    '<div class="card-art-full">' +
-    '<img class="card-ext-img" src="' +
-    EXT_IMG(def.extId) +
-    '" alt="" />' +
-    "</div>" +
-    '<div class="card-tint"></div>' +
-    '<div class="card-fg">' +
-    '<div class="card-header">' +
-    '<div class="card-header-icons">' +
-    '<span class="card-cost-badge"><span class="cost-zeus" aria-hidden="true">⚡</span>' +
-    def.cost +
-    "</span>" +
-    '<img class="card-skill-corner" src="' +
-    battleIconUrl(def.skillIcon) +
-    '" alt="" />' +
-    "</div>" +
-    '<div class="card-ext-name">' +
-    escapeHtml(def.extNameJa) +
-    "</div>" +
-    "</div>" +
-    '<div class="card-effect-summary">' +
-    summaryLines.map((t) => "<p>" + escapeHtml(t) + "</p>").join("") +
-    "</div>" +
-    '<div class="reward-card-detail">' +
-    detailLines.map((t) => "<p>" + escapeHtml(t) + "</p>").join("") +
-    (helpKeys.length
-      ? '<div class="card-peek-help">' + buildPeekHelpHtml(helpKeys) + "</div>"
-      : "") +
-    "</div>" +
-    "</div>" +
-    "</div>";
+      '<div class="reward-card-inner ' +
+      def.type +
+      '">' +
+      '<div class="card-art-full">' +
+      '<img class="card-ext-img" src="' +
+      EXT_IMG(def.extId) +
+      '" alt="" />' +
+      "</div>" +
+      '<div class="card-tint"></div>' +
+      '<div class="card-fg">' +
+      '<div class="card-header">' +
+      '<div class="card-top-cluster">' +
+      '<div class="card-header-icons">' +
+      '<span class="card-cost-badge"><span class="cost-zeus" aria-hidden="true">⚡</span>' +
+      def.cost +
+      "</span>" +
+      '<img class="card-skill-corner" src="' +
+      battleIconUrl(def.skillIcon) +
+      '" alt="" />' +
+      "</div>" +
+      '<div class="card-ext-name">' +
+      escapeHtml(def.extNameJa) +
+      "</div>" +
+      "</div>" +
+      "</div>" +
+      '<div class="card-effect-summary">' +
+      summaryLines.map((t) => "<p>" + escapeHtml(t) + "</p>").join("") +
+      "</div>" +
+      "</div>" +
+      "</div>";
   return b;
 }
 

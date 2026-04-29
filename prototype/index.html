@@ -420,23 +420,34 @@
     @media (max-width: 420px) {
       .hand { --card-h: 200px; }
     }
+    .hand-scroll {
+      width: 100%;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+      overflow-x: auto;
+      overflow-y: visible;
+      -webkit-overflow-scrolling: touch;
+      padding: 0.35rem 0.25rem 0.15rem;
+      box-sizing: border-box;
+    }
     .hand {
       --card-w: 112px;
       --card-h: 216px;
       display: flex;
       flex-wrap: nowrap;
-      justify-content: space-evenly;
+      justify-content: center;
       align-items: flex-end;
-      gap: 0;
+      gap: 0.55rem;
       min-height: calc(var(--card-h) + 2.25rem);
-      padding: 0.5rem 0.25rem 0.65rem;
-      width: 100%;
-      max-width: 900px;
+      padding: 0.5rem 0.75rem 0.65rem;
+      width: max-content;
+      min-width: min(100%, calc(var(--n-cards, 1) * var(--card-w) + (var(--n-cards, 1) - 1) * 0.55rem + 1.5rem));
       margin-left: auto;
       margin-right: auto;
       position: relative;
       perspective: 800px;
-      touch-action: pan-y;
+      touch-action: pan-x pan-y;
       box-sizing: border-box;
     }
     .hand .card {
@@ -542,9 +553,16 @@
       flex-direction: row;
       align-items: flex-start;
       justify-content: flex-start;
-      gap: 0.28rem;
-      padding: 0.24rem 0.28rem 0.2rem;
+      padding: 0.2rem 0.26rem 0.18rem;
       pointer-events: none;
+    }
+    .card-top-cluster {
+      flex: 1 1 auto;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.12rem;
     }
     .card-header-icons {
       display: flex;
@@ -561,10 +579,10 @@
       height: 24px;
     }
     .card-ext-name {
-      flex: 1 1 auto;
+      width: 100%;
       min-width: 0;
       margin: 0;
-      padding-top: 0.02rem;
+      padding: 0 0.06rem 0;
       text-align: left;
       font-size: clamp(0.52rem, 2.6vw, calc(0.58rem + 4px));
       line-height: 1.12;
@@ -575,7 +593,7 @@
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
-      align-self: flex-start;
+      align-self: stretch;
     }
     .card:hover:not(.disabled) { filter: brightness(1.03); }
     .card.disabled { opacity: 0.35; cursor: not-allowed; }
@@ -612,25 +630,27 @@
       font-size: calc(0.72rem + 4px);
       background: #0a1520ee;
       border: 1px solid #2a5560;
-      border-radius: 5px;
+      border-bottom: none;
+      border-radius: 7px 7px 0 0;
       text-shadow: 0 1px 2px #000;
-      z-index: 2;
+      z-index: 3;
+      box-shadow: 0 1px 0 #0a1520ee;
     }
     .card-cost-badge .cost-zeus { font-size: calc(0.78rem + 4px); line-height: 1; }
     .card-effect-summary {
       position: absolute;
-      left: 0.22rem;
-      right: 0.22rem;
-      bottom: 0.22rem;
+      left: 0;
+      right: 0;
+      bottom: 0;
       height: 35%;
       max-height: 35%;
+      border-radius: 0 0 8px 8px;
       box-sizing: border-box;
       overflow: hidden;
       overflow-y: auto;
       margin: 0;
       background: #d8d0e4;
       color: #1a1420;
-      border-radius: 6px;
       padding: 0.22rem 0.28rem;
       font-size: calc(0.52rem + 6px);
       font-weight: 700;
@@ -806,28 +826,27 @@
       text-align: left;
     }
     .reward-card-inner {
+      --card-w: 112px;
+      --card-h: 216px;
       border-radius: 10px;
       border: 2px solid #5a5068;
       padding: 0;
-      min-height: 236px;
-      height: 236px;
+      width: var(--card-w);
+      min-width: var(--card-w);
+      max-width: var(--card-w);
+      min-height: var(--card-h);
+      height: var(--card-h);
       position: relative;
       display: block;
       overflow: hidden;
       transition: transform 0.1s, box-shadow 0.1s;
+      margin-left: auto;
+      margin-right: auto;
     }
-    .reward-card-inner .reward-card-detail {
-      position: absolute;
-      left: 0.28rem;
-      right: 0.28rem;
-      bottom: calc(35% + 0.35rem);
-      max-height: 28%;
-      overflow-y: auto;
-      font-size: 0.62rem;
-      line-height: 1.35;
-      color: #c8bdd5;
-      text-align: left;
-      z-index: 7;
+    @media (max-width: 420px) {
+      .reward-card-inner {
+        --card-h: 200px;
+      }
     }
     .reward-card-btn:hover .reward-card-inner {
       transform: translateY(-2px);
@@ -850,7 +869,6 @@
         transparent 66%
       );
     }
-    .reward-card-detail p { margin: 0.18rem 0; }
     button.action {
       background: var(--border);
       color: var(--text);
@@ -877,10 +895,16 @@
     }
     #rewardView .reward-picks {
       display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 0.65rem;
     }
     #rewardView .reward-picks button {
+      flex: 0 0 auto;
+      width: auto;
+      max-width: calc(var(--card-w, 112px) + 4px);
       text-align: left;
       padding: 0;
     }
@@ -1082,7 +1106,9 @@
         <div class="hand-energy-row">
           <span class="energy-pill">⚡ <span id="energyVal">0</span> / <span id="energyMax">3</span></span>
         </div>
-        <div id="hand" class="hand" role="list"></div>
+        <div class="hand-scroll">
+          <div id="hand" class="hand" role="list"></div>
+        </div>
         <div class="combat-actions">
           <button type="button" class="btn-deck-pile" id="btnDeckOpen" aria-label="残りデッキを表示">
             <img alt="" data-icon="deck" width="20" height="20" />
