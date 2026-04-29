@@ -1,6 +1,6 @@
 # mycryptotactics
 
-歴史偉人 × **ローグライク × カードバトル**（Slay the Spire 系）の企画と UI モック。
+歴史偉人 × **ローグライク × カードバトル**（Slay the Spire 系）の企画とブラウザプロトタイプ。
 
 ## 開発の進め方（仕様駆動）
 
@@ -21,9 +21,13 @@
 
 **流れの要約**: 憲章を読む → 対象の SPEC を [SPEC-INDEX.md](docs/specs/SPEC-INDEX.md) から特定する → 実装 → PR に受け入れ基準と確認証跡を書く。
 
+### 体験・UI の追加方針（要約）
+
+戦闘まわりのレイアウト・フィードバック・音声・ピクセル補間など **プレイヤーが何をどこで理解するか** は [SPEC-002 §10](docs/specs/SPEC-002-prototype.md#10-体験ui-設計方針機能追加時の参照) に集約する。新機能で画面を変えるときは **先に SPEC を更新** し、近接配置・モバイルでの視認性・数値の検証しやすさを崩さないこと。
+
 ## プロダクト文書とプロトタイプ
 
-- 企画メモ: [docs/CHRONO_TACTICS_DESIGN.md](docs/CHRONO_TACTICS_DESIGN.md)
-- **プレイ用**: [prototype/index.html](prototype/index.html)（ES モジュール。ルート [index.html](index.html) から誘導）。アセットは [bearko/mycryptoheroes](https://github.com/bearko/mycryptoheroes) の raw URL
+- 企画メモ: [docs/CHRONO_TACTICS_DESIGN.md](docs/CHRONO_TACTICS_DESIGN.md)（§7 に体験設計の柱）
+- **プレイ用**: [prototype/index.html](prototype/index.html)（ES モジュール。ルート [index.html](index.html) から誘導）。アセット・BGM/SE は [bearko/mycryptoheroes](https://github.com/bearko/mycryptoheroes) の raw URL
 - 旧 URL `mock/index.html` → プロトタイプへリダイレクト
-- 仕様: [SPEC-001](docs/specs/SPEC-001-roguelike-deck-mock.md)（体験要件） / [SPEC-002](docs/specs/SPEC-002-prototype.md)（プロト構成・手札3列）
+- 仕様: [SPEC-001](docs/specs/SPEC-001-roguelike-deck-mock.md)（体験要件） / [SPEC-002](docs/specs/SPEC-002-prototype.md)（プロト構成・戦闘UX・手札3列）

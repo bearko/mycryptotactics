@@ -63,10 +63,12 @@ function makeCardLibrary(clog, dealDamage, drawCards) {
       skillIcon: "BUF_phy.png",
       cost: 1,
       type: "skl",
-      text: "PHY 5〜10% アップのイメージでブロック +7",
+      text: "PHY 5〜10% アップのイメージ：PHY +2、ブロック +7",
       play(s) {
+        const add = 2;
+        s.playerPhy = (s.playerPhy || 0) + add;
         s.playerBlock += 7;
-        clog("ノービスプロテクション: ブロック +7");
+        clog("ノービスプロテクション: PHY +" + add + "、ブロック +7");
       },
     },
     ext1005: {
@@ -105,8 +107,9 @@ function makeCardLibrary(clog, dealDamage, drawCards) {
       skillIcon: "int.png",
       cost: 1,
       type: "skl",
-      text: "敵全体 INT のイメージでカードを 2 枚引く",
+      text: "敵全体 INT のイメージでカードを 2 枚引く。INT +1",
       play(s) {
+        s.playerInt = (s.playerInt || 0) + 1;
         drawCards(s, 2);
       },
     },

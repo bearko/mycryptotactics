@@ -4,7 +4,14 @@ import {
   shuffle,
   battleIconUrl,
 } from "./cards.js";
-import { img, LEADER, ENEMY_IMG, EXT_IMG, BATTLE_BG } from "./constants.js";
+import {
+  img,
+  LEADER,
+  ENEMY_IMG,
+  EXT_IMG,
+  BATTLE_BG,
+  AUDIO_URLS,
+} from "./constants.js";
 
 let gold = 75;
 let layerIndex = 0;
@@ -12,12 +19,64 @@ let view = "map";
 /** @type {null | { deck: any[], playerHp: number, playerHpMax: number }} */
 let runState = null;
 let combat = null;
+/** @type {HTMLAudioElement | null} */
+let bgmAudio = null;
+
+function stopBgm() {
+  if (bgmAudio) {
+    bgmAudio.pause();
+    bgmAudio.currentTime = 0;
+    bgmAudio = null;
+  }
+}
+
+function startBgmCombat() {
+  stopBgm();
+  try {
+    bgmAudio = new Audio(AUDIO_URLS.bgmPvp());
+    bgmAudio.loop = true;
+    bgmAudio.volume = 0.32;
+    bgmAudio.play().catch(() => {});
+  } catch (_) {}
+}
+
+function playSeClear() {
+  try {
+    const a = new Audio(AUDIO_URLS.seClear());
+    a.volume = 0.55;
+    a.play().catch(() => {});
+  } catch (_) {}
+}
 
 function clog(msg) {
   const el = document.getElementById("clog");
   const p = document.createElement("p");
   p.textContent = msg;
   el.insertBefore(p, el.firstChild);
+}
+
+/** @param {'player-hp'|'player-block'|'player-phy'|'player-int'|'enemy-hp'|'enemy-block'} anchorId */
+function spawnStatFloat(anchorId, delta) {
+  if (!delta) return;
+  const host = document.getElementById(anchorId);
+  if (!host) return;
+  const el = document.createElement("span");
+  el.className =
+    "stat-float " + (delta > 0 ? "stat-float--gain" : "stat-float--loss");
+  el.textContent = (delta > 0 ? "+" : "") + String(delta);
+  host.appendChild(el);
+  requestAnimationFrame(() => el.classList.add("stat-float--show"));
+  setTimeout(() => {
+    el.remove();
+  }, 900);
+}
+
+function flashPortrait(which) {
+  const id = which === "enemy" ? "enemyPortraitWrap" : "playerPortraitWrap";
+  const wrap = document.getElementById(id);
+  if (!wrap) return;
+  wrap.classList.add("portrait-hit");
+  setTimeout(() => wrap.classList.remove("portrait-hit"), 380);
 }
 
 function dealDamage(s, base) {
@@ -27,6 +86,7 @@ function dealDamage(s, base) {
   s.enemyBlock -= blocked;
   v -= blocked;
   s.enemyHp = Math.max(0, s.enemyHp - v);
+  flashPortrait("enemy");
   clog(blocked ? `敵に ${v} ダメージ（ブロックで ${blocked} 軽減）` : `敵に ${v} ダメージ`);
 }
 
@@ -107,6 +167,9 @@ function renderMap() {
 }
 
 function showView(name) {
+  if (view === "combat" && name !== "combat") {
+    stopBgm();
+  }
   view = name;
   document.getElementById("mapView").classList.toggle("hidden", name !== "map");
   document.getElementById("combatView").classList.toggle("hidden", name !== "combat");
@@ -144,11 +207,15 @@ function startCombat(elite, boss) {
     hand: [],
     playerHp,
     playerHpMax,
+    playerPhy: LEADER.basePhy,
+    playerInt: LEADER.baseInt,
     playerBlock: 0,
     energy: 3,
     energyMax: 3,
     enemyHp,
     enemyHpMax: enemyHp,
+    enemyPhy: boss ? 8 : elite ? 6 : 5,
+    enemyInt: boss ? 7 : elite ? 5 : 4,
     enemyBlock: 0,
     enemyVulnerable: 0,
     bonusEnergyNext: 0,
@@ -158,9 +225,11 @@ function startCombat(elite, boss) {
     boss: !!boss,
     enemyName: boss ? "門番：影の軍勢" : elite ? "精鋭" : "斥候",
     enemyImgId: enemyId,
+    _lastUi: null,
   };
   combat.drawPile = shuffle(combat.deck.map((c) => copyCard(c.libraryKey)));
   showView("combat");
+  startBgmCombat();
   const bgFile = boss ? "1004" : elite ? "1002" : "1001";
   document.getElementById("combatBg").style.backgroundImage =
     "url('" + BATTLE_BG(bgFile) + "')";
@@ -175,8 +244,8 @@ function startCombat(elite, boss) {
 
 function intentText() {
   const it = combat.enemyIntent;
-  if (it.kind === "attack") return "次の意図\n攻撃 " + it.value;
-  if (it.kind === "block") return "次の意図\nブロック " + it.value;
+  if (it.kind === "attack") return "ATK " + it.value;
+  if (it.kind === "block") return "BLOCK " + it.value;
   return "—";
 }
 
@@ -204,23 +273,54 @@ function startPlayerTurn() {
   renderCombat();
 }
 
+function diffUiFloats() {
+  const cur = {
+    playerHp: combat.playerHp,
+    playerBlock: combat.playerBlock,
+    playerPhy: combat.playerPhy,
+    playerInt: combat.playerInt,
+    enemyHp: combat.enemyHp,
+    enemyBlock: combat.enemyBlock,
+  };
+  const prev = combat._lastUi;
+  if (prev) {
+    const dHp = cur.playerHp - prev.playerHp;
+    if (dHp !== 0) spawnStatFloat("player-hp", dHp);
+    const dBlk = cur.playerBlock - prev.playerBlock;
+    if (dBlk !== 0) spawnStatFloat("player-block", dBlk);
+    const dPhy = cur.playerPhy - prev.playerPhy;
+    if (dPhy !== 0) spawnStatFloat("player-phy", dPhy);
+    const dInt = cur.playerInt - prev.playerInt;
+    if (dInt !== 0) spawnStatFloat("player-int", dInt);
+    const dEhp = cur.enemyHp - prev.enemyHp;
+    if (dEhp !== 0) spawnStatFloat("enemy-hp", dEhp);
+    const dEblk = cur.enemyBlock - prev.enemyBlock;
+    if (dEblk !== 0) spawnStatFloat("enemy-block", dEblk);
+  }
+}
+
 function renderCombat() {
   document.getElementById("pHp").textContent = String(combat.playerHp);
   document.getElementById("pHpMax").textContent = String(combat.playerHpMax);
+  document.getElementById("pPhy").textContent = String(combat.playerPhy);
+  document.getElementById("pInt").textContent = String(combat.playerInt);
   document.getElementById("pBlock").textContent = String(combat.playerBlock);
   document.getElementById("eHp").textContent =
     String(combat.enemyHp) + " / " + String(combat.enemyHpMax);
+  document.getElementById("ePhy").textContent = String(combat.enemyPhy);
+  document.getElementById("eInt").textContent = String(combat.enemyInt);
   document.getElementById("eBlock").textContent = String(combat.enemyBlock);
   document.getElementById("energyVal").textContent = String(combat.energy);
   document.getElementById("energyMax").textContent = String(combat.energyMax);
   document.getElementById("enemyIntent").textContent = intentText();
+  diffUiFloats();
   const handEl = document.getElementById("hand");
   handEl.innerHTML = "";
   combat.hand.forEach((card, idx) => {
     const el = document.createElement("div");
     el.className = "card " + card.type + (card.cost > combat.energy ? " disabled" : "");
     el.innerHTML =
-      '<span class="card-cost">' +
+      '<span class="card-cost-badge">' +
       card.cost +
       "</span>" +
       '<img class="card-ext-img" src="' +
@@ -243,6 +343,14 @@ function renderCombat() {
     handEl.appendChild(el);
   });
   syncResources();
+  combat._lastUi = {
+    playerHp: combat.playerHp,
+    playerBlock: combat.playerBlock,
+    playerPhy: combat.playerPhy,
+    playerInt: combat.playerInt,
+    enemyHp: combat.enemyHp,
+    enemyBlock: combat.enemyBlock,
+  };
 }
 
 function playCard(idx) {
@@ -267,6 +375,7 @@ function enemyTurn() {
     combat.playerBlock -= blk;
     dmg -= blk;
     combat.playerHp -= dmg;
+    flashPortrait("player");
     clog(`敵の攻撃 → ${dmg} ダメージ` + (blk ? `（ブロック ${blk}）` : ""));
   } else {
     combat.enemyBlock += it.value;
@@ -326,6 +435,9 @@ function advanceAfterNode() {
     combat = null;
   }
   layerIndex++;
+  if (layerIndex >= MAP_LAYERS.length) {
+    playSeClear();
+  }
   showView("map");
   renderMap();
 }
@@ -371,6 +483,7 @@ function resetRun() {
   layerIndex = 0;
   combat = null;
   runState = null;
+  stopBgm();
   closeReward();
   showView("map");
   renderMap();
@@ -391,7 +504,6 @@ function wireAssets() {
       "Image/BattleIcons/Parameters/" + el.getAttribute("data-stat") + ".png"
     );
   });
-  document.getElementById("brandIcon").src = img("Image/Icons/mch_icon.png");
 }
 
 function init() {
