@@ -234,8 +234,7 @@
       top: 50%;
       width: 120px;
       height: 120px;
-      margin-left: -60px;
-      margin-top: -60px;
+      margin: 0;
       pointer-events: none;
       z-index: 4;
       background-repeat: no-repeat;
@@ -243,7 +242,7 @@
       image-rendering: crisp-edges;
       animation: portrait-sprite-fx 0.75s steps(8) forwards;
       opacity: 0.95;
-      transform: scale(6.6);
+      transform: translate(-50%, -50%) scale(6.6);
       transform-origin: center center;
     }
     @keyframes portrait-sprite-fx {
@@ -405,31 +404,36 @@
     }
 
     @media (max-width: 420px) {
-      .hand { --fan-w: 56px; }
+      .hand {
+        --card-w: 168px;
+        --card-h: 210px;
+      }
     }
     .hand {
-      --fan-w: 62px;
+      --card-w: 186px;
+      --card-h: 234px;
       display: flex;
       justify-content: center;
       align-items: flex-end;
-      min-height: 220px;
-      padding: 0.45rem 0.5rem 0.65rem;
+      min-height: 280px;
+      padding: 0.5rem 0.75rem 0.75rem;
       width: 100%;
       position: relative;
       perspective: 800px;
+      touch-action: pan-y;
     }
     .hand .card {
       position: relative;
-      flex: 0 0 var(--fan-w);
-      width: var(--fan-w);
-      max-width: var(--fan-w);
-      min-width: var(--fan-w);
-      height: 156px;
-      margin-left: calc(-0.72 * var(--fan-w));
+      flex: 0 0 var(--card-w);
+      width: var(--card-w);
+      max-width: var(--card-w);
+      min-width: var(--card-w);
+      height: var(--card-h);
+      margin-left: calc(0.4 * var(--card-w));
       --peek-lift: 0px;
       z-index: var(--i);
       transform-origin: 50% 100%;
-      transform: translateY(var(--peek-lift)) rotate(var(--rot, 0deg)) scaleX(3) scaleY(1.5);
+      transform: translateY(var(--peek-lift)) rotate(var(--rot, 0deg));
       transition: transform 0.18s ease, box-shadow 0.18s, margin 0.18s, filter 0.18s;
     }
     .hand .card:first-child { margin-left: 0; }
@@ -533,7 +537,7 @@
       width: 100%;
       flex: 1 1 auto;
       min-height: 0;
-      max-height: 56px;
+      max-height: 96px;
       object-fit: contain;
       margin: 0.05rem 0 0.12rem;
       filter: drop-shadow(0 2px 4px #0006);
@@ -1061,7 +1065,7 @@
           </ul>
           <h3>戦闘</h3>
           <ul>
-            <li>手札は<strong>扇状に重なったカード</strong>です。PC はカードに載せると詳細が開き、クリックでプレイ。スマホは<strong>タップで即プレイ</strong>、または<strong>長押し</strong>で詳細を出したうえで、指を離す位置のカードがプレイされます（長押し中に他のカードへ指を滑らせて詳細を切り替え可能）。</li>
+            <li>手札は<strong>扇状に重なったカード</strong>です。PC はカードに載せると詳細が開き、クリックでプレイ。<strong>スマホ</strong>は手札エリアで<strong>指を置いたカードにフォーカス（白枠）</strong>が付き、<strong>同じカードの上で指を離すとプレイ</strong>します。長押しで詳細を出したまま、他のカードへ指を滑らせてフォーカスを切り替えられます。</li>
             <li>エナジーは手札の上に <code>⚡ 現在 / 最大</code> で表示されます。</li>
             <li><strong>ターン終了</strong>は右端。左の山札アイコンから<strong>残りデッキ枚数と内訳</strong>（引く順は非表示）を確認できます。</li>
             <li>敵撃破後は<strong>VICTORY カットイン</strong> → タップで<strong>報酬選択画面</strong>へ。カードを 1 枚選ぶかスキップでマップに戻ります。</li>

@@ -732,164 +732,155 @@ function playCardByRef(cardRef) {
   playCard(idx);
 }
 
-function bindHandCard(el, idx, card) {
-  let holdTimer = null;
-  let longPressArmed = false;
-  let startX = 0;
-  let startY = 0;
-  let lastX = 0;
-  let lastY = 0;
-  let activeTouchId = null;
-
-  const cancelHold = () => {
-    if (holdTimer) {
-      clearTimeout(holdTimer);
-      holdTimer = null;
-    }
-    longPressArmed = false;
-    activeTouchId = null;
-    el.classList.remove("card--peek");
-    el.style.setProperty("--peek-lift", "0px");
-    document.removeEventListener("touchmove", onDocTouchMove, true);
-    document.removeEventListener("touchend", onDocTouchEnd, true);
-    document.removeEventListener("touchcancel", onDocTouchCancel, true);
-  };
-
-  function setPeekForElement(_targetEl, clientX, clientY) {
-    const cards = Array.from(document.querySelectorAll("#hand .card"));
-    let hit = null;
-    for (const c of cards) {
-      if (c.classList.contains("disabled")) continue;
-      const r = c.getBoundingClientRect();
-      if (
-        clientX >= r.left &&
-        clientX <= r.right &&
-        clientY >= r.top &&
-        clientY <= r.bottom
-      ) {
-        hit = c;
-        break;
-      }
-    }
-    cards.forEach((c) => {
-      c.classList.remove("card--peek");
-      c.style.setProperty("--peek-lift", "0px");
-    });
-    if (hit) {
-      hit.classList.add("card--peek");
-      refreshHandPeekLift();
-    }
-  };
-
-  const onDocTouchMove = (ev) => {
-    if (activeTouchId === null) return;
-    const t =
-      Array.from(ev.touches).find((x) => x.identifier === activeTouchId) ||
-      Array.from(ev.changedTouches).find((x) => x.identifier === activeTouchId);
-    if (!t) return;
-    lastX = t.clientX;
-    lastY = t.clientY;
-    if (holdTimer) {
-      const dx = t.clientX - startX;
-      const dy = t.clientY - startY;
-      if (dx * dx + dy * dy > 12 * 12) {
-        clearTimeout(holdTimer);
-        holdTimer = null;
-      }
-    }
-    if (longPressArmed) {
-      setPeekForElement(null, lastX, lastY);
-    }
-  };
-
-  const finishTouchInteraction = (ev) => {
-    const t =
-      Array.from(ev.changedTouches).find((x) => x.identifier === activeTouchId) ||
-      ev.changedTouches[0];
-    document.removeEventListener("touchmove", onDocTouchMove, true);
-    document.removeEventListener("touchend", onDocTouchEnd, true);
-    document.removeEventListener("touchcancel", onDocTouchCancel, true);
-    if (holdTimer) {
-      clearTimeout(holdTimer);
-      holdTimer = null;
-    }
-    if (longPressArmed && t) {
-      const cards = Array.from(document.querySelectorAll("#hand .card"));
-      let hitIdx = -1;
-      for (let i = 0; i < cards.length; i++) {
-        const c = cards[i];
-        if (c.classList.contains("disabled")) continue;
-        const r = c.getBoundingClientRect();
-        if (
-          t.clientX >= r.left &&
-          t.clientX <= r.right &&
-          t.clientY >= r.top &&
-          t.clientY <= r.bottom
-        ) {
-          hitIdx = i;
-          break;
-        }
-      }
-      cards.forEach((c) => {
-        c.classList.remove("card--peek");
-        c.style.setProperty("--peek-lift", "0px");
-      });
-      if (
-        hitIdx >= 0 &&
-        combat &&
-        combat.hand[hitIdx] &&
-        combat.hand[hitIdx].cost <= combat.energy
-      ) {
-        playCardByRef(combat.hand[hitIdx]);
-      }
-    } else {
-      el.classList.remove("card--peek");
-      el.style.setProperty("--peek-lift", "0px");
-      if (!longPressArmed && t && combat) {
-        const cards = Array.from(document.querySelectorAll("#hand .card"));
-        let hitIdx = -1;
-        for (let i = 0; i < cards.length; i++) {
-          const c = cards[i];
-          if (c.classList.contains("disabled")) continue;
-          const r = c.getBoundingClientRect();
-          if (
-            t.clientX >= r.left &&
-            t.clientX <= r.right &&
-            t.clientY >= r.top &&
-            t.clientY <= r.bottom
-          ) {
-            hitIdx = i;
-            break;
-          }
-        }
-        if (
-          hitIdx >= 0 &&
-          combat.hand[hitIdx] &&
-          combat.hand[hitIdx].cost <= combat.energy
-        ) {
-          playCardByRef(combat.hand[hitIdx]);
-        }
-      }
-    }
-    longPressArmed = false;
-    activeTouchId = null;
-  };
-
-  const onDocTouchEnd = (ev) => {
-    if (activeTouchId === null) return;
+/** @param {number} clientX @param {number} clientY @returns {number} hand index or -1 */
+function handIndexAtPoint(clientX, clientY) {
+  const cards = Array.from(document.querySelectorAll("#hand .card"));
+  for (let i = 0; i < cards.length; i++) {
+    const c = cards[i];
+    if (c.classList.contains("disabled")) continue;
+    const r = c.getBoundingClientRect();
     if (
-      !Array.from(ev.changedTouches).some((x) => x.identifier === activeTouchId)
+      clientX >= r.left &&
+      clientX <= r.right &&
+      clientY >= r.top &&
+      clientY <= r.bottom
+    ) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+function setHandPeekAt(clientX, clientY) {
+  const idx = handIndexAtPoint(clientX, clientY);
+  const cards = Array.from(document.querySelectorAll("#hand .card"));
+  cards.forEach((c) => {
+    c.classList.remove("card--peek");
+    c.style.setProperty("--peek-lift", "0px");
+  });
+  if (idx >= 0 && cards[idx]) {
+    cards[idx].classList.add("card--peek");
+    refreshHandPeekLift();
+  }
+}
+
+let handTouchBound = false;
+let handTouchId = null;
+let handLongPress = false;
+let handHoldTimer = null;
+let handStartX = 0;
+let handStartY = 0;
+let handLastX = 0;
+let handLastY = 0;
+
+function bindHandTouchDelegation() {
+  const handEl = document.getElementById("hand");
+  if (!handEl || handTouchBound) return;
+  handTouchBound = true;
+
+  const removeDocListeners = () => {
+    document.removeEventListener("touchmove", onHandDocMove, true);
+    document.removeEventListener("touchend", onHandDocEnd, true);
+    document.removeEventListener("touchcancel", onHandDocCancel, true);
+  };
+
+  const resetGestureState = () => {
+    removeDocListeners();
+    handTouchId = null;
+    handLongPress = false;
+    if (handHoldTimer) {
+      clearTimeout(handHoldTimer);
+      handHoldTimer = null;
+    }
+  };
+
+  const onHandDocMove = (ev) => {
+    if (handTouchId === null || view !== "combat" || !combat) return;
+    const t =
+      Array.from(ev.touches).find((x) => x.identifier === handTouchId) ||
+      Array.from(ev.changedTouches).find((x) => x.identifier === handTouchId);
+    if (!t) return;
+    handLastX = t.clientX;
+    handLastY = t.clientY;
+    if (handHoldTimer) {
+      const dx = t.clientX - handStartX;
+      const dy = t.clientY - handStartY;
+      if (dx * dx + dy * dy > 12 * 12) {
+        clearTimeout(handHoldTimer);
+        handHoldTimer = null;
+      }
+    }
+    setHandPeekAt(handLastX, handLastY);
+  };
+
+  const onHandDocEnd = (ev) => {
+    if (handTouchId === null) return;
+    if (
+      !Array.from(ev.changedTouches).some((x) => x.identifier === handTouchId)
     ) {
       return;
     }
-    finishTouchInteraction(ev);
+    const t =
+      Array.from(ev.changedTouches).find((x) => x.identifier === handTouchId) ||
+      ev.changedTouches[0];
+    removeDocListeners();
+    if (handHoldTimer) {
+      clearTimeout(handHoldTimer);
+      handHoldTimer = null;
+    }
+    const releaseIdx = handIndexAtPoint(t.clientX, t.clientY);
+    document.querySelectorAll("#hand .card").forEach((c) => {
+      c.classList.remove("card--peek");
+      c.style.setProperty("--peek-lift", "0px");
+    });
+    if (
+      combat &&
+      view === "combat" &&
+      releaseIdx >= 0 &&
+      combat.hand[releaseIdx] &&
+      combat.hand[releaseIdx].cost <= combat.energy
+    ) {
+      playCardByRef(combat.hand[releaseIdx]);
+    }
+    handTouchId = null;
+    handLongPress = false;
   };
 
-  const onDocTouchCancel = (ev) => {
-    if (activeTouchId === null) return;
-    cancelHold();
+  const onHandDocCancel = () => {
+    document.querySelectorAll("#hand .card").forEach((c) => {
+      c.classList.remove("card--peek");
+      c.style.setProperty("--peek-lift", "0px");
+    });
+    resetGestureState();
   };
 
+  handEl.addEventListener(
+    "touchstart",
+    (ev) => {
+      if (!combat || view !== "combat" || ev.touches.length !== 1) return;
+      resetGestureState();
+      const t = ev.touches[0];
+      handTouchId = t.identifier;
+      handStartX = t.clientX;
+      handStartY = t.clientY;
+      handLastX = t.clientX;
+      handLastY = t.clientY;
+      handLongPress = false;
+      setHandPeekAt(handLastX, handLastY);
+      document.addEventListener("touchmove", onHandDocMove, true);
+      document.addEventListener("touchend", onHandDocEnd, true);
+      document.addEventListener("touchcancel", onHandDocCancel, true);
+      handHoldTimer = setTimeout(() => {
+        handHoldTimer = null;
+        handLongPress = true;
+        setHandPeekAt(handLastX, handLastY);
+      }, 380);
+    },
+    { passive: true }
+  );
+}
+
+function bindHandCard(el, idx, card) {
   const onPeek = () => {
     document.querySelectorAll("#hand .card--peek").forEach((c) => {
       if (c !== el) {
@@ -916,32 +907,6 @@ function bindHandCard(el, idx, card) {
     if (card.cost > combat.energy || el.classList.contains("disabled")) return;
     playCard(idx);
   });
-
-  el.addEventListener(
-    "touchstart",
-    (ev) => {
-      if (ev.touches.length !== 1) return;
-      const t = ev.touches[0];
-      activeTouchId = t.identifier;
-      startX = t.clientX;
-      startY = t.clientY;
-      lastX = t.clientX;
-      lastY = t.clientY;
-      longPressArmed = false;
-      selectionCancelled = false;
-      el.style.setProperty("--peek-lift", "0px");
-      if (holdTimer) clearTimeout(holdTimer);
-      document.addEventListener("touchmove", onDocTouchMove, true);
-      document.addEventListener("touchend", onDocTouchEnd, true);
-      document.addEventListener("touchcancel", onDocTouchCancel, true);
-      holdTimer = setTimeout(() => {
-        holdTimer = null;
-        longPressArmed = true;
-        setPeekForElement(null, lastX, lastY);
-      }, 320);
-    },
-    { passive: true }
-  );
 }
 
 function renderCombat() {
@@ -1385,6 +1350,7 @@ function init() {
   document.getElementById("btnRestart").addEventListener("click", resetRun);
   wireAssets();
   initHelp();
+  bindHandTouchDelegation();
   showView("map");
   renderMap();
 }
