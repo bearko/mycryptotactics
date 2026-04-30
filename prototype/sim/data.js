@@ -72,9 +72,13 @@ const HEROES = [
     // PHY-balanced hero — actual game starter (kept as baseline)
     starterDeck: { ext1001: 5, ext1004: 4, ext1008: 1 } },
   { heroId: 1001, key: "doyle",    nameJa: "ドイル",
-    hpMax: 60, basePhy: 7,  baseInt: 14, baseAgi: 8,  passiveKey: "doyle",
-    // iter-001: PHY 寄せ→INT 寄せに変更。basePhy 7 では PHY カード機能しない
-    starterDeck: { ext1003: 3, ext1008: 4, ext1004: 3 } },
+    hpMax: 85, basePhy: 7,  baseInt: 23, baseAgi: 8,  passiveKey: "doyle",
+    // iter-004: hpMax 72→80 (+11%), baseInt 19→22 (+16%) — doyle ch1 39% / 格差 2.56x 是正、対 boss 上杉単独火力底上げ
+    // iter-005: starterDeck から ext1008 を 1 枚減らし ext1004 (guard+phy) を 1 枚追加 — ch1 boss 上杉謙信戦の防御札不足を是正、格差 1.92x 詰め
+    // iter-006: ext1004 を 1→2 にさらに増やし ext1008 を 3→2 に減らす — 格差 1.73x 詰め停滞、対 boss 上杉戦の生存性を直接上げる
+    // iter-010: ext1004 を 2→3 に増やし ext1003 を 2→1 に減らす — 格差 1.50x 境界、ch1 boss 上杉戦の防御札さらに増強
+    // iter-011: ext1004 を 3→4 に増やし ext1008 を 2→1 に減らす — 格差 1.53x OUT、上杉謙信集中 85% 維持、防御札さらに 1 枚追加で生存性底上げ
+    starterDeck: { ext1003: 1, ext1008: 1, ext1002: 4, ext1004: 4 } },
   { heroId: 1003, key: "zhang",    nameJa: "張遼",
     hpMax: 85, basePhy: 15, baseInt: 6,  baseAgi: 10, passiveKey: "zhang",
     // Tank hero — high HP/PHY, weaker INT

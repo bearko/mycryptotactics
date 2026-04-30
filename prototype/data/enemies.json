@@ -87,18 +87,18 @@
     "id": "hl-001",
     "name": "ハートブリード ヴェンティ",
     "hp": 24,
-    "phy": 12,
+    "phy": 13,
     "int": 6,
     "agi": 8,
     "imgId": 124,
     "intentRota": [
       {
         "kind": "attack",
-        "phyPct": 95
+        "phyPct": 100
       },
       {
         "kind": "attackBleed",
-        "phyPct": 75,
+        "phyPct": 80,
         "bleedStacks": 2
       },
       {
@@ -110,16 +110,16 @@
   "hl-002": {
     "id": "hl-002",
     "name": "バイトバンディット ヴェンティ",
-    "hp": 26,
-    "phy": 16,
+    "hp": 30,
+    "phy": 21,
     "int": 4,
     "agi": 10,
     "imgId": 164,
     "intentRota": [
       {
         "kind": "attackBleed",
-        "phyPct": 90,
-        "bleedStacks": 1
+        "phyPct": 95,
+        "bleedStacks": 2
       },
       {
         "kind": "guard",
@@ -127,26 +127,26 @@
       },
       {
         "kind": "attack",
-        "phyPct": 115
+        "phyPct": 110
       }
     ]
   },
   "hl-003": {
     "id": "hl-003",
     "name": "クリーパー マキアート",
-    "hp": 20,
-    "phy": 11,
+    "hp": 25,
+    "phy": 14,
     "int": 9,
     "agi": 14,
     "imgId": 105,
     "intentRota": [
       {
         "kind": "attack",
-        "phyPct": 85
+        "phyPct": 90
       },
       {
         "kind": "attack",
-        "phyPct": 90
+        "phyPct": 95
       },
       {
         "kind": "guard",
@@ -157,7 +157,7 @@
   "hl-e01": {
     "id": "hl-e01",
     "name": "ハートブリード フラペチーノ",
-    "hp": 44,
+    "hp": 43,
     "phy": 19,
     "int": 7,
     "agi": 10,
@@ -181,8 +181,8 @@
   "vp-001": {
     "id": "vp-001",
     "name": "カスケード ヴェンティ",
-    "hp": 24,
-    "phy": 13,
+    "hp": 30,
+    "phy": 17,
     "int": 6,
     "agi": 8,
     "imgId": 378,
@@ -253,8 +253,8 @@
   "vp-e01": {
     "id": "vp-e01",
     "name": "カスケード フラペチーノ",
-    "hp": 48,
-    "phy": 20,
+    "hp": 72,
+    "phy": 29,
     "int": 8,
     "agi": 10,
     "imgId": 380,
@@ -353,15 +353,15 @@
   "en-e01": {
     "id": "en-e01",
     "name": "ベーグル フラペチーノ",
-    "hp": 62,
-    "phy": 22,
+    "hp": 52,
+    "phy": 17,
     "int": 10,
     "agi": 12,
     "imgId": 186,
     "intentRota": [
       {
         "kind": "attackDouble",
-        "phyPct": 90
+        "phyPct": 70
       },
       {
         "kind": "guard",
@@ -369,11 +369,11 @@
       },
       {
         "kind": "special",
-        "pct": 18
+        "pct": 16
       },
       {
         "kind": "buffSelf",
-        "phyAdd": 4
+        "phyAdd": 3
       }
     ]
   },

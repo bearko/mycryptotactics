@@ -19,9 +19,9 @@ export const HERO_ROSTER = [
   {
     heroId: 1001,
     nameJa: "コナン・ドイル",
-    hpMax: 60,
+    hpMax: 85,
     basePhy: 7,
-    baseInt: 14,
+    baseInt: 23,
     baseAgi: 8,
     passiveKey: "doyle",
     passiveName: "シャーロック・ホームズ",
