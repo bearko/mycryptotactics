@@ -32,6 +32,7 @@ import { ENEMY_DEFS } from "./enemies.js";
 import { BOSS_DEFS } from "./bosses.js";
 import { CHAPTERS } from "./chapters.js";
 import { generateChapterMap } from "./maps.js";
+import { LL_EXT_POOL } from "./ll-extensions.js";
 
 // ─── ナビゲーター「マイ」 ────────────────────────────────────────
 const MAI_SD_URL = "./MAI_SD.png";
@@ -208,6 +209,187 @@ function playBattleSe(kind) {
   try { const a = new Audio(url); a.volume = 0.48; a.play().catch(() => {}); } catch (_) {}
 }
 
+// ─── 紙吹雪 ──────────────────────────────────────────────────────
+function startConfetti() {
+  const canvas = document.getElementById("confettiCanvas");
+  if (!canvas) return null;
+  canvas.style.display = "block";
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const ctx = canvas.getContext("2d");
+  const COLORS = [
+    "#1E90FF","#9ACD32","#FFD700","#FF69B4","#6A5ACD",
+    "#ADD8E6","#EE82EE","#90EE90","#4682B4","#F4A460",
+    "#D2691E","#DC143C",
+  ];
+  const pts = Array.from({ length: 120 }, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height - canvas.height,
+    r: 4 + Math.random() * 6,
+    d: 1 + Math.random() * 2,
+    color: COLORS[Math.floor(Math.random() * COLORS.length)],
+    tilt: 0,
+    tiltAngle: 0,
+    tiltInc: 0.07 + Math.random() * 0.05,
+  }));
+  let rafId;
+  const draw = () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    pts.forEach(p => {
+      ctx.beginPath();
+      ctx.lineWidth = p.r / 2;
+      ctx.strokeStyle = p.color;
+      ctx.moveTo(p.x + p.tilt + p.r / 4, p.y);
+      ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 4);
+      ctx.stroke();
+      p.tiltAngle += p.tiltInc;
+      p.y += (Math.cos(p.d) + 1 + p.r / 2) * 0.75;
+      p.tilt = Math.sin(p.tiltAngle - p.d / 3) * 15;
+      if (p.y > canvas.height) {
+        p.y = -10; p.x = Math.random() * canvas.width;
+      }
+    });
+    rafId = requestAnimationFrame(draw);
+  };
+  draw();
+  return () => {
+    cancelAnimationFrame(rafId);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    canvas.style.display = "none";
+  };
+}
+
+// ─── LLエクステ 獲得モーダル ──────────────────────────────────────
+function showLlExtModal(ext) {
+  const modal = document.getElementById("llExtModal");
+  if (!modal) return Promise.resolve();
+  const nameEl  = document.getElementById("llExtModalName");
+  const skillEl = document.getElementById("llExtModalSkill");
+  const descEl  = document.getElementById("llExtModalDesc");
+  if (nameEl)  nameEl.textContent  = ext.name;
+  if (skillEl) skillEl.textContent = `【${ext.skillName}】`;
+  if (descEl)  descEl.textContent  = ext.desc;
+  modal.classList.remove("hidden");
+  modal.removeAttribute("aria-hidden");
+  const stopConfetti = startConfetti();
+  return new Promise((resolve) => {
+    const btn = document.getElementById("btnLlExtClaim");
+    const onClaim = () => {
+      btn.removeEventListener("click", onClaim);
+      modal.classList.add("hidden");
+      modal.setAttribute("aria-hidden", "true");
+      stopConfetti?.();
+      resolve();
+    };
+    btn.addEventListener("click", onClaim);
+  });
+}
+
+// ─── LLエクステ スロット UI 同期 ─────────────────────────────────
+function syncLlExtSlots() {
+  if (!runState) return;
+  const slots = runState.llExtSlots;
+  const slotIds = [
+    ["mapLlSlot0",     "mapLlSlot1"],
+    ["combatLlSlot0", "combatLlSlot1"],
+  ];
+  for (const pair of slotIds) {
+    for (let i = 0; i < 2; i++) {
+      const el = document.getElementById(pair[i]);
+      if (!el) continue;
+      const ext = slots[i];
+      if (ext) {
+        el.classList.add("ll-slot--filled");
+        el.title = `${ext.name}【${ext.skillName}】 ${ext.desc}`;
+        el.innerHTML = `<img src="${EXT_IMG(ext.extId)}" alt="${ext.name}" onerror="this.style.opacity='0'" />`;
+      } else {
+        el.classList.remove("ll-slot--filled");
+        el.title = "";
+        el.textContent = "—";
+      }
+    }
+  }
+  renderLlExtBar();
+}
+
+function renderLlExtBar() {
+  const bar = document.getElementById("llExtBar");
+  if (!bar || !runState) return;
+  const slots = runState.llExtSlots;
+  const inCombat = combat && view === "combat";
+  if (!inCombat) { bar.classList.add("hidden"); return; }
+  const hasAny = slots.some(s => s !== null);
+  bar.classList.toggle("hidden", !hasAny);
+  for (let i = 0; i < 2; i++) {
+    const btn = document.getElementById(`btnUseLlExt${i}`);
+    if (!btn) continue;
+    const ext = slots[i];
+    if (ext) {
+      btn.classList.remove("ll-slot--empty");
+      btn.title = ext.desc;
+      btn.innerHTML =
+        `<img src="${EXT_IMG(ext.extId)}" alt="" onerror="this.style.opacity='0'" style="width:16px;height:16px;object-fit:contain;flex-shrink:0" />` +
+        `<span>${ext.skillName}</span>`;
+    } else {
+      btn.classList.add("ll-slot--empty");
+      btn.title = "";
+      btn.textContent = "空きスロット";
+    }
+  }
+}
+
+// ─── LLエクステ エフェクト適用 ───────────────────────────────────
+function applyLlExtEffect(ext) {
+  const s = combat;
+  clog(`【LLエクステ】${ext.name}「${ext.skillName}」発動！`);
+  switch (ext.effectKey) {
+    case "blade":
+      dealPhySkillToEnemyRange(s, 300, 400);
+      break;
+    case "grande":
+      dealIntSkillToEnemy(s, 400, 500, false);
+      break;
+    case "pen":
+      healPlayerFromIntSkill(s, 200, 250);
+      break;
+    case "armor": {
+      const boost = Math.floor(s.playerPhy * 0.5);
+      s.playerPhy += boost;
+      s.playerGuard = (s.playerGuard || 0) + 20;
+      playBattleSe("buff"); playPortraitEffect("player", "buff");
+      clog(`PHY+${boost} GRD+20`);
+      break;
+    }
+    case "blue":
+      healPlayerFromIntSkill(s, 200, 250);
+      s.playerInt += 4;
+      playBattleSe("buff"); playPortraitEffect("player", "buff");
+      clog("INT+4");
+      break;
+    case "fish":
+      healPlayerFromIntSkill(s, 150, 200);
+      s.playerPhy += 3;
+      s.hasResurrection = true;
+      playBattleSe("buff"); playPortraitEffect("player", "buff");
+      clog("PHY+3 リザレクション付与");
+      break;
+    default:
+      clog("（不明なエフェクト）");
+  }
+}
+
+function useLlExt(slotIdx) {
+  if (!combat || view !== "combat") return;
+  const ext = runState?.llExtSlots?.[slotIdx];
+  if (!ext) return;
+  runState.llExtSlots[slotIdx] = null;
+  applyLlExtEffect(ext);
+  if (combat.enemyHp <= 0) { endCombatWin(); return; }
+  if (combat.playerHp <= 0) { endCombatLoss(); return; }
+  syncLlExtSlots();
+  renderCombat();
+}
+
 // ─── ログ / エフェクト ────────────────────────────────────────────
 function clog(msg) {
   const el = document.getElementById("clog");
@@ -268,6 +450,18 @@ function lungePortrait(who) {
 }
 
 // ─── ダメージ計算補助 ─────────────────────────────────────────────
+/** リザレクション発動チェック（致死ダメージ後に HP を 1 に戻す） */
+function checkResurrection(s) {
+  if (s.playerHp <= 0 && s.hasResurrection) {
+    s.playerHp = 1;
+    s.hasResurrection = false;
+    playBattleSe("buff"); playPortraitEffect("player", "buff");
+    clog("【リザレクション】致死ダメージを耐えた！HP 1 で生存！");
+    return true;
+  }
+  return false;
+}
+
 function applyGuardToDamage(target, raw) {
   const key = target === "player" ? "playerGuard" : "enemyGuard";
   let g = combat[key] || 0;
@@ -380,6 +574,7 @@ function dealPhySkillFromEnemyToPlayer(s, skillPct) {
   }
   total = applyGuardToDamage("player", total);
   s.playerHp = Math.max(0, s.playerHp - total);
+  checkResurrection(s);
   lungePortrait("enemy");
   flashPortrait("player");
   playPortraitEffect("player", "hit");
@@ -413,6 +608,7 @@ function dealIntSkillFromEnemyToPlayer(s, skillPct) {
   }
   total = applyGuardToDamage("player", total);
   s.playerHp = Math.max(0, s.playerHp - total);
+  checkResurrection(s);
   lungePortrait("enemy");
   flashPortrait("player");
   playPortraitEffect("player", "hit");
@@ -437,6 +633,7 @@ function dealSpecialMaxHpPercentToPlayer(s, pct) {
   if (s.damageReducedThisTurn) raw = Math.ceil(raw / 2);
   raw = applyDamageThroughShield(s, "player", raw);
   s.playerHp = Math.max(0, s.playerHp - raw);
+  checkResurrection(s);
   lungePortrait("enemy");
   flashPortrait("player");
   playPortraitEffect("player", "area");
@@ -508,6 +705,7 @@ function ensureRunState() {
       lastMapNodeId: null,
       pathNodeIds: [],
       runComplete: false,
+      llExtSlots: [null, null],
     };
   }
 }
@@ -568,6 +766,7 @@ function syncResources() {
   }
   const chapterEl = document.getElementById("chapterVal");
   if (chapterEl) chapterEl.textContent = String((runState.chapterIdx ?? 0) + 1);
+  syncLlExtSlots();
   const layerEl = document.getElementById("layerVal");
   if (layerEl) {
     if (runState.runComplete) {
@@ -944,6 +1143,7 @@ function startCombatFromMapNode(node) {
     turn: 1,
     zhangPassiveTriggered: false,
     doylePassiveTriggered: false,
+    hasResurrection: false,
     _lastUi: null,
   };
 
@@ -969,6 +1169,7 @@ function startCombatFromMapNode(node) {
   if (isBoss && (enemyDef.initialShield || 0) > 0) {
     clog(`ボスはシールド ${enemyDef.initialShield} を持ちます！`);
   }
+  syncLlExtSlots();
   startPlayerTurn();
 }
 
@@ -1062,6 +1263,7 @@ function startPlayerTurn() {
     combat.playerHp = Math.max(0, combat.playerHp - dmg);
     flashPortrait("player"); playPortraitEffect("player", "debuff");
     clog(`毒ダメージ（自分）${dmg}`);
+    checkResurrection(combat);
     if (combat.playerHp <= 0) { endCombatLoss(); return; }
   }
   // 毒ティック（敵）
@@ -1571,8 +1773,28 @@ function endCombatWin() {
     isBoss,
   };
   combat = null;
+
+  // ─── LLエクステ ドロップ判定（ホレリス以降、章インデックス >= 1） ───
+  let droppedLlExt = null;
+  if (runState.chapterIdx >= 1) {
+    const hasEmpty = runState.llExtSlots.some(s => s === null);
+    const dropChance = isElite ? 1.0 : 0.10;
+    if (hasEmpty && Math.random() < dropChance) {
+      droppedLlExt = LL_EXT_POOL[Math.floor(Math.random() * LL_EXT_POOL.length)];
+      const emptyIdx = runState.llExtSlots.indexOf(null);
+      runState.llExtSlots[emptyIdx] = droppedLlExt;
+      clog(`✨ LLエクステ「${droppedLlExt.name}」ドロップ！`);
+    }
+  }
+
   stopBgm();
-  showCutin("win").then(() => openRewardScreen(picks));
+  showCutin("win").then(() => {
+    if (droppedLlExt) {
+      showLlExtModal(droppedLlExt).then(() => openRewardScreen(picks));
+    } else {
+      openRewardScreen(picks);
+    }
+  });
 }
 
 // ─── 報酬画面 ─────────────────────────────────────────────────────
@@ -1892,6 +2114,7 @@ function startRunFromChapter(chapterIdx) {
     lastMapNodeId: null,
     pathNodeIds: [],
     runComplete: false,
+    llExtSlots: [null, null],
   };
   showView("map");
   renderMap();
@@ -2325,6 +2548,10 @@ function init() {
       popup.classList.add("hidden");
     }
   });
+
+  // ── LLエクステ 使用ボタン ─────────────────────────────────────
+  document.getElementById("btnUseLlExt0")?.addEventListener("click", () => useLlExt(0));
+  document.getElementById("btnUseLlExt1")?.addEventListener("click", () => useLlExt(1));
 }
 
 init();

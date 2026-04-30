@@ -1,0 +1,48 @@
+/**
+ * LLエクステ定義（ホレリス以降のレリック的アイテム）
+ * effectKey は main.js 側の applyLlExtEffect() で分岐処理する
+ */
+export const LL_EXT_POOL = [
+  {
+    extId: 5501,
+    name: '真・MCHブレード',
+    skillName: '天の一撃',
+    desc: '先頭の敵にPHY極大ダメージを与える（PHY×350%）',
+    effectKey: 'blade',
+  },
+  {
+    extId: 5502,
+    name: '真・グランダルメ',
+    skillName: 'グランダルメ攻撃縦隊',
+    desc: '敵全体にINT大ダメージを与える（INT×450%）',
+    effectKey: 'grande',
+  },
+  {
+    extId: 5503,
+    name: '真・劇作家の羽ペン',
+    skillName: 'アンサンブル・カーテンコール',
+    desc: '味方を極大回復する（HC×225%）',
+    effectKey: 'pen',
+  },
+  {
+    extId: 5504,
+    name: '真・MCHアーマー',
+    skillName: 'ダイヤモンドパワー',
+    desc: 'PHY大幅バフ（+50%）＆ガード+20を付与する',
+    effectKey: 'armor',
+  },
+  {
+    extId: 5509,
+    name: 'マリーアントワネット・ブルー',
+    skillName: '希望の燐光',
+    desc: '極大回復＆INTを大幅アップする（HC×225%回復、INT+4）',
+    effectKey: 'blue',
+  },
+  {
+    extId: 5561,
+    name: '悪魔金魚',
+    skillName: '悪魔だからな',
+    desc: '回復＆PHY+3＆リザレクション付与（致死時1HP生存）',
+    effectKey: 'fish',
+  },
+];

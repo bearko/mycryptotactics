@@ -1386,6 +1386,89 @@
       padding: 0.4rem 1.2rem; border-radius: 8px; cursor: pointer;
     }
     .shop-remove-cancel:hover { border-color: var(--accent); color: var(--text); }
+
+    /* ── LLエクステ スロット ────────────────────────────────────────── */
+    .ll-ext-slots-wrap {
+      display: flex; gap: 0.25rem; align-items: center;
+    }
+    .ll-ext-slot-icon {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 26px; height: 26px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      font-size: 0.6rem; color: var(--muted);
+      overflow: hidden; vertical-align: middle;
+      cursor: default; flex-shrink: 0;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .ll-ext-slot-icon.ll-slot--filled {
+      border-color: #ffe766;
+      background: linear-gradient(135deg, #2a2234 0%, #1a1428 100%);
+      box-shadow: 0 0 6px rgba(255,231,102,0.35);
+    }
+    .ll-ext-slot-icon img { width: 100%; height: 100%; object-fit: contain; }
+
+    /* combat header ll slots */
+    .combat-ll-slots {
+      display: flex; gap: 0.2rem; align-items: center;
+    }
+
+    /* ── LLエクステ バトル使用バー ─────────────────────────────────── */
+    .ll-ext-bar {
+      display: flex; gap: 0.4rem;
+      padding: 0.3rem 0.5rem 0.1rem;
+      border-top: 1px solid var(--border);
+    }
+    .ll-ext-use-btn {
+      flex: 1; font-size: 0.68rem;
+      padding: 0.28rem 0.4rem;
+      border-radius: 6px;
+      border: 1px solid #ffe766;
+      background: linear-gradient(135deg, #2a2d34, #1a1428);
+      color: #ffe766; cursor: pointer;
+      display: flex; align-items: center; gap: 0.3rem;
+      justify-content: center; white-space: nowrap; overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .ll-ext-use-btn:hover:not(.ll-slot--empty) { background: linear-gradient(135deg, #3a3d44, #2a2438); }
+    .ll-ext-use-btn.ll-slot--empty {
+      border-color: var(--border); color: var(--muted); cursor: not-allowed;
+    }
+
+    /* ── LLエクステ 獲得モーダル ────────────────────────────────────── */
+    #llExtModal {
+      position: fixed; inset: 0; z-index: 500;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.72);
+    }
+    #llExtModal.hidden { display: none !important; }
+    .ll-ext-modal-box {
+      position: relative; z-index: 10;
+      background: linear-gradient(135deg, #2a2d34 0%, #1a1428 100%);
+      border: 2px solid #ffe766;
+      border-radius: 16px;
+      padding: 1.5rem 1.25rem 1.25rem;
+      text-align: center;
+      max-width: 300px; width: 90%;
+      animation: ll-modal-pop 0.38s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+    @keyframes ll-modal-pop {
+      from { transform: scale(0.65); opacity: 0; }
+      to   { transform: scale(1);    opacity: 1; }
+    }
+    .ll-chest-anim { font-size: 3.2rem; margin-bottom: 0.4rem; line-height: 1; }
+    .ll-ext-modal-label {
+      font-size: 0.68rem; color: #ffe766; letter-spacing: 0.1em;
+      text-transform: uppercase; margin-bottom: 0.35rem;
+    }
+    .ll-ext-modal-name { font-size: 1.05rem; font-weight: 800; color: #ffe766; margin-bottom: 0.2rem; }
+    .ll-ext-modal-skill { font-size: 0.82rem; color: #7de8f8; margin-bottom: 0.45rem; font-weight: 700; }
+    .ll-ext-modal-desc { font-size: 0.74rem; color: #c8e8f0; margin-bottom: 1rem; }
+    #confettiCanvas {
+      position: fixed; inset: 0; z-index: 5; pointer-events: none;
+      width: 100%; height: 100%;
+    }
   </style>
 </head>
 <body>
@@ -1401,6 +1484,11 @@
       <span class="res res-hp">♥ <span id="mapHpVal">0</span>/<span id="mapHpMax">0</span></span>
       <span class="res">層 <span id="layerVal">入口</span></span>
       <span class="res">章 <span id="chapterVal">1</span></span>
+      <!-- LLエクステ スロット（GUM右に2枠） -->
+      <span class="res ll-ext-slots-wrap" id="mapLlExtWrap" title="LLエクステ（バトル中に無コストで使用可能）">
+        <span class="ll-ext-slot-icon" id="mapLlSlot0" title="">—</span>
+        <span class="ll-ext-slot-icon" id="mapLlSlot1" title="">—</span>
+      </span>
       <button type="button" class="btn-help" id="btnHelpOpen" aria-label="ヘルプを開く" title="ヘルプ">?</button>
     </div>
 
@@ -1425,6 +1513,11 @@
         <div class="combat-header-gold">
           <img alt="G" data-icon="gum" class="combat-gold-icon" />
           <span id="combatGoldVal">0</span>
+        </div>
+        <!-- LLエクステ スロット -->
+        <div class="combat-ll-slots" id="combatLlSlots" title="LLエクステ（使用ボタンから無コストで使用）">
+          <span class="ll-ext-slot-icon" id="combatLlSlot0" title="">—</span>
+          <span class="ll-ext-slot-icon" id="combatLlSlot1" title="">—</span>
         </div>
         <span class="combat-header-stage" id="combatStageTitle">—</span>
         <div class="combat-header-btns">
@@ -1523,6 +1616,11 @@
         <div class="footer-topbar">
           <span class="energy-pill">⚡ <span id="energyVal">0</span> / <span id="energyMax">3</span></span>
           <button type="button" class="action primary" id="btnEndTurn">ターン終了</button>
+        </div>
+        <!-- LLエクステ 使用バー（スロットが埋まっているとき表示） -->
+        <div class="ll-ext-bar hidden" id="llExtBar" aria-label="LLエクステ使用">
+          <button type="button" class="ll-ext-use-btn ll-slot--empty" id="btnUseLlExt0" title="">空きスロット</button>
+          <button type="button" class="ll-ext-use-btn ll-slot--empty" id="btnUseLlExt1" title="">空きスロット</button>
         </div>
         <div class="hand-scroll">
           <div id="hand" class="hand" role="list"></div>
@@ -1669,6 +1767,19 @@
           <p>リポジトリ内の <code>docs/specs/SPEC-002-prototype.md</code> §11 と <code>prototype/js/battle-mch.js</code> にコードレベルの説明があります。</p>
         </section>
       </div>
+    </div>
+  </div>
+
+  <!-- ── LLエクステ 獲得モーダル + 紙吹雪キャンバス ── -->
+  <canvas id="confettiCanvas" style="display:none;position:fixed;inset:0;z-index:505;pointer-events:none;width:100%;height:100%;"></canvas>
+  <div id="llExtModal" class="hidden" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="llExtModalName">
+    <div class="ll-ext-modal-box">
+      <div class="ll-chest-anim">🎁</div>
+      <div class="ll-ext-modal-label">LLエクステ 獲得！</div>
+      <div class="ll-ext-modal-name" id="llExtModalName">—</div>
+      <div class="ll-ext-modal-skill" id="llExtModalSkill">—</div>
+      <div class="ll-ext-modal-desc" id="llExtModalDesc">—</div>
+      <button type="button" class="action primary" id="btnLlExtClaim" style="width:100%">受け取る！</button>
     </div>
   </div>
 
