@@ -69,7 +69,48 @@ export const ENEMY_DEFS = {
   },
 
   /* ═══════════════════════════════════════
-     章 2 ── node : アタナソフ
+     章 2 ── node : ホレリス
+  ═══════════════════════════════════════ */
+  'hl-001': {
+    id: 'hl-001', name: 'ハートブリード ヴェンティ',
+    hp: 20, phy: 11, int: 5, agi: 8, imgId: 124,
+    intentRota: [
+      { kind: 'attack',      phyPct: 90 },
+      { kind: 'attackBleed', phyPct: 70, bleedStacks: 1 },
+      { kind: 'guard',       value: 6 },
+    ],
+  },
+  'hl-002': {
+    id: 'hl-002', name: 'バイトバンディット ヴェンティ',
+    hp: 22, phy: 14, int: 4, agi: 8, imgId: 164,
+    intentRota: [
+      { kind: 'attackBleed', phyPct: 85, bleedStacks: 1 },
+      { kind: 'guard',       value: 7 },
+      { kind: 'attack',      phyPct: 110 },
+    ],
+  },
+  'hl-003': {
+    id: 'hl-003', name: 'クリーパー マキアート',
+    hp: 18, phy: 10, int: 8, agi: 14, imgId: 105,
+    intentRota: [
+      { kind: 'attack', phyPct: 80 },
+      { kind: 'attack', phyPct: 80 },
+      { kind: 'guard',  value: 5 },
+    ],
+  },
+  // ★ レアエネミー
+  'hl-e01': {
+    id: 'hl-e01', name: 'ハートブリード フラペチーノ',
+    hp: 38, phy: 17, int: 6, agi: 10, imgId: 126,
+    intentRota: [
+      { kind: 'guard',       value: 10 },
+      { kind: 'attackBleed', phyPct: 100, bleedStacks: 2 },
+      { kind: 'attack',      phyPct: 120 },
+    ],
+  },
+
+  /* ═══════════════════════════════════════
+     章 3 ── node : アタナソフ
   ═══════════════════════════════════════ */
   'vp-001': {
     id: 'vp-001', name: 'カスケード ヴェンティ',

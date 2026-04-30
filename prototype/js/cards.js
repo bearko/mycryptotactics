@@ -682,6 +682,143 @@ function makeCardLibrary(clog, api) {
     },
 
     // ════════════════════════════════════════
+    // 章 1 ── ホレリス カードプール
+    // ════════════════════════════════════════
+    cdH01: {
+      libraryKey: "cdH01",
+      extId: 2006,
+      extNameJa: "エリートカタナ",
+      skillNameJa: "抜刀・一閃",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      exhaust: true,
+      effectSummaryLines(s) {
+        const d = estPhyHit(s.playerPhy, s.enemyPhy, 80, 80);
+        return [`敵にダメージ　${d}`, "【消耗】"];
+      },
+      peekHelpKeys() { return []; },
+      previewLines(s) {
+        const d = estPhyHit(s.playerPhy, s.enemyPhy, 80, 80);
+        return [`敵1体に ${d} ダメージ（PHY 80%）`, "【消耗】使用後、山札に戻らず除外される"];
+      },
+      play(s) { api.dealPhySkillToEnemy(s, 80, 80); },
+    },
+
+    cdH02: {
+      libraryKey: "cdH02",
+      extId: 1002,
+      extNameJa: "ノービスマスケット",
+      skillNameJa: "出血弾・速射",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      effectSummaryLines(s) {
+        const d = estPhyHit(s.playerPhy, s.enemyPhy, 60, 60);
+        return [`敵にダメージ　${d}`, "出血　×1（敵）"];
+      },
+      peekHelpKeys() { return []; },
+      previewLines(s) {
+        const d = estPhyHit(s.playerPhy, s.enemyPhy, 60, 60);
+        return [`敵1体に ${d} ダメージ（PHY 60%）`, "敵に出血 ×1 付与"];
+      },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 60, 60);
+        if (s.enemyHp > 0) api.addBleedToEnemy(s, 1);
+      },
+    },
+
+    cdH03: {
+      libraryKey: "cdH03",
+      extId: 2005,
+      extNameJa: "エリートホース",
+      skillNameJa: "疾風の構え",
+      skillIcon: "BUF_agi.png",
+      cost: 1,
+      type: "skl",
+      effectSummaryLines() { return ["ガード　+8", "AGI　+2（永続）"]; },
+      peekHelpKeys() { return ["guard", "agi"]; },
+      previewLines() {
+        return ["ガードを 8 得る", "AGI を +2（永続）"];
+      },
+      play(s) {
+        se("buff"); fx("player", "buff");
+        s.playerGuard += 8;
+        s.playerAgi += 2;
+        clog("疾風の構え: ガード+8、AGI+2");
+      },
+    },
+
+    cdH04: {
+      libraryKey: "cdH04",
+      extId: 2003,
+      extNameJa: "エリートペン",
+      skillNameJa: "緊急回復",
+      skillIcon: "hp.png",
+      cost: 0,
+      type: "skl",
+      exhaust: true,
+      effectSummaryLines(s) {
+        const h = Math.floor((s.playerInt + s.playerPhy) / 2);
+        return [`HP　+${h}`, "【消耗】"];
+      },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) {
+        const h = Math.floor((s.playerInt + s.playerPhy) / 2);
+        return [`HP を ${h} 回復（(INT+PHY)÷2）`, "【消耗】使用後、山札に戻らず除外される"];
+      },
+      play(s) {
+        const heal = Math.floor((s.playerInt + s.playerPhy) / 2);
+        const before = s.playerHp;
+        s.playerHp = Math.min(s.playerHpMax, s.playerHp + heal);
+        if (s.playerHp > before) { se("heal"); fx("player", "heal"); }
+        clog(`緊急回復: HP+${s.playerHp - before}`);
+      },
+    },
+
+    cdH05: {
+      libraryKey: "cdH05",
+      extId: 1007,
+      extNameJa: "ノービスユミ",
+      skillNameJa: "連矢",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      effectSummaryLines(s) {
+        const d = estPhyHit(s.playerPhy, s.enemyPhy, 50, 50);
+        return [`敵にダメージ　${d} ×2`];
+      },
+      peekHelpKeys() { return []; },
+      previewLines(s) {
+        const d = estPhyHit(s.playerPhy, s.enemyPhy, 50, 50);
+        return [`敵1体に ${d} ×2 ダメージ（PHY 50% を 2 回）`];
+      },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 50, 50);
+        if (s.enemyHp > 0) api.dealPhySkillToEnemy(s, 50, 50);
+      },
+    },
+
+    cdH06: {
+      libraryKey: "cdH06",
+      extId: 2008,
+      extNameJa: "エリートブック",
+      skillNameJa: "知識の爆発",
+      skillIcon: "int.png",
+      cost: 2,
+      type: "skl",
+      effectSummaryLines() { return ["INT　+2（永続）", "ドロー　3"]; },
+      peekHelpKeys() { return ["int", "draw"]; },
+      previewLines() { return ["INT を +2（永続）", "カードを 3 枚引く"]; },
+      play(s) {
+        se("buff"); fx("player", "buff");
+        s.playerInt += 2;
+        api.drawCards(s, 3);
+        clog("知識の爆発: INT+2、ドロー3");
+      },
+    },
+
+    // ════════════════════════════════════════
     // 章 2 ── 大航海の港 カードプール（SPEC-004 §7.4）
     // ════════════════════════════════════════
     cd201: {
@@ -925,3 +1062,64 @@ function shuffle(a) {
 }
 
 export { shuffle };
+
+/**
+ * カードレアリティ定義（SPEC §カードレアリティ）
+ * ここを編集するだけで全カードのレアリティ（枠色）を変更できます。
+ *
+ * 値: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary'
+ * 色: common=#0984E3 / uncommon=#00B894 / rare=#FDCB6E / epic=#E17055 / legendary=#D63031
+ */
+export const CARD_RARITIES = {
+  // ─── スターターカード ──────────────────────────────────────────────
+  ext1001: 'common',    // ノービスブレード
+  ext1002: 'common',    // ノービスマスケット
+  ext1003: 'common',    // ノービスペン
+  ext1004: 'common',    // ノービスアーマー
+  ext1005: 'uncommon',  // ノービスホース（次ターンエナジー）
+  ext1006: 'common',    // ノービスカタナ
+  ext1008: 'uncommon',  // ノービスブック（INT+ドロー+ダメージ）
+  ext1011: 'common',    // アックス
+  ext1012: 'common',    // ETHEREMON-EKOPI
+  ext1022: 'uncommon',  // ドラゴン（全体+INT debuff）
+  ext1023: 'common',    // ブル（全体+自己PHYダウン）
+  ext2001: 'uncommon',  // エリートブレード
+  ext2002: 'uncommon',  // エリートマスケット（全体）
+  ext2004: 'uncommon',  // エリートアーマー（PHY%アップ）
+  ext2006: 'uncommon',  // エリートカタナ
+  ext2011: 'uncommon',  // エリートアックス
+  ext2013: 'uncommon',  // エリートユミ
+
+  // ─── 章0 アバカス カードプール ────────────────────────────────────
+  cd101:   'uncommon',  // 一刀（PHY100%）
+  cd102:   'rare',      // 二段斬り（PHY70%×2）
+  cd103:   'common',    // 構え（ガード+6）
+  cd104:   'uncommon',  // 集中（エナジー+1）
+  cd105:   'rare',      // 一閃（PHY150%）
+  cd106:   'uncommon',  // 鼓舞（PHY+3永続）
+  cd107:   'uncommon',  // 治療（HP回復）
+  cd108:   'uncommon',  // 突撃（コスト0+次ターンペナルティ）
+
+  // ─── 章1 ホレリス カードプール ────────────────────────────────────
+  cdH01:   'rare',      // 抜刀・一閃（PHY80%・消耗）
+  cdH02:   'uncommon',  // 出血弾・速射（PHY+出血×1）
+  cdH03:   'uncommon',  // 疾風の構え（ガード+8+AGI永続）
+  cdH04:   'rare',      // 緊急回復（コスト0・消耗）
+  cdH05:   'uncommon',  // 連矢（PHY50%×2）
+  cdH06:   'rare',      // 知識の爆発（INT+2+ドロー3）
+
+  // ─── 章2 アンティキティラ カードプール ───────────────────────────
+  cd301:   'uncommon',  // 鋼の盾（シールド+10）
+  cd302:   'epic',      // 大鎚（PHY200%）
+  cd303:   'epic',      // 戦術指揮（PHY+5+INT+5永続）
+  cd304:   'rare',      // 必殺の閃光（INT130%クリ確定）
+  cd305:   'rare',      // 不屈（このターン被ダメ半減）
+
+  // ─── 章3 アタナソフ カードプール ─────────────────────────────────
+  cd201:   'uncommon',  // 毒の刃（PHY+毒×2）
+  cd202:   'rare',      // 出血弾（PHY90%+出血×2）
+  cd203:   'common',    // 解毒（コスト0・デバフ解除）
+  cd204:   'rare',      // 防御陣（ガード+12）
+  cd205:   'rare',      // 連射（INT×3）
+  cd206:   'uncommon',  // 投資（GUM+20）
+};

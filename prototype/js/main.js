@@ -2,6 +2,7 @@ import {
   createCardRuntime,
   shuffle,
   battleIconUrl,
+  CARD_RARITIES,
 } from "./cards.js";
 import {
   img,
@@ -98,6 +99,8 @@ const MAP_START = { id: "START", layer: -1, x: 50, y: 92 };
 // ─── 状態変数 ────────────────────────────────────────────────────
 let gold = 75;
 let view = "map";
+/** セッション内でクリアした章インデックスのセット（node選択画面のアンロック管理） */
+let clearedChapters = new Set();
 /** @type {null | {
  *   chapterIdx: number,
  *   deck: any[],
@@ -146,8 +149,8 @@ function dismissTitle() {
   titleEl.classList.add("title-out");
   setTimeout(() => {
     titleEl.classList.add("hidden");
-    showView("map");
-    renderMap();
+    showView("nodeSelect");
+    renderNodeSelect();
   }, 380);
 }
 
@@ -470,6 +473,8 @@ function ensureRunState() {
 // ─── 章推移 ───────────────────────────────────────────────────────
 function advanceToNextChapter() {
   if (!runState) return;
+  // クリア済み章を記録（node選択画面のアンロックに使用）
+  clearedChapters.add(runState.chapterIdx);
   const nextIdx = runState.chapterIdx + 1;
   if (nextIdx >= CHAPTERS.length) {
     runState.runComplete = true;
@@ -678,6 +683,28 @@ function renderMap() {
     fightImgG.appendChild(imgEl);
   }
   svg.appendChild(fightImgG);
+
+  // ショップ・休憩ノードのアイコン表示
+  const nodeIconG = document.createElementNS("http://www.w3.org/2000/svg", "g");
+  nodeIconG.setAttribute("class", "map-node-icons");
+  for (const node of MAP_NODES) {
+    let iconUrl = null;
+    if (node.type === "shop") iconUrl = img("Image/Icons/gum.png");
+    else if (node.type === "rest") iconUrl = img("Image/BattleIcons/Parameters/hp.png");
+    if (!iconUrl) continue;
+    const sz = 5.2;
+    const iconEl = document.createElementNS("http://www.w3.org/2000/svg", "image");
+    iconEl.setAttribute("href", iconUrl);
+    iconEl.setAttributeNS("http://www.w3.org/1999/xlink", "href", iconUrl);
+    iconEl.setAttribute("x", String(node.x - sz / 2));
+    iconEl.setAttribute("y", String(node.y - sz / 2));
+    iconEl.setAttribute("width", String(sz));
+    iconEl.setAttribute("height", String(sz));
+    iconEl.setAttribute("preserveAspectRatio", "xMidYMid meet");
+    iconEl.setAttribute("class", "map-node-icon-img");
+    nodeIconG.appendChild(iconEl);
+  }
+  svg.appendChild(nodeIconG);
   host.appendChild(svg);
 
   const legend = document.createElement("p");
@@ -759,14 +786,16 @@ function showView(name) {
   document.getElementById("gameOver").classList.toggle("hidden", name !== "over");
   const rv = document.getElementById("rewardView");
   if (rv) rv.classList.toggle("hidden", name !== "reward");
+  const nsv = document.getElementById("nodeSelectView");
+  if (nsv) nsv.classList.toggle("hidden", name !== "nodeSelect");
   // Show/hide map resources bar
   const mapRes = document.getElementById("mapResources");
   if (mapRes) mapRes.classList.toggle("hidden", name === "combat");
   // Mai navigator: マップビュー内にあるので mapView の hidden に連動
   const nav = document.getElementById("maiNavigator");
   if (nav) nav.classList.toggle("hidden", name !== "map");
-  // マップ BGM: マップ・ショップ・報酬ではBGMを再生（戦闘BGMと重ねない）
-  if (name === "map") startBgmMap();
+  // マップ BGM: マップ・ショップ・報酬・node選択ではBGMを再生
+  if (name === "map" || name === "nodeSelect") startBgmMap();
 }
 
 // ─── 戦闘開始 ─────────────────────────────────────────────────────
@@ -810,6 +839,7 @@ function startCombatFromMapNode(node) {
     deck,
     drawPile: [],
     discardPile: [],
+    exhaustPile: [],
     hand: [],
     playerHp: runState.playerHp,
     playerHpMax: runState.playerHpMax,
@@ -1172,6 +1202,11 @@ function renderCombat() {
   document.getElementById("enemyIntent").textContent = intentText();
   const deckCountEl = document.getElementById("deckPileCount");
   if (deckCountEl) deckCountEl.textContent = String(combat.drawPile.length);
+  // 消耗カード数を表示
+  const exhaustNumEl = document.getElementById("exhaustNum");
+  const exhaustCountEl = document.getElementById("exhaustCount");
+  if (exhaustNumEl) exhaustNumEl.textContent = String(combat.exhaustPile?.length ?? 0);
+  if (exhaustCountEl) exhaustCountEl.dataset.nonzero = (combat.exhaustPile?.length > 0) ? "true" : "false";
 
   // HP gauges
   const playerFill = document.getElementById("playerHpFill");
@@ -1191,16 +1226,31 @@ function renderCombat() {
   handFocusedIdx = -1;
   const n = combat.hand.length;
   handEl.style.setProperty("--n-cards", String(Math.max(n, 1)));
+
+  // カード重ね量を計算（横幅が足りない場合に重ねる）
+  const containerW = (handEl.parentElement?.clientWidth || 340) - 16;
+  const cardW = window.innerWidth <= 420 ? 80 : 96;
+  const minGapPx = 6; // 通常の gap（0.4rem ≈ 6px）
+  let cardMarginPx = minGapPx;
+  if (n > 1) {
+    const naturalW = cardW * n + minGapPx * (n - 1);
+    if (naturalW > containerW) {
+      // total = cardW + (n-1)*(cardW + margin) = containerW
+      // margin = (containerW - cardW) / (n - 1) - cardW
+      cardMarginPx = Math.floor((containerW - cardW) / (n - 1)) - cardW;
+      cardMarginPx = Math.max(cardMarginPx, -Math.floor(cardW * 0.58));
+    }
+  }
+  handEl.style.setProperty("--card-margin", cardMarginPx + "px");
+
   combat.hand.forEach((card, idx) => {
     const slot = document.createElement("div");
+    const rarity = CARD_RARITIES[card.libraryKey] || 'common';
     slot.className = "card-slot" + (card.cost > combat.energy ? " card-slot--disabled" : "");
     slot.setAttribute("data-cost", String(card.cost));
+    slot.setAttribute("data-rarity", rarity);
     slot.style.setProperty("--i", String(idx + 1));
     slot.style.setProperty("--n", String(Math.max(n - 1, 1)));
-    const centerIdx = Math.floor((n - 1) / 2);
-    const rel = idx - centerIdx;
-    const rot = rel === 0 ? 0 : rel < 0 ? -4 * Math.abs(rel) : 4 * rel;
-    slot.style.setProperty("--rot", rot + "deg");
 
     const summaryLines = typeof card.effectSummaryLines === "function" ? card.effectSummaryLines(combat)
       : typeof card.previewLines === "function" ? card.previewLines(combat) : [card.text || ""];
@@ -1211,8 +1261,8 @@ function renderCombat() {
 
     slot.innerHTML =
       '<div class="card-cost-above"><span class="cost-zeus" aria-hidden="true">⚡</span>' + card.cost + '</div>' +
-      '<div class="card ' + card.type + '">' +
-      '<div class="card-name-hd">' + escapeHtml(card.extNameJa) + '</div>' +
+      '<div class="card ' + card.type + (card.exhaust ? ' card--exhaust' : '') + '">' +
+      '<div class="card-name-hd">' + escapeHtml(card.extNameJa) + (card.exhaust ? '<span class="exhaust-badge" title="消耗：使い切り">🔥</span>' : '') + '</div>' +
       '<div class="card-icon-area">' +
       '<img class="card-ext-img-full" src="' + EXT_IMG(card.extId) + '" alt="" />' +
       '<img class="card-skill-icon-tl" src="' + battleIconUrl(card.skillIcon) + '" alt="" />' +
@@ -1245,7 +1295,13 @@ function playCard(idx) {
   if (!card || card.cost > combat.energy) return;
   combat.energy -= card.cost;
   combat.hand.splice(idx, 1);
-  combat.discardPile.push(card);
+  // 消耗カードは exhaustPile へ、通常カードは捨て札へ
+  if (card.exhaust) {
+    combat.exhaustPile.push(card);
+    clog(`【消耗】${card.extNameJa} を除外`);
+  } else {
+    combat.discardPile.push(card);
+  }
   card.play(combat);
   if (combat.enemyHp <= 0) { endCombatWin(); return; }
   renderCombat();
@@ -1448,8 +1504,22 @@ function advanceAfterRewardPick(libraryKey) {
     runState.pathNodeIds.push(mid);
     runState.lastMapNodeId = mid;
     if (wasBoss) {
-      // 章クリア → 次章へ進む（advanceToNextChapter が runComplete を設定することも）
-      advanceToNextChapter();
+      // 章クリア → clearedChapters に追加し次章データを用意
+      const clearedIdx = runState.chapterIdx;
+      advanceToNextChapter(); // 内部で clearedChapters.add(clearedIdx) する
+      combat = null;
+      postCombatSnapshot = null;
+      if (runState.runComplete) {
+        // 全章クリア → ゲームオーバー画面（クリア）
+        showView("over");
+        document.getElementById("gameOverMsg").textContent =
+          "全 node クリアおめでとうございます！あなたは最高ですよ〜！";
+      } else {
+        // 次の node が解放された → node 選択画面へ（解放アニメ付き）
+        showView("nodeSelect");
+        renderNodeSelect(clearedIdx + 1); // 新たに解放されたインデックス
+      }
+      return;
     }
   }
   combat = null;
@@ -1567,8 +1637,144 @@ function resetRun() {
   postCombatSnapshot = null;
   stopBgm();
   dismissCutin();
+  showView("nodeSelect");
+  renderNodeSelect();
+}
+
+// ─── Node 選択画面 ────────────────────────────────────────────────
+/**
+ * 指定した章インデックスからランを開始する。
+ * clearedChapters に前の章が含まれている（またはインデックス 0）場合のみ呼び出し可。
+ */
+function startRunFromChapter(chapterIdx) {
+  gold = 75;
+  combat = null;
+  pendingShopNodeId = null;
+  postCombatSnapshot = null;
+  const chapter = CHAPTERS[chapterIdx];
+  const { nodes, edges } = generateChapterMap(chapter, ENEMY_DEFS);
+  setActiveMap(nodes, edges);
+  runState = {
+    chapterIdx,
+    deck: makeStarterDeck(),
+    playerHp: LEADER.hpMax,
+    playerHpMax: LEADER.hpMax,
+    lastMapNodeId: null,
+    pathNodeIds: [],
+    runComplete: false,
+  };
   showView("map");
   renderMap();
+}
+
+/**
+ * node 選択画面を描画する。
+ * @param {number|null} justUnlockedIdx  直前に解放された章インデックス（アニメ用、省略可）
+ */
+function renderNodeSelect(justUnlockedIdx = null) {
+  const el = document.getElementById("nodeSelectView");
+  if (!el) return;
+
+  // CHAPTERS + ゴール「TROY」の構成
+  const TROY_BG_ID = '1052';
+  const goals = [
+    ...CHAPTERS.map((ch, idx) => ({ idx, name: ch.name.replace('node : ', ''), chapter: ch })),
+    { idx: CHAPTERS.length, name: 'TROY', chapter: null, bgId: TROY_BG_ID },
+  ];
+
+  let html = '<div class="ns-header"><h2>node を選択してください</h2><p class="ns-sub">ボスを倒すと次の node が解放されます</p></div>';
+  html += '<div class="ns-cards">';
+
+  goals.forEach((goal) => {
+    const isTroy     = goal.chapter === null;
+    const isUnlocked = !isTroy && (goal.idx === 0 || clearedChapters.has(goal.idx - 1));
+    const isCleared  = !isTroy && clearedChapters.has(goal.idx);
+    const isJustUnlocked = goal.idx === justUnlockedIdx;
+
+    const ch = goal.chapter;
+    const bgId = ch?.bgId ?? goal.bgId ?? '1001';
+    const bgUrl = img('Image/Backgrounds/' + bgId + '.png');
+
+    // 状態クラス
+    const stateClass = isTroy      ? 'ns-card--troy' :
+                       isCleared   ? 'ns-card--cleared' :
+                       isUnlocked  ? 'ns-card--unlocked' :
+                                     'ns-card--locked';
+    const animClass  = isJustUnlocked ? ' ns-card--just-unlocked' : '';
+
+    html += `<div class="ns-card ${stateClass}${animClass}" data-idx="${goal.idx}" role="${isUnlocked ? 'button' : 'presentation'}" tabindex="${isUnlocked ? 0 : -1}" style="--ns-bg: url('${bgUrl}')">`;
+
+    // 背景レイヤー
+    html += '<div class="ns-card-bg"></div>';
+
+    // ─── コンテンツ ───
+    html += '<div class="ns-card-body">';
+
+    // node 名
+    html += `<div class="ns-card-title">${goal.name}</div>`;
+
+    if (isTroy) {
+      // TROY：最終目標ロック表示
+      html += '<div class="ns-card-troy-lock"><span>★</span><span class="ns-card-troy-label">最終目標</span></div>';
+    } else if (!isUnlocked) {
+      // ロック中
+      html += '<div class="ns-card-lock-overlay"><span class="ns-lock-icon">🔒</span><span class="ns-lock-label">ロック中</span></div>';
+    } else {
+      // 出現エネミー（通常 + フラペチーノ）
+      const enemyIds = [...(ch.enemyPool || []), ...(ch.elitePool || [])].slice(0, 4);
+      if (enemyIds.length > 0) {
+        html += '<div class="ns-enemy-row">';
+        enemyIds.forEach(id => {
+          const def = ENEMY_DEFS[id];
+          if (def) {
+            html += `<img class="ns-enemy-img" src="${ENEMY_IMG(def.imgId)}" alt="${def.name}" title="${def.name}" />`;
+          }
+        });
+        html += '</div>';
+      }
+
+      // ボス
+      const bossDef = ch.bossId ? BOSS_DEFS[ch.bossId] : null;
+      if (bossDef) {
+        html += '<div class="ns-boss-row">';
+        html += '<span class="ns-boss-label">boss</span>';
+        html += `<img class="ns-boss-img" src="${ENEMY_IMG(bossDef.imgId)}" alt="${bossDef.name}" />`;
+        html += `<span class="ns-boss-name">${bossDef.name}</span>`;
+        html += '</div>';
+      }
+
+      // クリア済みバッジ
+      if (isCleared) {
+        html += '<div class="ns-cleared-badge">✓ クリア済み</div>';
+      }
+    }
+
+    html += '</div>'; // .ns-card-body
+    html += '</div>'; // .ns-card
+  });
+
+  html += '</div>'; // .ns-cards
+  el.innerHTML = html;
+
+  // クリックイベント（解放済み章のみ）
+  el.querySelectorAll('.ns-card--unlocked, .ns-card--cleared').forEach(cardEl => {
+    const idx = parseInt(cardEl.dataset.idx, 10);
+    const activate = () => {
+      playSeNodeSelect();
+      startRunFromChapter(idx);
+    };
+    cardEl.addEventListener('click', activate);
+    cardEl.addEventListener('keydown', ev => {
+      if (ev.key === 'Enter' || ev.key === ' ') activate();
+    });
+  });
+
+  // 解放アニメ後にクラスを削除
+  if (justUnlockedIdx !== null) {
+    setTimeout(() => {
+      el.querySelector('.ns-card--just-unlocked')?.classList.remove('ns-card--just-unlocked');
+    }, 2000);
+  }
 }
 
 // ─── アセット配線 ─────────────────────────────────────────────────
@@ -1660,8 +1866,8 @@ function init() {
       if (ev.key === "Enter" || ev.key === " ") dismissTitle();
     });
   }
-  // マップ側は非表示で待機（タイトルが覆うので見えない）
-  showView("map"); // 内部状態はマップに初期化
+  // nodeSelect を非表示で待機（タイトルが覆うので見えない）
+  showView("nodeSelect"); // 内部状態は nodeSelect に初期化
   // BGM はタイトルクリック時に開始（ブラウザのオートプレイ制限のため init では呼ばない）
 }
 
