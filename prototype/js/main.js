@@ -137,6 +137,8 @@ function startBgmMap() {
 function dismissTitle() {
   const titleEl = document.getElementById("titleView");
   if (!titleEl || titleEl.classList.contains("hidden")) return;
+  // ユーザー操作後に BGM 開始（ブラウザのオートプレイ制限を回避）
+  startBgmMap();
   titleEl.classList.add("title-out");
   setTimeout(() => {
     titleEl.classList.add("hidden");
@@ -1654,10 +1656,9 @@ function init() {
       if (ev.key === "Enter" || ev.key === " ") dismissTitle();
     });
   }
-  // マップ側は非表示で待機（タイトルが覆うので hidden 不要だが念のため）
+  // マップ側は非表示で待機（タイトルが覆うので見えない）
   showView("map"); // 内部状態はマップに初期化
-  // タイトル BGM 開始（マップ遷移後も継続）
-  startBgmMap();
+  // BGM はタイトルクリック時に開始（ブラウザのオートプレイ制限のため init では呼ばない）
 }
 
 init();
