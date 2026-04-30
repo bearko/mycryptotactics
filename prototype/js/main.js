@@ -125,12 +125,24 @@ function stopBgm() {
 }
 
 function startBgmMap() {
-  if (bgmAudio) return; // すでに再生中なら再開始しない
+  if (bgmAudio) return; // すでに再生中なら再開始しない（タイトル→マップで継続）
   try {
     bgmAudio = new Audio(AUDIO_URLS.bgmMap());
     bgmAudio.loop = true; bgmAudio.volume = 0.32;
     bgmAudio.play().catch(() => {});
   } catch (_) {}
+}
+
+// ─── タイトル画面 ─────────────────────────────────────────────────
+function dismissTitle() {
+  const titleEl = document.getElementById("titleView");
+  if (!titleEl || titleEl.classList.contains("hidden")) return;
+  titleEl.classList.add("title-out");
+  setTimeout(() => {
+    titleEl.classList.add("hidden");
+    showView("map");
+    renderMap();
+  }, 380);
 }
 
 function startBgmCombat() {
@@ -704,7 +716,6 @@ function tryEnterMapNode(nodeId) {
   if (!allowed.includes(nodeId)) return;
   const node = mapNodeById(nodeId);
   if (!node) return;
-  playSeNodeSelect();
   if (node.type === "rest") {
     const heal = Math.floor(runState.playerHpMax * 0.35);
     const actualHeal = Math.min(runState.playerHpMax, runState.playerHp + heal) - runState.playerHp;
@@ -1634,8 +1645,19 @@ function init() {
     // future: open settings panel
   });
 
-  showView("map");
-  renderMap();
+  // ── タイトル画面 ──────────────────────────────────────────────────
+  const titleEl = document.getElementById("titleView");
+  if (titleEl) {
+    // クリック / タップで遷移
+    titleEl.addEventListener("click", dismissTitle);
+    titleEl.addEventListener("keydown", (ev) => {
+      if (ev.key === "Enter" || ev.key === " ") dismissTitle();
+    });
+  }
+  // マップ側は非表示で待機（タイトルが覆うので hidden 不要だが念のため）
+  showView("map"); // 内部状態はマップに初期化
+  // タイトル BGM 開始（マップ遷移後も継続）
+  startBgmMap();
 }
 
 init();
