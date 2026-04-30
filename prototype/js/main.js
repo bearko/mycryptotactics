@@ -383,6 +383,14 @@ function dealPhySkillFromEnemyToPlayer(s, skillPct) {
     `敵 PHY ${skillPct}% → 被ダメージ ${total}` +
     (critBonus ? "（CRIT+" + critBonus + "）" : "")
   );
+  // 張遼「遼来遼来」: 被ダメージ後に50%の確率で反撃
+  if (LEADER.passiveKey === 'zhang' && s.playerHp > 0 && s.enemyHp > 0 && Math.random() < 0.5) {
+    const counterDmg = Math.max(1, Math.floor(s.playerPhy * 0.2));
+    s.enemyHp = Math.max(0, s.enemyHp - counterDmg);
+    playPortraitEffect("enemy", "hit");
+    playBattleSe("hit");
+    clog(`【遼来遼来】発動！ 反撃 ${counterDmg} ダメージ`);
+  }
 }
 
 function dealIntSkillFromEnemyToPlayer(s, skillPct) {
@@ -408,6 +416,14 @@ function dealIntSkillFromEnemyToPlayer(s, skillPct) {
     `敵 INT ${skillPct}% → 被ダメージ ${total}` +
     (critBonus ? "（CRIT+" + critBonus + "）" : "")
   );
+  // 張遼「遼来遼来」: 被ダメージ後に50%の確率で反撃
+  if (LEADER.passiveKey === 'zhang' && s.playerHp > 0 && s.enemyHp > 0 && Math.random() < 0.5) {
+    const counterDmg = Math.max(1, Math.floor(s.playerPhy * 0.2));
+    s.enemyHp = Math.max(0, s.enemyHp - counterDmg);
+    playPortraitEffect("enemy", "hit");
+    playBattleSe("hit");
+    clog(`【遼来遼来】発動！ 反撃 ${counterDmg} ダメージ`);
+  }
 }
 
 /** 最大 HP 割合の特殊ダメージ（シールドのみ有効） */
@@ -908,6 +924,7 @@ function startCombatFromMapNode(node) {
     isElite: !!node.elite,
     turn: 1,
     zhangPassiveTriggered: false,
+    doylePassiveTriggered: false,
     _lastUi: null,
   };
 
@@ -1047,26 +1064,20 @@ function startPlayerTurn() {
 
   // ─── パッシブスキル ────────────────────────────────────────────
   const passive = LEADER.passiveKey;
-  // 甲斐姫「疾風」: ターン開始時 AGI÷5 のガードを自動獲得
-  if (passive === 'kaihime') {
-    const autoGuard = Math.max(1, Math.floor(combat.playerAgi / 5));
-    combat.playerGuard += autoGuard;
-    clog(`【疾風】ガード +${autoGuard}`);
-  }
-  // 張遼「武神」: HP が 50% 以下に落ちたとき PHY+4（1 回限り）
-  if (passive === 'zhang' && !combat.zhangPassiveTriggered) {
-    if (combat.playerHp <= combat.playerHpMax * 0.5) {
-      combat.playerPhy += 4;
-      combat.zhangPassiveTriggered = true;
+  // コナン・ドイル「シャーロック・ホームズ」: HP が 70% 未満になったとき1回だけ INT +3
+  if (passive === 'doyle' && !combat.doylePassiveTriggered) {
+    if (combat.playerHp < combat.playerHpMax * 0.7) {
+      combat.playerInt += 3;
+      combat.doylePassiveTriggered = true;
       playPortraitEffect("player", "buff");
-      clog('【武神】発動！ PHY +4');
+      playBattleSe("buff");
+      clog('【シャーロック・ホームズ】発動！ INT +3');
     }
   }
 
   combat.energy = combat.energyMax + (combat.bonusEnergyNext || 0);
   combat.bonusEnergyNext = 0;
-  // コナン・ドイル「推理」: 毎ターン開始時に 1 枚余分にドロー
-  const drawN = (passive === 'doyle') ? 6 : 5;
+  const drawN = 5;
   drawCards(combat, drawN);
   advanceEnemyIntent();
   renderCombat();
@@ -1360,7 +1371,7 @@ function renderCombat() {
       '<div class="card ' + card.type + (card.exhaust ? ' card--exhaust' : '') + '">' +
       '<div class="card-name-hd">' + escapeHtml(card.extNameJa) + (card.exhaust ? '<span class="exhaust-badge" title="消耗：使い切り">🔥</span>' : '') + '</div>' +
       '<div class="card-icon-area">' +
-      '<img class="card-ext-img-full" src="' + EXT_IMG(card.extId) + '" alt="" />' +
+      '<img class="card-ext-img-full" src="' + EXT_IMG(card.extId) + '" alt="" onerror="this.style.opacity=\'0\'" />' +
       '<img class="card-skill-icon-tl" src="' + battleIconUrl(card.skillIcon) + '" alt="" />' +
       '<span class="card-user-br">先頭</span>' +
       '</div>' +
@@ -1399,6 +1410,14 @@ function playCard(idx) {
     combat.discardPile.push(card);
   }
   card.play(combat);
+  // 甲斐姫「浪切」: スキルカード使用後に50%の確率で追加ダメージ
+  if (LEADER.passiveKey === 'kaihime' && combat.enemyHp > 0 && Math.random() < 0.5) {
+    const bonusDmg = Math.max(1, Math.floor(combat.playerPhy * 0.5));
+    combat.enemyHp = Math.max(0, combat.enemyHp - bonusDmg);
+    playPortraitEffect("enemy", "hit");
+    playBattleSe("hit");
+    clog(`【浪切】発動！ 追加ダメージ ${bonusDmg}`);
+  }
   if (combat.enemyHp <= 0) { endCombatWin(); return; }
   renderCombat();
 }
@@ -1549,7 +1568,7 @@ function buildRewardPickButton(def, mockS) {
   b.innerHTML =
     '<div class="reward-card-inner ' + def.type + '">' +
     '<div class="card-art-full">' +
-    '<img class="card-ext-img" src="' + EXT_IMG(def.extId) + '" alt="" />' +
+    '<img class="card-ext-img" src="' + EXT_IMG(def.extId) + '" alt="" onerror="this.style.opacity=\'0\'" />' +
     "</div>" +
     '<div class="card-tint"></div>' +
     '<div class="card-fg">' +
@@ -1967,6 +1986,24 @@ function renderNodeSelect(justUnlockedIdx = null) {
   }
 }
 
+// ─── パッシブスキルポップアップ ──────────────────────────────────────
+function togglePassivePopup() {
+  const popup = document.getElementById("passivePopup");
+  if (!popup) return;
+  if (!popup.classList.contains("hidden")) {
+    popup.classList.add("hidden");
+    return;
+  }
+  const heroName   = LEADER.nameJa        || "—";
+  const skillName  = LEADER.passiveName   || "—";
+  const skillDesc  = LEADER.passiveDesc   || "—";
+  popup.innerHTML =
+    `<div class="pp-hero-name">${heroName}</div>` +
+    `<div class="pp-skill-name">【${skillName}】</div>` +
+    `<div class="pp-skill-desc">${skillDesc}</div>`;
+  popup.classList.remove("hidden");
+}
+
 // ─── ヒーロー選択画面 ────────────────────────────────────────────────
 function renderHeroSelect() {
   const el = document.getElementById("heroSelectView");
@@ -1986,7 +2023,7 @@ function renderHeroSelect() {
     html += `<span>INT ${hero.baseInt}</span>`;
     html += `<span>AGI ${hero.baseAgi}</span>`;
     html += `</div>`;
-    html += `<div class="hs-passive">${hero.passiveDesc}</div>`;
+    html += `<div class="hs-passive"><span class="hs-passive-name">【${hero.passiveName || '—'}】</span>${hero.passiveDesc}</div>`;
     html += `<button class="hs-select-btn action">このヒーローで始める</button>`;
     html += `</div>`;
     html += `</div>`;
@@ -2250,9 +2287,23 @@ function init() {
       if (ev.key === "Enter" || ev.key === " ") dismissTitle();
     });
   }
-  // heroSelect を非表示で待機（タイトルが覆うので見えない）
-  showView("heroSelect"); // 内部状態は heroSelect に初期化
+  // heroSelect を事前にレンダリングしておく（タイトルが覆うので見えない）
+  showView("heroSelect");
+  renderHeroSelect();
   // BGM はタイトルクリック時に開始（ブラウザのオートプレイ制限のため init では呼ばない）
+
+  // ── ヒーローポートレートタップ → パッシブスキル表示 ──────────────
+  document.getElementById("playerPortraitWrap")?.addEventListener("click", () => {
+    togglePassivePopup();
+  });
+  // パッシブポップアップ外クリックで閉じる
+  document.getElementById("combatView")?.addEventListener("click", (ev) => {
+    const popup = document.getElementById("passivePopup");
+    if (!popup || popup.classList.contains("hidden")) return;
+    if (!popup.contains(ev.target) && !document.getElementById("playerPortraitWrap")?.contains(ev.target)) {
+      popup.classList.add("hidden");
+    }
+  });
 }
 
 init();

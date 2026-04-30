@@ -1197,6 +1197,36 @@
     .help-page { display: none; }
     .help-page--active { display: block; }
 
+    /* ── Passive Popup (combat) ──────────────────────────────────── */
+    #passivePopup {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 60;
+      background: linear-gradient(135deg, #1a1428 0%, #0f0c18 100%);
+      border: 2px solid #5ab4c4;
+      border-radius: 12px;
+      padding: 0.9rem 1rem 1rem;
+      min-width: 180px; max-width: 240px;
+      box-shadow: 0 8px 32px #000c, 0 0 0 1px #5ab4c420;
+      pointer-events: none;
+    }
+    .pp-hero-name {
+      font-size: 0.72rem; color: var(--muted);
+      margin-bottom: 0.3rem;
+    }
+    .pp-skill-name {
+      font-size: 0.95rem; font-weight: 800;
+      color: #7de8f8;
+      margin-bottom: 0.45rem;
+      line-height: 1.25;
+    }
+    .pp-skill-desc {
+      font-size: 0.72rem; color: #c8e8f0;
+      line-height: 1.5;
+    }
+    .combatant-portrait-wrap { cursor: pointer; }
+
     /* ── Hero Select ──────────────────────────────────────────────── */
     #heroSelectView {
       width: 100%; max-width: 900px;
@@ -1250,6 +1280,11 @@
       border-left: 2px solid #5ab4c4;
       padding: 0.3rem 0.4rem;
       border-radius: 0 6px 6px 0;
+    }
+    .hs-passive-name {
+      display: block;
+      font-size: 0.75rem; font-weight: 800;
+      color: #7de8f8; margin-bottom: 0.2rem;
     }
     .hs-select-btn {
       width: 100%; font-size: 0.78rem;
@@ -1399,8 +1434,9 @@
       </div>
 
       <!-- ② Arena -->
-      <div class="combat-arena">
+      <div class="combat-arena" style="position:relative">
         <div id="combatBg" class="combat-bg" role="presentation"></div>
+        <div id="passivePopup" class="hidden" role="tooltip" aria-live="polite"></div>
         <div class="arena-inner">
 
           <!-- Player party (3 slots, center active now) -->
