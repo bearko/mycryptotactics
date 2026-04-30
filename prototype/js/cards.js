@@ -508,6 +508,387 @@ function makeCardLibrary(clog, api) {
         api.dealPhySkillToEnemy(s, 40, 50);
       },
     },
+
+    // ════════════════════════════════════════
+    // 章 1 ── 戦国回廊 カードプール（SPEC-004 §6.4）
+    // ════════════════════════════════════════
+    cd101: {
+      libraryKey: "cd101",
+      extId: 1006,
+      extNameJa: "一刀",
+      skillNameJa: "一刀",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      effectSummaryLines(s) {
+        const d = estPhyHit(s.playerPhy, s.enemyPhy, 100, 100);
+        return [`敵にダメージ　${d}`];
+      },
+      peekHelpKeys() { return []; },
+      previewLines(s) {
+        const d = estPhyHit(s.playerPhy, s.enemyPhy, 100, 100);
+        return [`敵1体に ${d} ダメージ（PHY 100%）`];
+      },
+      play(s) { api.dealPhySkillToEnemy(s, 100, 100); },
+    },
+
+    cd102: {
+      libraryKey: "cd102",
+      extId: 2011,
+      extNameJa: "二段斬り",
+      skillNameJa: "二段斬り",
+      skillIcon: "phy.png",
+      cost: 2,
+      type: "atk",
+      effectSummaryLines(s) {
+        const d = estPhyHit(s.playerPhy, s.enemyPhy, 70, 70);
+        return [`敵にダメージ　${d} ×2`];
+      },
+      peekHelpKeys() { return []; },
+      previewLines(s) {
+        const d = estPhyHit(s.playerPhy, s.enemyPhy, 70, 70);
+        return [`敵1体に ${d} ×2 ダメージ（PHY 70% を 2 回）`];
+      },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 70, 70);
+        if (s.enemyHp > 0) api.dealPhySkillToEnemy(s, 70, 70);
+      },
+    },
+
+    cd103: {
+      libraryKey: "cd103",
+      extId: 1004,
+      extNameJa: "構え",
+      skillNameJa: "構え",
+      skillIcon: "BUF_phy.png",
+      cost: 1,
+      type: "skl",
+      effectSummaryLines() { return ["ガード　+6"]; },
+      peekHelpKeys() { return ["guard"]; },
+      previewLines() { return ["ガードを 6 得る（このターン中 PHY/INT ダメージ軽減）"]; },
+      play(s) {
+        se("buff"); fx("player", "buff");
+        s.playerGuard += 6;
+        clog("構え: ガード+6");
+      },
+    },
+
+    cd104: {
+      libraryKey: "cd104",
+      extId: 1008,
+      extNameJa: "集中",
+      skillNameJa: "集中",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "skl",
+      effectSummaryLines() { return ["⚡ +1（このターン）"]; },
+      peekHelpKeys() { return ["energy"]; },
+      previewLines() { return ["このターンのエナジーを 1 増やす"]; },
+      play(s) {
+        se("buff"); fx("player", "buff");
+        s.energy = Math.min(s.energy + 1, (s.energyMax || 3) + 3);
+        clog("集中: ⚡+1");
+      },
+    },
+
+    cd105: {
+      libraryKey: "cd105",
+      extId: 2001,
+      extNameJa: "一閃",
+      skillNameJa: "一閃",
+      skillIcon: "phy.png",
+      cost: 2,
+      type: "atk",
+      effectSummaryLines(s) {
+        const d = estPhyHit(s.playerPhy, s.enemyPhy, 150, 150);
+        return [`敵にダメージ　${d}`];
+      },
+      peekHelpKeys() { return []; },
+      previewLines(s) {
+        const d = estPhyHit(s.playerPhy, s.enemyPhy, 150, 150);
+        return [`敵1体に ${d} ダメージ（PHY 150%）`];
+      },
+      play(s) { api.dealPhySkillToEnemy(s, 150, 150); },
+    },
+
+    cd106: {
+      libraryKey: "cd106",
+      extId: 2004,
+      extNameJa: "鼓舞",
+      skillNameJa: "鼓舞",
+      skillIcon: "BUF_phy.png",
+      cost: 1,
+      type: "skl",
+      effectSummaryLines() { return ["PHY　+3（永続）"]; },
+      peekHelpKeys() { return ["phy"]; },
+      previewLines() { return ["PHY を +3（このランの残り全ての戦闘で有効）"]; },
+      play(s) {
+        se("buff"); fx("player", "buff");
+        s.playerPhy += 3;
+        clog("鼓舞: PHY+3");
+      },
+    },
+
+    cd107: {
+      libraryKey: "cd107",
+      extId: 1003,
+      extNameJa: "治療",
+      skillNameJa: "治療",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      effectSummaryLines(s) {
+        const h = Math.floor((s.playerInt + s.playerPhy) / 2);
+        return [`HP　+${h}`];
+      },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) {
+        const h = Math.floor((s.playerInt + s.playerPhy) / 2);
+        return [`HP を ${h} 回復（(INT+PHY)÷2）`];
+      },
+      play(s) {
+        const heal = Math.floor((s.playerInt + s.playerPhy) / 2);
+        const before = s.playerHp;
+        s.playerHp = Math.min(s.playerHpMax, s.playerHp + heal);
+        if (s.playerHp > before) {
+          se("heal"); fx("player", "heal");
+        }
+        clog(`治療: HP+${s.playerHp - before}`);
+      },
+    },
+
+    cd108: {
+      libraryKey: "cd108",
+      extId: 1023,
+      extNameJa: "突撃",
+      skillNameJa: "突撃",
+      skillIcon: "phy.png",
+      cost: 0,
+      type: "atk",
+      effectSummaryLines(s) {
+        const d = estPhyHit(s.playerPhy, s.enemyPhy, 60, 60);
+        return [`敵にダメージ　${d}`, "次ターン PHY -3"];
+      },
+      peekHelpKeys() { return ["phy"]; },
+      previewLines(s) {
+        const d = estPhyHit(s.playerPhy, s.enemyPhy, 60, 60);
+        return [`敵1体に ${d} ダメージ（PHY 60%）`, "次のターン開始時に PHY が -3 される"];
+      },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 60, 60);
+        s.phyPenaltyNext = (s.phyPenaltyNext || 0) + 3;
+        clog("突撃: 次ターン PHY-3");
+      },
+    },
+
+    // ════════════════════════════════════════
+    // 章 2 ── 大航海の港 カードプール（SPEC-004 §7.4）
+    // ════════════════════════════════════════
+    cd201: {
+      libraryKey: "cd201",
+      extId: 1001,
+      extNameJa: "毒の刃",
+      skillNameJa: "毒の刃",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      effectSummaryLines(s) {
+        const d = estPhyHit(s.playerPhy, s.enemyPhy, 60, 60);
+        return [`敵にダメージ　${d}`, "毒　×2（敵）"];
+      },
+      peekHelpKeys() { return []; },
+      previewLines(s) {
+        const d = estPhyHit(s.playerPhy, s.enemyPhy, 60, 60);
+        return [`敵1体に ${d} ダメージ（PHY 60%）`, "敵に毒 ×2 付与（毎ターン 2 ダメージ）"];
+      },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 60, 60);
+        if (s.enemyHp > 0) api.addPoisonToEnemy(s, 2);
+      },
+    },
+
+    cd202: {
+      libraryKey: "cd202",
+      extId: 2013,
+      extNameJa: "出血弾",
+      skillNameJa: "出血弾",
+      skillIcon: "phy.png",
+      cost: 2,
+      type: "atk",
+      effectSummaryLines(s) {
+        const d = estPhyHit(s.playerPhy, s.enemyPhy, 90, 90);
+        return [`敵にダメージ　${d}`, "出血　×2（敵）"];
+      },
+      peekHelpKeys() { return []; },
+      previewLines(s) {
+        const d = estPhyHit(s.playerPhy, s.enemyPhy, 90, 90);
+        return [`敵1体に ${d} ダメージ（PHY 90%）`, "敵に出血 ×2 付与（被攻撃時 +2 追加ダメージ）"];
+      },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 90, 90);
+        if (s.enemyHp > 0) api.addBleedToEnemy(s, 2);
+      },
+    },
+
+    cd203: {
+      libraryKey: "cd203",
+      extId: 1003,
+      extNameJa: "解毒",
+      skillNameJa: "解毒",
+      skillIcon: "hp.png",
+      cost: 0,
+      type: "skl",
+      effectSummaryLines() { return ["毒・出血 解除（自分）"]; },
+      peekHelpKeys() { return []; },
+      previewLines() { return ["自分の毒スタックと出血スタックをすべて解除する"]; },
+      play(s) { api.clearPlayerDebuffs(s); },
+    },
+
+    cd204: {
+      libraryKey: "cd204",
+      extId: 2004,
+      extNameJa: "防御陣",
+      skillNameJa: "防御陣",
+      skillIcon: "BUF_phy.png",
+      cost: 2,
+      type: "skl",
+      effectSummaryLines() { return ["ガード　+12"]; },
+      peekHelpKeys() { return ["guard"]; },
+      previewLines() { return ["ガードを 12 得る（このターン中 PHY/INT ダメージ軽減）"]; },
+      play(s) {
+        se("buff"); fx("player", "buff");
+        s.playerGuard += 12;
+        clog("防御陣: ガード+12");
+      },
+    },
+
+    cd205: {
+      libraryKey: "cd205",
+      extId: 2002,
+      extNameJa: "連射",
+      skillNameJa: "連射",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      effectSummaryLines(s) {
+        const d = estIntHit(s.playerInt, s.enemyInt, 50, 50);
+        return [`敵にダメージ　${d} ×3`];
+      },
+      peekHelpKeys() { return []; },
+      previewLines(s) {
+        const d = estIntHit(s.playerInt, s.enemyInt, 50, 50);
+        return [`敵1体に ${d} ×3 ダメージ（INT 50% を 3 回）`];
+      },
+      play(s) {
+        for (let i = 0; i < 3 && s.enemyHp > 0; i++) {
+          api.dealIntSkillToEnemy(s, 50, 50);
+        }
+      },
+    },
+
+    cd206: {
+      libraryKey: "cd206",
+      extId: 1008,
+      extNameJa: "投資",
+      skillNameJa: "投資",
+      skillIcon: "int.png",
+      cost: 0,
+      type: "skl",
+      effectSummaryLines() { return ["GUM　+20"]; },
+      peekHelpKeys() { return []; },
+      previewLines() { return ["ゴールド（GUM）を 20 得る"]; },
+      play(s) { api.addGold(20); },
+    },
+
+    // ════════════════════════════════════════
+    // 章 3 ── 決定の街 カードプール（SPEC-004 §8.4）
+    // ════════════════════════════════════════
+    cd301: {
+      libraryKey: "cd301",
+      extId: 1005,
+      extNameJa: "鋼の盾",
+      skillNameJa: "鋼の盾",
+      skillIcon: "BUF_agi.png",
+      cost: 1,
+      type: "skl",
+      effectSummaryLines() { return ["シールド　+10"]; },
+      peekHelpKeys() { return ["shield"]; },
+      previewLines() { return ["シールドを 10 得る（特殊ダメージのみ吸収）"]; },
+      play(s) { api.addPlayerShield(s, 10); },
+    },
+
+    cd302: {
+      libraryKey: "cd302",
+      extId: 1011,
+      extNameJa: "大鎚",
+      skillNameJa: "大鎚",
+      skillIcon: "phy.png",
+      cost: 3,
+      type: "atk",
+      effectSummaryLines(s) {
+        const d = estPhyHit(s.playerPhy, s.enemyPhy, 200, 200);
+        return [`敵にダメージ　${d}`];
+      },
+      peekHelpKeys() { return []; },
+      previewLines(s) {
+        const d = estPhyHit(s.playerPhy, s.enemyPhy, 200, 200);
+        return [`敵1体に ${d} ダメージ（PHY 200%）`];
+      },
+      play(s) { api.dealPhySkillToEnemy(s, 200, 200); },
+    },
+
+    cd303: {
+      libraryKey: "cd303",
+      extId: 2004,
+      extNameJa: "戦術指揮",
+      skillNameJa: "戦術指揮",
+      skillIcon: "BUF_phy.png",
+      cost: 2,
+      type: "skl",
+      effectSummaryLines() { return ["PHY　+5", "INT　+5（永続）"]; },
+      peekHelpKeys() { return ["phy", "int"]; },
+      previewLines() { return ["PHY を +5、INT を +5（永続）"]; },
+      play(s) {
+        se("buff"); fx("player", "buff");
+        s.playerPhy += 5;
+        s.playerInt += 5;
+        clog("戦術指揮: PHY+5、INT+5");
+      },
+    },
+
+    cd304: {
+      libraryKey: "cd304",
+      extId: 1022,
+      extNameJa: "必殺の閃光",
+      skillNameJa: "必殺の閃光",
+      skillIcon: "int.png",
+      cost: 2,
+      type: "atk",
+      effectSummaryLines(s) {
+        const d = estIntHit(s.playerInt, s.enemyInt, 130, 130);
+        return [`敵にダメージ　${d}`, "クリ確定"];
+      },
+      peekHelpKeys() { return []; },
+      previewLines(s) {
+        const d = estIntHit(s.playerInt, s.enemyInt, 130, 130);
+        return [`敵1体に ${d} ダメージ（INT 130%）`, "クリティカル確定（追加ダメージあり）"];
+      },
+      play(s) { api.dealIntSkillToEnemyCrit(s, 130, 130); },
+    },
+
+    cd305: {
+      libraryKey: "cd305",
+      extId: 1005,
+      extNameJa: "不屈",
+      skillNameJa: "不屈",
+      skillIcon: "BUF_agi.png",
+      cost: 0,
+      type: "skl",
+      effectSummaryLines() { return ["被ダメージ ½（このターン）"]; },
+      peekHelpKeys() { return ["guard"]; },
+      previewLines() { return ["このターン（ターン終了まで）受けるダメージをすべて半減する"]; },
+      play(s) { api.setDamageReducedThisTurn(s); },
+    },
   };
 }
 
