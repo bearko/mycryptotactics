@@ -30,7 +30,7 @@ import { CHAPTERS } from "./chapters.js";
 import { generateChapterMap } from "./maps.js";
 
 // ─── ナビゲーター「マイ」 ────────────────────────────────────────
-const MAI_SD_URL = "https://raw.githubusercontent.com/bearko/mycryptoheroes/main/MAI_SD.png";
+const MAI_SD_URL = "./MAI_SD.png";
 
 /** マイのメッセージをゲーム状態から決定する */
 function getMaiMessage() {
@@ -124,12 +124,29 @@ function stopBgm() {
   if (bgmAudio) { bgmAudio.pause(); bgmAudio.currentTime = 0; bgmAudio = null; }
 }
 
+function startBgmMap() {
+  if (bgmAudio) return; // すでに再生中なら再開始しない
+  try {
+    bgmAudio = new Audio(AUDIO_URLS.bgmMap());
+    bgmAudio.loop = true; bgmAudio.volume = 0.32;
+    bgmAudio.play().catch(() => {});
+  } catch (_) {}
+}
+
 function startBgmCombat() {
   stopBgm();
   try {
     bgmAudio = new Audio(AUDIO_URLS.bgmPvp());
     bgmAudio.loop = true; bgmAudio.volume = 0.32;
     bgmAudio.play().catch(() => {});
+  } catch (_) {}
+}
+
+function playSeNodeSelect() {
+  try {
+    const a = new Audio("Audio/SE/node_select.mp3");
+    a.volume = 0.65;
+    a.play().catch(() => {});
   } catch (_) {}
 }
 
@@ -669,6 +686,7 @@ function tryEnterMapNode(nodeId) {
   if (!allowed.includes(nodeId)) return;
   const node = mapNodeById(nodeId);
   if (!node) return;
+  playSeNodeSelect();
   if (node.type === "rest") {
     const heal = Math.floor(runState.playerHpMax * 0.35);
     const actualHeal = Math.min(runState.playerHpMax, runState.playerHp + heal) - runState.playerHp;
@@ -708,9 +726,11 @@ function showView(name) {
   // Show/hide map resources bar
   const mapRes = document.getElementById("mapResources");
   if (mapRes) mapRes.classList.toggle("hidden", name === "combat");
-  // Mai navigator: 戦闘・ゲームオーバー時は非表示
+  // Mai navigator: マップビュー内にあるので mapView の hidden に連動
   const nav = document.getElementById("maiNavigator");
-  if (nav) nav.classList.toggle("hidden", name === "combat" || name === "over");
+  if (nav) nav.classList.toggle("hidden", name !== "map");
+  // マップ BGM: マップ・ショップ・報酬ではBGMを再生（戦闘BGMと重ねない）
+  if (name === "map") startBgmMap();
 }
 
 // ─── 戦闘開始 ─────────────────────────────────────────────────────
