@@ -793,9 +793,15 @@
     .ns-card--locked .ns-card-body { opacity: 0.5; }
     .ns-card--locked { border-color: #2a2438; }
 
-    .ns-card--troy { border-color: #6030a0; }
-    .ns-card--troy .ns-card-bg { opacity: 0.2; }
-    .ns-card--troy .ns-card-body { opacity: 0.55; }
+    /* 最終ステージ（トロイ）強調 */
+    .ns-card--final {
+      border-color: #ffe766;
+      box-shadow: 0 0 18px rgba(255, 231, 102, 0.55), inset 0 0 12px rgba(255, 231, 102, 0.15);
+    }
+    .ns-card--final .ns-card-title {
+      color: #ffe766;
+      text-shadow: 0 0 8px rgba(255, 231, 102, 0.7);
+    }
 
     /* Lock overlay */
     .ns-card-lock-overlay {
@@ -806,15 +812,6 @@
     }
     .ns-lock-icon { font-size: 1.8rem; }
     .ns-lock-label { font-size: 0.7rem; color: var(--muted); }
-
-    /* TROY lock */
-    .ns-card-troy-lock {
-      flex: 1; display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      gap: 0.5rem; padding: 1rem;
-    }
-    .ns-card-troy-lock span:first-child { font-size: 2rem; color: #9060d0; }
-    .ns-card-troy-label { font-size: 0.72rem; color: #8060b0; font-weight: 700; }
 
     /* Just-unlocked glow animation */
     .ns-card--just-unlocked {
@@ -1512,11 +1509,11 @@
     .ll-ext-art {
       position: relative; z-index: 32;
       width: 100%; height: 100%; object-fit: contain; display: block;
+      opacity: 1 !important;
       image-rendering: pixelated;
       image-rendering: -moz-crisp-edges;
       image-rendering: crisp-edges;
       filter:
-        brightness(1.18) contrast(1.06)
         drop-shadow(0 0 6px rgba(255, 240, 180, 0.9))
         drop-shadow(0 0 14px rgba(255, 200, 80, 0.55));
     }

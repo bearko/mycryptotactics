@@ -354,7 +354,10 @@ function showLlExtModal(ext) {
   const descEl  = document.getElementById("llExtModalDesc");
 
   // フェーズ2のデータを事前にセット
-  if (artEl)   artEl.src = EXT_IMG(ext.extId);
+  if (artEl) {
+    artEl.style.opacity = "";  // 前回の onerror で 0.3 が残っている可能性をリセット
+    artEl.src = EXT_IMG(ext.extId);
+  }
   if (nameEl)  nameEl.textContent  = ext.name;
   if (skillEl) skillEl.textContent = `【${ext.skillName}】`;
   if (descEl)  descEl.textContent  = ext.desc;
@@ -908,13 +911,13 @@ function renderMap() {
   if (titleEl) {
     const chapter = CHAPTERS[runState.chapterIdx];
     titleEl.textContent = runState.runComplete
-      ? "全ランクリア！（3 章突破）"
+      ? `全ランクリア！（${CHAPTERS.length} 章突破・トロイ制覇）`
       : `章 ${chapter.id}「${chapter.name}」（下から上へ進む）`;
   }
 
   if (runState.runComplete) {
     host.innerHTML =
-      "<p style='color:var(--accent);margin:0 0 0.75rem'>3 章すべてをクリアしました！おめでとうございます。</p>" +
+      `<p style='color:var(--accent);margin:0 0 0.75rem'>全 ${CHAPTERS.length} 章（トロイまで）をクリアしました！おめでとうございます。</p>` +
       "<button type='button' class='action primary' id='btnRestartClear'>もう一度</button>";
     document.getElementById("btnRestartClear").addEventListener("click", resetRun);
     syncResources();
@@ -2275,34 +2278,30 @@ function renderNodeSelect(justUnlockedIdx = null) {
   const el = document.getElementById("nodeSelectView");
   if (!el) return;
 
-  // CHAPTERS + ゴール「TROY」の構成
-  const TROY_BG_ID = '1052';
-  const goals = [
-    ...CHAPTERS.map((ch, idx) => ({ idx, name: ch.name.replace('node : ', ''), chapter: ch })),
-    { idx: CHAPTERS.length, name: 'TROY', chapter: null, bgId: TROY_BG_ID },
-  ];
+  // CHAPTERS のみ（トロイ実装済みのため最終目標 TROY エントリは廃止）
+  const goals = CHAPTERS.map((ch, idx) => ({ idx, name: ch.name.replace('node : ', ''), chapter: ch }));
 
   let html = '<div class="ns-header"><h2>node を選択してください</h2><p class="ns-sub">ボスを倒すと次の node が解放されます</p></div>';
   html += '<div class="ns-cards">';
 
   goals.forEach((goal) => {
-    const isTroy     = goal.chapter === null;
-    const isUnlocked = !isTroy && (goal.idx === 0 || clearedChapters.has(goal.idx - 1));
-    const isCleared  = !isTroy && clearedChapters.has(goal.idx);
+    const isUnlocked = goal.idx === 0 || clearedChapters.has(goal.idx - 1);
+    const isCleared  = clearedChapters.has(goal.idx);
     const isJustUnlocked = goal.idx === justUnlockedIdx;
+    const isFinal    = goal.idx === CHAPTERS.length - 1;
 
     const ch = goal.chapter;
-    const bgId = ch?.bgId ?? goal.bgId ?? '1001';
+    const bgId = ch?.bgId ?? '1001';
     const bgUrl = img('Image/Backgrounds/' + bgId + '.png');
 
     // 状態クラス
-    const stateClass = isTroy      ? 'ns-card--troy' :
-                       isCleared   ? 'ns-card--cleared' :
+    const stateClass = isCleared   ? 'ns-card--cleared' :
                        isUnlocked  ? 'ns-card--unlocked' :
                                      'ns-card--locked';
+    const finalClass = isFinal && isUnlocked && !isCleared ? ' ns-card--final' : '';
     const animClass  = isJustUnlocked ? ' ns-card--just-unlocked' : '';
 
-    html += `<div class="ns-card ${stateClass}${animClass}" data-idx="${goal.idx}" role="${isUnlocked ? 'button' : 'presentation'}" tabindex="${isUnlocked ? 0 : -1}" style="--ns-bg: url('${bgUrl}')">`;
+    html += `<div class="ns-card ${stateClass}${finalClass}${animClass}" data-idx="${goal.idx}" role="${isUnlocked ? 'button' : 'presentation'}" tabindex="${isUnlocked ? 0 : -1}" style="--ns-bg: url('${bgUrl}')">`;
 
     // 背景レイヤー
     html += '<div class="ns-card-bg"></div>';
@@ -2310,13 +2309,10 @@ function renderNodeSelect(justUnlockedIdx = null) {
     // ─── コンテンツ ───
     html += '<div class="ns-card-body">';
 
-    // node 名
-    html += `<div class="ns-card-title">${goal.name}</div>`;
+    // node 名（最終ステージは ★ マーカー付き）
+    html += `<div class="ns-card-title">${isFinal ? '★ ' : ''}${goal.name}${isFinal ? ' ★' : ''}</div>`;
 
-    if (isTroy) {
-      // TROY：最終目標ロック表示
-      html += '<div class="ns-card-troy-lock"><span>★</span><span class="ns-card-troy-label">最終目標</span></div>';
-    } else if (!isUnlocked) {
+    if (!isUnlocked) {
       // ロック中
       html += '<div class="ns-card-lock-overlay"><span class="ns-lock-icon">🔒</span><span class="ns-lock-label">ロック中</span></div>';
     } else {
