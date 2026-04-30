@@ -17,7 +17,7 @@ export const CHAPTERS = [
     },
     enemyPool: ['sn-001', 'sn-002', 'sn-003'],
     elitePool: ['sn-e01'],
-    cardPool: ['cd101', 'cd102', 'cd103', 'cd104', 'cd105', 'cd106', 'cd107', 'cd108'],
+    cardPool: ['cd101', 'cd102', 'cd103', 'cd104', 'cd105', 'cd106', 'cd107', 'cd108', 'ext2004'],
     bossId: 'boss-ch1',
     bossRewardGold: 50,
   },

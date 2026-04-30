@@ -1669,11 +1669,13 @@ function endCombatLoss() {
   stopBgm();
   postCombatSnapshot = null;
   showCutin("lose").then(() => {
-    showView("over");
-    document.getElementById("gameOverMsg").textContent =
-      "HP が 0 になりました。デッキと立ち回りを調整して再挑戦しよう。";
+    // 全ランステートをリセットしてヒーロー選択画面へ戻る
     combat = null;
     runState = null;
+    clearedChapters = new Set();
+    gold = 75;
+    showView("heroSelect");
+    renderHeroSelect();
   });
 }
 
