@@ -18,6 +18,20 @@ export const BOSS_DEFS = {
     ],
   },
 
+  'boss-hl': {
+    id: 'boss-hl',
+    name: 'ゴースト・ビスマルク',
+    hp: 80, phy: 17, int: 9, agi: 7, imgId: 435,
+    initialShield: 0,
+    intentRota: [
+      { kind: 'attack',      phyPct: 100 },
+      { kind: 'guard',       value: 12 },
+      { kind: 'attackBleed', phyPct: 90, bleedStacks: 1 },
+      { kind: 'special',     pct: 12 },
+      { kind: 'buffSelf',    phyAdd: 3, intAdd: 2 },
+    ],
+  },
+
   'boss-ch2': {
     id: 'boss-ch2',
     name: 'ゴースト・ナポレオン',

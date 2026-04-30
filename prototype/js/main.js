@@ -98,6 +98,8 @@ const MAP_START = { id: "START", layer: -1, x: 50, y: 92 };
 // ─── 状態変数 ────────────────────────────────────────────────────
 let gold = 75;
 let view = "map";
+/** セッション内でクリアした章インデックスのセット（node選択画面のアンロック管理） */
+let clearedChapters = new Set();
 /** @type {null | {
  *   chapterIdx: number,
  *   deck: any[],
@@ -146,8 +148,8 @@ function dismissTitle() {
   titleEl.classList.add("title-out");
   setTimeout(() => {
     titleEl.classList.add("hidden");
-    showView("map");
-    renderMap();
+    showView("nodeSelect");
+    renderNodeSelect();
   }, 380);
 }
 
@@ -470,6 +472,8 @@ function ensureRunState() {
 // ─── 章推移 ───────────────────────────────────────────────────────
 function advanceToNextChapter() {
   if (!runState) return;
+  // クリア済み章を記録（node選択画面のアンロックに使用）
+  clearedChapters.add(runState.chapterIdx);
   const nextIdx = runState.chapterIdx + 1;
   if (nextIdx >= CHAPTERS.length) {
     runState.runComplete = true;
@@ -759,14 +763,16 @@ function showView(name) {
   document.getElementById("gameOver").classList.toggle("hidden", name !== "over");
   const rv = document.getElementById("rewardView");
   if (rv) rv.classList.toggle("hidden", name !== "reward");
+  const nsv = document.getElementById("nodeSelectView");
+  if (nsv) nsv.classList.toggle("hidden", name !== "nodeSelect");
   // Show/hide map resources bar
   const mapRes = document.getElementById("mapResources");
   if (mapRes) mapRes.classList.toggle("hidden", name === "combat");
   // Mai navigator: マップビュー内にあるので mapView の hidden に連動
   const nav = document.getElementById("maiNavigator");
   if (nav) nav.classList.toggle("hidden", name !== "map");
-  // マップ BGM: マップ・ショップ・報酬ではBGMを再生（戦闘BGMと重ねない）
-  if (name === "map") startBgmMap();
+  // マップ BGM: マップ・ショップ・報酬・node選択ではBGMを再生
+  if (name === "map" || name === "nodeSelect") startBgmMap();
 }
 
 // ─── 戦闘開始 ─────────────────────────────────────────────────────
@@ -810,6 +816,7 @@ function startCombatFromMapNode(node) {
     deck,
     drawPile: [],
     discardPile: [],
+    exhaustPile: [],
     hand: [],
     playerHp: runState.playerHp,
     playerHpMax: runState.playerHpMax,
@@ -1172,6 +1179,11 @@ function renderCombat() {
   document.getElementById("enemyIntent").textContent = intentText();
   const deckCountEl = document.getElementById("deckPileCount");
   if (deckCountEl) deckCountEl.textContent = String(combat.drawPile.length);
+  // 消耗カード数を表示
+  const exhaustNumEl = document.getElementById("exhaustNum");
+  const exhaustCountEl = document.getElementById("exhaustCount");
+  if (exhaustNumEl) exhaustNumEl.textContent = String(combat.exhaustPile?.length ?? 0);
+  if (exhaustCountEl) exhaustCountEl.dataset.nonzero = (combat.exhaustPile?.length > 0) ? "true" : "false";
 
   // HP gauges
   const playerFill = document.getElementById("playerHpFill");
@@ -1211,8 +1223,8 @@ function renderCombat() {
 
     slot.innerHTML =
       '<div class="card-cost-above"><span class="cost-zeus" aria-hidden="true">⚡</span>' + card.cost + '</div>' +
-      '<div class="card ' + card.type + '">' +
-      '<div class="card-name-hd">' + escapeHtml(card.extNameJa) + '</div>' +
+      '<div class="card ' + card.type + (card.exhaust ? ' card--exhaust' : '') + '">' +
+      '<div class="card-name-hd">' + escapeHtml(card.extNameJa) + (card.exhaust ? '<span class="exhaust-badge" title="消耗：使い切り">🔥</span>' : '') + '</div>' +
       '<div class="card-icon-area">' +
       '<img class="card-ext-img-full" src="' + EXT_IMG(card.extId) + '" alt="" />' +
       '<img class="card-skill-icon-tl" src="' + battleIconUrl(card.skillIcon) + '" alt="" />' +
@@ -1245,7 +1257,13 @@ function playCard(idx) {
   if (!card || card.cost > combat.energy) return;
   combat.energy -= card.cost;
   combat.hand.splice(idx, 1);
-  combat.discardPile.push(card);
+  // 消耗カードは exhaustPile へ、通常カードは捨て札へ
+  if (card.exhaust) {
+    combat.exhaustPile.push(card);
+    clog(`【消耗】${card.extNameJa} を除外`);
+  } else {
+    combat.discardPile.push(card);
+  }
   card.play(combat);
   if (combat.enemyHp <= 0) { endCombatWin(); return; }
   renderCombat();
@@ -1567,8 +1585,94 @@ function resetRun() {
   postCombatSnapshot = null;
   stopBgm();
   dismissCutin();
+  showView("nodeSelect");
+  renderNodeSelect();
+}
+
+// ─── Node 選択画面 ────────────────────────────────────────────────
+/**
+ * 指定した章インデックスからランを開始する。
+ * clearedChapters に前の章が含まれている（またはインデックス 0）場合のみ呼び出し可。
+ */
+function startRunFromChapter(chapterIdx) {
+  gold = 75;
+  combat = null;
+  pendingShopNodeId = null;
+  postCombatSnapshot = null;
+  const chapter = CHAPTERS[chapterIdx];
+  const { nodes, edges } = generateChapterMap(chapter, ENEMY_DEFS);
+  setActiveMap(nodes, edges);
+  runState = {
+    chapterIdx,
+    deck: makeStarterDeck(),
+    playerHp: LEADER.hpMax,
+    playerHpMax: LEADER.hpMax,
+    lastMapNodeId: null,
+    pathNodeIds: [],
+    runComplete: false,
+  };
   showView("map");
   renderMap();
+}
+
+/** node 選択画面を描画する */
+function renderNodeSelect() {
+  const el = document.getElementById("nodeSelectView");
+  if (!el) return;
+
+  // CHAPTERS + ゴール「TROY」の構成
+  const goals = [
+    ...CHAPTERS.map((ch, idx) => ({ idx, name: ch.name.replace('node : ', ''), chapter: ch })),
+    { idx: CHAPTERS.length, name: 'TROY', chapter: null },
+  ];
+
+  let html = '<div class="ns-header"><h2>node を選択してください</h2><p class="ns-sub">ボスを倒すと次の node が解放されます</p></div>';
+  html += '<div class="ns-path">';
+
+  goals.forEach((goal, i) => {
+    const isLast = i === goals.length - 1; // TROY
+    const isUnlocked = goal.idx === 0 || clearedChapters.has(goal.idx - 1);
+    const isCleared  = clearedChapters.has(goal.idx);
+    const isTroy     = isLast;
+
+    let stateClass = isTroy ? 'ns-node--troy' :
+                     isCleared  ? 'ns-node--cleared' :
+                     isUnlocked ? 'ns-node--unlocked' :
+                                  'ns-node--locked';
+
+    html += `<div class="ns-node ${stateClass}" data-idx="${goal.idx}" role="button" tabindex="${isUnlocked && !isTroy ? 0 : -1}">`;
+    html += `<div class="ns-node-icon">${isCleared ? '✓' : isTroy ? '★' : isUnlocked ? '▶' : '🔒'}</div>`;
+    html += `<div class="ns-node-name">${goal.name}</div>`;
+    if (isTroy) {
+      html += `<div class="ns-node-hint">最終目標</div>`;
+    } else if (isCleared) {
+      html += `<div class="ns-node-hint">クリア済み</div>`;
+    } else if (!isUnlocked) {
+      html += `<div class="ns-node-hint">ロック中</div>`;
+    }
+    html += '</div>';
+
+    // 矢印（最後の要素以外）
+    if (i < goals.length - 1) {
+      html += '<div class="ns-arrow">→</div>';
+    }
+  });
+
+  html += '</div>';
+  el.innerHTML = html;
+
+  // クリックイベント
+  el.querySelectorAll('.ns-node--unlocked').forEach(nodeEl => {
+    const idx = parseInt(nodeEl.dataset.idx, 10);
+    const activate = () => {
+      playSeNodeSelect();
+      startRunFromChapter(idx);
+    };
+    nodeEl.addEventListener('click', activate);
+    nodeEl.addEventListener('keydown', ev => {
+      if (ev.key === 'Enter' || ev.key === ' ') activate();
+    });
+  });
 }
 
 // ─── アセット配線 ─────────────────────────────────────────────────
@@ -1660,8 +1764,8 @@ function init() {
       if (ev.key === "Enter" || ev.key === " ") dismissTitle();
     });
   }
-  // マップ側は非表示で待機（タイトルが覆うので見えない）
-  showView("map"); // 内部状態はマップに初期化
+  // nodeSelect を非表示で待機（タイトルが覆うので見えない）
+  showView("nodeSelect"); // 内部状態は nodeSelect に初期化
   // BGM はタイトルクリック時に開始（ブラウザのオートプレイ制限のため init では呼ばない）
 }
 

@@ -344,7 +344,7 @@
       bottom: 100%;
       transform: translateX(-50%) translateY(0);
       font-weight: 800;
-      font-size: 0.95rem;
+      font-size: 1.8rem;
       pointer-events: none;
       opacity: 0;
       white-space: nowrap;
@@ -546,6 +546,8 @@
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
       flex-shrink: 0;
     }
+    .exhaust-badge { font-size: 0.55rem; margin-left: 2px; vertical-align: middle; }
+    .card--exhaust { border-color: #a04020 !important; }
     .card-icon-area {
       position: relative; flex: 1; overflow: hidden; min-height: 0;
     }
@@ -625,6 +627,77 @@
       font-size: 1rem;
       color: var(--energy);
       font-variant-numeric: tabular-nums;
+    }
+
+    /* ── Exhaust count ─────────────────────────────────────────────────── */
+    .exhaust-count {
+      display: inline-flex; align-items: center; gap: 0.2rem;
+      font-size: 0.75rem; color: var(--muted);
+      margin-right: auto;
+      opacity: 0.8;
+    }
+    .exhaust-count[data-nonzero="true"] {
+      color: #e07040;
+      opacity: 1;
+    }
+
+    /* ── Node Select View ──────────────────────────────────────────────── */
+    #nodeSelectView {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      min-height: 60vh;
+      padding: 1.5rem 1rem;
+    }
+    .ns-header { text-align: center; margin-bottom: 2rem; }
+    .ns-header h2 { margin: 0 0 0.4rem; font-size: 1.3rem; color: var(--accent); }
+    .ns-sub { margin: 0; font-size: 0.82rem; color: var(--muted); }
+
+    .ns-path {
+      display: flex; flex-wrap: wrap;
+      align-items: center; justify-content: center;
+      gap: 0.5rem 0.3rem;
+      width: 100%;
+    }
+
+    .ns-node {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 0.9rem 1.1rem;
+      border-radius: 12px;
+      border: 2px solid var(--border);
+      background: var(--map-node);
+      min-width: 100px;
+      transition: transform 0.12s, border-color 0.12s, box-shadow 0.12s;
+      cursor: default;
+    }
+    .ns-node--unlocked {
+      border-color: var(--accent);
+      cursor: pointer;
+    }
+    .ns-node--unlocked:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px #0008;
+      border-color: #e8d070;
+    }
+    .ns-node--cleared {
+      border-color: var(--gain);
+      opacity: 0.7;
+    }
+    .ns-node--locked {
+      opacity: 0.45;
+    }
+    .ns-node--troy {
+      border-color: #b060f0;
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .ns-node-icon { font-size: 1.5rem; line-height: 1; margin-bottom: 0.35rem; }
+    .ns-node-name { font-size: 0.82rem; font-weight: 700; color: var(--text); text-align: center; }
+    .ns-node-hint { font-size: 0.7rem; color: var(--muted); margin-top: 0.2rem; }
+
+    .ns-arrow {
+      font-size: 1.4rem; color: var(--muted);
+      flex-shrink: 0;
     }
 
     /* Reward cards (keep original layout style) */
@@ -1114,6 +1187,7 @@
           <div id="hand" class="hand" role="list"></div>
         </div>
         <div class="footer-bottombar">
+          <span class="exhaust-count" id="exhaustCount" title="消耗済みカード">🔥<span id="exhaustNum">0</span></span>
           <button type="button" class="btn-deck-pile" id="btnDeckOpen" aria-label="残りデッキを表示">
             <img alt="" data-icon="deck" width="20" height="20" />
             <span class="btn-deck-pile__count" id="deckPileCount">0</span>
@@ -1122,6 +1196,8 @@
       </div>
 
     </div>
+
+    <div id="nodeSelectView" class="panel hidden"></div>
 
     <div id="shopView" class="panel hidden">
       <div class="shop-header-row">
