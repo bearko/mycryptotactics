@@ -697,6 +697,71 @@
     }
 
     #gameOver { text-align: center; padding: 2rem; }
+
+    /* ── Mai Navigator ─────────────────────────────────────────── */
+    .mai-navigator {
+      position: fixed; bottom: 1.25rem; right: 0.85rem;
+      display: flex; flex-direction: row; align-items: flex-end;
+      gap: 0.45rem; z-index: 50; pointer-events: none;
+      max-width: min(260px, 78vw);
+    }
+    .mai-navigator.hidden { display: none !important; }
+    .mai-bubble {
+      background: rgba(18,14,28,0.94); border: 1.5px solid var(--accent);
+      border-radius: 12px 12px 4px 12px;
+      padding: 0.48rem 0.6rem; font-size: 0.72rem; line-height: 1.5;
+      color: var(--text); box-shadow: 0 4px 18px #000a;
+      animation: mai-fadein 0.28s ease;
+      flex: 1; min-width: 0;
+    }
+    .mai-bubble-name {
+      font-size: 0.6rem; font-weight: 700; color: var(--accent);
+      margin-bottom: 0.18rem; letter-spacing: 0.08em;
+    }
+    @keyframes mai-fadein {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .mai-icon {
+      width: 58px; height: 58px; object-fit: contain;
+      image-rendering: pixelated; flex-shrink: 0;
+    }
+
+    /* ── Shop card layout ───────────────────────────────────────── */
+    .shop-header-row {
+      display: flex; align-items: center; justify-content: space-between;
+      margin: 0 0 0.2rem;
+    }
+    .shop-gold-disp {
+      display: flex; align-items: center; gap: 0.25rem;
+      font-size: 0.8rem; color: var(--muted);
+    }
+    .shop-gold-disp img { width: 15px; height: 15px; object-fit: contain; }
+    .shop-gold-val { font-weight: 700; color: var(--accent); }
+    #shopList {
+      display: flex; flex-wrap: wrap;
+      gap: 0.65rem; justify-content: center; margin: 0.6rem 0;
+    }
+    .shop-card-item {
+      display: flex; flex-direction: column; align-items: center; gap: 0.35rem;
+    }
+    .shop-price-row {
+      display: flex; flex-direction: row; align-items: center; justify-content: center;
+      gap: 0.3rem; width: 100%;
+    }
+    .shop-price-val {
+      font-size: 0.78rem; color: var(--accent); font-weight: 700;
+    }
+    .shop-price {
+      display: flex; align-items: center; gap: 0.2rem;
+      font-size: 0.7rem; color: var(--accent); font-weight: 700;
+    }
+    .shop-price img { width: 13px; height: 13px; object-fit: contain; }
+    .shop-buy-btn {
+      width: 100%; font-size: 0.72rem;
+      padding: 0.3rem 0.45rem; border-radius: 6px;
+    }
+
     footer {
       margin-top: auto;
       padding-top: 1rem;
@@ -1010,10 +1075,16 @@
     </div>
 
     <div id="shopView" class="panel hidden">
-      <p style="margin-top:0;font-weight:600;color:var(--accent)">店</p>
-      <p style="font-size:0.8rem;color:var(--muted)">ゴールドでカードを購入。</p>
-      <div id="shopList" style="display:flex;flex-direction:column;gap:0.5rem;margin:1rem 0"></div>
-      <button type="button" class="action" id="btnLeaveShop">立ち去る</button>
+      <div class="shop-header-row">
+        <p style="margin:0;font-weight:600;color:var(--accent);font-size:0.95rem">ショップ</p>
+        <div class="shop-gold-disp">
+          <img alt="G" data-icon="gum" />
+          <span class="shop-gold-val" id="shopGoldDisp">0</span> GUM
+        </div>
+      </div>
+      <p style="font-size:0.76rem;color:var(--muted);margin:0.2rem 0 0">エクステンションを購入してデッキを強化しよう。</p>
+      <div id="shopList"></div>
+      <button type="button" class="action" id="btnLeaveShop" style="margin-top:0.25rem;width:100%">立ち去る</button>
     </div>
 
     <div id="gameOver" class="panel hidden">
@@ -1028,6 +1099,17 @@
       <div class="reward-picks" id="rewardPicks"></div>
       <button type="button" class="action" id="btnSkipReward" style="margin-top:0.75rem;width:100%">スキップ（報酬なし）</button>
     </div>
+  </div>
+
+  <!-- ── Mai Navigator（マップ・ショップ・報酬画面で表示） ── -->
+  <div class="mai-navigator hidden" id="maiNavigator" aria-live="polite">
+    <div class="mai-bubble" id="maiBubble">
+      <div class="mai-bubble-name">マイ</div>
+      <span id="maiText">ボスの居るステージを目指しましょう！</span>
+    </div>
+    <img class="mai-icon" id="maiIcon"
+      src="https://raw.githubusercontent.com/bearko/mycryptoheroes/main/MAI_SD.png"
+      alt="マイ" />
   </div>
 
   <div id="deckModal" class="hidden" aria-hidden="true" role="dialog" aria-labelledby="deckModalTitle">
