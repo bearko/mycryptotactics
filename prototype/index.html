@@ -1521,7 +1521,7 @@
       margin-top: 2px; display: block;
     }
     #confettiCanvas {
-      position: fixed; inset: 0; z-index: 5; pointer-events: none;
+      position: absolute; inset: 0; z-index: 1; pointer-events: none;
       width: 100%; height: 100%;
     }
 
@@ -1946,8 +1946,8 @@
   </div>
 
   <!-- ── LLエクステ 獲得モーダル + 紙吹雪キャンバス ── -->
-  <canvas id="confettiCanvas" style="display:none;position:fixed;inset:0;pointer-events:none;width:100%;height:100%;"></canvas>
   <div id="llExtModal" class="hidden" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="llExtModalName">
+    <canvas id="confettiCanvas" style="display:none;position:absolute;inset:0;pointer-events:none;width:100%;height:100%;"></canvas>
     <div class="ll-ext-modal-box">
       <!-- フェーズ1: 宝箱 -->
       <div class="ll-modal-phase" id="llModalPhaseChest">
