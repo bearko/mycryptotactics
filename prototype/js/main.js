@@ -214,74 +214,110 @@ function startConfetti() {
   const canvas = document.getElementById("confettiCanvas");
   if (!canvas) return null;
   canvas.style.display = "block";
-  canvas.width  = window.innerWidth;
-  canvas.height = window.innerHeight;
+  const W = canvas.width  = window.innerWidth;
+  const H = canvas.height = window.innerHeight;
   const ctx = canvas.getContext("2d");
+
   const COLORS = [
-    "#1E90FF","#9ACD32","#FFD700","#FF69B4","#6A5ACD",
-    "#ADD8E6","#EE82EE","#90EE90","#4682B4","#F4A460",
-    "#D2691E","#DC143C",
+    "#FF595E","#FF924C","#FFCA3A","#8AC926",
+    "#1982C4","#6A4C93","#F7B7D2","#4BC4CF",
+    "#FF7096","#C77DFF","#80B918","#E63946",
   ];
-  const pts = Array.from({ length: 120 }, () => ({
-    x: Math.random() * canvas.width,
-    y: Math.random() * canvas.height - canvas.height,
-    r: 4 + Math.random() * 6,
-    d: 1 + Math.random() * 2,
+
+  // 長方形の紙吹雪パーティクル（幅8×高さ5px前後）
+  const pts = Array.from({ length: 150 }, (_, i) => ({
+    x: (i / 150) * W + (Math.random() - 0.5) * (W / 150),  // 均等スタート
+    y: -20 - Math.random() * H * 0.6,                        // 画面上方にスタート
+    w: 7 + Math.random() * 7,
+    h: 4 + Math.random() * 4,
     color: COLORS[Math.floor(Math.random() * COLORS.length)],
-    tilt: 0,
-    tiltAngle: 0,
-    tiltInc: 0.07 + Math.random() * 0.05,
+    angle:     Math.random() * Math.PI * 2,
+    spin:      (Math.random() < 0.5 ? 1 : -1) * (0.05 + Math.random() * 0.12),
+    vx:        (Math.random() - 0.5) * 0.6,
+    vy:        1.0 + Math.random() * 1.5,    // ゆっくり落下
+    phase:     Math.random() * Math.PI * 2,
   }));
+
   let rafId;
   const draw = () => {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    pts.forEach(p => {
-      ctx.beginPath();
-      ctx.lineWidth = p.r / 2;
-      ctx.strokeStyle = p.color;
-      ctx.moveTo(p.x + p.tilt + p.r / 4, p.y);
-      ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 4);
-      ctx.stroke();
-      p.tiltAngle += p.tiltInc;
-      p.y += (Math.cos(p.d) + 1 + p.r / 2) * 0.75;
-      p.tilt = Math.sin(p.tiltAngle - p.d / 3) * 15;
-      if (p.y > canvas.height) {
-        p.y = -10; p.x = Math.random() * canvas.width;
+    ctx.clearRect(0, 0, W, H);
+    for (const p of pts) {
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.angle);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w * 0.5, -p.h * 0.5, p.w, p.h);
+      ctx.restore();
+
+      // 物理更新
+      p.angle  += p.spin;
+      p.phase  += 0.03;
+      p.x      += p.vx + Math.sin(p.phase) * 0.4;
+      p.y      += p.vy;
+
+      // 画面外に出たら上に戻す
+      if (p.y > H + 20) {
+        p.y = -20;
+        p.x = Math.random() * W;
       }
-    });
+    }
     rafId = requestAnimationFrame(draw);
   };
   draw();
+
   return () => {
     cancelAnimationFrame(rafId);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, W, H);
     canvas.style.display = "none";
   };
 }
 
-// ─── LLエクステ 獲得モーダル ──────────────────────────────────────
+// ─── LLエクステ 獲得モーダル（宝箱→開封→エクステ開示） ──────────
 function showLlExtModal(ext) {
-  const modal = document.getElementById("llExtModal");
+  const modal    = document.getElementById("llExtModal");
   if (!modal) return Promise.resolve();
+
+  const phaseChest  = document.getElementById("llModalPhaseChest");
+  const phaseReveal = document.getElementById("llModalPhaseReveal");
+  const artEl   = document.getElementById("llExtModalArt");
   const nameEl  = document.getElementById("llExtModalName");
   const skillEl = document.getElementById("llExtModalSkill");
   const descEl  = document.getElementById("llExtModalDesc");
+
+  // フェーズ2のデータを事前にセット
+  if (artEl)   artEl.src = EXT_IMG(ext.extId);
   if (nameEl)  nameEl.textContent  = ext.name;
   if (skillEl) skillEl.textContent = `【${ext.skillName}】`;
   if (descEl)  descEl.textContent  = ext.desc;
+
+  // フェーズ1を表示、フェーズ2を隠す
+  phaseChest?.classList.remove("hidden");
+  phaseReveal?.classList.add("hidden");
+
   modal.classList.remove("hidden");
   modal.removeAttribute("aria-hidden");
   const stopConfetti = startConfetti();
+
   return new Promise((resolve) => {
-    const btn = document.getElementById("btnLlExtClaim");
+    // 「開ける！」ボタン → フェーズ2へ切り替え
+    const btnOpen = document.getElementById("btnLlExtOpen");
+    const onOpen = () => {
+      btnOpen.removeEventListener("click", onOpen);
+      phaseChest?.classList.add("hidden");
+      phaseReveal?.classList.remove("hidden");
+    };
+    btnOpen?.addEventListener("click", onOpen);
+
+    // 「受け取る！」ボタン → 閉じて resolve
+    const btnClaim = document.getElementById("btnLlExtClaim");
     const onClaim = () => {
-      btn.removeEventListener("click", onClaim);
+      btnClaim.removeEventListener("click", onClaim);
       modal.classList.add("hidden");
       modal.setAttribute("aria-hidden", "true");
       stopConfetti?.();
       resolve();
     };
-    btn.addEventListener("click", onClaim);
+    btnClaim?.addEventListener("click", onClaim);
   });
 }
 
@@ -1590,7 +1626,8 @@ function renderCombat() {
     slot.innerHTML =
       '<div class="card-cost-above"><span class="cost-zeus" aria-hidden="true">⚡</span>' + card.cost + '</div>' +
       '<div class="card ' + card.type + (card.exhaust ? ' card--exhaust' : '') + '">' +
-      '<div class="card-name-hd">' + escapeHtml(card.extNameJa) + (card.exhaust ? '<span class="exhaust-badge" title="消耗：使い切り">🔥</span>' : '') + '</div>' +
+      '<div class="card-name-hd">' + escapeHtml(card.extNameJa) + (card.exhaust ? '<span class="exhaust-badge" title="消耗：使い切り">🔥</span>' : '') +
+      (card.skillNameJa ? '<span class="card-skill-sub">' + escapeHtml(card.skillNameJa) + '</span>' : '') + '</div>' +
       '<div class="card-icon-area">' +
       '<img class="card-ext-img-full" src="' + EXT_IMG(card.extId) + '" alt="" onerror="this.style.opacity=\'0\'" />' +
       '<img class="card-skill-icon-tl" src="' + battleIconUrl(card.skillIcon) + '" alt="" />' +
@@ -1817,7 +1854,9 @@ function buildRewardPickButton(def, mockS) {
     '<span class="card-cost-badge"><span class="cost-zeus" aria-hidden="true">⚡</span>' + def.cost + "</span>" +
     '<img class="card-skill-corner" src="' + battleIconUrl(def.skillIcon) + '" alt="" />' +
     "</div></div>" +
-    '<div class="card-ext-name">' + escapeHtml(def.extNameJa) + "</div>" +
+    '<div class="card-ext-name">' + escapeHtml(def.extNameJa) +
+    (def.skillNameJa ? '<span class="card-ext-skill-sub">' + escapeHtml(def.skillNameJa) + '</span>' : '') +
+    "</div>" +
     '<div class="card-effect-summary">' +
     summaryLines.map((t) => "<p>" + escapeHtml(t) + "</p>").join("") +
     "</div></div></div>";
