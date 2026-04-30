@@ -3,10 +3,13 @@ import {
   shuffle,
   battleIconUrl,
   CARD_RARITIES,
+  CARD_UPGRADE_SERIES,
 } from "./cards.js";
 import {
   img,
   LEADER,
+  HERO_ROSTER,
+  setLeader,
   ENEMY_IMG,
   EXT_IMG,
   BATTLE_BG,
@@ -73,11 +76,15 @@ function renderNavigator(msg) {
 let activeMapNodes = [];
 let activeMapEdges = [];
 let activeEdgeFrom = new Map();
+let activeMapViewH  = 100;   // SVG viewBox の高さ
+let activeMapStartY = 92;    // START ノードの y 座標
 
-function setActiveMap(nodes, edges) {
-  activeMapNodes = nodes;
-  activeMapEdges = edges;
-  activeEdgeFrom = new Map();
+function setActiveMap(nodes, edges, viewH = 100, startY = 92) {
+  activeMapNodes  = nodes;
+  activeMapEdges  = edges;
+  activeMapViewH  = viewH;
+  activeMapStartY = startY;
+  activeEdgeFrom  = new Map();
   for (const [a, b] of edges) {
     if (!activeEdgeFrom.has(a)) activeEdgeFrom.set(a, []);
     activeEdgeFrom.get(a).push(b);
@@ -94,7 +101,8 @@ function reachableNextNodeIds(lastNodeId) {
 }
 
 // ─── MAP_START（SVG 用の仮想入口ノード） ─────────────────────────
-const MAP_START = { id: "START", layer: -1, x: 50, y: 92 };
+// x は固定・y は activeMapStartY に委譲
+const MAP_START_X = 50;
 
 // ─── 状態変数 ────────────────────────────────────────────────────
 let gold = 75;
@@ -113,6 +121,7 @@ let clearedChapters = new Set();
 let runState = null;
 let combat = null;
 let pendingShopNodeId = null;
+let pendingCraftNodeId = null;
 /** @type {'win'|'lose'|null} */
 let cutinKind = null;
 let cutinResolve = null;
@@ -149,8 +158,8 @@ function dismissTitle() {
   titleEl.classList.add("title-out");
   setTimeout(() => {
     titleEl.classList.add("hidden");
-    showView("nodeSelect");
-    renderNodeSelect();
+    showView("heroSelect");
+    renderHeroSelect();
   }, 380);
 }
 
@@ -246,6 +255,18 @@ function flashPortrait(which) {
   setTimeout(() => wrap.classList.remove("portrait-hit"), 380);
 }
 
+/** 攻撃側のポートレートを突進アニメで動かす（player = 右へ, enemy = 左へ） */
+function lungePortrait(who) {
+  const id = who === "enemy" ? "enemyPortraitWrap" : "playerPortraitWrap";
+  const wrap = document.getElementById(id);
+  if (!wrap) return;
+  const cls = who === "player" ? "portrait-lunge--player" : "portrait-lunge--enemy";
+  wrap.classList.remove(cls);   // reset if still running
+  void wrap.offsetWidth;        // reflow to restart animation
+  wrap.classList.add(cls);
+  setTimeout(() => wrap.classList.remove(cls), 350);
+}
+
 // ─── ダメージ計算補助 ─────────────────────────────────────────────
 function applyGuardToDamage(target, raw) {
   const key = target === "player" ? "playerGuard" : "enemyGuard";
@@ -288,6 +309,7 @@ function dealPhySkillToEnemy(s, skillPct) {
   }
   total = applyGuardToDamage("enemy", total);
   s.enemyHp = Math.max(0, s.enemyHp - total);
+  lungePortrait("player");
   flashPortrait("enemy");
   playPortraitEffect("enemy", "hit");
   if (total > 0) playBattleSe("hit");
@@ -315,6 +337,7 @@ function dealIntSkillToEnemy(s, minPct, maxPct, forceCrit = false) {
   let total = base + critBonus;
   total = applyGuardToDamage("enemy", total);
   s.enemyHp = Math.max(0, s.enemyHp - total);
+  lungePortrait("player");
   flashPortrait("enemy");
   playPortraitEffect("enemy", "hit");
   if (total > 0) playBattleSe("hit");
@@ -357,6 +380,7 @@ function dealPhySkillFromEnemyToPlayer(s, skillPct) {
   }
   total = applyGuardToDamage("player", total);
   s.playerHp = Math.max(0, s.playerHp - total);
+  lungePortrait("enemy");
   flashPortrait("player");
   playPortraitEffect("player", "hit");
   if (total > 0) playBattleSe("hit");
@@ -364,6 +388,14 @@ function dealPhySkillFromEnemyToPlayer(s, skillPct) {
     `敵 PHY ${skillPct}% → 被ダメージ ${total}` +
     (critBonus ? "（CRIT+" + critBonus + "）" : "")
   );
+  // 張遼「遼来遼来」: 被ダメージ後に50%の確率で反撃
+  if (LEADER.passiveKey === 'zhang' && s.playerHp > 0 && s.enemyHp > 0 && Math.random() < 0.5) {
+    const counterDmg = Math.max(1, Math.floor(s.playerPhy * 0.2));
+    s.enemyHp = Math.max(0, s.enemyHp - counterDmg);
+    playPortraitEffect("enemy", "hit");
+    playBattleSe("hit");
+    clog(`【遼来遼来】発動！ 反撃 ${counterDmg} ダメージ`);
+  }
 }
 
 function dealIntSkillFromEnemyToPlayer(s, skillPct) {
@@ -381,6 +413,7 @@ function dealIntSkillFromEnemyToPlayer(s, skillPct) {
   }
   total = applyGuardToDamage("player", total);
   s.playerHp = Math.max(0, s.playerHp - total);
+  lungePortrait("enemy");
   flashPortrait("player");
   playPortraitEffect("player", "hit");
   if (total > 0) playBattleSe("hit");
@@ -388,6 +421,14 @@ function dealIntSkillFromEnemyToPlayer(s, skillPct) {
     `敵 INT ${skillPct}% → 被ダメージ ${total}` +
     (critBonus ? "（CRIT+" + critBonus + "）" : "")
   );
+  // 張遼「遼来遼来」: 被ダメージ後に50%の確率で反撃
+  if (LEADER.passiveKey === 'zhang' && s.playerHp > 0 && s.enemyHp > 0 && Math.random() < 0.5) {
+    const counterDmg = Math.max(1, Math.floor(s.playerPhy * 0.2));
+    s.enemyHp = Math.max(0, s.enemyHp - counterDmg);
+    playPortraitEffect("enemy", "hit");
+    playBattleSe("hit");
+    clog(`【遼来遼来】発動！ 反撃 ${counterDmg} ダメージ`);
+  }
 }
 
 /** 最大 HP 割合の特殊ダメージ（シールドのみ有効） */
@@ -396,6 +437,7 @@ function dealSpecialMaxHpPercentToPlayer(s, pct) {
   if (s.damageReducedThisTurn) raw = Math.ceil(raw / 2);
   raw = applyDamageThroughShield(s, "player", raw);
   s.playerHp = Math.max(0, s.playerHp - raw);
+  lungePortrait("enemy");
   flashPortrait("player");
   playPortraitEffect("player", "area");
   if (raw > 0) playBattleSe("area");
@@ -456,8 +498,8 @@ const { CARD_LIBRARY, copyCard, makeStarterDeck } = createCardRuntime(clog, batt
 function ensureRunState() {
   if (!runState) {
     const chapter = CHAPTERS[0];
-    const { nodes, edges } = generateChapterMap(chapter, ENEMY_DEFS);
-    setActiveMap(nodes, edges);
+    const { nodes, edges, viewH, startY } = generateChapterMap(chapter, ENEMY_DEFS);
+    setActiveMap(nodes, edges, viewH, startY);
     runState = {
       chapterIdx: 0,
       deck: makeStarterDeck(),
@@ -485,8 +527,8 @@ function advanceToNextChapter() {
   runState.lastMapNodeId = null;
   runState.pathNodeIds = [];
   const chapter = CHAPTERS[nextIdx];
-  const { nodes, edges } = generateChapterMap(chapter, ENEMY_DEFS);
-  setActiveMap(nodes, edges);
+  const { nodes, edges, viewH, startY } = generateChapterMap(chapter, ENEMY_DEFS);
+  setActiveMap(nodes, edges, viewH, startY);
   clog(`── 章 ${chapter.id}「${chapter.name}」へ ──`);
 }
 
@@ -502,7 +544,7 @@ function getCumulativeCardPool() {
 
 // ─── ノード位置 ───────────────────────────────────────────────────
 function nodeXY(id) {
-  if (id === "START") return { x: MAP_START.x, y: MAP_START.y };
+  if (id === "START") return { x: MAP_START_X, y: activeMapStartY };
   const n = mapNodeById(id);
   return n ? { x: n.x, y: n.y } : { x: 0, y: 0 };
 }
@@ -583,7 +625,7 @@ function renderMap() {
   const MAP_EDGES = activeMapEdges;
 
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  svg.setAttribute("viewBox", "0 0 100 100");
+  svg.setAttribute("viewBox", `0 0 100 ${activeMapViewH}`);
   svg.setAttribute("class", "map-graph");
   svg.setAttribute("role", "img");
   svg.setAttribute("aria-label", "フロア接続マップ");
@@ -610,31 +652,33 @@ function renderMap() {
 
   const edgeG = document.createElementNS("http://www.w3.org/2000/svg", "g");
   edgeG.setAttribute("class", "map-edges");
+  const allowed = new Set(reachableNextNodeIds(runState.lastMapNodeId));
   for (const [a, b] of MAP_EDGES) {
-    const pa = nodeXY(a); const pb = nodeXY(b);
-    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    line.setAttribute("x1", String(pa.x)); line.setAttribute("y1", String(pa.y));
-    line.setAttribute("x2", String(pb.x)); line.setAttribute("y2", String(pb.y));
-    line.setAttribute("marker-end", "url(#arrowHead)");
-    const allowed = new Set(reachableNextNodeIds(runState.lastMapNodeId));
+    const pa = nodeXY(a), pb = nodeXY(b);
+    // 3次ベジエ曲線: 制御点を縦中間の同一 y に置き、滑らかな S カーブを作る
+    const midY = (pa.y + pb.y) / 2;
+    const pathEl = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    pathEl.setAttribute("d",
+      `M ${pa.x} ${pa.y} C ${pa.x} ${midY}, ${pb.x} ${midY}, ${pb.x} ${pb.y}`);
+    pathEl.setAttribute("marker-end", "url(#arrowHead)");
     const onPath =
       runState.pathNodeIds.includes(a) &&
       (runState.pathNodeIds.includes(b) || allowed.has(b));
-    line.setAttribute("class",
+    pathEl.setAttribute("class",
       onPath || (a === "START" && allowed.has(b)) ? "map-edge map-edge--active" : "map-edge"
     );
-    edgeG.appendChild(line);
+    edgeG.appendChild(pathEl);
   }
   svg.appendChild(edgeG);
 
   const startG = document.createElementNS("http://www.w3.org/2000/svg", "g");
   startG.setAttribute("class", "map-start");
   const sc = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-  sc.setAttribute("cx", String(MAP_START.x)); sc.setAttribute("cy", String(MAP_START.y));
+  sc.setAttribute("cx", String(MAP_START_X)); sc.setAttribute("cy", String(activeMapStartY));
   sc.setAttribute("r", "3.2"); sc.setAttribute("class", "map-start-dot");
   startG.appendChild(sc);
   const st = document.createElementNS("http://www.w3.org/2000/svg", "text");
-  st.setAttribute("x", String(MAP_START.x)); st.setAttribute("y", String(MAP_START.y + 7.5));
+  st.setAttribute("x", String(MAP_START_X)); st.setAttribute("y", String(activeMapStartY + 7.5));
   st.setAttribute("text-anchor", "middle"); st.setAttribute("class", "map-start-label");
   st.textContent = "入口";
   startG.appendChild(st);
@@ -658,9 +702,10 @@ function renderMap() {
     ty.setAttribute("x", String(node.x)); ty.setAttribute("y", String(node.y + 11.8));
     ty.setAttribute("text-anchor", "middle"); ty.setAttribute("class", "map-node-type");
     ty.textContent =
-      node.type === "fight" ? (node.elite ? "レアエネミー" : "エネミー") :
-      node.type === "rest"  ? "HP回復" :
-      node.type === "shop"  ? "ショップ" : "ボス";
+      node.type === "fight"  ? (node.elite ? "レアエネミー" : "エネミー") :
+      node.type === "rest"   ? "HP回復" :
+      node.type === "shop"   ? "ショップ" :
+      node.type === "craft"  ? "クラフト" : "ボス";
     g.appendChild(ty);
     const allowed = new Set(reachableNextNodeIds(runState.lastMapNodeId));
     if (!allowed.has(node.id)) g.style.pointerEvents = "none";
@@ -689,8 +734,9 @@ function renderMap() {
   nodeIconG.setAttribute("class", "map-node-icons");
   for (const node of MAP_NODES) {
     let iconUrl = null;
-    if (node.type === "shop") iconUrl = img("Image/Icons/gum.png");
-    else if (node.type === "rest") iconUrl = img("Image/BattleIcons/Parameters/hp.png");
+    if (node.type === "shop")  iconUrl = img("Image/Icons/gum.png");
+    else if (node.type === "rest")  iconUrl = img("Image/BattleIcons/Parameters/hp.png");
+    else if (node.type === "craft") iconUrl = img("Image/Icons/ce.png");
     if (!iconUrl) continue;
     const sz = 5.2;
     const iconEl = document.createElementNS("http://www.w3.org/2000/svg", "image");
@@ -716,26 +762,38 @@ function renderMap() {
   if (mapPanel && host.nextSibling) mapPanel.insertBefore(legend, host.nextSibling);
   else if (mapPanel) mapPanel.appendChild(legend);
 
-  const scrollMapToCurrentNode = () => {
+  // 現在地 + 次の選択肢ノードを画面内に収める
+  const scrollMapFocus = (smooth = false) => {
     const wrap = host;
     if (!wrap || !svg.isConnected) return;
-    const curId = runState.lastMapNodeId || "START";
-    const pt = nodeXY(curId);
+    const curId  = runState.lastMapNodeId || "START";
+    const nextIds = reachableNextNodeIds(curId);
+    // 現在地と次の進め先の重心へスクロール
+    const pts = [nodeXY(curId), ...nextIds.map(id => nodeXY(id))];
+    if (!pts.length) return;
+    const minY  = Math.min(...pts.map(p => p.y));
+    const maxY  = Math.max(...pts.map(p => p.y));
+    const focusY = (minY + maxY) / 2;
+    const focusX = pts.reduce((s, p) => s + p.x, 0) / pts.length;
     const vb = svg.viewBox.baseVal;
-    const vbW = vb.width || 100; const vbH = vb.height || 100;
+    const vbW = vb.width  || 100;
+    const vbH = vb.height || activeMapViewH;
     const wrapRect = wrap.getBoundingClientRect();
-    const svgRect = svg.getBoundingClientRect();
-    const nx = svgRect.left + (pt.x / vbW) * svgRect.width;
-    const ny = svgRect.top + (pt.y / vbH) * svgRect.height;
-    const contentY = wrap.scrollTop + (ny - wrapRect.top);
-    const contentX = wrap.scrollLeft + (nx - wrapRect.left);
-    wrap.scrollTop = Math.max(0, Math.min(contentY - wrap.clientHeight / 2, Math.max(0, wrap.scrollHeight - wrap.clientHeight)));
-    wrap.scrollLeft = Math.max(0, Math.min(contentX - wrap.clientWidth / 2, Math.max(0, wrap.scrollWidth - wrap.clientWidth)));
+    const svgRect  = svg.getBoundingClientRect();
+    const svgX = svgRect.left + (focusX / vbW) * svgRect.width;
+    const svgY = svgRect.top  + (focusY / vbH) * svgRect.height;
+    const tTop  = wrap.scrollTop  + (svgY - wrapRect.top)  - wrap.clientHeight / 2;
+    const tLeft = wrap.scrollLeft + (svgX - wrapRect.left) - wrap.clientWidth  / 2;
+    wrap.scrollTo({
+      top:  Math.max(0, Math.min(tTop,  wrap.scrollHeight - wrap.clientHeight)),
+      left: Math.max(0, Math.min(tLeft, wrap.scrollWidth  - wrap.clientWidth)),
+      behavior: smooth ? "smooth" : "auto",
+    });
   };
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
-      scrollMapToCurrentNode();
-      setTimeout(scrollMapToCurrentNode, 60);
+      scrollMapFocus(false);
+      setTimeout(() => scrollMapFocus(true), 80);
     });
   });
   syncResources();
@@ -773,6 +831,11 @@ function tryEnterMapNode(nodeId) {
     openShop();
     return;
   }
+  if (node.type === "craft") {
+    pendingCraftNodeId = nodeId;
+    openCraftScreen();
+    return;
+  }
   startCombatFromMapNode(node);
 }
 
@@ -788,14 +851,18 @@ function showView(name) {
   if (rv) rv.classList.toggle("hidden", name !== "reward");
   const nsv = document.getElementById("nodeSelectView");
   if (nsv) nsv.classList.toggle("hidden", name !== "nodeSelect");
-  // Show/hide map resources bar
+  const cv = document.getElementById("craftView");
+  if (cv) cv.classList.toggle("hidden", name !== "craft");
+  const hsv = document.getElementById("heroSelectView");
+  if (hsv) hsv.classList.toggle("hidden", name !== "heroSelect");
+  // Show/hide map resources bar（ヒーロー選択・戦闘中は非表示）
   const mapRes = document.getElementById("mapResources");
-  if (mapRes) mapRes.classList.toggle("hidden", name === "combat");
+  if (mapRes) mapRes.classList.toggle("hidden", name === "combat" || name === "heroSelect");
   // Mai navigator: マップビュー内にあるので mapView の hidden に連動
   const nav = document.getElementById("maiNavigator");
   if (nav) nav.classList.toggle("hidden", name !== "map");
-  // マップ BGM: マップ・ショップ・報酬・node選択ではBGMを再生
-  if (name === "map" || name === "nodeSelect") startBgmMap();
+  // マップ BGM: マップ・ショップ・報酬・node選択・ヒーロー選択ではBGMを再生
+  if (name === "map" || name === "nodeSelect" || name === "heroSelect") startBgmMap();
 }
 
 // ─── 戦闘開始 ─────────────────────────────────────────────────────
@@ -875,6 +942,8 @@ function startCombatFromMapNode(node) {
     mapNodeId: node.id,
     isElite: !!node.elite,
     turn: 1,
+    zhangPassiveTriggered: false,
+    doylePassiveTriggered: false,
     _lastUi: null,
   };
 
@@ -904,21 +973,64 @@ function startCombatFromMapNode(node) {
 }
 
 // ─── 意図テキスト ─────────────────────────────────────────────────
+/** 敵の PHY 攻撃が現在の防御力を考慮した上で与える推定ダメージを返す */
+function estEnemyPhyDmg(pct) {
+  const base = Math.floor(combat.enemyPhy * pct / 100);
+  const cut  = cutRateFromPhy(combat.playerPhy);
+  return Math.max(0, Math.floor(base * (100 - cut) / 100));
+}
+function estEnemyIntDmg(pct) {
+  const base = Math.floor(combat.enemyInt * pct / 100);
+  const cut  = cutRateFromInt(combat.playerInt);
+  return Math.max(0, Math.floor(base * (100 - cut) / 100));
+}
+
 function intentText() {
   const it = combat?.enemyIntent;
   if (!it) return "—";
   switch (it.kind) {
-    case "attack":          return `ATK PHY ${it.phyPct}%`;
-    case "attackPoison":    return `ATK PHY ${it.phyPct}% + 毒×${it.poisonStacks}`;
-    case "attackBleed":     return `ATK PHY ${it.phyPct}% + 出血×${it.bleedStacks}`;
-    case "attackDouble":    return `ATK PHY ${it.phyPct}% ×2`;
-    case "attackInt":       return `ATK INT ${it.intPct}%`;
-    case "attackIntDouble": return `ATK INT ${it.intPct}% ×2`;
-    case "healSelf":        return `自己回復 最大HP ${it.pct}%`;
-    case "buffSelf":        return `強化: PHY+${it.phyAdd || 0} INT+${it.intAdd || 0}`;
-    case "guard":           return `GUARD +${it.value}`;
-    case "special":         return `SPECIAL 最大HP ${it.pct}%`;
-    default:                return "—";
+    case "attack": {
+      const d = estEnemyPhyDmg(it.phyPct);
+      return `先頭：${d} ダメージ`;
+    }
+    case "attackPoison": {
+      const d = estEnemyPhyDmg(it.phyPct);
+      return `先頭：${d} ダメージ ＋毒×${it.poisonStacks}`;
+    }
+    case "attackBleed": {
+      const d = estEnemyPhyDmg(it.phyPct);
+      return `先頭：${d} ダメージ ＋出血×${it.bleedStacks}`;
+    }
+    case "attackDouble": {
+      const d = estEnemyPhyDmg(it.phyPct);
+      return `先頭：${d} ダメージ ×2`;
+    }
+    case "attackInt": {
+      const d = estEnemyIntDmg(it.intPct);
+      return `先頭：${d} ダメージ（INT）`;
+    }
+    case "attackIntDouble": {
+      const d = estEnemyIntDmg(it.intPct);
+      return `先頭：${d} ダメージ（INT）×2`;
+    }
+    case "healSelf": {
+      const h = Math.max(1, Math.floor(combat.enemyHpMax * it.pct / 100));
+      return `自己回復：${h} HP`;
+    }
+    case "buffSelf": {
+      const parts = [];
+      if (it.phyAdd) parts.push(`PHY+${it.phyAdd}`);
+      if (it.intAdd) parts.push(`INT+${it.intAdd}`);
+      return `強化：${parts.join(' ')}`;
+    }
+    case "guard":
+      return `防御：GRD+${it.value}`;
+    case "special": {
+      const d = Math.max(1, Math.floor(combat.playerHpMax * it.pct / 100));
+      return `先頭：${d} ダメージ（特殊）`;
+    }
+    default:
+      return "—";
   }
 }
 
@@ -969,9 +1081,23 @@ function startPlayerTurn() {
     combat.phyPenaltyNext = 0;
   }
 
+  // ─── パッシブスキル ────────────────────────────────────────────
+  const passive = LEADER.passiveKey;
+  // コナン・ドイル「シャーロック・ホームズ」: HP が 70% 未満になったとき1回だけ INT +3
+  if (passive === 'doyle' && !combat.doylePassiveTriggered) {
+    if (combat.playerHp < combat.playerHpMax * 0.7) {
+      combat.playerInt += 3;
+      combat.doylePassiveTriggered = true;
+      playPortraitEffect("player", "buff");
+      playBattleSe("buff");
+      clog('【シャーロック・ホームズ】発動！ INT +3');
+    }
+  }
+
   combat.energy = combat.energyMax + (combat.bonusEnergyNext || 0);
   combat.bonusEnergyNext = 0;
-  drawCards(combat, 5);
+  const drawN = 5;
+  drawCards(combat, drawN);
   advanceEnemyIntent();
   renderCombat();
 }
@@ -1264,7 +1390,7 @@ function renderCombat() {
       '<div class="card ' + card.type + (card.exhaust ? ' card--exhaust' : '') + '">' +
       '<div class="card-name-hd">' + escapeHtml(card.extNameJa) + (card.exhaust ? '<span class="exhaust-badge" title="消耗：使い切り">🔥</span>' : '') + '</div>' +
       '<div class="card-icon-area">' +
-      '<img class="card-ext-img-full" src="' + EXT_IMG(card.extId) + '" alt="" />' +
+      '<img class="card-ext-img-full" src="' + EXT_IMG(card.extId) + '" alt="" onerror="this.style.opacity=\'0\'" />' +
       '<img class="card-skill-icon-tl" src="' + battleIconUrl(card.skillIcon) + '" alt="" />' +
       '<span class="card-user-br">先頭</span>' +
       '</div>' +
@@ -1303,6 +1429,14 @@ function playCard(idx) {
     combat.discardPile.push(card);
   }
   card.play(combat);
+  // 甲斐姫「浪切」: スキルカード使用後に50%の確率で追加ダメージ
+  if (LEADER.passiveKey === 'kaihime' && combat.enemyHp > 0 && Math.random() < 0.5) {
+    const bonusDmg = Math.max(1, Math.floor(combat.playerPhy * 0.5));
+    combat.enemyHp = Math.max(0, combat.enemyHp - bonusDmg);
+    playPortraitEffect("enemy", "hit");
+    playBattleSe("hit");
+    clog(`【浪切】発動！ 追加ダメージ ${bonusDmg}`);
+  }
   if (combat.enemyHp <= 0) { endCombatWin(); return; }
   renderCombat();
 }
@@ -1445,13 +1579,15 @@ function endCombatWin() {
 function buildRewardPickButton(def, mockS) {
   const b = document.createElement("button");
   b.type = "button"; b.className = "reward-card-btn";
+  const rarity = CARD_RARITIES[def.libraryKey] || 'common';
+  b.setAttribute("data-rarity", rarity);
   const summaryLines =
     typeof def.effectSummaryLines === "function" ? def.effectSummaryLines(mockS) :
     typeof def.previewLines === "function" ? def.previewLines(mockS) : [];
   b.innerHTML =
     '<div class="reward-card-inner ' + def.type + '">' +
     '<div class="card-art-full">' +
-    '<img class="card-ext-img" src="' + EXT_IMG(def.extId) + '" alt="" />' +
+    '<img class="card-ext-img" src="' + EXT_IMG(def.extId) + '" alt="" onerror="this.style.opacity=\'0\'" />' +
     "</div>" +
     '<div class="card-tint"></div>' +
     '<div class="card-fg">' +
@@ -1624,8 +1760,98 @@ function openShop() {
     list.appendChild(item);
   });
 
+  // ─── カード破棄セクション ──────────────────────────────────────
+  const removeSection = document.createElement("div");
+  removeSection.className = "shop-remove-section";
+  const removeTitle = document.createElement("div");
+  removeTitle.className = "shop-remove-title";
+  removeTitle.textContent = "カード破棄（50 GUM）";
+  removeSection.appendChild(removeTitle);
+  const removeDesc = document.createElement("div");
+  removeDesc.className = "shop-remove-desc";
+  removeDesc.textContent = "デッキ内のカードを1枚選んで除外できます（スターター以外）。";
+  removeSection.appendChild(removeDesc);
+
+  const removeBtn = document.createElement("button");
+  removeBtn.type = "button";
+  removeBtn.className = "shop-remove-btn action";
+  removeBtn.textContent = "カードを破棄する";
+  removeBtn.addEventListener("click", () => openShopRemoveCard(goldDisp));
+  removeSection.appendChild(removeBtn);
+  list.parentElement.appendChild(removeSection);
+
   // マイのメッセージ（ショップ入店時）
   renderNavigator("エクステンションを購入してデッキを強化しましょう！GUMに余裕があるなら積極的に買いましょう！");
+}
+
+// ─── ショップ カード破棄 ──────────────────────────────────────────
+const SHOP_REMOVE_COST = 50;
+// スターターカードのキー（破棄不可）
+const STARTER_KEYS = new Set(['ext1001', 'ext1004', 'ext1008']);
+
+function openShopRemoveCard(goldDisp) {
+  ensureRunState();
+  if (gold < SHOP_REMOVE_COST) {
+    renderNavigator(`GUM が足りません（必要: ${SHOP_REMOVE_COST} GUM）`);
+    return;
+  }
+  // 破棄可能なカード（スターター以外）
+  const removable = runState.deck
+    .map((c, idx) => ({ card: c, idx }))
+    .filter(({ card }) => !STARTER_KEYS.has(card.libraryKey));
+
+  if (removable.length === 0) {
+    renderNavigator("破棄できるカードがありません（スターターカードは破棄不可）");
+    return;
+  }
+
+  // モーダル的に shopView 内にオーバーレイを出す
+  const overlay = document.createElement("div");
+  overlay.className = "shop-remove-overlay";
+  overlay.innerHTML = `<div class="shop-remove-modal">
+    <div class="shop-remove-modal-title">破棄するカードを選んでください</div>
+    <div class="shop-remove-card-list" id="shopRemoveCardList"></div>
+    <button class="shop-remove-cancel" id="shopRemoveCancel">キャンセル</button>
+  </div>`;
+  document.getElementById("shopView").appendChild(overlay);
+  document.getElementById("shopRemoveCancel").addEventListener("click", () => overlay.remove());
+
+  const mockS = {
+    playerPhy: LEADER.basePhy, playerInt: LEADER.baseInt, playerAgi: LEADER.baseAgi,
+    enemyPhy: 14, enemyInt: 8,
+    playerHp: runState.playerHp, playerHpMax: runState.playerHpMax,
+    playerGuard: 0, playerShield: 0, energyMax: 3, energy: 3,
+  };
+
+  const cardListEl = document.getElementById("shopRemoveCardList");
+  const seen = new Set();
+  removable.forEach(({ card, idx }) => {
+    if (seen.has(card.libraryKey)) return; // 重複は代表1枚のみ
+    seen.add(card.libraryKey);
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "shop-remove-card-wrapper";
+    const cardBtn = buildRewardPickButton(card, mockS);
+    cardBtn.style.pointerEvents = "none";
+    wrapper.appendChild(cardBtn);
+
+    const delBtn = document.createElement("button");
+    delBtn.className = "action shop-remove-confirm-btn";
+    delBtn.textContent = `破棄 (-${SHOP_REMOVE_COST} GUM)`;
+    delBtn.addEventListener("click", () => {
+      gold -= SHOP_REMOVE_COST;
+      // 同じキーの最初の1枚を削除
+      const removeIdx = runState.deck.findIndex(c => c.libraryKey === card.libraryKey);
+      if (removeIdx >= 0) runState.deck.splice(removeIdx, 1);
+      if (goldDisp) goldDisp.textContent = String(gold);
+      syncResources();
+      clog(`破棄: ${card.extNameJa}（-${SHOP_REMOVE_COST} GUM）`);
+      renderNavigator(`「${card.extNameJa}」を破棄しました！デッキが軽くなりましたよ！`);
+      overlay.remove();
+    });
+    wrapper.appendChild(delBtn);
+    cardListEl.appendChild(wrapper);
+  });
 }
 
 // ─── ランリセット ─────────────────────────────────────────────────
@@ -1634,6 +1860,7 @@ function resetRun() {
   combat = null;
   runState = null;
   pendingShopNodeId = null;
+  pendingCraftNodeId = null;
   postCombatSnapshot = null;
   stopBgm();
   dismissCutin();
@@ -1650,10 +1877,11 @@ function startRunFromChapter(chapterIdx) {
   gold = 75;
   combat = null;
   pendingShopNodeId = null;
+  pendingCraftNodeId = null;
   postCombatSnapshot = null;
   const chapter = CHAPTERS[chapterIdx];
-  const { nodes, edges } = generateChapterMap(chapter, ENEMY_DEFS);
-  setActiveMap(nodes, edges);
+  const { nodes, edges, viewH, startY } = generateChapterMap(chapter, ENEMY_DEFS);
+  setActiveMap(nodes, edges, viewH, startY);
   runState = {
     chapterIdx,
     deck: makeStarterDeck(),
@@ -1777,6 +2005,218 @@ function renderNodeSelect(justUnlockedIdx = null) {
   }
 }
 
+// ─── パッシブスキルポップアップ ──────────────────────────────────────
+function togglePassivePopup() {
+  const popup = document.getElementById("passivePopup");
+  if (!popup) return;
+  if (!popup.classList.contains("hidden")) {
+    popup.classList.add("hidden");
+    return;
+  }
+  const heroName   = LEADER.nameJa        || "—";
+  const skillName  = LEADER.passiveName   || "—";
+  const skillDesc  = LEADER.passiveDesc   || "—";
+  popup.innerHTML =
+    `<div class="pp-hero-name">${heroName}</div>` +
+    `<div class="pp-skill-name">【${skillName}】</div>` +
+    `<div class="pp-skill-desc">${skillDesc}</div>`;
+  popup.classList.remove("hidden");
+}
+
+// ─── ヒーロー選択画面 ────────────────────────────────────────────────
+function renderHeroSelect() {
+  const el = document.getElementById("heroSelectView");
+  if (!el) return;
+
+  let html = '<div class="hs-header"><h2>ヒーローを選んでください</h2><p class="hs-sub">パッシブスキルを持つ英雄があなたの旅を導きます</p></div>';
+  html += '<div class="hs-roster">';
+
+  HERO_ROSTER.forEach((hero, idx) => {
+    html += `<div class="hs-card" data-idx="${idx}" role="button" tabindex="0">`;
+    html += `<img class="hs-hero-img" src="${hero.img()}" alt="${hero.nameJa}" />`;
+    html += `<div class="hs-hero-body">`;
+    html += `<div class="hs-hero-name">${hero.nameJa}</div>`;
+    html += `<div class="hs-hero-stats">`;
+    html += `<span>HP ${hero.hpMax}</span>`;
+    html += `<span>PHY ${hero.basePhy}</span>`;
+    html += `<span>INT ${hero.baseInt}</span>`;
+    html += `<span>AGI ${hero.baseAgi}</span>`;
+    html += `</div>`;
+    html += `<div class="hs-passive"><span class="hs-passive-name">【${hero.passiveName || '—'}】</span>${hero.passiveDesc}</div>`;
+    html += `<button class="hs-select-btn action">このヒーローで始める</button>`;
+    html += `</div>`;
+    html += `</div>`;
+  });
+
+  html += '</div>';
+  el.innerHTML = html;
+
+  el.querySelectorAll('.hs-select-btn').forEach((btn, idx) => {
+    btn.addEventListener('click', () => {
+      setLeader(HERO_ROSTER[idx]);
+      showView("nodeSelect");
+      renderNodeSelect();
+    });
+  });
+}
+
+// ─── クラフト画面 ────────────────────────────────────────────────────
+function openCraftScreen() {
+  showView("craft");
+  const el = document.getElementById("craftView");
+  if (!el) return;
+
+  el.innerHTML = `
+    <div class="craft-header">
+      <h2>クラフト</h2>
+      <p class="craft-sub">エクステンションを獲得するか、デッキを強化しましょう</p>
+    </div>
+    <div class="craft-choices">
+      <div class="craft-option" id="craftOptGet">
+        <div class="craft-opt-title">エクステ獲得</div>
+        <div class="craft-opt-desc">累積カードプールからカードを3枚提示します。1枚をデッキに追加できます。</div>
+        <button class="action craft-opt-btn" id="btnCraftGet">獲得する</button>
+      </div>
+      <div class="craft-option" id="craftOptUpgrade">
+        <div class="craft-opt-title">打ち直し</div>
+        <div class="craft-opt-desc">デッキ内のノービスカードを1枚選んでエリートにランクアップします。</div>
+        <button class="action craft-opt-btn" id="btnCraftUpgrade">打ち直す</button>
+      </div>
+    </div>
+    <button class="craft-leave-btn" id="btnLeaveCraft">← マップに戻る</button>
+  `;
+
+  document.getElementById("btnCraftGet").addEventListener("click", () => {
+    openCraftGetCard();
+  });
+  document.getElementById("btnCraftUpgrade").addEventListener("click", () => {
+    openCraftUpgrade();
+  });
+  document.getElementById("btnLeaveCraft").addEventListener("click", () => {
+    leaveCraft();
+  });
+}
+
+function leaveCraft() {
+  ensureRunState();
+  if (pendingCraftNodeId) {
+    runState.pathNodeIds.push(pendingCraftNodeId);
+    runState.lastMapNodeId = pendingCraftNodeId;
+    pendingCraftNodeId = null;
+  }
+  showView("map");
+  renderMap();
+}
+
+function openCraftGetCard() {
+  const el = document.getElementById("craftView");
+  if (!el) return;
+  ensureRunState();
+
+  const poolKeys = shuffle(getCumulativeCardPool());
+  const offerKeys = poolKeys.slice(0, 3);
+  const mockS = {
+    playerPhy: LEADER.basePhy, playerInt: LEADER.baseInt, playerAgi: LEADER.baseAgi,
+    enemyPhy: 14, enemyInt: 8,
+    playerHp: runState.playerHp, playerHpMax: runState.playerHpMax,
+    playerGuard: 0, playerShield: 0, energyMax: 3, energy: 3,
+  };
+
+  el.innerHTML = `<div class="craft-header"><h2>エクステ獲得</h2><p class="craft-sub">1枚を選んでデッキに追加します</p></div>`;
+  const list = document.createElement("div");
+  list.className = "craft-reward-list";
+  offerKeys.forEach(key => {
+    const def = CARD_LIBRARY[key];
+    if (!def) return;
+    const btn = buildRewardPickButton(def, mockS);
+    btn.addEventListener("click", () => {
+      runState.deck.push(copyCard(key));
+      clog(`クラフト獲得: ${def.extNameJa}`);
+      leaveCraft();
+    });
+    list.appendChild(btn);
+  });
+  el.appendChild(list);
+
+  const skipBtn = document.createElement("button");
+  skipBtn.className = "craft-leave-btn";
+  skipBtn.textContent = "スキップ";
+  skipBtn.addEventListener("click", leaveCraft);
+  el.appendChild(skipBtn);
+}
+
+function openCraftUpgrade() {
+  const el = document.getElementById("craftView");
+  if (!el) return;
+  ensureRunState();
+
+  // アップグレード可能なカードを探す
+  const upgradeable = runState.deck
+    .map((c, idx) => ({ card: c, idx }))
+    .filter(({ card }) => CARD_UPGRADE_SERIES[card.libraryKey]);
+
+  if (upgradeable.length === 0) {
+    el.innerHTML = `
+      <div class="craft-header"><h2>打ち直し</h2></div>
+      <p style="text-align:center;color:var(--muted);margin:2rem 0;">アップグレード可能なノービスカードがありません</p>
+      <button class="craft-leave-btn" id="btnLeaveCraft2">← 戻る</button>
+    `;
+    document.getElementById("btnLeaveCraft2").addEventListener("click", () => openCraftScreen());
+    return;
+  }
+
+  el.innerHTML = `<div class="craft-header"><h2>打ち直し</h2><p class="craft-sub">ランクアップするカードを選んでください（ノービス → エリート）</p></div>`;
+  const list = document.createElement("div");
+  list.className = "craft-upgrade-list";
+
+  const mockS = {
+    playerPhy: LEADER.basePhy, playerInt: LEADER.baseInt, playerAgi: LEADER.baseAgi,
+    enemyPhy: 14, enemyInt: 8,
+    playerHp: runState.playerHp, playerHpMax: runState.playerHpMax,
+    playerGuard: 0, playerShield: 0, energyMax: 3, energy: 3,
+  };
+
+  upgradeable.forEach(({ card, idx }) => {
+    const upgradeKey = CARD_UPGRADE_SERIES[card.libraryKey];
+    const upgradeDef = CARD_LIBRARY[upgradeKey];
+    if (!upgradeDef) return;
+
+    const row = document.createElement("div");
+    row.className = "craft-upgrade-row";
+
+    const before = buildRewardPickButton(card, mockS);
+    before.style.pointerEvents = "none";
+    const arrow = document.createElement("span");
+    arrow.className = "craft-arrow";
+    arrow.textContent = "→";
+    const after = buildRewardPickButton(upgradeDef, mockS);
+    after.style.pointerEvents = "none";
+
+    const selBtn = document.createElement("button");
+    selBtn.className = "action craft-opt-btn";
+    selBtn.textContent = "このカードを強化";
+    selBtn.addEventListener("click", () => {
+      runState.deck[idx] = copyCard(upgradeKey);
+      clog(`打ち直し: ${card.extNameJa} → ${upgradeDef.extNameJa}`);
+      leaveCraft();
+    });
+
+    row.appendChild(before);
+    row.appendChild(arrow);
+    row.appendChild(after);
+    row.appendChild(selBtn);
+    list.appendChild(row);
+  });
+
+  el.appendChild(list);
+
+  const backBtn = document.createElement("button");
+  backBtn.className = "craft-leave-btn";
+  backBtn.textContent = "← 戻る";
+  backBtn.addEventListener("click", () => openCraftScreen());
+  el.appendChild(backBtn);
+}
+
 // ─── アセット配線 ─────────────────────────────────────────────────
 function wireAssets() {
   document.querySelectorAll("[data-icon]").forEach((el) => {
@@ -1866,9 +2306,23 @@ function init() {
       if (ev.key === "Enter" || ev.key === " ") dismissTitle();
     });
   }
-  // nodeSelect を非表示で待機（タイトルが覆うので見えない）
-  showView("nodeSelect"); // 内部状態は nodeSelect に初期化
+  // heroSelect を事前にレンダリングしておく（タイトルが覆うので見えない）
+  showView("heroSelect");
+  renderHeroSelect();
   // BGM はタイトルクリック時に開始（ブラウザのオートプレイ制限のため init では呼ばない）
+
+  // ── ヒーローポートレートタップ → パッシブスキル表示 ──────────────
+  document.getElementById("playerPortraitWrap")?.addEventListener("click", () => {
+    togglePassivePopup();
+  });
+  // パッシブポップアップ外クリックで閉じる
+  document.getElementById("combatView")?.addEventListener("click", (ev) => {
+    const popup = document.getElementById("passivePopup");
+    if (!popup || popup.classList.contains("hidden")) return;
+    if (!popup.contains(ev.target) && !document.getElementById("playerPortraitWrap")?.contains(ev.target)) {
+      popup.classList.add("hidden");
+    }
+  });
 }
 
 init();
