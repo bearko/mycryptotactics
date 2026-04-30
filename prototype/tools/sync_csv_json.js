@@ -304,15 +304,19 @@ export const BOSS_DEFS = {
 const command = process.argv[2];
 
 if (command === 'json-to-csv') {
-  console.log('[sync] JSON → CSV ...');
+  console.log('[sync] JSON → CSV + JS ...');
 
   const ej = JSON.parse(fs.readFileSync(path.join(DATA_DIR, 'enemies.json'), 'utf8'));
   fs.writeFileSync(path.join(DATA_DIR, 'enemies.csv'), enemiesJsonToCsv(ej), 'utf8');
   console.log('  ✓ data/enemies.csv を更新しました');
+  fs.writeFileSync(path.join(JS_DIR, 'enemies.js'), generateEnemiesJs(ej), 'utf8');
+  console.log('  ✓ js/enemies.js を再生成しました');
 
   const bj = JSON.parse(fs.readFileSync(path.join(DATA_DIR, 'bosses.json'), 'utf8'));
   fs.writeFileSync(path.join(DATA_DIR, 'bosses.csv'), bossesJsonToCsv(bj), 'utf8');
   console.log('  ✓ data/bosses.csv を更新しました');
+  fs.writeFileSync(path.join(JS_DIR, 'bosses.js'), generateBossesJs(bj), 'utf8');
+  console.log('  ✓ js/bosses.js を再生成しました');
 
   console.log('[sync] 完了');
 

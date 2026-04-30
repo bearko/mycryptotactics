@@ -32,43 +32,43 @@ export const ENEMY_DEFS = {
   },
   'sn-e01': {
     id: 'sn-e01', name: 'クリーパー フラペチーノ',
-    hp: 34, phy: 17, int: 6, agi: 8, imgId: 106,
+    hp: 28, phy: 17, int: 6, agi: 8, imgId: 106,
     intentRota: [
       { kind: 'guard', value: 12 },
-      { kind: 'attack', phyPct: 130 },
-      { kind: 'attack', phyPct: 120 },
+      { kind: 'attack', phyPct: 115 },
+      { kind: 'attack', phyPct: 110 },
     ],
   },
   'hl-001': {
     id: 'hl-001', name: 'ハートブリード ヴェンティ',
-    hp: 24, phy: 12, int: 6, agi: 8, imgId: 124,
+    hp: 24, phy: 13, int: 6, agi: 8, imgId: 124,
     intentRota: [
-      { kind: 'attack', phyPct: 95 },
-      { kind: 'attackBleed', phyPct: 75, bleedStacks: 2 },
+      { kind: 'attack', phyPct: 100 },
+      { kind: 'attackBleed', phyPct: 80, bleedStacks: 2 },
       { kind: 'guard', value: 7 },
     ],
   },
   'hl-002': {
     id: 'hl-002', name: 'バイトバンディット ヴェンティ',
-    hp: 26, phy: 16, int: 4, agi: 10, imgId: 164,
+    hp: 30, phy: 21, int: 4, agi: 10, imgId: 164,
     intentRota: [
-      { kind: 'attackBleed', phyPct: 90, bleedStacks: 1 },
+      { kind: 'attackBleed', phyPct: 95, bleedStacks: 2 },
       { kind: 'guard', value: 8 },
-      { kind: 'attack', phyPct: 115 },
+      { kind: 'attack', phyPct: 110 },
     ],
   },
   'hl-003': {
     id: 'hl-003', name: 'クリーパー マキアート',
-    hp: 20, phy: 11, int: 9, agi: 14, imgId: 105,
+    hp: 25, phy: 14, int: 9, agi: 14, imgId: 105,
     intentRota: [
-      { kind: 'attack', phyPct: 85 },
       { kind: 'attack', phyPct: 90 },
+      { kind: 'attack', phyPct: 95 },
       { kind: 'guard', value: 6 },
     ],
   },
   'hl-e01': {
     id: 'hl-e01', name: 'ハートブリード フラペチーノ',
-    hp: 44, phy: 19, int: 7, agi: 10, imgId: 126,
+    hp: 43, phy: 19, int: 7, agi: 10, imgId: 126,
     intentRota: [
       { kind: 'guard', value: 12 },
       { kind: 'attackBleed', phyPct: 110, bleedStacks: 2 },
@@ -77,7 +77,7 @@ export const ENEMY_DEFS = {
   },
   'vp-001': {
     id: 'vp-001', name: 'カスケード ヴェンティ',
-    hp: 24, phy: 13, int: 6, agi: 8, imgId: 378,
+    hp: 30, phy: 17, int: 6, agi: 8, imgId: 378,
     intentRota: [
       { kind: 'attack', phyPct: 105 },
       { kind: 'attack', phyPct: 95 },
@@ -104,7 +104,7 @@ export const ENEMY_DEFS = {
   },
   'vp-e01': {
     id: 'vp-e01', name: 'カスケード フラペチーノ',
-    hp: 48, phy: 20, int: 8, agi: 10, imgId: 380,
+    hp: 72, phy: 29, int: 8, agi: 10, imgId: 380,
     intentRota: [
       { kind: 'attack', phyPct: 115 },
       { kind: 'guard', value: 12 },
@@ -142,12 +142,12 @@ export const ENEMY_DEFS = {
   },
   'en-e01': {
     id: 'en-e01', name: 'ベーグル フラペチーノ',
-    hp: 62, phy: 25, int: 10, agi: 12, imgId: 186,
+    hp: 52, phy: 17, int: 10, agi: 12, imgId: 186,
     intentRota: [
-      { kind: 'attackDouble', phyPct: 105 },
+      { kind: 'attackDouble', phyPct: 70 },
       { kind: 'guard', value: 16 },
-      { kind: 'special', pct: 18 },
-      { kind: 'buffSelf', phyAdd: 4 },
+      { kind: 'special', pct: 16 },
+      { kind: 'buffSelf', phyAdd: 3 },
     ],
   },
   'tr-001': {

@@ -8,7 +8,7 @@ export const BOSS_DEFS = {
   'boss-ch1': {
     id: 'boss-ch1',
     name: 'ゴースト・上杉謙信',
-    hp: 65, phy: 17, int: 6, agi: 6, imgId: 425,
+    hp: 55, phy: 17, int: 6, agi: 6, imgId: 425,
     initialShield: 0,
     intentRota: [
       { kind: 'guard', value: 12 },
@@ -20,12 +20,12 @@ export const BOSS_DEFS = {
   'boss-hl': {
     id: 'boss-hl',
     name: 'ゴースト・楊貴妃',
-    hp: 90, phy: 18, int: 10, agi: 8, imgId: 435,
+    hp: 81, phy: 18, int: 10, agi: 8, imgId: 435,
     initialShield: 0,
     intentRota: [
-      { kind: 'attack', phyPct: 105 },
+      { kind: 'attack', phyPct: 90 },
       { kind: 'guard', value: 14 },
-      { kind: 'attackBleed', phyPct: 95, bleedStacks: 2 },
+      { kind: 'attackBleed', phyPct: 90, bleedStacks: 2 },
       { kind: 'special', pct: 14 },
       { kind: 'buffSelf', phyAdd: 4, intAdd: 2 },
     ],
@@ -33,7 +33,7 @@ export const BOSS_DEFS = {
   'boss-ch2': {
     id: 'boss-ch2',
     name: 'ゴースト・ナポレオン',
-    hp: 115, phy: 20, int: 14, agi: 8, imgId: 445,
+    hp: 138, phy: 20, int: 14, agi: 8, imgId: 445,
     initialShield: 0,
     intentRota: [
       { kind: 'attackPoison', phyPct: 105, poisonStacks: 2 },
@@ -46,18 +46,18 @@ export const BOSS_DEFS = {
   'boss-ch3': {
     id: 'boss-ch3',
     name: 'ゴースト・リンカーン',
-    hp: 200, phy: 24, int: 20, agi: 10, imgId: 505,
-    initialShield: 30,
+    hp: 185, phy: 21, int: 17, agi: 10, imgId: 505,
+    initialShield: 24,
     phases: [
       {
         // フェーズ 1
         hpThresholdPct: 50,
         intentRota: [
-          { kind: 'attack', phyPct: 105 },
-          { kind: 'attackInt', intPct: 105 },
+          { kind: 'attack', phyPct: 95 },
+          { kind: 'attackInt', intPct: 95 },
           { kind: 'guard', value: 16 },
-          { kind: 'special', pct: 20 },
-          { kind: 'buffSelf', phyAdd: 5, intAdd: 5 },
+          { kind: 'special', pct: 18 },
+          { kind: 'buffSelf', phyAdd: 4, intAdd: 4 },
         ],
       },
       {

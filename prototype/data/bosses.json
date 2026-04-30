@@ -2,7 +2,7 @@
   "boss-ch1": {
     "id": "boss-ch1",
     "name": "ゴースト・上杉謙信",
-    "hp": 65,
+    "hp": 55,
     "phy": 17,
     "int": 6,
     "agi": 6,
@@ -30,7 +30,7 @@
   "boss-hl": {
     "id": "boss-hl",
     "name": "ゴースト・楊貴妃",
-    "hp": 90,
+    "hp": 81,
     "phy": 18,
     "int": 10,
     "agi": 8,
@@ -39,7 +39,7 @@
     "intentRota": [
       {
         "kind": "attack",
-        "phyPct": 105
+        "phyPct": 90
       },
       {
         "kind": "guard",
@@ -47,7 +47,7 @@
       },
       {
         "kind": "attackBleed",
-        "phyPct": 95,
+        "phyPct": 90,
         "bleedStacks": 2
       },
       {
@@ -64,7 +64,7 @@
   "boss-ch2": {
     "id": "boss-ch2",
     "name": "ゴースト・ナポレオン",
-    "hp": 115,
+    "hp": 138,
     "phy": 20,
     "int": 14,
     "agi": 8,
@@ -98,23 +98,23 @@
   "boss-ch3": {
     "id": "boss-ch3",
     "name": "ゴースト・リンカーン",
-    "hp": 200,
-    "phy": 24,
-    "int": 20,
+    "hp": 185,
+    "phy": 21,
+    "int": 17,
     "agi": 10,
     "imgId": 505,
-    "initialShield": 30,
+    "initialShield": 24,
     "phases": [
       {
         "hpThresholdPct": 50,
         "intentRota": [
           {
             "kind": "attack",
-            "phyPct": 105
+            "phyPct": 95
           },
           {
             "kind": "attackInt",
-            "intPct": 105
+            "intPct": 95
           },
           {
             "kind": "guard",
@@ -122,12 +122,12 @@
           },
           {
             "kind": "special",
-            "pct": 20
+            "pct": 18
           },
           {
             "kind": "buffSelf",
-            "phyAdd": 5,
-            "intAdd": 5
+            "phyAdd": 4,
+            "intAdd": 4
           }
         ]
       },
