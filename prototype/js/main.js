@@ -29,6 +29,45 @@ import { BOSS_DEFS } from "./bosses.js";
 import { CHAPTERS } from "./chapters.js";
 import { generateChapterMap } from "./maps.js";
 
+// ─── ナビゲーター「マイ」 ────────────────────────────────────────
+const MAI_SD_URL = "./MAI_SD.png";
+
+/** マイのメッセージをゲーム状態から決定する */
+function getMaiMessage() {
+  if (!runState) return "ボスの居るステージを目指しましょう！緑のノードへ進めます！";
+  if (runState.runComplete) return "全クリアおめでとうございます！あなたは最高ですよ〜！";
+
+  const reachable = reachableNextNodeIds(runState.lastMapNodeId);
+  const reachableNodes = reachable.map(id => mapNodeById(id)).filter(Boolean);
+  const bossNext  = reachableNodes.some(n => n.type === "boss");
+  const shopNext  = reachableNodes.some(n => n.type === "shop");
+  const restNext  = reachableNodes.some(n => n.type === "rest");
+  const hpPct = runState.playerHp / runState.playerHpMax;
+
+  if (bossNext) return "いよいよボス戦です！ここまで来たら全力でがんばってください！";
+  if (hpPct <= 0.80 && restNext) {
+    return `体力が減っています（${runState.playerHp}/${runState.playerHpMax}）。休憩（HP回復）を目指して休みましょう！`;
+  }
+  if (shopNext) return "近くにショップがあります！GUMを使ってエクステンションを強化しましょう！";
+  if (!runState.lastMapNodeId) return "ボスの居るステージを目指しましょう！緑のノードへ進めます！";
+  return "次のノードを選んで進みましょう！戦略的な選択がカギですよ！";
+}
+
+/** マイのセリフを更新して表示する（msg省略時はゲーム状態から自動決定） */
+function renderNavigator(msg) {
+  const nav = document.getElementById("maiNavigator");
+  if (!nav) return;
+  const textEl = document.getElementById("maiText");
+  if (textEl) textEl.textContent = msg ?? getMaiMessage();
+  // バブルのアニメーションを再トリガー
+  const bubble = document.getElementById("maiBubble");
+  if (bubble) {
+    bubble.style.animation = "none";
+    void bubble.offsetHeight; // reflow
+    bubble.style.animation = "";
+  }
+}
+
 // ─── アクティブマップ（章ごとに差し替え） ──────────────────────
 let activeMapNodes = [];
 let activeMapEdges = [];
@@ -85,12 +124,51 @@ function stopBgm() {
   if (bgmAudio) { bgmAudio.pause(); bgmAudio.currentTime = 0; bgmAudio = null; }
 }
 
+function startBgmMap() {
+  if (bgmAudio) return; // すでに再生中なら再開始しない（タイトル→マップで継続）
+  try {
+    bgmAudio = new Audio(AUDIO_URLS.bgmMap());
+    bgmAudio.loop = true; bgmAudio.volume = 0.32;
+    bgmAudio.play().catch(() => {});
+  } catch (_) {}
+}
+
+// ─── タイトル画面 ─────────────────────────────────────────────────
+function dismissTitle() {
+  const titleEl = document.getElementById("titleView");
+  if (!titleEl || titleEl.classList.contains("hidden")) return;
+  // ユーザー操作後に BGM 開始（ブラウザのオートプレイ制限を回避）
+  startBgmMap();
+  titleEl.classList.add("title-out");
+  setTimeout(() => {
+    titleEl.classList.add("hidden");
+    showView("map");
+    renderMap();
+  }, 380);
+}
+
 function startBgmCombat() {
   stopBgm();
   try {
     bgmAudio = new Audio(AUDIO_URLS.bgmPvp());
     bgmAudio.loop = true; bgmAudio.volume = 0.32;
     bgmAudio.play().catch(() => {});
+  } catch (_) {}
+}
+
+function playSeNodeSelect() {
+  try {
+    const a = new Audio("Audio/SE/node_select.mp3");
+    a.volume = 0.65;
+    a.play().catch(() => {});
+  } catch (_) {}
+}
+
+function playSeShopBuy() {
+  try {
+    const a = new Audio("Audio/SE/coin.mp3");
+    a.volume = 0.70;
+    a.play().catch(() => {});
   } catch (_) {}
 }
 
@@ -427,6 +505,16 @@ function syncResources() {
   const combatGoldEl = document.getElementById("combatGoldVal");
   if (combatGoldEl) combatGoldEl.textContent = String(gold);
   ensureRunState();
+  // マップヘッダーHP
+  const mapHpValEl = document.getElementById("mapHpVal");
+  const mapHpMaxEl = document.getElementById("mapHpMax");
+  if (mapHpValEl) mapHpValEl.textContent = String(runState.playerHp);
+  if (mapHpMaxEl) mapHpMaxEl.textContent = String(runState.playerHpMax);
+  const hpEl = document.querySelector(".res-hp");
+  if (hpEl) {
+    const pct = runState.playerHp / runState.playerHpMax;
+    hpEl.classList.toggle("res-hp--low", pct <= 0.5);
+  }
   const chapterEl = document.getElementById("chapterVal");
   if (chapterEl) chapterEl.textContent = String((runState.chapterIdx ?? 0) + 1);
   const layerEl = document.getElementById("layerVal");
@@ -561,9 +649,9 @@ function renderMap() {
     ty.setAttribute("x", String(node.x)); ty.setAttribute("y", String(node.y + 11.8));
     ty.setAttribute("text-anchor", "middle"); ty.setAttribute("class", "map-node-type");
     ty.textContent =
-      node.type === "fight" ? (node.elite ? "精鋭戦闘" : "戦闘") :
-      node.type === "rest"  ? "休憩" :
-      node.type === "shop"  ? "店" : "ボス";
+      node.type === "fight" ? (node.elite ? "レアエネミー" : "エネミー") :
+      node.type === "rest"  ? "HP回復" :
+      node.type === "shop"  ? "ショップ" : "ボス";
     g.appendChild(ty);
     const allowed = new Set(reachableNextNodeIds(runState.lastMapNodeId));
     if (!allowed.has(node.id)) g.style.pointerEvents = "none";
@@ -620,6 +708,7 @@ function renderMap() {
     });
   });
   syncResources();
+  renderNavigator(); // マイのアドバイスをゲーム状態から更新
 }
 
 // ─── ノード進入 ───────────────────────────────────────────────────
@@ -631,11 +720,21 @@ function tryEnterMapNode(nodeId) {
   if (!node) return;
   if (node.type === "rest") {
     const heal = Math.floor(runState.playerHpMax * 0.35);
+    const actualHeal = Math.min(runState.playerHpMax, runState.playerHp + heal) - runState.playerHp;
     runState.playerHp = Math.min(runState.playerHpMax, runState.playerHp + heal);
     runState.pathNodeIds.push(nodeId);
     runState.lastMapNodeId = nodeId;
-    clog(`篝火で HP+${heal}`);
+    clog(`休憩で HP+${actualHeal}`);
+    playBattleSe("heal");
     renderMap();
+    // マイのナレーション（renderMap 内の renderNavigator より後に上書き）
+    const hpAfter = runState.playerHp;
+    const hpMax = runState.playerHpMax;
+    renderNavigator(
+      actualHeal > 0
+        ? `休憩できましたね！HP が ${hpAfter}/${hpMax} に回復しました。さあ、次へ進みましょう！`
+        : `すでに満タンです！${hpAfter}/${hpMax}。この調子でボスを倒しましょう！`
+    );
     return;
   }
   if (node.type === "shop") {
@@ -659,6 +758,11 @@ function showView(name) {
   // Show/hide map resources bar
   const mapRes = document.getElementById("mapResources");
   if (mapRes) mapRes.classList.toggle("hidden", name === "combat");
+  // Mai navigator: マップビュー内にあるので mapView の hidden に連動
+  const nav = document.getElementById("maiNavigator");
+  if (nav) nav.classList.toggle("hidden", name !== "map");
+  // マップ BGM: マップ・ショップ・報酬ではBGMを再生（戦闘BGMと重ねない）
+  if (name === "map") startBgmMap();
 }
 
 // ─── 戦闘開始 ─────────────────────────────────────────────────────
@@ -1366,8 +1470,25 @@ function endCombatLoss() {
 // ─── ショップ ─────────────────────────────────────────────────────
 function openShop() {
   showView("shop");
+
+  // ゴールド表示を更新
+  const goldDisp = document.getElementById("shopGoldDisp");
+  if (goldDisp) goldDisp.textContent = String(gold);
+
   const list = document.getElementById("shopList");
   list.innerHTML = "";
+
+  // カードプレビュー用モックステート（現在のランステートを参照）
+  ensureRunState();
+  const mockS = {
+    playerPhy: LEADER.basePhy,
+    playerInt: LEADER.baseInt,
+    playerAgi: LEADER.baseAgi,
+    enemyPhy: 14, enemyInt: 8,
+    playerHp: runState.playerHp,
+    playerHpMax: runState.playerHpMax,
+    playerGuard: 0, playerShield: 0, energyMax: 3, energy: 3,
+  };
 
   // 章の累積カードプールからショップ商品を選ぶ
   const poolKeys = shuffle(getCumulativeCardPool());
@@ -1377,24 +1498,60 @@ function openShop() {
   while (shopKeys.length < 4) shopKeys.push(staticOffers[shopKeys.length]);
 
   const prices = { 0: 20, 1: 55, 2: 85, 3: 120 };
+
   shopKeys.forEach((key) => {
     const def = CARD_LIBRARY[key];
     if (!def) return;
     const price = prices[def.cost] ?? 65;
-    const b = document.createElement("button");
-    b.type = "button"; b.className = "node-btn shop"; b.style.width = "100%";
-    b.textContent = `${def.extNameJa}（⚡${def.cost}）— ${price} GUM`;
-    b.addEventListener("click", () => {
+
+    // カードアイテム全体ラッパー
+    const item = document.createElement("div");
+    item.className = "shop-card-item";
+
+    // 報酬画面と同じカード表示（クリック不可）
+    const cardBtn = buildRewardPickButton(def, mockS);
+    cardBtn.style.pointerEvents = "none";
+    cardBtn.tabIndex = -1;
+    item.appendChild(cardBtn);
+
+    // 価格行
+    const priceRow = document.createElement("div");
+    priceRow.className = "shop-price-row";
+    const gumImg = document.createElement("img");
+    gumImg.alt = "G"; gumImg.src = img("Image/Icons/gum.png");
+    gumImg.style.cssText = "width:1em;height:1em;vertical-align:middle;margin-right:0.25em";
+    priceRow.appendChild(gumImg);
+    const priceSpan = document.createElement("span");
+    priceSpan.className = "shop-price-val";
+    priceSpan.textContent = price + " GUM";
+    priceRow.appendChild(priceSpan);
+    item.appendChild(priceRow);
+
+    // 購入ボタン
+    const buyBtn = document.createElement("button");
+    buyBtn.type = "button";
+    buyBtn.className = "shop-buy-btn action";
+    buyBtn.textContent = "購入する";
+    buyBtn.addEventListener("click", () => {
       if (gold < price) { clog("GUM が足りません"); return; }
       gold -= price;
       ensureRunState();
       runState.deck.push(copyCard(key));
-      b.disabled = true;
+      buyBtn.disabled = true;
+      buyBtn.textContent = "購入済み";
+      if (goldDisp) goldDisp.textContent = String(gold);
+      playSeShopBuy();
       syncResources();
       clog(`購入: ${def.extNameJa}`);
+      renderNavigator(`「${def.extNameJa}」を購入しました！デッキが強化されましたよ！`);
     });
-    list.appendChild(b);
+    item.appendChild(buyBtn);
+
+    list.appendChild(item);
   });
+
+  // マイのメッセージ（ショップ入店時）
+  renderNavigator("エクステンションを購入してデッキを強化しましょう！GUMに余裕があるなら積極的に買いましょう！");
 }
 
 // ─── ランリセット ─────────────────────────────────────────────────
@@ -1490,8 +1647,18 @@ function init() {
     // future: open settings panel
   });
 
-  showView("map");
-  renderMap();
+  // ── タイトル画面 ──────────────────────────────────────────────────
+  const titleEl = document.getElementById("titleView");
+  if (titleEl) {
+    // クリック / タップで遷移
+    titleEl.addEventListener("click", dismissTitle);
+    titleEl.addEventListener("keydown", (ev) => {
+      if (ev.key === "Enter" || ev.key === " ") dismissTitle();
+    });
+  }
+  // マップ側は非表示で待機（タイトルが覆うので見えない）
+  showView("map"); // 内部状態はマップに初期化
+  // BGM はタイトルクリック時に開始（ブラウザのオートプレイ制限のため init では呼ばない）
 }
 
 init();

@@ -32,7 +32,7 @@ function makeTypePicker(nodeRatios) {
 
 /** ノード種別の表示ラベル */
 function labelForType(type) {
-  return { fight: '遭遇', rest: '篝火', shop: '店', elite: '精鋭', boss: 'ボス' }[type] ?? '?';
+  return { fight: 'エネミー', rest: '休憩', shop: 'ショップ', elite: 'レアエネミー', boss: 'ボス' }[type] ?? '?';
 }
 
 /**

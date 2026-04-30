@@ -41,6 +41,36 @@
     }
     .hidden { display: none !important; }
 
+    /* ── Title screen ───────────────────────────────────────────────────── */
+    .title-screen {
+      position: fixed; inset: 0; z-index: 200;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      background: #080611;
+      cursor: pointer; user-select: none;
+      gap: 2.8rem;
+    }
+    .title-screen.hidden { display: none !important; }
+    .title-screen.title-out {
+      animation: title-fade-out 0.38s ease forwards;
+    }
+    @keyframes title-fade-out {
+      to { opacity: 0; }
+    }
+    .title-logo {
+      max-width: min(420px, 88vw);
+      border-radius: 12px;
+    }
+    .title-press {
+      font-size: 1.05rem; color: #bba8d8; letter-spacing: 0.2em;
+      text-transform: uppercase;
+      animation: title-blink 1.3s ease-in-out infinite;
+    }
+    @keyframes title-blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.15; }
+    }
+
     /* ── Map resources bar ─────────────────────────────────────────────── */
     .resources {
       display: flex; flex-wrap: wrap; gap: 0.75rem;
@@ -48,6 +78,8 @@
     }
     .resources .res { display: flex; align-items: center; gap: 0.3rem; font-size: 0.85rem; color: var(--muted); }
     .resources img { width: 22px; height: 22px; object-fit: contain; }
+    .res-hp { color: #e07080; }
+    .res-hp.res-hp--low { color: #ff3a50; font-weight: 700; }
 
     .btn-help {
       margin-left: auto;
@@ -75,7 +107,8 @@
     .map-graph-wrap {
       overflow-x: auto;
       overflow-y: auto;
-      max-height: min(72vh, 520px);
+      max-height: calc(100dvh - 160px);
+      min-height: min(72vh, 420px);
       border: 1px solid var(--border);
       border-radius: 10px;
       background: #0f0c14;
@@ -697,6 +730,71 @@
     }
 
     #gameOver { text-align: center; padding: 2rem; }
+
+    /* ── Mai Navigator ─────────────────────────────────────────── */
+    .mai-navigator {
+      position: absolute; bottom: 0.85rem; right: 0.75rem;
+      display: flex; flex-direction: row; align-items: flex-end;
+      gap: 0.45rem; z-index: 10; pointer-events: none;
+      max-width: min(240px, 70%);
+    }
+    .mai-navigator.hidden { display: none !important; }
+    .mai-bubble {
+      background: rgba(18,14,28,0.94); border: 1.5px solid var(--accent);
+      border-radius: 12px 12px 4px 12px;
+      padding: 0.48rem 0.6rem; font-size: 0.72rem; line-height: 1.5;
+      color: var(--text); box-shadow: 0 4px 18px #000a;
+      animation: mai-fadein 0.28s ease;
+      flex: 1; min-width: 0;
+    }
+    .mai-bubble-name {
+      font-size: 0.6rem; font-weight: 700; color: var(--accent);
+      margin-bottom: 0.18rem; letter-spacing: 0.08em;
+    }
+    @keyframes mai-fadein {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .mai-icon {
+      width: 72px; height: 72px; object-fit: contain;
+      flex-shrink: 0;
+    }
+
+    /* ── Shop card layout ───────────────────────────────────────── */
+    .shop-header-row {
+      display: flex; align-items: center; justify-content: space-between;
+      margin: 0 0 0.2rem;
+    }
+    .shop-gold-disp {
+      display: flex; align-items: center; gap: 0.25rem;
+      font-size: 0.8rem; color: var(--muted);
+    }
+    .shop-gold-disp img { width: 15px; height: 15px; object-fit: contain; }
+    .shop-gold-val { font-weight: 700; color: var(--accent); }
+    #shopList {
+      display: flex; flex-wrap: wrap;
+      gap: 0.65rem; justify-content: center; margin: 0.6rem 0;
+    }
+    .shop-card-item {
+      display: flex; flex-direction: column; align-items: center; gap: 0.35rem;
+    }
+    .shop-price-row {
+      display: flex; flex-direction: row; align-items: center; justify-content: center;
+      gap: 0.3rem; width: 100%;
+    }
+    .shop-price-val {
+      font-size: 0.78rem; color: var(--accent); font-weight: 700;
+    }
+    .shop-price {
+      display: flex; align-items: center; gap: 0.2rem;
+      font-size: 0.7rem; color: var(--accent); font-weight: 700;
+    }
+    .shop-price img { width: 13px; height: 13px; object-fit: contain; }
+    .shop-buy-btn {
+      width: 100%; font-size: 0.72rem;
+      padding: 0.3rem 0.45rem; border-radius: 6px;
+    }
+
     footer {
       margin-top: auto;
       padding-top: 1rem;
@@ -877,18 +975,33 @@
   </style>
 </head>
 <body>
+  <!-- ── Title Screen ── -->
+  <div id="titleView" class="title-screen" role="button" aria-label="ゲームを始める" tabindex="0">
+    <img class="title-logo" src="./MCT_logo.jpg" alt="MyCryptoTactics" />
+    <p class="title-press">Press to Start</p>
+  </div>
+
   <div class="wrap">
     <div class="resources" id="mapResources" aria-label="ランリソース">
       <span class="res"><img alt="GUM" data-icon="gum" /> <span id="goldVal">0</span></span>
+      <span class="res res-hp">♥ <span id="mapHpVal">0</span>/<span id="mapHpMax">0</span></span>
       <span class="res">層 <span id="layerVal">入口</span></span>
       <span class="res">章 <span id="chapterVal">1</span></span>
       <button type="button" class="btn-help" id="btnHelpOpen" aria-label="ヘルプを開く" title="ヘルプ">?</button>
     </div>
 
-    <div id="mapView" class="panel">
+    <div id="mapView" class="panel" style="position:relative">
       <p class="map-title" id="mapTitle">始まりの塔（下から上へ。緑のノードから進む）</p>
       <div id="mapRows" class="map-graph-wrap" role="region" aria-label="マップ"></div>
       <p style="font-size:0.75rem;color:var(--muted);margin:0.5rem 0 0">企画書 §3 に沿ったラン内ループ。ロジックは <code>prototype/js/</code>。</p>
+      <!-- ── Mai Navigator（マップ内右下に絶対配置） ── -->
+      <div class="mai-navigator hidden" id="maiNavigator" aria-live="polite">
+        <div class="mai-bubble" id="maiBubble">
+          <div class="mai-bubble-name">マイ</div>
+          <span id="maiText">ボスの居るステージを目指しましょう！</span>
+        </div>
+        <img class="mai-icon" id="maiIcon" src="./MAI_SD.png" alt="マイ" />
+      </div>
     </div>
 
     <div id="combatView" class="panel combat-panel hidden">
@@ -1010,10 +1123,16 @@
     </div>
 
     <div id="shopView" class="panel hidden">
-      <p style="margin-top:0;font-weight:600;color:var(--accent)">店</p>
-      <p style="font-size:0.8rem;color:var(--muted)">ゴールドでカードを購入。</p>
-      <div id="shopList" style="display:flex;flex-direction:column;gap:0.5rem;margin:1rem 0"></div>
-      <button type="button" class="action" id="btnLeaveShop">立ち去る</button>
+      <div class="shop-header-row">
+        <p style="margin:0;font-weight:600;color:var(--accent);font-size:0.95rem">ショップ</p>
+        <div class="shop-gold-disp">
+          <img alt="G" data-icon="gum" />
+          <span class="shop-gold-val" id="shopGoldDisp">0</span> GUM
+        </div>
+      </div>
+      <p style="font-size:0.76rem;color:var(--muted);margin:0.2rem 0 0">エクステンションを購入してデッキを強化しよう。</p>
+      <div id="shopList"></div>
+      <button type="button" class="action" id="btnLeaveShop" style="margin-top:0.25rem;width:100%">立ち去る</button>
     </div>
 
     <div id="gameOver" class="panel hidden">

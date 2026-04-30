@@ -28,6 +28,7 @@ export const BATTLE_EFFECT_SPRITE = {
 
 /** cutins.json のジングル */
 export const AUDIO_URLS = {
+  bgmMap: () => audioUrl("Audio/BGM/pve.mp3"),
   bgmPvp: () => audioUrl("Audio/BGM/pvp.mp3"),
   seClear: () => audioUrl("Audio/SE/clear.wav"),
   seBattleSingleDamage: () => audioUrl("Audio/SE/Battle/1_single_damage.mp3"),
