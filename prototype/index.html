@@ -40,15 +40,15 @@
       margin-bottom: 0.75rem;
     }
     .hidden { display: none !important; }
+
+    /* ── Map resources bar ─────────────────────────────────────────────── */
     .resources {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-      align-items: center;
-      margin-bottom: 0.75rem;
+      display: flex; flex-wrap: wrap; gap: 0.75rem;
+      align-items: center; margin-bottom: 0.75rem;
     }
-    .resources .res { display: flex; align-items: center; gap: 0.35rem; font-size: 0.85rem; color: var(--muted); }
+    .resources .res { display: flex; align-items: center; gap: 0.3rem; font-size: 0.85rem; color: var(--muted); }
     .resources img { width: 22px; height: 22px; object-fit: contain; }
+
     .btn-help {
       margin-left: auto;
       display: inline-flex;
@@ -177,140 +177,131 @@
     .node-btn.boss { border-left: 4px solid #9a6ac4; font-weight: 600; }
 
     #combatView.combat-panel { padding: 0; overflow: hidden; }
-    .combat-arena {
-      position: relative;
-      min-height: 300px;
+
+    /* ── Combat header ─────────────────────────────────────────────────── */
+    .combat-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.45rem 0.75rem;
+      background: rgba(10,8,18,0.92);
+      border-bottom: 1px solid var(--border);
       border-radius: 10px 10px 0 0;
-      overflow: hidden;
+      gap: 0.5rem;
     }
+    .combat-header-gold {
+      display: flex; align-items: center; gap: 0.3rem;
+      font-size: 0.9rem; font-weight: 700; color: var(--accent); min-width: 4rem;
+    }
+    .combat-header-gold img { width: 20px; height: 20px; object-fit: contain; image-rendering: pixelated; }
+    .combat-header-stage {
+      flex: 1; text-align: center; font-size: 0.78rem; font-weight: 600;
+      color: var(--text); letter-spacing: 0.04em; white-space: nowrap;
+      overflow: hidden; text-overflow: ellipsis;
+    }
+    .combat-header-btns { display: flex; gap: 0.3rem; min-width: 4rem; justify-content: flex-end; }
+    .btn-icon-hd {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 28px; height: 28px; border-radius: 6px;
+      border: 1px solid var(--border); background: #1a1628;
+      color: var(--muted); font-size: 0.9rem; cursor: pointer; line-height: 1;
+    }
+    .btn-icon-hd:hover { border-color: var(--accent); color: var(--text); }
+
+    /* ── Arena ─────────────────────────────────────────────────────────── */
+    .combat-arena { position: relative; overflow: hidden; }
     .combat-bg {
-      position: absolute;
-      inset: 0;
-      background-size: cover;
-      background-position: center 35%;
-      background-repeat: no-repeat;
-      filter: saturate(0.92) brightness(0.55);
+      position: absolute; inset: 0;
+      background-size: cover; background-position: center 35%; background-repeat: no-repeat;
+      filter: saturate(0.92) brightness(0.45);
     }
     .combat-bg::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(90deg, #0a0812cc 0%, transparent 22%, transparent 78%, #0a0812cc 100%),
-        linear-gradient(180deg, transparent 40%, #120e18ee 100%);
+      content: ""; position: absolute; inset: 0;
+      background: linear-gradient(90deg,#0a0812cc 0%,transparent 22%,transparent 78%,#0a0812cc 100%),
+                  linear-gradient(180deg,transparent 35%,#120e18ee 100%);
       pointer-events: none;
     }
-    .combat-arena-inner {
-      position: relative;
-      z-index: 1;
-      display: flex;
-      align-items: stretch;
-      justify-content: space-between;
-      gap: 0.5rem;
-      padding: 1rem 0.85rem 1rem;
-      min-height: 300px;
+    .arena-inner {
+      position: relative; z-index: 1;
+      display: flex; align-items: flex-end; justify-content: space-between;
+      padding: 0.6rem 0.5rem 0.75rem;
+      min-height: 240px;
     }
-    .duelist {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      max-width: 42%;
+    .party-side {
+      display: flex; gap: 0.2rem; align-items: flex-end;
+      flex: 1; max-width: 44%;
     }
-    .duelist-tag {
-      font-size: 0.65rem;
-      letter-spacing: 0.12em;
-      color: var(--muted);
-      text-transform: uppercase;
-      margin-bottom: 0.35rem;
+    .party-side--player { justify-content: flex-start; }
+    .party-side--enemy  { justify-content: flex-end; flex-direction: row-reverse; }
+    .party-slot { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; }
+    .party-slot--ghost { opacity: 0; pointer-events: none; min-height: 100px; }
+    .party-slot--center { flex: 0 0 auto; }
+
+    .combatant { display: flex; flex-direction: column; align-items: center; gap: 0.18rem; }
+
+    /* Portrait */
+    .combatant-portrait-wrap {
+      position: relative; width: 88px; height: 88px;
     }
-    .portrait-card {
-      background: linear-gradient(180deg, #1a1628e6 0%, #0f0d16f0 100%);
-      border: 2px solid var(--border);
-      border-radius: 12px;
-      padding: 0.65rem 0.75rem 0.75rem;
-      width: 100%;
-      max-width: 200px;
-      box-shadow: 0 12px 32px #000a, inset 0 1px 0 #ffffff14;
+    .combatant-portrait {
+      width: 88px; height: 88px; object-fit: contain;
+      image-rendering: pixelated; image-rendering: crisp-edges;
+      border-radius: 6px; display: block;
     }
-    .portrait-card.hero-side { border-color: #6a8a5a88; box-shadow: 0 0 24px #3d5c3a44, 0 12px 32px #000a; }
-    .portrait-card.enemy-side { border-color: #9a4a5888; box-shadow: 0 0 24px #5c2a3044, 0 12px 32px #000a; }
-    .portrait-wrap {
-      position: relative;
-      width: 100%;
-      max-width: 120px;
-      margin: 0 auto 0.4rem;
-      overflow: visible;
-    }
-    .portrait-fx {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      width: 120px;
-      height: 120px;
-      margin: 0;
+    .combatant-portrait--enemy { background: #0a0810; }
+
+    /* Status badges on portrait */
+    .status-badges {
+      position: absolute; top: 2px; left: 2px;
+      display: flex; flex-wrap: wrap; gap: 2px;
       pointer-events: none;
-      z-index: 4;
-      background-repeat: no-repeat;
-      image-rendering: pixelated;
-      image-rendering: crisp-edges;
-      animation: portrait-sprite-fx 0.75s steps(8) forwards;
-      opacity: 0.95;
-      transform: translate(-50%, -50%) scale(3.3);
-      transform-origin: center center;
     }
-    @keyframes portrait-sprite-fx {
-      from { background-position: 0 0; }
-      to { background-position: -800px 0; }
+    .sbadge-status {
+      font-size: 0.6rem; font-weight: 700;
+      background: rgba(10,6,16,0.82); border-radius: 3px;
+      padding: 1px 3px; line-height: 1.25; color: #f0a050;
+      border: 1px solid #6a3820;
     }
-    .portrait-fx--heal { opacity: 0.88; filter: saturate(1.15) hue-rotate(-8deg); }
-    .portrait-fx--buff { opacity: 0.82; }
-    .portrait-fx--debuff { opacity: 0.82; filter: hue-rotate(12deg); }
-    .portrait-fx--area { opacity: 0.85; }
-    .portrait-card img.portrait-lg {
-      width: 100%;
-      max-width: 120px;
-      height: 120px;
-      object-fit: cover;
-      border-radius: 8px;
-      display: block;
-      border: 2px solid #0006;
-      image-rendering: pixelated;
-      image-rendering: crisp-edges;
+
+    /* Combatant info */
+    .combatant-info { width: 88px; display: flex; flex-direction: column; gap: 0.14rem; }
+    .combatant-name {
+      font-size: 0.68rem; font-weight: 700; text-align: center; color: var(--text);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
-    .portrait-card.enemy-side .portrait-lg { object-fit: contain; background: #0a0810; }
-    .portrait-hit {
-      animation: portrait-shake 0.35s ease-out;
+
+    /* HP gauge */
+    .hp-bar-row { display: flex; flex-direction: column; gap: 2px; }
+    .hp-bar-track {
+      height: 5px; background: #2a2438; border-radius: 3px; overflow: hidden; width: 100%;
     }
-    @keyframes portrait-shake {
-      0%, 100% { transform: translateX(0); filter: brightness(1); }
-      25% { transform: translateX(-4px); filter: brightness(1.4) saturate(1.2); }
-      75% { transform: translateX(4px); filter: brightness(1.25); }
+    .hp-bar-fill {
+      height: 100%; width: 100%; background: linear-gradient(90deg,#3abf6a,#5ecf8a);
+      border-radius: 3px; transition: width 0.3s ease;
     }
-    .duelist-name { font-weight: 700; font-size: 0.85rem; margin-bottom: 0.25rem; }
-    .stat-compact {
-      font-size: 0.68rem;
-      text-align: center;
-      width: 100%;
+    .hp-bar-fill--enemy { background: linear-gradient(90deg,#a03040,#c45c6a); }
+    .hp-bar-nums {
+      font-size: 0.58rem; color: var(--muted); text-align: right;
+      font-variant-numeric: tabular-nums; line-height: 1;
     }
-    .stat-row {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.35rem;
-      margin: 0.12rem 0;
-      min-height: 1.15rem;
+
+    /* Stat badges row */
+    .stat-row-badges {
+      display: flex; flex-wrap: wrap; gap: 2px; justify-content: center;
+    }
+    .sbadge {
+      font-size: 0.58rem; font-weight: 700;
+      border: 1px solid #4a4060; border-radius: 3px;
+      padding: 1px 3px; color: var(--text); line-height: 1.3;
+      background: rgba(10,8,18,0.7); white-space: nowrap;
       position: relative;
     }
-    .stat-row img { width: 14px; height: 14px; flex-shrink: 0; object-fit: contain; }
-    .stat-row .stat-values {
-      display: flex;
-      align-items: center;
-      gap: 0.25rem;
-      font-variant-numeric: tabular-nums;
-      font-weight: 600;
-    }
-    .stat-row .slash { color: var(--muted); font-weight: 500; }
+    .sbadge-phy { color: #ff9a6a; border-color: #6a3020; }
+    .sbadge-int { color: #6ab4f0; border-color: #203060; }
+    .sbadge-agi { color: #8adf6a; border-color: #205020; }
+    .sbadge-grd { color: #b0a8c0; border-color: #4a4068; }
+    .sbadge-shd { color: var(--accent); border-color: #5a4020; }
+    .sbadge::before { content: attr(data-label); margin-right: 2px; opacity: 0.6; font-size: 0.52rem; }
+
+    /* stat-anchor for float animations */
     .stat-anchor { position: relative; display: inline-block; min-height: 1em; }
 
     .stat-float {
@@ -336,87 +327,94 @@
       100% { opacity: 0; transform: translateX(-50%) translateY(-22px) scale(1); }
     }
 
-    .vs-column {
-      flex: 0 0 auto;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      padding: 0 0.25rem;
-      min-width: 4rem;
+    /* VS col */
+    .vs-col {
+      flex: 0 0 auto; min-width: 2.5rem;
+      display: flex; align-items: center; justify-content: center;
     }
     .vs-mark {
-      font-size: 1.35rem;
-      font-weight: 800;
-      color: var(--accent);
-      text-shadow: 0 0 20px #c4a35a66;
-      letter-spacing: 0.05em;
+      font-size: 1.2rem; font-weight: 800; color: var(--accent);
+      text-shadow: 0 0 20px #c4a35a66; letter-spacing: 0.05em;
     }
 
+    /* Intent bubble (above enemy portrait) */
     .intent-bubble {
-      font-size: 0.62rem;
-      color: #ffd4a8;
-      text-align: center;
-      line-height: 1.35;
-      padding: 0.4rem 0.45rem;
-      background: #1a1018ee;
-      border: 1px solid #6a4048;
-      border-radius: 8px;
-      max-width: 100%;
-      margin-top: 0.35rem;
-      margin-bottom: 0;
-      letter-spacing: 0.04em;
+      font-size: 0.6rem; color: #ffd4a8; text-align: center; line-height: 1.3;
+      padding: 0.28rem 0.4rem;
+      background: #1a1018ee; border: 1px solid #6a4048; border-radius: 7px;
+      max-width: 100px; margin-bottom: 0.2rem; letter-spacing: 0.03em;
     }
     .intent-bubble .intent-label {
-      display: block;
-      font-size: 0.55rem;
-      color: var(--muted);
-      margin-bottom: 0.15rem;
-      letter-spacing: 0.1em;
+      display: block; font-size: 0.5rem; color: var(--muted);
+      margin-bottom: 0.1rem; letter-spacing: 0.1em;
     }
 
+    /* Portrait FX */
+    .portrait-fx {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 120px;
+      height: 120px;
+      margin: 0;
+      pointer-events: none;
+      z-index: 4;
+      background-repeat: no-repeat;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      animation: portrait-sprite-fx 0.75s steps(8) forwards;
+      opacity: 0.95;
+      transform: translate(-50%, -50%) scale(3.3);
+      transform-origin: center center;
+    }
+    @keyframes portrait-sprite-fx {
+      from { background-position: 0 0; }
+      to { background-position: -800px 0; }
+    }
+    .portrait-fx--heal { opacity: 0.88; filter: saturate(1.15) hue-rotate(-8deg); }
+    .portrait-fx--buff { opacity: 0.82; }
+    .portrait-fx--debuff { opacity: 0.82; filter: hue-rotate(12deg); }
+    .portrait-fx--area { opacity: 0.85; }
+    .portrait-hit {
+      animation: portrait-shake 0.35s ease-out;
+    }
+    @keyframes portrait-shake {
+      0%, 100% { transform: translateX(0); filter: brightness(1); }
+      25% { transform: translateX(-4px); filter: brightness(1.4) saturate(1.2); }
+      75% { transform: translateX(4px); filter: brightness(1.25); }
+    }
+
+    /* ── Log ───────────────────────────────────────────────────────────── */
     .combat-log-mid {
-      padding: 0.5rem 0.75rem;
+      padding: 0.4rem 0.65rem;
       background: #0f0c14cc;
       border-top: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
     }
     .combat-log-mid .log {
-      font-size: 0.72rem;
-      color: var(--muted);
-      max-height: 72px;
-      overflow-y: auto;
-      margin: 0;
-      padding: 0;
-      border: none;
+      font-size: 0.7rem; color: var(--muted);
+      max-height: 66px; overflow-y: auto; margin: 0; padding: 0; border: none;
     }
-    .combat-log-mid .log p { margin: 0.12rem 0; }
+    .combat-log-mid .log p { margin: 0.1rem 0; }
+    .log-from { color: #8ecfaa; font-weight: 600; }
+    .log-to   { color: #cf9a6a; font-weight: 600; }
+    .log-arrow { color: var(--muted); margin: 0 2px; }
 
+    /* ── Combat Footer ─────────────────────────────────────────────────── */
     .combat-footer {
-      padding: 0.65rem 0.75rem 0.85rem;
-      background: var(--panel);
-      border-radius: 0 0 10px 10px;
+      padding: 0.5rem 0.65rem 0.55rem;
+      background: var(--panel); border-radius: 0 0 10px 10px;
+      position: relative;
     }
-    .hand-energy-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.5rem;
-      margin-bottom: 0.45rem;
-      flex-wrap: nowrap;
-      min-width: 0;
+    .footer-topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 0.35rem;
     }
-    .hand-energy-row .energy-pill {
-      flex-shrink: 0;
+    .footer-bottombar {
+      display: flex; justify-content: flex-end;
+      margin-top: 0.2rem;
     }
-    .hand-energy-row .hand-energy-actions {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 0.5rem;
-      flex-shrink: 0;
-    }
+
     .energy-pill {
       display: inline-flex;
       align-items: center;
@@ -430,285 +428,137 @@
       border: 1px solid #2a5560;
     }
 
-    @media (max-width: 420px) {
-      .hand { --card-h: 200px; }
-    }
+    /* ── Hand ──────────────────────────────────────────────────────────── */
     .hand-scroll {
-      width: 100%;
-      max-width: 900px;
-      margin-left: auto;
-      margin-right: auto;
-      overflow-x: auto;
-      overflow-y: visible;
+      width: 100%; overflow-x: auto; overflow-y: visible;
       -webkit-overflow-scrolling: touch;
-      padding: 0.35rem 0.25rem 0.15rem;
-      box-sizing: border-box;
+      padding: 0.25rem 0.2rem 0.1rem; box-sizing: border-box;
     }
     .hand {
-      --card-w: 112px;
-      --card-h: 216px;
-      display: flex;
-      flex-wrap: nowrap;
-      justify-content: center;
-      align-items: flex-end;
-      gap: 0.55rem;
-      min-height: calc(var(--card-h) + 2.25rem);
-      padding: 0.5rem 0.75rem 0.65rem;
+      --card-w: 96px; --card-h: 170px;
+      display: flex; flex-wrap: nowrap; justify-content: center;
+      align-items: flex-end; gap: 0.4rem;
+      min-height: calc(var(--card-h) + 2rem);
+      padding: 0.4rem 0.5rem 0.4rem;
       width: max-content;
-      min-width: min(100%, calc(var(--n-cards, 1) * var(--card-w) + (var(--n-cards, 1) - 1) * 0.55rem + 1.5rem));
-      margin-left: auto;
-      margin-right: auto;
-      position: relative;
-      perspective: 800px;
+      min-width: min(100%, calc(var(--n-cards, 1) * var(--card-w) + (var(--n-cards, 1) - 1) * 0.4rem + 1rem));
+      margin: 0 auto; position: relative; perspective: 800px;
       touch-action: pan-x pan-y;
-      box-sizing: border-box;
     }
-    .hand .card {
+    @media (max-width: 420px) { .hand { --card-w: 80px; --card-h: 155px; } }
+
+    /* Card slot (wrapper that fan-rotates, includes cost badge above) */
+    .hand .card-slot {
       position: relative;
-      flex: 0 0 var(--card-w);
-      width: var(--card-w);
-      min-width: var(--card-w);
-      max-width: var(--card-w);
-      height: var(--card-h);
-      margin-left: 0;
-      --peek-lift: 0px;
-      z-index: var(--i);
+      flex: 0 0 var(--card-w); width: var(--card-w); min-width: var(--card-w);
+      display: flex; flex-direction: column; align-items: center;
       transform-origin: 50% 100%;
-      transform: translateY(var(--peek-lift)) rotate(var(--rot, 0deg));
-      transition: transform 0.18s ease, box-shadow 0.18s, filter 0.18s;
-    }
-    .hand .card:first-child { margin-left: 0; }
-    .hand .card:hover:not(.disabled),
-    .hand .card.card--peek:not(.disabled) {
-      z-index: 80;
-      box-shadow: 0 0 0 2px #fff, 0 0 18px #8ecfff99, 0 14px 28px #000b;
-      filter: brightness(1.04);
-    }
-    .card {
-      border-radius: 10px;
-      border: 2px solid #6a5a88;
-      padding: 0;
+      transform: translateY(calc(-1 * var(--peek-lift, 0px))) rotate(var(--rot, 0deg));
+      transition: transform 0.2s ease, filter 0.15s;
+      z-index: var(--i, 1);
       cursor: default;
-      font-size: 0.62rem;
-      line-height: 1.18;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      position: relative;
-      user-select: none;
-      touch-action: manipulation;
-      -webkit-tap-highlight-color: transparent;
+      --peek-lift: 0px;
     }
-    .card > .card-fg {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
+    .hand .card-slot:hover:not(.card-slot--disabled) { z-index: 80; filter: brightness(1.04); }
+    .hand .card-slot--focused { z-index: 90 !important; filter: brightness(1.06); }
+    .hand .card-slot--focused .card {
+      box-shadow: 0 0 0 2px #fff, 0 0 18px #8ecfff99, 0 14px 28px #000c;
     }
-    .card-art-full {
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: 0;
-      height: 65%;
-      z-index: 1;
-      display: flex;
-      align-items: flex-start;
-      justify-content: center;
-      overflow: hidden;
-      pointer-events: none;
+    .hand .card-slot--disabled .card { opacity: 0.35; cursor: not-allowed; }
+
+    /* Cost badge above card */
+    .card-cost-above {
+      display: inline-flex; align-items: center; gap: 0.1rem;
+      background: #0a1520ee; color: var(--energy);
+      border: 1px solid #2a5560; border-bottom: none;
+      border-radius: 7px 7px 0 0;
+      padding: 0.12rem 0.45rem;
+      font-weight: 800; font-size: 0.85rem; line-height: 1.2;
+      position: relative; z-index: 2;
     }
-    .card-art-full .card-ext-img {
-      width: 118%;
-      max-width: none;
-      height: 100%;
-      object-fit: contain;
-      object-position: center top;
-      opacity: 0.95;
-      filter: drop-shadow(0 2px 4px #0006);
-      image-rendering: pixelated;
-      image-rendering: crisp-edges;
+    .card-cost-above .cost-zeus { font-size: 0.8rem; }
+
+    /* Card cost color variants */
+    .card-slot[data-cost="0"] .card-cost-above { border-color: #4a4060; }
+    .card-slot[data-cost="1"] .card { border-color: #3a6ab0; }
+    .card-slot[data-cost="1"] .card-cost-above { border-color: #3a6ab0; border-bottom: none; }
+    .card-slot[data-cost="2"] .card { border-color: #2a9070; }
+    .card-slot[data-cost="2"] .card-cost-above { border-color: #2a9070; border-bottom: none; }
+    .card-slot[data-cost="3"] .card { border-color: #c4a35a; }
+    .card-slot[data-cost="3"] .card-cost-above { border-color: #c4a35a; border-bottom: none; }
+    .card-slot[data-cost="4"] .card { border-color: #c05050; }
+    .card-slot[data-cost="4"] .card-cost-above { border-color: #c05050; border-bottom: none; }
+    .card-slot[data-cost="5"] .card { border-color: #a03040; }
+    .card-slot[data-cost="5"] .card-cost-above { border-color: #a03040; border-bottom: none; }
+
+    /* Card base */
+    .card {
+      border-radius: 0 0 10px 10px;
+      border: 2px solid #5a4068; border-top: none;
+      width: var(--card-w); height: var(--card-h);
+      cursor: default; display: flex; flex-direction: column;
+      overflow: hidden; position: relative; user-select: none;
+      touch-action: manipulation; -webkit-tap-highlight-color: transparent;
     }
-    .card-tint {
-      position: absolute;
-      inset: 0;
-      z-index: 2;
-      pointer-events: none;
-      background: linear-gradient(
-        180deg,
-        rgba(12, 10, 18, 0.55) 0%,
-        rgba(12, 10, 18, 0.2) 45%,
-        transparent 65%
-      );
-    }
-    .card.atk .card-tint {
-      background: linear-gradient(
-        180deg,
-        rgba(58, 40, 50, 0.65) 0%,
-        rgba(58, 40, 50, 0.25) 48%,
-        transparent 66%
-      );
-    }
-    .card.skl .card-tint {
-      background: linear-gradient(
-        180deg,
-        rgba(40, 50, 64, 0.65) 0%,
-        rgba(40, 50, 64, 0.25) 48%,
-        transparent 66%
-      );
-    }
-    .card-header {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 8;
-      display: flex;
-      flex-direction: row;
-      align-items: flex-start;
-      justify-content: flex-start;
-      padding: 0.2rem 0.26rem 0.18rem;
-      pointer-events: none;
-    }
-    .card-header-icons {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 0.22rem;
-      flex-shrink: 0;
-    }
-    .card-header-icons .card-skill-corner {
-      position: static;
-      top: auto;
-      left: auto;
-      width: 24px;
-      height: 24px;
-    }
-    .card-ext-name {
-      position: absolute;
-      left: 0.22rem;
-      right: 0.22rem;
-      bottom: 35%;
-      z-index: 7;
-      margin: 0;
-      padding: 0 0.06rem;
-      max-height: 2.36em;
-      text-align: left;
-      font-size: clamp(0.52rem, 2.6vw, calc(0.58rem + 4px));
-      line-height: 1.12;
-      font-weight: 700;
-      color: var(--text);
-      text-shadow: 0 1px 3px #000c;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      pointer-events: none;
-    }
-    .card:hover:not(.disabled) { filter: brightness(1.03); }
-    .card.disabled { opacity: 0.35; cursor: not-allowed; }
     .card.atk { background: #120d12; }
     .card.skl { background: #0d1218; }
-    .card-skill-corner {
-      position: absolute;
-      top: 5px;
-      left: 5px;
-      width: 22px;
-      height: 22px;
-      padding: 2px;
-      object-fit: contain;
-      background: #0d0a12cc;
-      border: 1px solid #4a4058;
-      border-radius: 5px;
-      z-index: 2;
+
+    /* Card sections */
+    .card-name-hd {
+      background: rgba(10,8,18,0.9); color: var(--text);
+      font-weight: 700; font-size: 0.6rem;
+      padding: 0.18rem 0.28rem; text-align: center;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      flex-shrink: 0;
+    }
+    .card-icon-area {
+      position: relative; flex: 1; overflow: hidden; min-height: 0;
+    }
+    .card-ext-img-full {
+      width: 100%; height: 100%; object-fit: contain; object-position: center;
+      display: block; image-rendering: pixelated; image-rendering: crisp-edges;
+    }
+    .card-skill-icon-tl {
+      position: absolute; top: 4px; left: 4px;
+      width: 22px; height: 22px; padding: 2px;
+      object-fit: contain; background: rgba(10,8,18,0.8);
+      border: 1px solid #4a4058; border-radius: 5px;
       image-rendering: pixelated;
-      image-rendering: crisp-edges;
     }
-    .card-cost-badge {
-      position: relative;
-      top: auto;
-      right: auto;
-      min-width: 1.85rem;
-      height: 1.38rem;
-      padding: 0 0.32rem;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.1rem;
-      font-weight: 800;
-      color: var(--energy);
-      font-size: calc(0.72rem + 4px);
-      background: #0a1520ee;
-      border: 1px solid #2a5560;
-      border-bottom: none;
-      border-radius: 7px 7px 0 0;
-      text-shadow: 0 1px 2px #000;
-      z-index: 3;
-      box-shadow: 0 1px 0 #0a1520ee;
+    .card-user-br {
+      position: absolute; bottom: 4px; right: 4px;
+      font-size: 0.58rem; font-weight: 700;
+      background: rgba(10,8,18,0.82); border: 1px solid #4a4058;
+      border-radius: 4px; padding: 1px 4px; color: var(--muted);
+      line-height: 1.2;
     }
-    .card-cost-badge .cost-zeus { font-size: calc(0.78rem + 4px); line-height: 1; }
-    .card-effect-summary {
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      height: 35%;
-      max-height: 35%;
-      border-radius: 0 0 8px 8px;
-      box-sizing: border-box;
+    .card-effect-area {
+      background: #d8d0e4; color: #1a1420;
+      padding: 0.18rem 0.24rem; font-size: 0.58rem;
+      font-weight: 700; line-height: 1.28; text-align: left;
+      flex-shrink: 0; min-height: 2.4rem; max-height: 2.8rem;
       overflow: hidden;
-      overflow-y: auto;
-      margin: 0;
-      background: #d8d0e4;
-      color: #1a1420;
-      padding: 0.22rem 0.28rem;
-      font-size: calc(0.52rem + 6px);
-      font-weight: 700;
-      line-height: 1.28;
-      text-align: left;
-      z-index: 6;
     }
-    .card-effect-summary p {
-      margin: 0.06rem 0;
-    }
-    .card--peek .card-effect-summary {
-      max-height: none;
-      overflow: visible;
-    }
+    .card-effect-area p { margin: 0.04rem 0; }
+
+    /* Peek layer (shown when focused) */
     .card-peek-layer {
-      display: none;
-      position: absolute;
-      left: 50%;
-      bottom: calc(100% - 4px);
+      display: none; position: absolute;
+      left: 50%; bottom: calc(100% + 2px);
       transform: translateX(-50%);
-      width: min(248px, 86vw);
-      z-index: 100;
-      pointer-events: none;
+      width: min(220px, 80vw); z-index: 100; pointer-events: none;
     }
-    .card--peek .card-peek-layer { display: block; }
+    .card-slot--focused .card-peek-layer { display: block; }
     .card-peek-inner {
-      background: #0a0814f2;
-      border: 1px solid var(--accent);
-      border-radius: 8px;
-      padding: 0.45rem 0.5rem 0.5rem;
-      box-shadow: 0 12px 32px #000c;
-      font-size: 0.62rem;
-      line-height: 1.35;
-      color: #e8e0f0;
-      text-align: left;
+      background: #0a0814f2; border: 1px solid var(--accent);
+      border-radius: 8px; padding: 0.4rem 0.45rem 0.45rem;
+      box-shadow: 0 12px 32px #000c; font-size: 0.6rem;
+      line-height: 1.35; color: #e8e0f0; text-align: left;
     }
-    .card-peek-lines p {
-      margin: 0.15rem 0;
-    }
-    .card-peek-help {
-      margin-top: 0.35rem;
-      padding-top: 0.35rem;
-      border-top: 1px solid #3d3550;
-    }
-    .card-help-block {
-      font-size: 0.58rem;
-      color: var(--muted);
-      margin-top: 0.28rem;
-    }
+    .card-peek-lines p { margin: 0.12rem 0; }
+    .card-peek-help { margin-top: 0.3rem; padding-top: 0.3rem; border-top: 1px solid #3d3550; }
+    .card-help-block { font-size: 0.56rem; color: var(--muted); margin-top: 0.24rem; }
     .card-help-block:first-child { margin-top: 0; }
     .card-help-block strong { color: #f0d878; }
 
@@ -735,6 +585,127 @@
       font-size: 1rem;
       color: var(--energy);
       font-variant-numeric: tabular-nums;
+    }
+
+    /* Reward cards (keep original layout style) */
+    .reward-card-btn { width: 100%; padding: 0; border: none; background: transparent; cursor: pointer; text-align: left; }
+    .reward-card-inner {
+      --card-w: 112px; --card-h: 216px;
+      border-radius: 10px; border: 2px solid #5a5068;
+      width: var(--card-w); min-width: var(--card-w);
+      min-height: var(--card-h); height: var(--card-h);
+      position: relative; display: block; overflow: hidden;
+      transition: transform 0.1s, box-shadow 0.1s;
+      margin: 0 auto;
+    }
+    @media (max-width: 420px) { .reward-card-inner { --card-h: 200px; } }
+    .reward-card-btn:hover .reward-card-inner { transform: translateY(-2px); box-shadow: 0 8px 20px #0008; border-color: var(--accent); }
+    .reward-card-inner .card-art-full {
+      position: absolute; left: 0; right: 0; top: 0; height: 65%; z-index: 1;
+      display: flex; align-items: flex-start; justify-content: center;
+      overflow: hidden; pointer-events: none;
+    }
+    .reward-card-inner .card-art-full .card-ext-img {
+      width: 118%; max-width: none; height: 100%; object-fit: contain;
+      object-position: center top; opacity: 0.95;
+      image-rendering: pixelated;
+    }
+    .reward-card-inner .card-tint {
+      position: absolute; inset: 0; z-index: 2; pointer-events: none;
+      background: linear-gradient(180deg,rgba(12,10,18,0.55) 0%,rgba(12,10,18,0.2) 45%,transparent 65%);
+    }
+    .reward-card-inner.atk .card-tint { background: linear-gradient(180deg,rgba(58,40,50,0.65) 0%,rgba(58,40,50,0.25) 48%,transparent 66%); }
+    .reward-card-inner.skl .card-tint { background: linear-gradient(180deg,rgba(40,50,64,0.65) 0%,rgba(40,50,64,0.25) 48%,transparent 66%); }
+    .reward-card-inner .card-fg { position: absolute; inset: 0; pointer-events: none; }
+    .reward-card-inner .card-header {
+      position: absolute; top: 0; left: 0; right: 0; z-index: 8;
+      display: flex; padding: 0.2rem 0.26rem 0.18rem; pointer-events: none;
+    }
+    .reward-card-inner .card-header-icons { display: flex; flex-direction: column; gap: 0.22rem; }
+    .reward-card-inner .card-skill-corner {
+      width: 24px; height: 24px; padding: 2px; object-fit: contain;
+      background: #0d0a12cc; border: 1px solid #4a4058; border-radius: 5px;
+      image-rendering: pixelated;
+    }
+    .reward-card-inner .card-cost-badge {
+      min-width: 1.85rem; height: 1.38rem; padding: 0 0.32rem;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-weight: 800; color: var(--energy); font-size: calc(0.72rem + 4px);
+      background: #0a1520ee; border: 1px solid #2a5560;
+      border-bottom: none; border-radius: 7px 7px 0 0;
+      text-shadow: 0 1px 2px #000; z-index: 3;
+    }
+    .reward-card-inner .card-ext-name {
+      position: absolute; left: 0.22rem; right: 0.22rem; bottom: 35%; z-index: 7;
+      font-size: clamp(0.52rem,2.6vw,calc(0.58rem + 4px)); font-weight: 700;
+      color: var(--text); text-shadow: 0 1px 3px #000c;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .reward-card-inner .card-effect-summary {
+      position: absolute; left: 0; right: 0; bottom: 0; height: 35%;
+      border-radius: 0 0 8px 8px; overflow: hidden;
+      background: #d8d0e4; color: #1a1420;
+      padding: 0.22rem 0.28rem; font-size: calc(0.52rem + 6px); font-weight: 700;
+      line-height: 1.28; text-align: left; z-index: 6;
+    }
+    .reward-card-inner .card-effect-summary p { margin: 0.06rem 0; }
+
+    button.action {
+      background: var(--border);
+      color: var(--text);
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+    button.action:hover:not(:disabled) { filter: brightness(1.12); }
+    button.action:disabled { opacity: 0.45; cursor: not-allowed; }
+    button.primary { background: #4a3d6a; border: 1px solid var(--accent); }
+
+    #rewardView {
+      max-width: 520px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #rewardView .reward-intro {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin: 0 0 0.75rem;
+      line-height: 1.45;
+    }
+    #rewardView .reward-picks {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 0.65rem;
+    }
+    #rewardView .reward-picks button {
+      flex: 0 0 auto;
+      width: auto;
+      max-width: calc(var(--card-w, 112px) + 4px);
+      text-align: left;
+      padding: 0;
+    }
+
+    #gameOver { text-align: center; padding: 2rem; }
+    footer {
+      margin-top: auto;
+      padding-top: 1rem;
+      font-size: 0.62rem;
+      color: var(--muted);
+      text-align: center;
+      max-width: 720px;
+      line-height: 1.5;
+    }
+    footer a { color: var(--accent); }
+    .footer-tech {
+      display: block;
+      margin-top: 0.35rem;
+      font-size: 0.58rem;
+      opacity: 0.9;
     }
 
     #deckModal {
@@ -815,116 +786,6 @@
       margin-top: 1.25rem;
       font-size: 0.85rem;
       color: var(--muted);
-    }
-
-    .reward-card-btn {
-      width: 100%;
-      padding: 0;
-      border: none;
-      background: transparent;
-      cursor: pointer;
-      text-align: left;
-    }
-    .reward-card-inner {
-      --card-w: 112px;
-      --card-h: 216px;
-      border-radius: 10px;
-      border: 2px solid #5a5068;
-      padding: 0;
-      width: var(--card-w);
-      min-width: var(--card-w);
-      max-width: var(--card-w);
-      min-height: var(--card-h);
-      height: var(--card-h);
-      position: relative;
-      display: block;
-      overflow: hidden;
-      transition: transform 0.1s, box-shadow 0.1s;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    @media (max-width: 420px) {
-      .reward-card-inner {
-        --card-h: 200px;
-      }
-    }
-    .reward-card-btn:hover .reward-card-inner {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px #0008;
-      border-color: var(--accent);
-    }
-    .reward-card-inner.atk .card-tint {
-      background: linear-gradient(
-        180deg,
-        rgba(58, 40, 50, 0.65) 0%,
-        rgba(58, 40, 50, 0.25) 48%,
-        transparent 66%
-      );
-    }
-    .reward-card-inner.skl .card-tint {
-      background: linear-gradient(
-        180deg,
-        rgba(40, 50, 64, 0.65) 0%,
-        rgba(40, 50, 64, 0.25) 48%,
-        transparent 66%
-      );
-    }
-    button.action {
-      background: var(--border);
-      color: var(--text);
-      border: none;
-      padding: 0.5rem 1rem;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 0.85rem;
-    }
-    button.action:hover:not(:disabled) { filter: brightness(1.12); }
-    button.action:disabled { opacity: 0.45; cursor: not-allowed; }
-    button.primary { background: #4a3d6a; border: 1px solid var(--accent); }
-
-    #rewardView {
-      max-width: 520px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    #rewardView .reward-intro {
-      font-size: 0.82rem;
-      color: var(--muted);
-      margin: 0 0 0.75rem;
-      line-height: 1.45;
-    }
-    #rewardView .reward-picks {
-      display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
-      justify-content: center;
-      align-items: flex-start;
-      gap: 0.65rem;
-    }
-    #rewardView .reward-picks button {
-      flex: 0 0 auto;
-      width: auto;
-      max-width: calc(var(--card-w, 112px) + 4px);
-      text-align: left;
-      padding: 0;
-    }
-
-    #gameOver { text-align: center; padding: 2rem; }
-    footer {
-      margin-top: auto;
-      padding-top: 1rem;
-      font-size: 0.62rem;
-      color: var(--muted);
-      text-align: center;
-      max-width: 720px;
-      line-height: 1.5;
-    }
-    footer a { color: var(--accent); }
-    .footer-tech {
-      display: block;
-      margin-top: 0.35rem;
-      font-size: 0.58rem;
-      opacity: 0.9;
     }
 
     /* Help overlay */
@@ -1011,9 +872,8 @@
 </head>
 <body>
   <div class="wrap">
-    <div class="resources" aria-label="ランリソース">
+    <div class="resources" id="mapResources" aria-label="ランリソース">
       <span class="res"><img alt="GUM" data-icon="gum" /> <span id="goldVal">0</span></span>
-      <span class="res"><img alt="HP" data-stat="hp" /> <span id="hpMapVal">—</span></span>
       <span class="res">層 <span id="layerVal">入口</span></span>
       <span class="res">章 <span id="chapterVal">1</span></span>
       <button type="button" class="btn-help" id="btnHelpOpen" aria-label="ヘルプを開く" title="ヘルプ">?</button>
@@ -1026,100 +886,121 @@
     </div>
 
     <div id="combatView" class="panel combat-panel hidden">
-      <div class="combat-arena">
-        <div id="combatBg" class="combat-bg" role="presentation"></div>
-        <div class="combat-arena-inner">
-          <div class="duelist">
-            <span class="duelist-tag">Leader</span>
-            <div class="portrait-card hero-side">
-              <div id="playerPortraitWrap" class="portrait-wrap">
-                <img id="leaderImg" class="portrait-lg" alt="" />
-              </div>
-              <div class="duelist-name" id="leaderName">—</div>
-              <div class="stat-compact">
-                <div class="stat-row">
-                  <img alt="" data-stat="hp" />
-                  <span class="stat-values">
-                    <span id="player-hp" class="stat-anchor"><span id="pHp">0</span><span class="slash">/</span><span id="pHpMax">0</span></span>
-                  </span>
-                </div>
-                <div class="stat-row">
-                  <img alt="" data-stat="phy" />
-                  <span id="player-phy" class="stat-anchor stat-values"><span id="pPhy">0</span></span>
-                  <img alt="" data-stat="int" />
-                  <span id="player-int" class="stat-anchor stat-values"><span id="pInt">0</span></span>
-                  <img id="pAgiStatIcon" alt="" width="14" height="14" style="object-fit:contain" />
-                  <span id="player-agi" class="stat-anchor stat-values"><span id="pAgi">0</span></span>
-                </div>
-                <div class="stat-row">
-                  <span aria-hidden="true" style="font-size:0.85rem">🛡</span>
-                  <span id="player-guard" class="stat-anchor stat-values"><span id="pGuard">0</span></span>
-                  <span aria-hidden="true" style="font-size:0.85rem;margin-left:0.15rem">✦</span>
-                  <span id="player-shield" class="stat-anchor stat-values"><span id="pShield">0</span></span>
-                </div>
-                <div id="playerStatusBadge" style="display:none;font-size:0.75rem;color:#f0a050;margin-top:0.12rem;text-align:center;line-height:1.3"></div>
-              </div>
-            </div>
-          </div>
-          <div class="vs-column">
-            <span class="vs-mark">VS</span>
-          </div>
-          <div class="duelist">
-            <span class="duelist-tag">Enemy</span>
-            <div class="portrait-card enemy-side">
-              <div id="enemyPortraitWrap" class="portrait-wrap">
-                <img id="enemyImg" class="portrait-lg" alt="" />
-              </div>
-              <div class="duelist-name" id="enemyName">—</div>
-              <div class="stat-compact">
-                <div class="stat-row">
-                  <img alt="" data-stat="hp" />
-                  <span class="stat-values">
-                    <span id="enemy-hp" class="stat-anchor"><span id="eHp">0</span><span class="slash">/</span><span id="eHpMax">0</span></span>
-                  </span>
-                </div>
-                <div class="stat-row">
-                  <img alt="" data-stat="phy" />
-                  <span id="ePhy" class="stat-values">0</span>
-                  <img alt="" data-stat="int" />
-                  <span id="enemy-int" class="stat-anchor stat-values"><span id="eInt">0</span></span>
-                  <img id="eAgiStatIcon" alt="" width="14" height="14" style="object-fit:contain" />
-                  <span id="eAgi" class="stat-values">0</span>
-                </div>
-                <div class="stat-row">
-                  <span aria-hidden="true" style="font-size:0.85rem">🛡</span>
-                  <span id="enemy-guard" class="stat-anchor stat-values"><span id="eGuard">0</span></span>
-                  <span aria-hidden="true" style="font-size:0.85rem;margin-left:0.15rem">✦</span>
-                  <span id="enemy-shield" class="stat-anchor stat-values"><span id="eShield">0</span></span>
-                </div>
-                <div id="enemyStatusBadge" style="display:none;font-size:0.75rem;color:#f0a050;margin-top:0.12rem;text-align:center;line-height:1.3"></div>
-              </div>
-              <div class="intent-bubble" id="enemyIntentWrap" aria-live="polite">
-                <span class="intent-label">NEXT ACTION</span>
-                <span id="enemyIntent">—</span>
-              </div>
-            </div>
-          </div>
+
+      <!-- ① Header -->
+      <div class="combat-header">
+        <div class="combat-header-gold">
+          <img alt="G" data-icon="gum" class="combat-gold-icon" />
+          <span id="combatGoldVal">0</span>
+        </div>
+        <span class="combat-header-stage" id="combatStageTitle">—</span>
+        <div class="combat-header-btns">
+          <button type="button" class="btn-icon-hd" id="btnSettingsOpen" aria-label="設定" title="設定">⚙</button>
+          <button type="button" class="btn-icon-hd" id="btnHelpOpenCombat" aria-label="ヘルプ" title="ヘルプ">?</button>
         </div>
       </div>
+
+      <!-- ② Arena -->
+      <div class="combat-arena">
+        <div id="combatBg" class="combat-bg" role="presentation"></div>
+        <div class="arena-inner">
+
+          <!-- Player party (3 slots, center active now) -->
+          <div class="party-side party-side--player">
+            <div class="party-slot party-slot--ghost" aria-hidden="true"></div>
+            <div class="party-slot party-slot--center">
+              <div class="combatant hero-combatant">
+                <div class="combatant-portrait-wrap" id="playerPortraitWrap">
+                  <img id="leaderImg" class="combatant-portrait" alt="" />
+                  <div id="playerStatusBadge" class="status-badges"></div>
+                </div>
+                <div class="combatant-info">
+                  <div class="combatant-name" id="leaderName">—</div>
+                  <div class="hp-bar-row">
+                    <div class="hp-bar-track">
+                      <div class="hp-bar-fill" id="playerHpFill" style="width:100%"></div>
+                    </div>
+                    <span class="hp-bar-nums">
+                      <span id="player-hp" class="stat-anchor"><span id="pHp">0</span></span>/<span id="pHpMax">0</span>
+                    </span>
+                  </div>
+                  <div class="stat-row-badges">
+                    <span class="sbadge sbadge-phy" id="player-phy" data-label="PHY"><span id="pPhy">0</span></span>
+                    <span class="sbadge sbadge-int" id="player-int" data-label="INT"><span id="pInt">0</span></span>
+                    <span class="sbadge sbadge-agi" id="player-agi" data-label="AGI"><span id="pAgi">0</span></span>
+                    <span class="sbadge sbadge-grd" id="player-guard" data-label="GRD">🛡<span id="pGuard">0</span></span>
+                    <span class="sbadge sbadge-shd" id="player-shield" data-label="SHD">✦<span id="pShield">0</span></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="party-slot party-slot--ghost" aria-hidden="true"></div>
+          </div>
+
+          <!-- VS -->
+          <div class="vs-col"><span class="vs-mark">VS</span></div>
+
+          <!-- Enemy party (3 slots, center active now) -->
+          <div class="party-side party-side--enemy">
+            <div class="party-slot party-slot--ghost" aria-hidden="true"></div>
+            <div class="party-slot party-slot--center">
+              <div class="combatant enemy-combatant">
+                <div class="intent-bubble" id="enemyIntentWrap" aria-live="polite">
+                  <span class="intent-label">NEXT ACTION</span>
+                  <span id="enemyIntent">—</span>
+                </div>
+                <div class="combatant-portrait-wrap" id="enemyPortraitWrap">
+                  <img id="enemyImg" class="combatant-portrait combatant-portrait--enemy" alt="" />
+                  <div id="enemyStatusBadge" class="status-badges"></div>
+                </div>
+                <div class="combatant-info">
+                  <div class="combatant-name" id="enemyName">—</div>
+                  <div class="hp-bar-row">
+                    <div class="hp-bar-track">
+                      <div class="hp-bar-fill hp-bar-fill--enemy" id="enemyHpFill" style="width:100%"></div>
+                    </div>
+                    <span class="hp-bar-nums">
+                      <span id="enemy-hp" class="stat-anchor"><span id="eHp">0</span></span>/<span id="eHpMax">0</span>
+                    </span>
+                  </div>
+                  <div class="stat-row-badges">
+                    <span class="sbadge sbadge-phy" data-label="PHY"><span id="ePhy">0</span></span>
+                    <span class="sbadge sbadge-int" id="enemy-int" data-label="INT"><span id="eInt">0</span></span>
+                    <span class="sbadge sbadge-agi" data-label="AGI"><span id="eAgi">0</span></span>
+                    <span class="sbadge sbadge-grd" id="enemy-guard" data-label="GRD">🛡<span id="eGuard">0</span></span>
+                    <span class="sbadge sbadge-shd" id="enemy-shield" data-label="SHD">✦<span id="eShield">0</span></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="party-slot party-slot--ghost" aria-hidden="true"></div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ③ Log -->
       <div class="combat-log-mid">
         <div class="log" id="clog" aria-live="polite"></div>
       </div>
+
+      <!-- ④ Footer -->
       <div class="combat-footer">
-        <div class="hand-energy-row">
+        <div class="footer-topbar">
           <span class="energy-pill">⚡ <span id="energyVal">0</span> / <span id="energyMax">3</span></span>
-          <div class="hand-energy-actions">
-            <button type="button" class="btn-deck-pile" id="btnDeckOpen" aria-label="残りデッキを表示">
-              <img alt="" data-icon="deck" width="20" height="20" />
-              <span class="btn-deck-pile__count" id="deckPileCount">0</span>
-            </button>
-            <button type="button" class="action primary" id="btnEndTurn">ターン終了</button>
-          </div>
+          <button type="button" class="action primary" id="btnEndTurn">ターン終了</button>
         </div>
         <div class="hand-scroll">
           <div id="hand" class="hand" role="list"></div>
         </div>
+        <div class="footer-bottombar">
+          <button type="button" class="btn-deck-pile" id="btnDeckOpen" aria-label="残りデッキを表示">
+            <img alt="" data-icon="deck" width="20" height="20" />
+            <span class="btn-deck-pile__count" id="deckPileCount">0</span>
+          </button>
+        </div>
       </div>
+
     </div>
 
     <div id="shopView" class="panel hidden">

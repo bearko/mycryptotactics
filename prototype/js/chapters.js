@@ -6,7 +6,7 @@
 export const CHAPTERS = [
   {
     id: 1,
-    name: '戦国回廊',
+    name: 'node : アバカス',
     mapRules: {
       layers: 4,
       nodesPerLayerMin: 3,
@@ -21,7 +21,7 @@ export const CHAPTERS = [
   },
   {
     id: 2,
-    name: '大航海の港',
+    name: 'node : アタナソフ',
     mapRules: {
       layers: 5,
       nodesPerLayerMin: 3,
@@ -36,7 +36,7 @@ export const CHAPTERS = [
   },
   {
     id: 3,
-    name: '決定の街',
+    name: 'node : アンティキティラ',
     mapRules: {
       layers: 5,
       nodesPerLayerMin: 3,
