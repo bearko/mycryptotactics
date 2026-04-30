@@ -433,7 +433,7 @@ function renderLlExtBar() {
       btn.classList.remove("ll-slot--empty");
       btn.title = ext.desc;
       btn.innerHTML =
-        `<img src="${EXT_IMG(ext.extId)}" alt="" onerror="this.style.opacity='0'" style="width:16px;height:16px;object-fit:contain;flex-shrink:0" />` +
+        `<img src="${EXT_IMG(ext.extId)}" alt="" onerror="this.style.opacity='0'" style="width:16px;height:16px;object-fit:contain;flex-shrink:0;image-rendering:pixelated" />` +
         `<span>${ext.skillName}</span>`;
     } else {
       btn.classList.add("ll-slot--empty");
