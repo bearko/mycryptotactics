@@ -1,0 +1,8 @@
+bossId,name,hp,phy,int,agi,imgId,initialShield,phase,hpThreshold,i1,i2,i3,i4,i5,i6
+boss-ch1,ゴースト・上杉謙信,65,17,6,6,425,0,0,0,guard/12,attack/115,attack/110,special/16,,
+boss-hl,ゴースト・楊貴妃,90,18,10,8,435,0,0,0,attack/105,guard/14,attackBleed/95/2,special/14,buffSelf/4/2,
+boss-ch2,ゴースト・ナポレオン,115,20,14,8,445,0,0,0,attackPoison/105/2,guard/14,attackIntDouble/105,special/22,buffSelf/4/3,
+boss-ch3,ゴースト・リンカーン,200,24,20,10,505,30,0,50,attack/105,attackInt/105,guard/16,special/20,buffSelf/5/5,
+boss-ch3,ゴースト・リンカーン,200,24,20,10,505,30,1,0,attack/140,special/28,attackInt/140,special/28,attackDouble/100,
+boss-troy,ディープ・ヨシュカ,240,27,22,14,171,0,0,45,guard/20,attack/115,attackInt/115,buffSelf/5/4,special/20,attackDouble/95
+boss-troy,ディープ・ヨシュカ,240,27,22,14,171,0,1,0,attackDouble/112,attackPoison/130/3,special/28,attackIntDouble/115,attackDouble/105,guard/10

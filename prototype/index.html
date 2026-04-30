@@ -1513,6 +1513,115 @@
       position: fixed; inset: 0; z-index: 5; pointer-events: none;
       width: 100%; height: 100%;
     }
+
+    /* ── パッシブスキル カットイン ─────────────────────────────────── */
+    .passive-cutin {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%) skewY(-10deg);
+      width: 100%;
+      padding: 2.6rem 0;
+      z-index: 20;
+      pointer-events: none;
+      overflow: hidden;
+      background: linear-gradient(to right bottom,
+        #609da8 0%, #609da8 50%,
+        #282b33 0%, #282b33 100%);
+      box-shadow: 0 4px 32px rgba(0,0,0,0.7);
+    }
+    .passive-cutin__shine {
+      position: absolute; inset: 0;
+      background: linear-gradient(180deg, #002244, #005599 20%, #005599 80%, #002244);
+      mix-blend-mode: color-dodge;
+      animation: passive-cutin-shine 0.6s linear infinite alternate;
+    }
+    @keyframes passive-cutin-shine {
+      from { opacity: 0.18; }
+      to   { opacity: 0.42; }
+    }
+    .passive-cutin__content {
+      position: relative; z-index: 2;
+      display: flex; align-items: center; gap: 1.2rem;
+      transform: skewY(10deg);  /* undo parent skew for content */
+    }
+    .passive-cutin__portrait {
+      width: 80px; height: 80px; object-fit: contain;
+      image-rendering: pixelated;
+      transform: scale(1.5);
+      transform-origin: center center;
+      flex-shrink: 0;
+    }
+    .passive-cutin__text {
+      display: flex; flex-direction: column; gap: 0.2rem;
+    }
+    .passive-cutin__label {
+      font-size: 0.62rem; font-weight: 700; color: #7de8f8;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      text-shadow: 0 0 8px #005599;
+    }
+    .passive-cutin__skill {
+      font-size: 1.35rem; font-weight: 900; color: #ffffff;
+      text-shadow: 0 2px 12px rgba(0,80,180,0.8), 0 0 4px #7de8f8;
+      letter-spacing: 0.04em; white-space: nowrap;
+    }
+    /* slide-in/out transitions */
+    .passive-cutin--enter {
+      opacity: 0;
+      transform: translate(100%, -50%) skewY(-10deg);
+      transition: none;
+    }
+    .passive-cutin--enter-active {
+      transition: opacity 0.14s ease, transform 0.14s ease;
+    }
+    .passive-cutin--visible {
+      opacity: 1;
+      transform: translateY(-50%) skewY(-10deg);
+      transition: opacity 0.14s ease, transform 0.14s ease;
+    }
+    .passive-cutin--leave-active {
+      opacity: 0;
+      transform: translate(-100%, -50%) skewY(-10deg);
+      transition: opacity 0.22s ease, transform 0.22s ease;
+    }
+
+    /* ── クリティカル バナー ──────────────────────────────────────── */
+    .crit-banner {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      pointer-events: none;
+      z-index: 15;
+      display: flex; flex-direction: column; align-items: center; gap: 0.1rem;
+      animation: crit-banner-pop 0.7s ease-out forwards;
+    }
+    @keyframes crit-banner-pop {
+      0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+      15%  { opacity: 1; transform: translate(-50%, -50%) scale(1.18); }
+      30%  { transform: translate(-50%, -50%) scale(1.0); }
+      70%  { opacity: 1; transform: translate(-50%, -50%) scale(1.0); }
+      100% { opacity: 0; transform: translate(-50%, -55%) scale(0.95); }
+    }
+    .crit-banner__dmg {
+      font-size: 3.2rem;
+      font-weight: 900;
+      color: #ff4455;
+      text-shadow: 0 0 16px #ff000088, 0 2px 4px #000;
+      line-height: 1;
+      letter-spacing: -0.02em;
+    }
+    .crit-banner__label {
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: #ffd700;
+      text-shadow: 0 0 8px #c4a35a88;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
   </style>
 </head>
 <body>
@@ -1574,6 +1683,17 @@
       <div class="combat-arena" style="position:relative">
         <div id="combatBg" class="combat-bg" role="presentation"></div>
         <div id="passivePopup" class="hidden" role="tooltip" aria-live="polite"></div>
+        <!-- パッシブスキル カットイン（JS で表示制御） -->
+        <div id="passiveCutin" class="passive-cutin" style="display:none" aria-hidden="true">
+          <div class="passive-cutin__shine"></div>
+          <div class="passive-cutin__content">
+            <img id="passiveCutinPortrait" class="passive-cutin__portrait" src="" alt="" />
+            <div class="passive-cutin__text">
+              <span class="passive-cutin__label">PASSIVE SKILL</span>
+              <span id="passiveCutinSkill" class="passive-cutin__skill">—</span>
+            </div>
+          </div>
+        </div>
         <div class="arena-inner">
 
           <!-- Player party (3 slots, center active now) -->
@@ -1815,7 +1935,7 @@
   </div>
 
   <!-- ── LLエクステ 獲得モーダル + 紙吹雪キャンバス ── -->
-  <canvas id="confettiCanvas" style="display:none;position:fixed;inset:0;z-index:505;pointer-events:none;width:100%;height:100%;"></canvas>
+  <canvas id="confettiCanvas" style="display:none;position:fixed;inset:0;pointer-events:none;width:100%;height:100%;"></canvas>
   <div id="llExtModal" class="hidden" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="llExtModalName">
     <div class="ll-ext-modal-box">
       <!-- フェーズ1: 宝箱 -->

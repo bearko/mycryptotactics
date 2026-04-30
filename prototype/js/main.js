@@ -108,6 +108,8 @@ const MAP_START_X = 50;
 // ─── 状態変数 ────────────────────────────────────────────────────
 let gold = 75;
 let view = "map";
+/** 戦闘中の非同期演出中はカード操作を禁止するフラグ */
+let combatInputLocked = false;
 /** セッション内でクリアした章インデックスのセット（node選択画面のアンロック管理） */
 let clearedChapters = new Set();
 /** @type {null | {
@@ -270,6 +272,73 @@ function startConfetti() {
     ctx.clearRect(0, 0, W, H);
     canvas.style.display = "none";
   };
+}
+
+// ─── パッシブスキル カットイン ────────────────────────────────────
+/**
+ * ヒーローのパッシブスキル発動時にカットインを表示する
+ * @param {string} skillName  スキル名（例:「浪切」）
+ * @param {string} portraitUrl  ヒーロー画像 URL
+ * @returns {Promise<void>}  フェードアウト完了で resolve
+ */
+function showPassiveCutin(skillName, portraitUrl) {
+  const el = document.getElementById("passiveCutin");
+  if (!el) return Promise.resolve();
+  const skillEl    = document.getElementById("passiveCutinSkill");
+  const portraitEl = document.getElementById("passiveCutinPortrait");
+  if (skillEl)    skillEl.textContent = skillName;
+  if (portraitEl) portraitEl.src      = portraitUrl;
+
+  return new Promise((resolve) => {
+    // リセット：非表示 → 画面外右にセット → 表示
+    el.style.transition = "none";
+    el.style.opacity    = "0";
+    el.style.transform  = "translate(100%, -50%) skewY(-10deg)";
+    el.style.display    = "";
+    el.setAttribute("aria-hidden", "false");
+
+    // 次フレームでトランジション有効 → スライドイン
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        el.style.transition = "opacity 0.14s ease, transform 0.14s ease";
+        el.style.opacity    = "1";
+        el.style.transform  = "translateY(-50%) skewY(-10deg)";
+
+        // 700ms 表示後にスライドアウト
+        setTimeout(() => {
+          el.style.transition = "opacity 0.22s ease, transform 0.22s ease";
+          el.style.opacity    = "0";
+          el.style.transform  = "translate(-100%, -50%) skewY(-10deg)";
+          el.addEventListener("transitionend", function done() {
+            el.removeEventListener("transitionend", done);
+            el.style.display = "none";
+            el.setAttribute("aria-hidden", "true");
+            resolve();
+          });
+        }, 700);
+      });
+    });
+  });
+}
+
+// ─── クリティカル バナー ──────────────────────────────────────────
+/**
+ * クリティカルヒット時に大きなダメージ数字と CRITICAL ラベルを表示する
+ * @param {'player'|'enemy'} who  被ダメージ側（バナーの表示位置）
+ * @param {number} totalDmg  合計ダメージ値
+ */
+function spawnCritDisplay(who, totalDmg) {
+  const wrapId = who === "enemy" ? "enemyPortraitWrap" : "playerPortraitWrap";
+  const wrap = document.getElementById(wrapId);
+  if (!wrap) return;
+  const banner = document.createElement("div");
+  banner.className = "crit-banner";
+  banner.innerHTML =
+    `<span class="crit-banner__dmg">${totalDmg}</span>` +
+    `<span class="crit-banner__label">CRITICAL</span>`;
+  wrap.appendChild(banner);
+  // アニメーション終了後に自動除去（0.7s + バッファ）
+  setTimeout(() => { banner.remove(); }, 820);
 }
 
 // ─── LLエクステ 獲得モーダル（宝箱→開封→エクステ開示） ──────────
@@ -543,6 +612,7 @@ function dealPhySkillToEnemy(s, skillPct) {
   flashPortrait("enemy");
   playPortraitEffect("enemy", "hit");
   if (total > 0) playBattleSe("hit");
+  if (critBonus > 0) spawnCritDisplay("enemy", total);
   clog(
     `PHY攻撃 ${skillPct}% → 基礎${base} カット${cut}%` +
     (critBonus ? " +CRIT" + critBonus : "") +
@@ -571,6 +641,7 @@ function dealIntSkillToEnemy(s, minPct, maxPct, forceCrit = false) {
   flashPortrait("enemy");
   playPortraitEffect("enemy", "hit");
   if (total > 0) playBattleSe("hit");
+  if (critBonus > 0) spawnCritDisplay("enemy", total);
   clog(
     `INT攻撃 ${skillPct}% → 基礎${base} カット${cut}%` +
     (critBonus ? " +CRIT" + critBonus : "") +
@@ -615,17 +686,14 @@ function dealPhySkillFromEnemyToPlayer(s, skillPct) {
   flashPortrait("player");
   playPortraitEffect("player", "hit");
   if (total > 0) playBattleSe("hit");
+  if (critBonus > 0) spawnCritDisplay("player", total);
   clog(
     `敵 PHY ${skillPct}% → 被ダメージ ${total}` +
     (critBonus ? "（CRIT+" + critBonus + "）" : "")
   );
-  // 張遼「遼来遼来」: 被ダメージ後に50%の確率で反撃
+  // 張遼パッシブ判定フラグを立てる（実際の反撃は enemyTurn で async に処理）
   if (LEADER.passiveKey === 'zhang' && s.playerHp > 0 && s.enemyHp > 0 && Math.random() < 0.5) {
-    const counterDmg = Math.max(1, Math.floor(s.playerPhy * 0.2));
-    s.enemyHp = Math.max(0, s.enemyHp - counterDmg);
-    playPortraitEffect("enemy", "hit");
-    playBattleSe("hit");
-    clog(`【遼来遼来】発動！ 反撃 ${counterDmg} ダメージ`);
+    s._zhangCounterPending = true;
   }
 }
 
@@ -649,17 +717,14 @@ function dealIntSkillFromEnemyToPlayer(s, skillPct) {
   flashPortrait("player");
   playPortraitEffect("player", "hit");
   if (total > 0) playBattleSe("hit");
+  if (critBonus > 0) spawnCritDisplay("player", total);
   clog(
     `敵 INT ${skillPct}% → 被ダメージ ${total}` +
     (critBonus ? "（CRIT+" + critBonus + "）" : "")
   );
-  // 張遼「遼来遼来」: 被ダメージ後に50%の確率で反撃
+  // 張遼パッシブ判定フラグを立てる（実際の反撃は enemyTurn で async に処理）
   if (LEADER.passiveKey === 'zhang' && s.playerHp > 0 && s.enemyHp > 0 && Math.random() < 0.5) {
-    const counterDmg = Math.max(1, Math.floor(s.playerPhy * 0.2));
-    s.enemyHp = Math.max(0, s.enemyHp - counterDmg);
-    playPortraitEffect("enemy", "hit");
-    playBattleSe("hit");
-    clog(`【遼来遼来】発動！ 反撃 ${counterDmg} ダメージ`);
+    s._zhangCounterPending = true;
   }
 }
 
@@ -1449,7 +1514,7 @@ function setHandFocusByIndex(idx) {
 }
 
 function playCardByRef(cardRef) {
-  if (!combat || view !== "combat") return;
+  if (!combat || view !== "combat" || combatInputLocked) return;
   const idx = combat.hand.indexOf(cardRef);
   if (idx < 0) return;
   playCard(idx);
@@ -1511,6 +1576,7 @@ function bindHandCard(el, idx, card) {
   el.addEventListener("click", (ev) => {
     if (!window.matchMedia("(pointer: fine)").matches) return;
     ev.preventDefault();
+    if (combatInputLocked) return;
     if (card.cost > combat.energy || el.classList.contains("card-slot--disabled")) return;
     const slots = Array.from(document.querySelectorAll("#hand .card-slot"));
     const myIdx = slots.indexOf(el);
@@ -1654,8 +1720,49 @@ function renderCombat() {
   };
 }
 
+// ─── 甲斐姫パッシブ（浪切）非同期ヘルパー ────────────────────────
+async function applyKaihimePassive(s) {
+  if (LEADER.passiveKey !== 'kaihime') return;
+  if (s.enemyHp <= 0) return;
+  if (Math.random() >= 0.5) return;
+
+  const bonusDmg = Math.max(1, Math.floor(s.playerPhy * 0.5));
+  // カットイン表示（待機）
+  combatInputLocked = true;
+  await showPassiveCutin("浪切", typeof LEADER.img === "function" ? LEADER.img() : (LEADER.img || ""));
+  combatInputLocked = false;
+
+  if (!combat || s.enemyHp <= 0) return;
+  s.enemyHp = Math.max(0, s.enemyHp - bonusDmg);
+  playPortraitEffect("enemy", "hit");
+  playBattleSe("hit");
+  clog(`【浪切】発動！ 追加ダメージ ${bonusDmg}`);
+  renderCombat();
+}
+
+// ─── 張遼パッシブ（遼来遼来）非同期ヘルパー ──────────────────────
+async function applyZhangPassive(s) {
+  if (!s._zhangCounterPending) return;
+  s._zhangCounterPending = false;
+  if (s.playerHp <= 0 || s.enemyHp <= 0) return;
+
+  const counterDmg = Math.max(1, Math.floor(s.playerPhy * 0.2));
+  // カットイン表示（待機）
+  combatInputLocked = true;
+  await showPassiveCutin("遼来遼来", typeof LEADER.img === "function" ? LEADER.img() : (LEADER.img || ""));
+  combatInputLocked = false;
+
+  if (!combat || s.enemyHp <= 0) return;
+  s.enemyHp = Math.max(0, s.enemyHp - counterDmg);
+  playPortraitEffect("enemy", "hit");
+  playBattleSe("hit");
+  clog(`【遼来遼来】発動！ 反撃 ${counterDmg} ダメージ`);
+  renderCombat();
+}
+
 // ─── カードプレイ ─────────────────────────────────────────────────
-function playCard(idx) {
+async function playCard(idx) {
+  if (combatInputLocked) return;
   const card = combat.hand[idx];
   if (!card || card.cost > combat.energy) return;
   combat.energy -= card.cost;
@@ -1668,20 +1775,18 @@ function playCard(idx) {
     combat.discardPile.push(card);
   }
   card.play(combat);
-  // 甲斐姫「浪切」: スキルカード使用後に50%の確率で追加ダメージ
-  if (LEADER.passiveKey === 'kaihime' && combat.enemyHp > 0 && Math.random() < 0.5) {
-    const bonusDmg = Math.max(1, Math.floor(combat.playerPhy * 0.5));
-    combat.enemyHp = Math.max(0, combat.enemyHp - bonusDmg);
-    playPortraitEffect("enemy", "hit");
-    playBattleSe("hit");
-    clog(`【浪切】発動！ 追加ダメージ ${bonusDmg}`);
-  }
+  // カード効果を UI に反映してからパッシブへ
+  renderCombat();
+  if (combat.enemyHp <= 0) { endCombatWin(); return; }
+  // 甲斐姫「浪切」: スキルカード使用後に50%の確率で追加ダメージ（カットイン付き）
+  await applyKaihimePassive(combat);
+  if (!combat) return;
   if (combat.enemyHp <= 0) { endCombatWin(); return; }
   renderCombat();
 }
 
 // ─── 敵ターン ─────────────────────────────────────────────────────
-function enemyTurn() {
+async function enemyTurn() {
   const it = combat.enemyIntent;
   if (!it) { combat.turn++; startPlayerTurn(); return; }
 
@@ -1742,6 +1847,13 @@ function enemyTurn() {
   }
 
   if (combat.playerHp <= 0) { endCombatLoss(); return; }
+
+  // 張遼「遼来遼来」: 被ダメージ後に反撃（カットイン付き、非同期）
+  renderCombat();
+  await applyZhangPassive(combat);
+  if (!combat) return;
+  if (combat.enemyHp <= 0) { endCombatWin(); return; }
+
   combat.turn++;
   startPlayerTurn();
 }
@@ -2032,7 +2144,7 @@ function openShop() {
   removeSection.appendChild(removeTitle);
   const removeDesc = document.createElement("div");
   removeDesc.className = "shop-remove-desc";
-  removeDesc.textContent = "デッキ内のカードを1枚選んで除外できます（スターター以外）。";
+  removeDesc.textContent = "デッキ内のカードを1枚選んで除外できます（スターターも含む）。";
   removeSection.appendChild(removeDesc);
 
   const removeBtn = document.createElement("button");
@@ -2049,22 +2161,18 @@ function openShop() {
 
 // ─── ショップ カード破棄 ──────────────────────────────────────────
 const SHOP_REMOVE_COST = 50;
-// スターターカードのキー（破棄不可）
-const STARTER_KEYS = new Set(['ext1001', 'ext1004', 'ext1008']);
-
 function openShopRemoveCard(goldDisp) {
   ensureRunState();
   if (gold < SHOP_REMOVE_COST) {
     renderNavigator(`GUM が足りません（必要: ${SHOP_REMOVE_COST} GUM）`);
     return;
   }
-  // 破棄可能なカード（スターター以外）
+  // デッキ内の全カードが破棄対象（スターターも含む）
   const removable = runState.deck
-    .map((c, idx) => ({ card: c, idx }))
-    .filter(({ card }) => !STARTER_KEYS.has(card.libraryKey));
+    .map((c, idx) => ({ card: c, idx }));
 
   if (removable.length === 0) {
-    renderNavigator("破棄できるカードがありません（スターターカードは破棄不可）");
+    renderNavigator("破棄できるカードがありません");
     return;
   }
 
@@ -2524,12 +2632,12 @@ function closeDeckModal() {
 
 // ─── 初期化 ───────────────────────────────────────────────────────
 function init() {
-  document.getElementById("btnEndTurn").addEventListener("click", () => {
-    if (!combat || view !== "combat") return;
+  document.getElementById("btnEndTurn").addEventListener("click", async () => {
+    if (!combat || view !== "combat" || combatInputLocked) return;
     combat.hand.forEach((c) => combat.discardPile.push(c));
     combat.hand = [];
     renderCombat();
-    enemyTurn();
+    await enemyTurn();
   });
   document.getElementById("btnDeckOpen").addEventListener("click", openDeckModal);
   document.getElementById("deckModalClose").addEventListener("click", closeDeckModal);
