@@ -422,20 +422,23 @@ function nodeXY(id) {
 
 // ─── リソース表示更新 ─────────────────────────────────────────────
 function syncResources() {
-  document.getElementById("goldVal").textContent = String(gold);
+  const goldValEl = document.getElementById("goldVal");
+  if (goldValEl) goldValEl.textContent = String(gold);
+  const combatGoldEl = document.getElementById("combatGoldVal");
+  if (combatGoldEl) combatGoldEl.textContent = String(gold);
   ensureRunState();
-  document.getElementById("hpMapVal").textContent =
-    `${runState.playerHp}/${runState.playerHpMax}`;
   const chapterEl = document.getElementById("chapterVal");
   if (chapterEl) chapterEl.textContent = String((runState.chapterIdx ?? 0) + 1);
   const layerEl = document.getElementById("layerVal");
-  if (runState.runComplete) {
-    layerEl.textContent = "クリア";
-  } else if (!runState.lastMapNodeId) {
-    layerEl.textContent = "入口";
-  } else {
-    const cur = mapNodeById(runState.lastMapNodeId);
-    layerEl.textContent = cur ? `第${cur.layer + 1}層 · ${cur.label}` : "—";
+  if (layerEl) {
+    if (runState.runComplete) {
+      layerEl.textContent = "クリア";
+    } else if (!runState.lastMapNodeId) {
+      layerEl.textContent = "入口";
+    } else {
+      const cur = mapNodeById(runState.lastMapNodeId);
+      layerEl.textContent = cur ? `第${cur.layer + 1}層 · ${cur.label}` : "—";
+    }
   }
 }
 
@@ -653,6 +656,9 @@ function showView(name) {
   document.getElementById("gameOver").classList.toggle("hidden", name !== "over");
   const rv = document.getElementById("rewardView");
   if (rv) rv.classList.toggle("hidden", name !== "reward");
+  // Show/hide map resources bar
+  const mapRes = document.getElementById("mapResources");
+  if (mapRes) mapRes.classList.toggle("hidden", name === "combat");
 }
 
 // ─── 戦闘開始 ─────────────────────────────────────────────────────
@@ -737,6 +743,13 @@ function startCombatFromMapNode(node) {
   combat.drawPile = shuffle(combat.deck.map((c) => copyCard(c.libraryKey)));
   showView("combat");
   startBgmCombat();
+
+  // Update stage title in combat header
+  const stageTitleEl = document.getElementById("combatStageTitle");
+  if (stageTitleEl) {
+    const chapter = CHAPTERS[runState.chapterIdx];
+    stageTitleEl.textContent = chapter.name;
+  }
 
   const bgFile = isBoss ? "1004" : node.elite ? "1002" : "1001";
   document.getElementById("combatBg").style.backgroundImage = "url('" + BATTLE_BG(bgFile) + "')";
@@ -881,32 +894,53 @@ function buildPeekHelpHtml(keys) {
 }
 
 function refreshHandPeekLift() {
+  // Recalculate lift for focused slot
+  const focused = document.querySelector("#hand .card-slot.card-slot--focused");
+  if (!focused) return;
   requestAnimationFrame(() => {
-    document.querySelectorAll("#hand .card.card--peek, #hand .card.card--focused").forEach((el) => {
-      const sum = el.querySelector(".card-effect-summary");
-      if (!sum) { el.style.setProperty("--peek-lift", "0px"); return; }
-      const need = Math.max(0, sum.scrollHeight - sum.clientHeight);
-      const lift = need > 2 ? Math.min(48, need + 8) : 0;
-      el.style.setProperty("--peek-lift", lift + "px");
-    });
+    const card = focused.querySelector(".card");
+    if (!card) return;
+    const rect = card.getBoundingClientRect();
+    const viewH = window.innerHeight;
+    const lift = Math.max(0, rect.bottom - (viewH - 8));
+    focused.style.setProperty("--peek-lift", lift + "px");
   });
 }
 
 function clearHandFocus() {
   handFocusedIdx = -1;
-  document.querySelectorAll("#hand .card").forEach((c) => {
-    c.classList.remove("card--focused", "card--peek");
-    c.style.setProperty("--peek-lift", "0px");
+  document.querySelectorAll("#hand .card-slot").forEach(s => {
+    s.classList.remove("card-slot--focused", "card-peek--right");
+    s.style.setProperty("--peek-lift", "0px");
   });
 }
 
 function setHandFocusByIndex(idx) {
-  const cards = Array.from(document.querySelectorAll("#hand .card"));
-  cards.forEach((c) => { c.classList.remove("card--focused", "card--peek"); c.style.setProperty("--peek-lift", "0px"); });
-  if (idx >= 0 && idx < cards.length && cards[idx] && !cards[idx].classList.contains("disabled")) {
+  const slots = Array.from(document.querySelectorAll("#hand .card-slot"));
+  slots.forEach(s => {
+    s.classList.remove("card-slot--focused", "card-peek--right");
+    s.style.setProperty("--peek-lift", "0px");
+  });
+  if (idx >= 0 && idx < slots.length && slots[idx] && !slots[idx].classList.contains("card-slot--disabled")) {
     handFocusedIdx = idx;
-    cards[idx].classList.add("card--focused", "card--peek");
-    refreshHandPeekLift();
+    const slot = slots[idx];
+    slot.classList.add("card-slot--focused");
+    // Determine which side to show the peek tooltip:
+    // Left half of screen → show peek to the RIGHT; center/right → show to the LEFT
+    const slotRect = slot.getBoundingClientRect();
+    const cardCenterX = slotRect.left + slotRect.width / 2;
+    if (cardCenterX < window.innerWidth / 2) {
+      slot.classList.add("card-peek--right");
+    }
+    // Lift card so its bottom aligns near viewport bottom
+    requestAnimationFrame(() => {
+      const card = slot.querySelector(".card");
+      if (!card) return;
+      const rect = card.getBoundingClientRect();
+      const viewH = window.innerHeight;
+      const lift = Math.max(0, rect.bottom - (viewH - 8));
+      slot.style.setProperty("--peek-lift", lift + "px");
+    });
   } else {
     handFocusedIdx = -1;
   }
@@ -920,11 +954,11 @@ function playCardByRef(cardRef) {
 }
 
 function handIndexAtPoint(clientX, clientY) {
-  const cards = Array.from(document.querySelectorAll("#hand .card"));
-  for (let i = 0; i < cards.length; i++) {
-    const c = cards[i];
-    if (c.classList.contains("disabled")) continue;
-    const r = c.getBoundingClientRect();
+  const slots = Array.from(document.querySelectorAll("#hand .card-slot"));
+  for (let i = 0; i < slots.length; i++) {
+    const s = slots[i];
+    if (s.classList.contains("card-slot--disabled")) continue;
+    const r = s.getBoundingClientRect();
     if (clientX >= r.left && clientX <= r.right && clientY >= r.top && clientY <= r.bottom) return i;
   }
   return -1;
@@ -971,37 +1005,42 @@ function bindHandTouchDelegation() {
 }
 
 function bindHandCard(el, idx, card) {
+  // el is .card-slot
   el.addEventListener("click", (ev) => {
     if (!window.matchMedia("(pointer: fine)").matches) return;
     ev.preventDefault();
-    if (card.cost > combat.energy || el.classList.contains("disabled")) return;
-    const cards = Array.from(document.querySelectorAll("#hand .card"));
-    const myIdx = cards.indexOf(el);
+    if (card.cost > combat.energy || el.classList.contains("card-slot--disabled")) return;
+    const slots = Array.from(document.querySelectorAll("#hand .card-slot"));
+    const myIdx = slots.indexOf(el);
     if (myIdx < 0) return;
     if (handFocusedIdx === myIdx) playCard(idx);
     else setHandFocusByIndex(myIdx);
   });
 }
 
-// ─── 状態異常バッジ更新（簡易テキスト表示） ─────────────────────
+// ─── 状態異常バッジ更新 ─────────────────────────────────────────
 function renderStatusBadges() {
   if (!combat) return;
-  const pBadge = document.getElementById("playerStatusBadge");
-  const eBadge = document.getElementById("enemyStatusBadge");
-  if (pBadge) {
-    const parts = [];
-    if ((combat.playerPoison || 0) > 0) parts.push(`☠×${combat.playerPoison}`);
-    if ((combat.playerBleed || 0) > 0)  parts.push(`🩸×${combat.playerBleed}`);
-    pBadge.textContent = parts.join(" ");
-    pBadge.style.display = parts.length ? "" : "none";
-  }
-  if (eBadge) {
-    const parts = [];
-    if ((combat.enemyPoison || 0) > 0) parts.push(`☠×${combat.enemyPoison}`);
-    if ((combat.enemyBleed || 0) > 0)  parts.push(`🩸×${combat.enemyBleed}`);
-    eBadge.textContent = parts.join(" ");
-    eBadge.style.display = parts.length ? "" : "none";
-  }
+  const renderTo = (elId, poison, bleed) => {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    el.innerHTML = "";
+    if (poison > 0) {
+      const b = document.createElement("span");
+      b.className = "sbadge-status";
+      b.textContent = "☠" + poison;
+      el.appendChild(b);
+    }
+    if (bleed > 0) {
+      const b = document.createElement("span");
+      b.className = "sbadge-status";
+      b.textContent = "🩸" + bleed;
+      el.appendChild(b);
+    }
+    el.style.display = (poison > 0 || bleed > 0) ? "" : "none";
+  };
+  renderTo("playerStatusBadge", combat.playerPoison || 0, combat.playerBleed || 0);
+  renderTo("enemyStatusBadge", combat.enemyPoison || 0, combat.enemyBleed || 0);
 }
 
 // ─── 戦闘 UI 描画 ─────────────────────────────────────────────────
@@ -1026,6 +1065,16 @@ function renderCombat() {
   const deckCountEl = document.getElementById("deckPileCount");
   if (deckCountEl) deckCountEl.textContent = String(combat.drawPile.length);
 
+  // HP gauges
+  const playerFill = document.getElementById("playerHpFill");
+  if (playerFill) playerFill.style.width = combat.playerHpMax > 0
+    ? Math.max(0, Math.min(100, (combat.playerHp / combat.playerHpMax) * 100)) + "%"
+    : "0%";
+  const enemyFill = document.getElementById("enemyHpFill");
+  if (enemyFill) enemyFill.style.width = combat.enemyHpMax > 0
+    ? Math.max(0, Math.min(100, (combat.enemyHp / combat.enemyHpMax) * 100)) + "%"
+    : "0%";
+
   renderStatusBadges();
   diffUiFloats();
 
@@ -1035,42 +1084,42 @@ function renderCombat() {
   const n = combat.hand.length;
   handEl.style.setProperty("--n-cards", String(Math.max(n, 1)));
   combat.hand.forEach((card, idx) => {
-    const el = document.createElement("div");
-    el.className = "card " + card.type + (card.cost > combat.energy ? " disabled" : "");
-    el.style.setProperty("--i", String(idx));
-    el.style.setProperty("--n", String(Math.max(n - 1, 1)));
+    const slot = document.createElement("div");
+    slot.className = "card-slot" + (card.cost > combat.energy ? " card-slot--disabled" : "");
+    slot.setAttribute("data-cost", String(card.cost));
+    slot.style.setProperty("--i", String(idx + 1));
+    slot.style.setProperty("--n", String(Math.max(n - 1, 1)));
     const centerIdx = Math.floor((n - 1) / 2);
     const rel = idx - centerIdx;
-    const rot = rel === 0 ? 0 : rel < 0 ? -5 * Math.abs(rel) : 5 * rel;
-    el.style.setProperty("--rot", rot + "deg");
-    const summaryLines =
-      typeof card.effectSummaryLines === "function" ? card.effectSummaryLines(combat) :
-      typeof card.previewLines === "function" ? card.previewLines(combat) : [card.text || ""];
-    const detailLines =
-      typeof card.previewLines === "function" ? card.previewLines(combat) : summaryLines;
+    const rot = rel === 0 ? 0 : rel < 0 ? -4 * Math.abs(rel) : 4 * rel;
+    slot.style.setProperty("--rot", rot + "deg");
+
+    const summaryLines = typeof card.effectSummaryLines === "function" ? card.effectSummaryLines(combat)
+      : typeof card.previewLines === "function" ? card.previewLines(combat) : [card.text || ""];
+    const detailLines = typeof card.previewLines === "function" ? card.previewLines(combat) : summaryLines;
     const helpKeys = typeof card.peekHelpKeys === "function" ? card.peekHelpKeys() : [];
-    const detailBody = detailLines.map((t) => "<p>" + escapeHtml(t) + "</p>").join("");
-    const summaryBody = summaryLines.map((t) => "<p>" + escapeHtml(t) + "</p>").join("");
-    el.innerHTML =
-      '<div class="card-art-full">' +
-      '<img class="card-ext-img" src="' + EXT_IMG(card.extId) + '" alt="" />' +
-      "</div>" +
-      '<div class="card-tint"></div>' +
-      '<div class="card-fg">' +
-      '<div class="card-header">' +
-      '<div class="card-header-icons">' +
-      '<span class="card-cost-badge"><span class="cost-zeus" aria-hidden="true">⚡</span>' + card.cost + "</span>" +
-      '<img class="card-skill-corner" src="' + battleIconUrl(card.skillIcon) + '" alt="" />' +
-      "</div></div>" +
-      '<div class="card-ext-name">' + escapeHtml(card.extNameJa) + "</div>" +
-      '<div class="card-effect-summary">' + summaryBody + "</div>" +
+    const detailBody = detailLines.map(t => "<p>" + escapeHtml(t) + "</p>").join("");
+    const summaryBody = summaryLines.map(t => "<p>" + escapeHtml(t) + "</p>").join("");
+
+    slot.innerHTML =
+      '<div class="card-cost-above"><span class="cost-zeus" aria-hidden="true">⚡</span>' + card.cost + '</div>' +
+      '<div class="card ' + card.type + '">' +
+      '<div class="card-name-hd">' + escapeHtml(card.extNameJa) + '</div>' +
+      '<div class="card-icon-area">' +
+      '<img class="card-ext-img-full" src="' + EXT_IMG(card.extId) + '" alt="" />' +
+      '<img class="card-skill-icon-tl" src="' + battleIconUrl(card.skillIcon) + '" alt="" />' +
+      '<span class="card-user-br">先頭</span>' +
+      '</div>' +
+      '<div class="card-effect-area">' + summaryBody + '</div>' +
+      '</div>' +
       '<div class="card-peek-layer" aria-hidden="true">' +
       '<div class="card-peek-inner">' +
-      '<div class="card-peek-lines">' + detailBody + "</div>" +
+      '<div class="card-peek-lines">' + detailBody + '</div>' +
       buildPeekHelpHtml(helpKeys) +
-      "</div></div></div>";
-    bindHandCard(el, idx, card);
-    handEl.appendChild(el);
+      '</div></div>';
+
+    bindHandCard(slot, idx, card);
+    handEl.appendChild(slot);
   });
   syncResources();
   combat._lastUi = {
@@ -1371,9 +1420,6 @@ function wireAssets() {
   document.querySelectorAll("[data-stat]").forEach((el) => {
     el.src = img("Image/BattleIcons/Parameters/" + el.getAttribute("data-stat") + ".png");
   });
-  const agiIcon = img("Image/BattleIcons/Buffs/buf_agi.png");
-  const pi = document.getElementById("pAgiStatIcon"); if (pi) pi.src = agiIcon;
-  const ei = document.getElementById("eAgiStatIcon"); if (ei) ei.src = agiIcon;
 }
 
 // ─── デッキモーダル ───────────────────────────────────────────────
@@ -1435,6 +1481,15 @@ function init() {
   wireAssets();
   initHelp();
   bindHandTouchDelegation();
+
+  // Combat header buttons
+  document.getElementById("btnHelpOpenCombat")?.addEventListener("click", () => {
+    document.getElementById("btnHelpOpen")?.click();
+  });
+  document.getElementById("btnSettingsOpen")?.addEventListener("click", () => {
+    // future: open settings panel
+  });
+
   showView("map");
   renderMap();
 }
