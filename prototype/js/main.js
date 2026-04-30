@@ -125,7 +125,11 @@ function stopBgm() {
 }
 
 function startBgmMap() {
-  if (bgmAudio) return; // すでに再生中なら再開始しない（タイトル→マップで継続）
+  if (bgmAudio) {
+    // オートプレイ制限で一時停止中の場合は再生を試みる（ユーザー操作後に有効）
+    if (bgmAudio.paused) bgmAudio.play().catch(() => {});
+    return;
+  }
   try {
     bgmAudio = new Audio(AUDIO_URLS.bgmMap());
     bgmAudio.loop = true; bgmAudio.volume = 0.32;

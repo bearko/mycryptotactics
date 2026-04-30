@@ -515,7 +515,7 @@ function makeCardLibrary(clog, api) {
     cd101: {
       libraryKey: "cd101",
       extId: 1006,
-      extNameJa: "一刀",
+      extNameJa: "ノービスカタナ",
       skillNameJa: "一刀",
       skillIcon: "phy.png",
       cost: 1,
@@ -535,7 +535,7 @@ function makeCardLibrary(clog, api) {
     cd102: {
       libraryKey: "cd102",
       extId: 2011,
-      extNameJa: "二段斬り",
+      extNameJa: "エリートアックス",
       skillNameJa: "二段斬り",
       skillIcon: "phy.png",
       cost: 2,
@@ -558,7 +558,7 @@ function makeCardLibrary(clog, api) {
     cd103: {
       libraryKey: "cd103",
       extId: 1004,
-      extNameJa: "構え",
+      extNameJa: "ノービスアーマー",
       skillNameJa: "構え",
       skillIcon: "BUF_phy.png",
       cost: 1,
@@ -576,7 +576,7 @@ function makeCardLibrary(clog, api) {
     cd104: {
       libraryKey: "cd104",
       extId: 1008,
-      extNameJa: "集中",
+      extNameJa: "ノービスブック",
       skillNameJa: "集中",
       skillIcon: "int.png",
       cost: 1,
@@ -594,7 +594,7 @@ function makeCardLibrary(clog, api) {
     cd105: {
       libraryKey: "cd105",
       extId: 2001,
-      extNameJa: "一閃",
+      extNameJa: "エリートブレード",
       skillNameJa: "一閃",
       skillIcon: "phy.png",
       cost: 2,
@@ -614,7 +614,7 @@ function makeCardLibrary(clog, api) {
     cd106: {
       libraryKey: "cd106",
       extId: 2004,
-      extNameJa: "鼓舞",
+      extNameJa: "エリートアーマー",
       skillNameJa: "鼓舞",
       skillIcon: "BUF_phy.png",
       cost: 1,
@@ -632,7 +632,7 @@ function makeCardLibrary(clog, api) {
     cd107: {
       libraryKey: "cd107",
       extId: 1003,
-      extNameJa: "治療",
+      extNameJa: "ノービスペン",
       skillNameJa: "治療",
       skillIcon: "hp.png",
       cost: 1,
@@ -660,7 +660,7 @@ function makeCardLibrary(clog, api) {
     cd108: {
       libraryKey: "cd108",
       extId: 1023,
-      extNameJa: "突撃",
+      extNameJa: "ブル",
       skillNameJa: "突撃",
       skillIcon: "phy.png",
       cost: 0,
@@ -687,7 +687,7 @@ function makeCardLibrary(clog, api) {
     cd201: {
       libraryKey: "cd201",
       extId: 1001,
-      extNameJa: "毒の刃",
+      extNameJa: "ノービスブレード",
       skillNameJa: "毒の刃",
       skillIcon: "phy.png",
       cost: 1,
@@ -710,7 +710,7 @@ function makeCardLibrary(clog, api) {
     cd202: {
       libraryKey: "cd202",
       extId: 2013,
-      extNameJa: "出血弾",
+      extNameJa: "エリートユミ",
       skillNameJa: "出血弾",
       skillIcon: "phy.png",
       cost: 2,
@@ -733,7 +733,7 @@ function makeCardLibrary(clog, api) {
     cd203: {
       libraryKey: "cd203",
       extId: 1003,
-      extNameJa: "解毒",
+      extNameJa: "ノービスペン",
       skillNameJa: "解毒",
       skillIcon: "hp.png",
       cost: 0,
@@ -747,7 +747,7 @@ function makeCardLibrary(clog, api) {
     cd204: {
       libraryKey: "cd204",
       extId: 2004,
-      extNameJa: "防御陣",
+      extNameJa: "エリートアーマー",
       skillNameJa: "防御陣",
       skillIcon: "BUF_phy.png",
       cost: 2,
@@ -765,7 +765,7 @@ function makeCardLibrary(clog, api) {
     cd205: {
       libraryKey: "cd205",
       extId: 2002,
-      extNameJa: "連射",
+      extNameJa: "エリートマスケット",
       skillNameJa: "連射",
       skillIcon: "int.png",
       cost: 1,
@@ -789,7 +789,7 @@ function makeCardLibrary(clog, api) {
     cd206: {
       libraryKey: "cd206",
       extId: 1008,
-      extNameJa: "投資",
+      extNameJa: "ノービスブック",
       skillNameJa: "投資",
       skillIcon: "int.png",
       cost: 0,
@@ -806,7 +806,7 @@ function makeCardLibrary(clog, api) {
     cd301: {
       libraryKey: "cd301",
       extId: 1005,
-      extNameJa: "鋼の盾",
+      extNameJa: "ノービスホース",
       skillNameJa: "鋼の盾",
       skillIcon: "BUF_agi.png",
       cost: 1,
@@ -820,7 +820,7 @@ function makeCardLibrary(clog, api) {
     cd302: {
       libraryKey: "cd302",
       extId: 1011,
-      extNameJa: "大鎚",
+      extNameJa: "アックス",
       skillNameJa: "大鎚",
       skillIcon: "phy.png",
       cost: 3,
@@ -840,7 +840,7 @@ function makeCardLibrary(clog, api) {
     cd303: {
       libraryKey: "cd303",
       extId: 2004,
-      extNameJa: "戦術指揮",
+      extNameJa: "エリートアーマー",
       skillNameJa: "戦術指揮",
       skillIcon: "BUF_phy.png",
       cost: 2,
@@ -859,7 +859,7 @@ function makeCardLibrary(clog, api) {
     cd304: {
       libraryKey: "cd304",
       extId: 1022,
-      extNameJa: "必殺の閃光",
+      extNameJa: "ドラゴン",
       skillNameJa: "必殺の閃光",
       skillIcon: "int.png",
       cost: 2,
@@ -879,7 +879,7 @@ function makeCardLibrary(clog, api) {
     cd305: {
       libraryKey: "cd305",
       extId: 1005,
-      extNameJa: "不屈",
+      extNameJa: "ノービスホース",
       skillNameJa: "不屈",
       skillIcon: "BUF_agi.png",
       cost: 0,

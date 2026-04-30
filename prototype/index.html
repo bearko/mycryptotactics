@@ -173,6 +173,7 @@
       fill: var(--muted);
       font-family: system-ui, sans-serif;
       pointer-events: none;
+      display: none;
     }
     .map-node--locked .map-node-cap,
     .map-node--locked .map-node-type,
@@ -279,7 +280,7 @@
       image-rendering: pixelated; image-rendering: crisp-edges;
       border-radius: 6px; display: block;
     }
-    .combatant-portrait--enemy { background: #0a0810; }
+    .combatant-portrait--enemy { background: transparent; }
 
     /* Status badges on portrait */
     .status-badges {
@@ -295,7 +296,7 @@
     }
 
     /* Combatant info */
-    .combatant-info { width: 88px; display: flex; flex-direction: column; gap: 0.14rem; }
+    .combatant-info { width: 148px; display: flex; flex-direction: column; gap: 0.14rem; }
     .combatant-name {
       font-size: 0.68rem; font-weight: 700; text-align: center; color: var(--text);
       overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
