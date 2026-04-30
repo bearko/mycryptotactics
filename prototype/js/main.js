@@ -910,18 +910,28 @@ function refreshHandPeekLift() {
 function clearHandFocus() {
   handFocusedIdx = -1;
   document.querySelectorAll("#hand .card-slot").forEach(s => {
-    s.classList.remove("card-slot--focused");
+    s.classList.remove("card-slot--focused", "card-peek--right");
     s.style.setProperty("--peek-lift", "0px");
   });
 }
 
 function setHandFocusByIndex(idx) {
   const slots = Array.from(document.querySelectorAll("#hand .card-slot"));
-  slots.forEach(s => { s.classList.remove("card-slot--focused"); s.style.setProperty("--peek-lift", "0px"); });
+  slots.forEach(s => {
+    s.classList.remove("card-slot--focused", "card-peek--right");
+    s.style.setProperty("--peek-lift", "0px");
+  });
   if (idx >= 0 && idx < slots.length && slots[idx] && !slots[idx].classList.contains("card-slot--disabled")) {
     handFocusedIdx = idx;
     const slot = slots[idx];
     slot.classList.add("card-slot--focused");
+    // Determine which side to show the peek tooltip:
+    // Left half of screen → show peek to the RIGHT; center/right → show to the LEFT
+    const slotRect = slot.getBoundingClientRect();
+    const cardCenterX = slotRect.left + slotRect.width / 2;
+    if (cardCenterX < window.innerWidth / 2) {
+      slot.classList.add("card-peek--right");
+    }
     // Lift card so its bottom aligns near viewport bottom
     requestAnimationFrame(() => {
       const card = slot.querySelector(".card");

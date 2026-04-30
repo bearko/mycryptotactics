@@ -493,7 +493,7 @@
 
     /* Card base */
     .card {
-      border-radius: 0 0 10px 10px;
+      border-radius: 0 0 2px 2px;
       border: 2px solid #5a4068; border-top: none;
       width: var(--card-w); height: var(--card-h);
       cursor: default; display: flex; flex-direction: column;
@@ -542,14 +542,20 @@
     }
     .card-effect-area p { margin: 0.04rem 0; }
 
-    /* Peek layer (shown when focused) */
+    /* Peek layer (shown when focused) — appears to the side of the card */
     .card-peek-layer {
       display: none; position: absolute;
-      left: 50%; bottom: calc(100% + 2px);
-      transform: translateX(-50%);
-      width: min(220px, 80vw); z-index: 100; pointer-events: none;
+      /* default: show to the LEFT of the card */
+      right: calc(100% + 6px); left: auto;
+      top: 0; bottom: auto;
+      transform: none;
+      width: min(220px, 55vw); z-index: 100; pointer-events: none;
     }
     .card-slot--focused .card-peek-layer { display: block; }
+    /* card-peek--right: show to the RIGHT of the card */
+    .card-slot--focused.card-peek--right .card-peek-layer {
+      left: calc(100% + 6px); right: auto;
+    }
     .card-peek-inner {
       background: #0a0814f2; border: 1px solid var(--accent);
       border-radius: 8px; padding: 0.4rem 0.45rem 0.45rem;
