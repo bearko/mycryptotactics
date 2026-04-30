@@ -150,6 +150,14 @@ function playSeNodeSelect() {
   } catch (_) {}
 }
 
+function playSeShopBuy() {
+  try {
+    const a = new Audio("Audio/SE/coin.mp3");
+    a.volume = 0.70;
+    a.play().catch(() => {});
+  } catch (_) {}
+}
+
 function playSeClear() {
   try { const a = new Audio(AUDIO_URLS.seClear()); a.volume = 0.55; a.play().catch(() => {}); } catch (_) {}
 }
@@ -483,6 +491,16 @@ function syncResources() {
   const combatGoldEl = document.getElementById("combatGoldVal");
   if (combatGoldEl) combatGoldEl.textContent = String(gold);
   ensureRunState();
+  // マップヘッダーHP
+  const mapHpValEl = document.getElementById("mapHpVal");
+  const mapHpMaxEl = document.getElementById("mapHpMax");
+  if (mapHpValEl) mapHpValEl.textContent = String(runState.playerHp);
+  if (mapHpMaxEl) mapHpMaxEl.textContent = String(runState.playerHpMax);
+  const hpEl = document.querySelector(".res-hp");
+  if (hpEl) {
+    const pct = runState.playerHp / runState.playerHpMax;
+    hpEl.classList.toggle("res-hp--low", pct <= 0.5);
+  }
   const chapterEl = document.getElementById("chapterVal");
   if (chapterEl) chapterEl.textContent = String((runState.chapterIdx ?? 0) + 1);
   const layerEl = document.getElementById("layerVal");
@@ -694,6 +712,7 @@ function tryEnterMapNode(nodeId) {
     runState.pathNodeIds.push(nodeId);
     runState.lastMapNodeId = nodeId;
     clog(`休憩で HP+${actualHeal}`);
+    playBattleSe("heal");
     renderMap();
     // マイのナレーション（renderMap 内の renderNavigator より後に上書き）
     const hpAfter = runState.playerHp;
@@ -1508,6 +1527,7 @@ function openShop() {
       buyBtn.disabled = true;
       buyBtn.textContent = "購入済み";
       if (goldDisp) goldDisp.textContent = String(gold);
+      playSeShopBuy();
       syncResources();
       clog(`購入: ${def.extNameJa}`);
       renderNavigator(`「${def.extNameJa}」を購入しました！デッキが強化されましたよ！`);

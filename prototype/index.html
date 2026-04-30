@@ -48,6 +48,8 @@
     }
     .resources .res { display: flex; align-items: center; gap: 0.3rem; font-size: 0.85rem; color: var(--muted); }
     .resources img { width: 22px; height: 22px; object-fit: contain; }
+    .res-hp { color: #e07080; }
+    .res-hp.res-hp--low { color: #ff3a50; font-weight: 700; }
 
     .btn-help {
       margin-left: auto;
@@ -946,6 +948,7 @@
   <div class="wrap">
     <div class="resources" id="mapResources" aria-label="ランリソース">
       <span class="res"><img alt="GUM" data-icon="gum" /> <span id="goldVal">0</span></span>
+      <span class="res res-hp">♥ <span id="mapHpVal">0</span>/<span id="mapHpMax">0</span></span>
       <span class="res">層 <span id="layerVal">入口</span></span>
       <span class="res">章 <span id="chapterVal">1</span></span>
       <button type="button" class="btn-help" id="btnHelpOpen" aria-label="ヘルプを開く" title="ヘルプ">?</button>
