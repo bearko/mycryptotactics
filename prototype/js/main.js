@@ -76,11 +76,15 @@ function renderNavigator(msg) {
 let activeMapNodes = [];
 let activeMapEdges = [];
 let activeEdgeFrom = new Map();
+let activeMapViewH  = 100;   // SVG viewBox の高さ
+let activeMapStartY = 92;    // START ノードの y 座標
 
-function setActiveMap(nodes, edges) {
-  activeMapNodes = nodes;
-  activeMapEdges = edges;
-  activeEdgeFrom = new Map();
+function setActiveMap(nodes, edges, viewH = 100, startY = 92) {
+  activeMapNodes  = nodes;
+  activeMapEdges  = edges;
+  activeMapViewH  = viewH;
+  activeMapStartY = startY;
+  activeEdgeFrom  = new Map();
   for (const [a, b] of edges) {
     if (!activeEdgeFrom.has(a)) activeEdgeFrom.set(a, []);
     activeEdgeFrom.get(a).push(b);
@@ -97,7 +101,8 @@ function reachableNextNodeIds(lastNodeId) {
 }
 
 // ─── MAP_START（SVG 用の仮想入口ノード） ─────────────────────────
-const MAP_START = { id: "START", layer: -1, x: 50, y: 92 };
+// x は固定・y は activeMapStartY に委譲
+const MAP_START_X = 50;
 
 // ─── 状態変数 ────────────────────────────────────────────────────
 let gold = 75;
@@ -493,8 +498,8 @@ const { CARD_LIBRARY, copyCard, makeStarterDeck } = createCardRuntime(clog, batt
 function ensureRunState() {
   if (!runState) {
     const chapter = CHAPTERS[0];
-    const { nodes, edges } = generateChapterMap(chapter, ENEMY_DEFS);
-    setActiveMap(nodes, edges);
+    const { nodes, edges, viewH, startY } = generateChapterMap(chapter, ENEMY_DEFS);
+    setActiveMap(nodes, edges, viewH, startY);
     runState = {
       chapterIdx: 0,
       deck: makeStarterDeck(),
@@ -522,8 +527,8 @@ function advanceToNextChapter() {
   runState.lastMapNodeId = null;
   runState.pathNodeIds = [];
   const chapter = CHAPTERS[nextIdx];
-  const { nodes, edges } = generateChapterMap(chapter, ENEMY_DEFS);
-  setActiveMap(nodes, edges);
+  const { nodes, edges, viewH, startY } = generateChapterMap(chapter, ENEMY_DEFS);
+  setActiveMap(nodes, edges, viewH, startY);
   clog(`── 章 ${chapter.id}「${chapter.name}」へ ──`);
 }
 
@@ -539,7 +544,7 @@ function getCumulativeCardPool() {
 
 // ─── ノード位置 ───────────────────────────────────────────────────
 function nodeXY(id) {
-  if (id === "START") return { x: MAP_START.x, y: MAP_START.y };
+  if (id === "START") return { x: MAP_START_X, y: activeMapStartY };
   const n = mapNodeById(id);
   return n ? { x: n.x, y: n.y } : { x: 0, y: 0 };
 }
@@ -620,7 +625,7 @@ function renderMap() {
   const MAP_EDGES = activeMapEdges;
 
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  svg.setAttribute("viewBox", "0 0 100 100");
+  svg.setAttribute("viewBox", `0 0 100 ${activeMapViewH}`);
   svg.setAttribute("class", "map-graph");
   svg.setAttribute("role", "img");
   svg.setAttribute("aria-label", "フロア接続マップ");
@@ -647,31 +652,33 @@ function renderMap() {
 
   const edgeG = document.createElementNS("http://www.w3.org/2000/svg", "g");
   edgeG.setAttribute("class", "map-edges");
+  const allowed = new Set(reachableNextNodeIds(runState.lastMapNodeId));
   for (const [a, b] of MAP_EDGES) {
-    const pa = nodeXY(a); const pb = nodeXY(b);
-    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    line.setAttribute("x1", String(pa.x)); line.setAttribute("y1", String(pa.y));
-    line.setAttribute("x2", String(pb.x)); line.setAttribute("y2", String(pb.y));
-    line.setAttribute("marker-end", "url(#arrowHead)");
-    const allowed = new Set(reachableNextNodeIds(runState.lastMapNodeId));
+    const pa = nodeXY(a), pb = nodeXY(b);
+    // 3次ベジエ曲線: 制御点を縦中間の同一 y に置き、滑らかな S カーブを作る
+    const midY = (pa.y + pb.y) / 2;
+    const pathEl = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    pathEl.setAttribute("d",
+      `M ${pa.x} ${pa.y} C ${pa.x} ${midY}, ${pb.x} ${midY}, ${pb.x} ${pb.y}`);
+    pathEl.setAttribute("marker-end", "url(#arrowHead)");
     const onPath =
       runState.pathNodeIds.includes(a) &&
       (runState.pathNodeIds.includes(b) || allowed.has(b));
-    line.setAttribute("class",
+    pathEl.setAttribute("class",
       onPath || (a === "START" && allowed.has(b)) ? "map-edge map-edge--active" : "map-edge"
     );
-    edgeG.appendChild(line);
+    edgeG.appendChild(pathEl);
   }
   svg.appendChild(edgeG);
 
   const startG = document.createElementNS("http://www.w3.org/2000/svg", "g");
   startG.setAttribute("class", "map-start");
   const sc = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-  sc.setAttribute("cx", String(MAP_START.x)); sc.setAttribute("cy", String(MAP_START.y));
+  sc.setAttribute("cx", String(MAP_START_X)); sc.setAttribute("cy", String(activeMapStartY));
   sc.setAttribute("r", "3.2"); sc.setAttribute("class", "map-start-dot");
   startG.appendChild(sc);
   const st = document.createElementNS("http://www.w3.org/2000/svg", "text");
-  st.setAttribute("x", String(MAP_START.x)); st.setAttribute("y", String(MAP_START.y + 7.5));
+  st.setAttribute("x", String(MAP_START_X)); st.setAttribute("y", String(activeMapStartY + 7.5));
   st.setAttribute("text-anchor", "middle"); st.setAttribute("class", "map-start-label");
   st.textContent = "入口";
   startG.appendChild(st);
@@ -755,26 +762,38 @@ function renderMap() {
   if (mapPanel && host.nextSibling) mapPanel.insertBefore(legend, host.nextSibling);
   else if (mapPanel) mapPanel.appendChild(legend);
 
-  const scrollMapToCurrentNode = () => {
+  // 現在地 + 次の選択肢ノードを画面内に収める
+  const scrollMapFocus = (smooth = false) => {
     const wrap = host;
     if (!wrap || !svg.isConnected) return;
-    const curId = runState.lastMapNodeId || "START";
-    const pt = nodeXY(curId);
+    const curId  = runState.lastMapNodeId || "START";
+    const nextIds = reachableNextNodeIds(curId);
+    // 現在地と次の進め先の重心へスクロール
+    const pts = [nodeXY(curId), ...nextIds.map(id => nodeXY(id))];
+    if (!pts.length) return;
+    const minY  = Math.min(...pts.map(p => p.y));
+    const maxY  = Math.max(...pts.map(p => p.y));
+    const focusY = (minY + maxY) / 2;
+    const focusX = pts.reduce((s, p) => s + p.x, 0) / pts.length;
     const vb = svg.viewBox.baseVal;
-    const vbW = vb.width || 100; const vbH = vb.height || 100;
+    const vbW = vb.width  || 100;
+    const vbH = vb.height || activeMapViewH;
     const wrapRect = wrap.getBoundingClientRect();
-    const svgRect = svg.getBoundingClientRect();
-    const nx = svgRect.left + (pt.x / vbW) * svgRect.width;
-    const ny = svgRect.top + (pt.y / vbH) * svgRect.height;
-    const contentY = wrap.scrollTop + (ny - wrapRect.top);
-    const contentX = wrap.scrollLeft + (nx - wrapRect.left);
-    wrap.scrollTop = Math.max(0, Math.min(contentY - wrap.clientHeight / 2, Math.max(0, wrap.scrollHeight - wrap.clientHeight)));
-    wrap.scrollLeft = Math.max(0, Math.min(contentX - wrap.clientWidth / 2, Math.max(0, wrap.scrollWidth - wrap.clientWidth)));
+    const svgRect  = svg.getBoundingClientRect();
+    const svgX = svgRect.left + (focusX / vbW) * svgRect.width;
+    const svgY = svgRect.top  + (focusY / vbH) * svgRect.height;
+    const tTop  = wrap.scrollTop  + (svgY - wrapRect.top)  - wrap.clientHeight / 2;
+    const tLeft = wrap.scrollLeft + (svgX - wrapRect.left) - wrap.clientWidth  / 2;
+    wrap.scrollTo({
+      top:  Math.max(0, Math.min(tTop,  wrap.scrollHeight - wrap.clientHeight)),
+      left: Math.max(0, Math.min(tLeft, wrap.scrollWidth  - wrap.clientWidth)),
+      behavior: smooth ? "smooth" : "auto",
+    });
   };
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
-      scrollMapToCurrentNode();
-      setTimeout(scrollMapToCurrentNode, 60);
+      scrollMapFocus(false);
+      setTimeout(() => scrollMapFocus(true), 80);
     });
   });
   syncResources();
@@ -1861,8 +1880,8 @@ function startRunFromChapter(chapterIdx) {
   pendingCraftNodeId = null;
   postCombatSnapshot = null;
   const chapter = CHAPTERS[chapterIdx];
-  const { nodes, edges } = generateChapterMap(chapter, ENEMY_DEFS);
-  setActiveMap(nodes, edges);
+  const { nodes, edges, viewH, startY } = generateChapterMap(chapter, ENEMY_DEFS);
+  setActiveMap(nodes, edges, viewH, startY);
   runState = {
     chapterIdx,
     deck: makeStarterDeck(),
