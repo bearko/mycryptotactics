@@ -186,6 +186,11 @@
       image-rendering: crisp-edges;
       pointer-events: none;
     }
+    .map-node-icon-img {
+      pointer-events: none;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
     .map-legend {
       font-size: 0.72rem;
       color: var(--muted);
@@ -512,18 +517,21 @@
     }
     .card-cost-above .cost-zeus { font-size: 0.8rem; }
 
-    /* Card cost color variants */
-    .card-slot[data-cost="0"] .card-cost-above { border-color: #4a4060; }
-    .card-slot[data-cost="1"] .card { border-color: #3a6ab0; }
-    .card-slot[data-cost="1"] .card-cost-above { border-color: #3a6ab0; border-bottom: none; }
-    .card-slot[data-cost="2"] .card { border-color: #2a9070; }
-    .card-slot[data-cost="2"] .card-cost-above { border-color: #2a9070; border-bottom: none; }
-    .card-slot[data-cost="3"] .card { border-color: #c4a35a; }
-    .card-slot[data-cost="3"] .card-cost-above { border-color: #c4a35a; border-bottom: none; }
-    .card-slot[data-cost="4"] .card { border-color: #c05050; }
-    .card-slot[data-cost="4"] .card-cost-above { border-color: #c05050; border-bottom: none; }
-    .card-slot[data-cost="5"] .card { border-color: #a03040; }
-    .card-slot[data-cost="5"] .card-cost-above { border-color: #a03040; border-bottom: none; }
+    /* Card rarity color variants
+       Common=#0984E3 / Uncommon=#00B894 / Rare=#FDCB6E / Epic=#E17055 / Legendary=#D63031 */
+    .card-slot[data-rarity="common"]    .card { border-color: #0984E3; }
+    .card-slot[data-rarity="common"]    .card-cost-above { border-color: #0984E3; border-bottom: none; }
+    .card-slot[data-rarity="uncommon"]  .card { border-color: #00B894; }
+    .card-slot[data-rarity="uncommon"]  .card-cost-above { border-color: #00B894; border-bottom: none; }
+    .card-slot[data-rarity="rare"]      .card { border-color: #FDCB6E; }
+    .card-slot[data-rarity="rare"]      .card-cost-above { border-color: #FDCB6E; border-bottom: none; }
+    .card-slot[data-rarity="epic"]      .card { border-color: #E17055; }
+    .card-slot[data-rarity="epic"]      .card-cost-above { border-color: #E17055; border-bottom: none; }
+    .card-slot[data-rarity="legendary"] .card { border-color: #D63031; }
+    .card-slot[data-rarity="legendary"] .card-cost-above { border-color: #D63031; border-bottom: none; }
+    /* fallback when data-rarity not set */
+    .card-slot:not([data-rarity]) .card { border-color: #0984E3; }
+    .card-slot:not([data-rarity]) .card-cost-above { border-color: #0984E3; border-bottom: none; }
 
     /* Card base */
     .card {

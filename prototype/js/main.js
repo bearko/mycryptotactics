@@ -2,6 +2,7 @@ import {
   createCardRuntime,
   shuffle,
   battleIconUrl,
+  CARD_RARITIES,
 } from "./cards.js";
 import {
   img,
@@ -682,6 +683,28 @@ function renderMap() {
     fightImgG.appendChild(imgEl);
   }
   svg.appendChild(fightImgG);
+
+  // ショップ・休憩ノードのアイコン表示
+  const nodeIconG = document.createElementNS("http://www.w3.org/2000/svg", "g");
+  nodeIconG.setAttribute("class", "map-node-icons");
+  for (const node of MAP_NODES) {
+    let iconUrl = null;
+    if (node.type === "shop") iconUrl = img("Image/Icons/gum.png");
+    else if (node.type === "rest") iconUrl = img("Image/BattleIcons/Parameters/hp.png");
+    if (!iconUrl) continue;
+    const sz = 5.2;
+    const iconEl = document.createElementNS("http://www.w3.org/2000/svg", "image");
+    iconEl.setAttribute("href", iconUrl);
+    iconEl.setAttributeNS("http://www.w3.org/1999/xlink", "href", iconUrl);
+    iconEl.setAttribute("x", String(node.x - sz / 2));
+    iconEl.setAttribute("y", String(node.y - sz / 2));
+    iconEl.setAttribute("width", String(sz));
+    iconEl.setAttribute("height", String(sz));
+    iconEl.setAttribute("preserveAspectRatio", "xMidYMid meet");
+    iconEl.setAttribute("class", "map-node-icon-img");
+    nodeIconG.appendChild(iconEl);
+  }
+  svg.appendChild(nodeIconG);
   host.appendChild(svg);
 
   const legend = document.createElement("p");
@@ -1222,8 +1245,10 @@ function renderCombat() {
 
   combat.hand.forEach((card, idx) => {
     const slot = document.createElement("div");
+    const rarity = CARD_RARITIES[card.libraryKey] || 'common';
     slot.className = "card-slot" + (card.cost > combat.energy ? " card-slot--disabled" : "");
     slot.setAttribute("data-cost", String(card.cost));
+    slot.setAttribute("data-rarity", rarity);
     slot.style.setProperty("--i", String(idx + 1));
     slot.style.setProperty("--n", String(Math.max(n - 1, 1)));
 

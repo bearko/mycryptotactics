@@ -1062,3 +1062,64 @@ function shuffle(a) {
 }
 
 export { shuffle };
+
+/**
+ * カードレアリティ定義（SPEC §カードレアリティ）
+ * ここを編集するだけで全カードのレアリティ（枠色）を変更できます。
+ *
+ * 値: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary'
+ * 色: common=#0984E3 / uncommon=#00B894 / rare=#FDCB6E / epic=#E17055 / legendary=#D63031
+ */
+export const CARD_RARITIES = {
+  // ─── スターターカード ──────────────────────────────────────────────
+  ext1001: 'common',    // ノービスブレード
+  ext1002: 'common',    // ノービスマスケット
+  ext1003: 'common',    // ノービスペン
+  ext1004: 'common',    // ノービスアーマー
+  ext1005: 'uncommon',  // ノービスホース（次ターンエナジー）
+  ext1006: 'common',    // ノービスカタナ
+  ext1008: 'uncommon',  // ノービスブック（INT+ドロー+ダメージ）
+  ext1011: 'common',    // アックス
+  ext1012: 'common',    // ETHEREMON-EKOPI
+  ext1022: 'uncommon',  // ドラゴン（全体+INT debuff）
+  ext1023: 'common',    // ブル（全体+自己PHYダウン）
+  ext2001: 'uncommon',  // エリートブレード
+  ext2002: 'uncommon',  // エリートマスケット（全体）
+  ext2004: 'uncommon',  // エリートアーマー（PHY%アップ）
+  ext2006: 'uncommon',  // エリートカタナ
+  ext2011: 'uncommon',  // エリートアックス
+  ext2013: 'uncommon',  // エリートユミ
+
+  // ─── 章0 アバカス カードプール ────────────────────────────────────
+  cd101:   'uncommon',  // 一刀（PHY100%）
+  cd102:   'rare',      // 二段斬り（PHY70%×2）
+  cd103:   'common',    // 構え（ガード+6）
+  cd104:   'uncommon',  // 集中（エナジー+1）
+  cd105:   'rare',      // 一閃（PHY150%）
+  cd106:   'uncommon',  // 鼓舞（PHY+3永続）
+  cd107:   'uncommon',  // 治療（HP回復）
+  cd108:   'uncommon',  // 突撃（コスト0+次ターンペナルティ）
+
+  // ─── 章1 ホレリス カードプール ────────────────────────────────────
+  cdH01:   'rare',      // 抜刀・一閃（PHY80%・消耗）
+  cdH02:   'uncommon',  // 出血弾・速射（PHY+出血×1）
+  cdH03:   'uncommon',  // 疾風の構え（ガード+8+AGI永続）
+  cdH04:   'rare',      // 緊急回復（コスト0・消耗）
+  cdH05:   'uncommon',  // 連矢（PHY50%×2）
+  cdH06:   'rare',      // 知識の爆発（INT+2+ドロー3）
+
+  // ─── 章2 アンティキティラ カードプール ───────────────────────────
+  cd301:   'uncommon',  // 鋼の盾（シールド+10）
+  cd302:   'epic',      // 大鎚（PHY200%）
+  cd303:   'epic',      // 戦術指揮（PHY+5+INT+5永続）
+  cd304:   'rare',      // 必殺の閃光（INT130%クリ確定）
+  cd305:   'rare',      // 不屈（このターン被ダメ半減）
+
+  // ─── 章3 アタナソフ カードプール ─────────────────────────────────
+  cd201:   'uncommon',  // 毒の刃（PHY+毒×2）
+  cd202:   'rare',      // 出血弾（PHY90%+出血×2）
+  cd203:   'common',    // 解毒（コスト0・デバフ解除）
+  cd204:   'rare',      // 防御陣（ガード+12）
+  cd205:   'rare',      // 連射（INT×3）
+  cd206:   'uncommon',  // 投資（GUM+20）
+};
