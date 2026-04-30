@@ -1203,16 +1203,29 @@ function renderCombat() {
   handFocusedIdx = -1;
   const n = combat.hand.length;
   handEl.style.setProperty("--n-cards", String(Math.max(n, 1)));
+
+  // カード重ね量を計算（横幅が足りない場合に重ねる）
+  const containerW = (handEl.parentElement?.clientWidth || 340) - 16;
+  const cardW = window.innerWidth <= 420 ? 80 : 96;
+  const minGapPx = 6; // 通常の gap（0.4rem ≈ 6px）
+  let cardMarginPx = minGapPx;
+  if (n > 1) {
+    const naturalW = cardW * n + minGapPx * (n - 1);
+    if (naturalW > containerW) {
+      // total = cardW + (n-1)*(cardW + margin) = containerW
+      // margin = (containerW - cardW) / (n - 1) - cardW
+      cardMarginPx = Math.floor((containerW - cardW) / (n - 1)) - cardW;
+      cardMarginPx = Math.max(cardMarginPx, -Math.floor(cardW * 0.58));
+    }
+  }
+  handEl.style.setProperty("--card-margin", cardMarginPx + "px");
+
   combat.hand.forEach((card, idx) => {
     const slot = document.createElement("div");
     slot.className = "card-slot" + (card.cost > combat.energy ? " card-slot--disabled" : "");
     slot.setAttribute("data-cost", String(card.cost));
     slot.style.setProperty("--i", String(idx + 1));
     slot.style.setProperty("--n", String(Math.max(n - 1, 1)));
-    const centerIdx = Math.floor((n - 1) / 2);
-    const rel = idx - centerIdx;
-    const rot = rel === 0 ? 0 : rel < 0 ? -4 * Math.abs(rel) : 4 * rel;
-    slot.style.setProperty("--rot", rot + "deg");
 
     const summaryLines = typeof card.effectSummaryLines === "function" ? card.effectSummaryLines(combat)
       : typeof card.previewLines === "function" ? card.previewLines(combat) : [card.text || ""];
@@ -1466,8 +1479,22 @@ function advanceAfterRewardPick(libraryKey) {
     runState.pathNodeIds.push(mid);
     runState.lastMapNodeId = mid;
     if (wasBoss) {
-      // 章クリア → 次章へ進む（advanceToNextChapter が runComplete を設定することも）
-      advanceToNextChapter();
+      // 章クリア → clearedChapters に追加し次章データを用意
+      const clearedIdx = runState.chapterIdx;
+      advanceToNextChapter(); // 内部で clearedChapters.add(clearedIdx) する
+      combat = null;
+      postCombatSnapshot = null;
+      if (runState.runComplete) {
+        // 全章クリア → ゲームオーバー画面（クリア）
+        showView("over");
+        document.getElementById("gameOverMsg").textContent =
+          "全 node クリアおめでとうございます！あなたは最高ですよ〜！";
+      } else {
+        // 次の node が解放された → node 選択画面へ（解放アニメ付き）
+        showView("nodeSelect");
+        renderNodeSelect(clearedIdx + 1); // 新たに解放されたインデックス
+      }
+      return;
     }
   }
   combat = null;
@@ -1615,64 +1642,114 @@ function startRunFromChapter(chapterIdx) {
   renderMap();
 }
 
-/** node 選択画面を描画する */
-function renderNodeSelect() {
+/**
+ * node 選択画面を描画する。
+ * @param {number|null} justUnlockedIdx  直前に解放された章インデックス（アニメ用、省略可）
+ */
+function renderNodeSelect(justUnlockedIdx = null) {
   const el = document.getElementById("nodeSelectView");
   if (!el) return;
 
   // CHAPTERS + ゴール「TROY」の構成
+  const TROY_BG_ID = '1052';
   const goals = [
     ...CHAPTERS.map((ch, idx) => ({ idx, name: ch.name.replace('node : ', ''), chapter: ch })),
-    { idx: CHAPTERS.length, name: 'TROY', chapter: null },
+    { idx: CHAPTERS.length, name: 'TROY', chapter: null, bgId: TROY_BG_ID },
   ];
 
   let html = '<div class="ns-header"><h2>node を選択してください</h2><p class="ns-sub">ボスを倒すと次の node が解放されます</p></div>';
-  html += '<div class="ns-path">';
+  html += '<div class="ns-cards">';
 
-  goals.forEach((goal, i) => {
-    const isLast = i === goals.length - 1; // TROY
-    const isUnlocked = goal.idx === 0 || clearedChapters.has(goal.idx - 1);
-    const isCleared  = clearedChapters.has(goal.idx);
-    const isTroy     = isLast;
+  goals.forEach((goal) => {
+    const isTroy     = goal.chapter === null;
+    const isUnlocked = !isTroy && (goal.idx === 0 || clearedChapters.has(goal.idx - 1));
+    const isCleared  = !isTroy && clearedChapters.has(goal.idx);
+    const isJustUnlocked = goal.idx === justUnlockedIdx;
 
-    let stateClass = isTroy ? 'ns-node--troy' :
-                     isCleared  ? 'ns-node--cleared' :
-                     isUnlocked ? 'ns-node--unlocked' :
-                                  'ns-node--locked';
+    const ch = goal.chapter;
+    const bgId = ch?.bgId ?? goal.bgId ?? '1001';
+    const bgUrl = img('Image/Backgrounds/' + bgId + '.png');
 
-    html += `<div class="ns-node ${stateClass}" data-idx="${goal.idx}" role="button" tabindex="${isUnlocked && !isTroy ? 0 : -1}">`;
-    html += `<div class="ns-node-icon">${isCleared ? '✓' : isTroy ? '★' : isUnlocked ? '▶' : '🔒'}</div>`;
-    html += `<div class="ns-node-name">${goal.name}</div>`;
+    // 状態クラス
+    const stateClass = isTroy      ? 'ns-card--troy' :
+                       isCleared   ? 'ns-card--cleared' :
+                       isUnlocked  ? 'ns-card--unlocked' :
+                                     'ns-card--locked';
+    const animClass  = isJustUnlocked ? ' ns-card--just-unlocked' : '';
+
+    html += `<div class="ns-card ${stateClass}${animClass}" data-idx="${goal.idx}" role="${isUnlocked ? 'button' : 'presentation'}" tabindex="${isUnlocked ? 0 : -1}" style="--ns-bg: url('${bgUrl}')">`;
+
+    // 背景レイヤー
+    html += '<div class="ns-card-bg"></div>';
+
+    // ─── コンテンツ ───
+    html += '<div class="ns-card-body">';
+
+    // node 名
+    html += `<div class="ns-card-title">${goal.name}</div>`;
+
     if (isTroy) {
-      html += `<div class="ns-node-hint">最終目標</div>`;
-    } else if (isCleared) {
-      html += `<div class="ns-node-hint">クリア済み</div>`;
+      // TROY：最終目標ロック表示
+      html += '<div class="ns-card-troy-lock"><span>★</span><span class="ns-card-troy-label">最終目標</span></div>';
     } else if (!isUnlocked) {
-      html += `<div class="ns-node-hint">ロック中</div>`;
-    }
-    html += '</div>';
+      // ロック中
+      html += '<div class="ns-card-lock-overlay"><span class="ns-lock-icon">🔒</span><span class="ns-lock-label">ロック中</span></div>';
+    } else {
+      // 出現エネミー（通常 + フラペチーノ）
+      const enemyIds = [...(ch.enemyPool || []), ...(ch.elitePool || [])].slice(0, 4);
+      if (enemyIds.length > 0) {
+        html += '<div class="ns-enemy-row">';
+        enemyIds.forEach(id => {
+          const def = ENEMY_DEFS[id];
+          if (def) {
+            html += `<img class="ns-enemy-img" src="${ENEMY_IMG(def.imgId)}" alt="${def.name}" title="${def.name}" />`;
+          }
+        });
+        html += '</div>';
+      }
 
-    // 矢印（最後の要素以外）
-    if (i < goals.length - 1) {
-      html += '<div class="ns-arrow">→</div>';
+      // ボス
+      const bossDef = ch.bossId ? BOSS_DEFS[ch.bossId] : null;
+      if (bossDef) {
+        html += '<div class="ns-boss-row">';
+        html += '<span class="ns-boss-label">boss</span>';
+        html += `<img class="ns-boss-img" src="${ENEMY_IMG(bossDef.imgId)}" alt="${bossDef.name}" />`;
+        html += `<span class="ns-boss-name">${bossDef.name}</span>`;
+        html += '</div>';
+      }
+
+      // クリア済みバッジ
+      if (isCleared) {
+        html += '<div class="ns-cleared-badge">✓ クリア済み</div>';
+      }
     }
+
+    html += '</div>'; // .ns-card-body
+    html += '</div>'; // .ns-card
   });
 
-  html += '</div>';
+  html += '</div>'; // .ns-cards
   el.innerHTML = html;
 
-  // クリックイベント
-  el.querySelectorAll('.ns-node--unlocked').forEach(nodeEl => {
-    const idx = parseInt(nodeEl.dataset.idx, 10);
+  // クリックイベント（解放済み章のみ）
+  el.querySelectorAll('.ns-card--unlocked, .ns-card--cleared').forEach(cardEl => {
+    const idx = parseInt(cardEl.dataset.idx, 10);
     const activate = () => {
       playSeNodeSelect();
       startRunFromChapter(idx);
     };
-    nodeEl.addEventListener('click', activate);
-    nodeEl.addEventListener('keydown', ev => {
+    cardEl.addEventListener('click', activate);
+    cardEl.addEventListener('keydown', ev => {
       if (ev.key === 'Enter' || ev.key === ' ') activate();
     });
   });
+
+  // 解放アニメ後にクラスを削除
+  if (justUnlockedIdx !== null) {
+    setTimeout(() => {
+      el.querySelector('.ns-card--just-unlocked')?.classList.remove('ns-card--just-unlocked');
+    }, 2000);
+  }
 }
 
 // ─── アセット配線 ─────────────────────────────────────────────────

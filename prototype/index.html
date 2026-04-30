@@ -464,35 +464,35 @@
 
     /* ── Hand ──────────────────────────────────────────────────────────── */
     .hand-scroll {
-      width: 100%; overflow-x: auto; overflow-y: visible;
-      -webkit-overflow-scrolling: touch;
+      width: 100%; overflow: visible;
       padding: 0.25rem 0.2rem 0.1rem; box-sizing: border-box;
     }
     .hand {
       --card-w: 96px; --card-h: 170px;
       display: flex; flex-wrap: nowrap; justify-content: center;
-      align-items: flex-end; gap: 0.4rem;
+      align-items: flex-end; gap: 0;
       min-height: calc(var(--card-h) + 2rem);
       padding: 0.4rem 0.5rem 0.4rem;
-      width: max-content;
-      min-width: min(100%, calc(var(--n-cards, 1) * var(--card-w) + (var(--n-cards, 1) - 1) * 0.4rem + 1rem));
+      width: 100%;
       margin: 0 auto; position: relative; perspective: 800px;
       touch-action: pan-x pan-y;
     }
     @media (max-width: 420px) { .hand { --card-w: 80px; --card-h: 155px; } }
 
-    /* Card slot (wrapper that fan-rotates, includes cost badge above) */
+    /* Card slot — flat layout with optional overlap, no tilt */
     .hand .card-slot {
       position: relative;
       flex: 0 0 var(--card-w); width: var(--card-w); min-width: var(--card-w);
       display: flex; flex-direction: column; align-items: center;
       transform-origin: 50% 100%;
-      transform: translateY(calc(-1 * var(--peek-lift, 0px))) rotate(var(--rot, 0deg));
+      transform: translateY(calc(-1 * var(--peek-lift, 0px)));
       transition: transform 0.2s ease, filter 0.15s;
       z-index: var(--i, 1);
       cursor: default;
       --peek-lift: 0px;
+      margin-left: var(--card-margin, 0.4rem);
     }
+    .hand .card-slot:first-child { margin-left: 0; }
     .hand .card-slot:hover:not(.card-slot--disabled) { z-index: 80; filter: brightness(1.04); }
     .hand .card-slot--focused { z-index: 90 !important; filter: brightness(1.06); }
     .hand .card-slot--focused .card {
@@ -644,60 +644,175 @@
     /* ── Node Select View ──────────────────────────────────────────────── */
     #nodeSelectView {
       display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      min-height: 60vh;
-      padding: 1.5rem 1rem;
+      align-items: center;
+      padding: 1rem 0.5rem 1.5rem;
+      background: none;
+      border: none;
     }
-    .ns-header { text-align: center; margin-bottom: 2rem; }
-    .ns-header h2 { margin: 0 0 0.4rem; font-size: 1.3rem; color: var(--accent); }
-    .ns-sub { margin: 0; font-size: 0.82rem; color: var(--muted); }
+    .ns-header { text-align: center; margin-bottom: 1.2rem; }
+    .ns-header h2 { margin: 0 0 0.3rem; font-size: 1.2rem; color: var(--accent); }
+    .ns-sub { margin: 0; font-size: 0.78rem; color: var(--muted); }
 
-    .ns-path {
-      display: flex; flex-wrap: wrap;
-      align-items: center; justify-content: center;
-      gap: 0.5rem 0.3rem;
-      width: 100%;
+    /* Horizontal scroll row of chapter cards */
+    .ns-cards {
+      display: flex; flex-wrap: nowrap;
+      gap: 0.75rem;
+      width: 100%; overflow-x: auto;
+      padding: 0.5rem 0.25rem 1rem;
+      -webkit-overflow-scrolling: touch;
+      scroll-snap-type: x mandatory;
+      align-items: flex-start;
     }
 
-    .ns-node {
-      display: flex; flex-direction: column; align-items: center;
-      padding: 0.9rem 1.1rem;
-      border-radius: 12px;
+    /* Each chapter card */
+    .ns-card {
+      flex: 0 0 160px;
+      width: 160px;
+      border-radius: 14px;
       border: 2px solid var(--border);
-      background: var(--map-node);
-      min-width: 100px;
-      transition: transform 0.12s, border-color 0.12s, box-shadow 0.12s;
+      overflow: hidden;
+      position: relative;
       cursor: default;
+      scroll-snap-align: center;
+      transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+      min-height: 260px;
+      display: flex; flex-direction: column;
     }
-    .ns-node--unlocked {
+    @media (max-width: 420px) {
+      .ns-card { flex: 0 0 140px; width: 140px; min-height: 235px; }
+    }
+
+    /* Background image layer */
+    .ns-card-bg {
+      position: absolute; inset: 0;
+      background-image: var(--ns-bg);
+      background-size: cover; background-position: center top;
+      opacity: 0.38;
+      z-index: 0;
+    }
+
+    /* Content sits above bg */
+    .ns-card-body {
+      position: relative; z-index: 1;
+      display: flex; flex-direction: column;
+      width: 100%; flex: 1;
+    }
+
+    /* Node name header */
+    .ns-card-title {
+      background: rgba(8,6,16,0.88);
+      color: var(--accent);
+      font-weight: 800; font-size: 0.78rem;
+      text-align: center;
+      padding: 0.4rem 0.3rem;
+      letter-spacing: 0.03em;
+    }
+
+    /* Enemy row */
+    .ns-enemy-row {
+      display: flex; flex-wrap: wrap;
+      justify-content: center; align-items: flex-end;
+      gap: 2px;
+      padding: 0.4rem 0.2rem 0.2rem;
+      flex: 1;
+      background: rgba(0,0,0,0.18);
+    }
+    .ns-enemy-img {
+      width: 56px; height: 56px;
+      object-fit: contain; image-rendering: pixelated;
+      filter: drop-shadow(0 2px 4px #000a);
+    }
+    @media (max-width: 420px) {
+      .ns-enemy-img { width: 46px; height: 46px; }
+    }
+
+    /* Boss row */
+    .ns-boss-row {
+      display: flex; flex-direction: column; align-items: center;
+      background: rgba(6,4,14,0.85);
+      padding: 0.3rem 0.25rem 0.35rem;
+      gap: 0.1rem;
+    }
+    .ns-boss-label {
+      font-size: 0.62rem; font-weight: 800;
+      color: #ff5555; letter-spacing: 0.08em; text-transform: uppercase;
+    }
+    .ns-boss-img {
+      width: 64px; height: 64px;
+      object-fit: contain; image-rendering: pixelated;
+      filter: drop-shadow(0 2px 6px #000c);
+    }
+    @media (max-width: 420px) {
+      .ns-boss-img { width: 54px; height: 54px; }
+    }
+    .ns-boss-name {
+      font-size: 0.62rem; color: #c8b8e0;
+      text-align: center; line-height: 1.2; font-weight: 600;
+    }
+
+    /* Cleared badge */
+    .ns-cleared-badge {
+      font-size: 0.6rem; font-weight: 700;
+      color: var(--gain); text-align: center;
+      padding: 0.2rem 0;
+      background: rgba(0,0,0,0.6);
+    }
+
+    /* State variants */
+    .ns-card--unlocked {
       border-color: var(--accent);
       cursor: pointer;
     }
-    .ns-node--unlocked:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 20px #0008;
-      border-color: #e8d070;
+    .ns-card--unlocked:hover, .ns-card--unlocked:focus {
+      transform: translateY(-5px) scale(1.02);
+      box-shadow: 0 10px 28px #000a, 0 0 0 2px var(--accent);
+      outline: none;
     }
-    .ns-node--cleared {
-      border-color: var(--gain);
-      opacity: 0.7;
+    .ns-card--cleared {
+      border-color: #4caf6a;
+      cursor: pointer;
     }
-    .ns-node--locked {
-      opacity: 0.45;
+    .ns-card--cleared:hover, .ns-card--cleared:focus {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 18px #000a;
+      outline: none;
     }
-    .ns-node--troy {
-      border-color: #b060f0;
-      opacity: 0.55;
-      cursor: not-allowed;
-    }
+    .ns-card--locked .ns-card-bg { opacity: 0.15; }
+    .ns-card--locked .ns-card-body { opacity: 0.5; }
+    .ns-card--locked { border-color: #2a2438; }
 
-    .ns-node-icon { font-size: 1.5rem; line-height: 1; margin-bottom: 0.35rem; }
-    .ns-node-name { font-size: 0.82rem; font-weight: 700; color: var(--text); text-align: center; }
-    .ns-node-hint { font-size: 0.7rem; color: var(--muted); margin-top: 0.2rem; }
+    .ns-card--troy { border-color: #6030a0; }
+    .ns-card--troy .ns-card-bg { opacity: 0.2; }
+    .ns-card--troy .ns-card-body { opacity: 0.55; }
 
-    .ns-arrow {
-      font-size: 1.4rem; color: var(--muted);
-      flex-shrink: 0;
+    /* Lock overlay */
+    .ns-card-lock-overlay {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 0.4rem; padding: 1rem;
+      background: rgba(0,0,0,0.4);
+    }
+    .ns-lock-icon { font-size: 1.8rem; }
+    .ns-lock-label { font-size: 0.7rem; color: var(--muted); }
+
+    /* TROY lock */
+    .ns-card-troy-lock {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 0.5rem; padding: 1rem;
+    }
+    .ns-card-troy-lock span:first-child { font-size: 2rem; color: #9060d0; }
+    .ns-card-troy-label { font-size: 0.72rem; color: #8060b0; font-weight: 700; }
+
+    /* Just-unlocked glow animation */
+    .ns-card--just-unlocked {
+      animation: ns-unlock-glow 1.6s ease-out forwards;
+    }
+    @keyframes ns-unlock-glow {
+      0%  { box-shadow: 0 0 0 0 #c4a35a00; border-color: var(--accent); }
+      20% { box-shadow: 0 0 24px 8px #c4a35a88; border-color: #fff; transform: scale(1.05); }
+      60% { box-shadow: 0 0 16px 4px #c4a35a44; border-color: #e8d070; transform: scale(1.02); }
+      100%{ box-shadow: none; border-color: var(--accent); transform: scale(1); }
     }
 
     /* Reward cards (keep original layout style) */
@@ -1197,7 +1312,7 @@
 
     </div>
 
-    <div id="nodeSelectView" class="panel hidden"></div>
+    <div id="nodeSelectView" class="hidden"></div>
 
     <div id="shopView" class="panel hidden">
       <div class="shop-header-row">

@@ -8,6 +8,7 @@ export const CHAPTERS = [
   {
     id: 1,
     name: 'node : アバカス',
+    bgId: '1023',
     mapRules: {
       layers: 4,
       nodesPerLayerMin: 3,
@@ -24,6 +25,7 @@ export const CHAPTERS = [
   {
     id: 2,
     name: 'node : ホレリス',
+    bgId: '1038',
     mapRules: {
       layers: 5,
       nodesPerLayerMin: 3,
@@ -40,6 +42,7 @@ export const CHAPTERS = [
   {
     id: 3,
     name: 'node : アンティキティラ',
+    bgId: '1037',
     mapRules: {
       layers: 5,
       nodesPerLayerMin: 3,
@@ -56,6 +59,7 @@ export const CHAPTERS = [
   {
     id: 4,
     name: 'node : アタナソフ',
+    bgId: '1053',
     mapRules: {
       layers: 5,
       nodesPerLayerMin: 3,
