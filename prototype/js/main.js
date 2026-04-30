@@ -32,6 +32,7 @@ import { ENEMY_DEFS } from "./enemies.js";
 import { BOSS_DEFS } from "./bosses.js";
 import { CHAPTERS } from "./chapters.js";
 import { generateChapterMap } from "./maps.js";
+import { LL_EXT_POOL } from "./ll-extensions.js";
 
 // ─── ナビゲーター「マイ」 ────────────────────────────────────────
 const MAI_SD_URL = "./MAI_SD.png";
@@ -107,6 +108,8 @@ const MAP_START_X = 50;
 // ─── 状態変数 ────────────────────────────────────────────────────
 let gold = 75;
 let view = "map";
+/** 戦闘中の非同期演出中はカード操作を禁止するフラグ */
+let combatInputLocked = false;
 /** セッション内でクリアした章インデックスのセット（node選択画面のアンロック管理） */
 let clearedChapters = new Set();
 /** @type {null | {
@@ -208,6 +211,293 @@ function playBattleSe(kind) {
   try { const a = new Audio(url); a.volume = 0.48; a.play().catch(() => {}); } catch (_) {}
 }
 
+// ─── 紙吹雪 ──────────────────────────────────────────────────────
+function startConfetti() {
+  const canvas = document.getElementById("confettiCanvas");
+  if (!canvas) return null;
+  canvas.style.display = "block";
+  const W = canvas.width  = window.innerWidth;
+  const H = canvas.height = window.innerHeight;
+  const ctx = canvas.getContext("2d");
+
+  const COLORS = [
+    "#FF595E","#FF924C","#FFCA3A","#8AC926",
+    "#1982C4","#6A4C93","#F7B7D2","#4BC4CF",
+    "#FF7096","#C77DFF","#80B918","#E63946",
+  ];
+
+  // 長方形の紙吹雪パーティクル（幅8×高さ5px前後）
+  const pts = Array.from({ length: 150 }, (_, i) => ({
+    x: (i / 150) * W + (Math.random() - 0.5) * (W / 150),  // 均等スタート
+    y: -20 - Math.random() * H * 0.6,                        // 画面上方にスタート
+    w: 7 + Math.random() * 7,
+    h: 4 + Math.random() * 4,
+    color: COLORS[Math.floor(Math.random() * COLORS.length)],
+    angle:     Math.random() * Math.PI * 2,
+    spin:      (Math.random() < 0.5 ? 1 : -1) * (0.05 + Math.random() * 0.12),
+    vx:        (Math.random() - 0.5) * 0.6,
+    vy:        1.0 + Math.random() * 1.5,    // ゆっくり落下
+    phase:     Math.random() * Math.PI * 2,
+  }));
+
+  let rafId;
+  const draw = () => {
+    ctx.clearRect(0, 0, W, H);
+    for (const p of pts) {
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.angle);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w * 0.5, -p.h * 0.5, p.w, p.h);
+      ctx.restore();
+
+      // 物理更新
+      p.angle  += p.spin;
+      p.phase  += 0.03;
+      p.x      += p.vx + Math.sin(p.phase) * 0.4;
+      p.y      += p.vy;
+
+      // 画面外に出たら上に戻す
+      if (p.y > H + 20) {
+        p.y = -20;
+        p.x = Math.random() * W;
+      }
+    }
+    rafId = requestAnimationFrame(draw);
+  };
+  draw();
+
+  return () => {
+    cancelAnimationFrame(rafId);
+    ctx.clearRect(0, 0, W, H);
+    canvas.style.display = "none";
+  };
+}
+
+// ─── パッシブスキル カットイン ────────────────────────────────────
+/**
+ * ヒーローのパッシブスキル発動時にカットインを表示する
+ * @param {string} skillName  スキル名（例:「浪切」）
+ * @param {string} portraitUrl  ヒーロー画像 URL
+ * @returns {Promise<void>}  フェードアウト完了で resolve
+ */
+function showPassiveCutin(skillName, portraitUrl) {
+  const el = document.getElementById("passiveCutin");
+  if (!el) return Promise.resolve();
+  const skillEl    = document.getElementById("passiveCutinSkill");
+  const portraitEl = document.getElementById("passiveCutinPortrait");
+  if (skillEl)    skillEl.textContent = skillName;
+  if (portraitEl) portraitEl.src      = portraitUrl;
+
+  return new Promise((resolve) => {
+    // リセット：非表示 → 画面外右にセット → 表示
+    el.style.transition = "none";
+    el.style.opacity    = "0";
+    el.style.transform  = "translate(100%, -50%) skewY(-10deg)";
+    el.style.display    = "";
+    el.setAttribute("aria-hidden", "false");
+
+    // 次フレームでトランジション有効 → スライドイン
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        el.style.transition = "opacity 0.14s ease, transform 0.14s ease";
+        el.style.opacity    = "1";
+        el.style.transform  = "translateY(-50%) skewY(-10deg)";
+
+        // 700ms 表示後にスライドアウト
+        setTimeout(() => {
+          el.style.transition = "opacity 0.22s ease, transform 0.22s ease";
+          el.style.opacity    = "0";
+          el.style.transform  = "translate(-100%, -50%) skewY(-10deg)";
+          el.addEventListener("transitionend", function done() {
+            el.removeEventListener("transitionend", done);
+            el.style.display = "none";
+            el.setAttribute("aria-hidden", "true");
+            resolve();
+          });
+        }, 700);
+      });
+    });
+  });
+}
+
+// ─── クリティカル バナー ──────────────────────────────────────────
+/**
+ * クリティカルヒット時に大きなダメージ数字と CRITICAL ラベルを表示する
+ * @param {'player'|'enemy'} who  被ダメージ側（バナーの表示位置）
+ * @param {number} totalDmg  合計ダメージ値
+ */
+function spawnCritDisplay(who, totalDmg) {
+  const wrapId = who === "enemy" ? "enemyPortraitWrap" : "playerPortraitWrap";
+  const wrap = document.getElementById(wrapId);
+  if (!wrap) return;
+  const banner = document.createElement("div");
+  banner.className = "crit-banner";
+  banner.innerHTML =
+    `<span class="crit-banner__dmg">${totalDmg}</span>` +
+    `<span class="crit-banner__label">CRITICAL</span>`;
+  wrap.appendChild(banner);
+  // アニメーション終了後に自動除去（0.7s + バッファ）
+  setTimeout(() => { banner.remove(); }, 820);
+}
+
+// ─── LLエクステ 獲得モーダル（宝箱→開封→エクステ開示） ──────────
+function showLlExtModal(ext) {
+  const modal    = document.getElementById("llExtModal");
+  if (!modal) return Promise.resolve();
+
+  const phaseChest  = document.getElementById("llModalPhaseChest");
+  const phaseReveal = document.getElementById("llModalPhaseReveal");
+  const artEl   = document.getElementById("llExtModalArt");
+  const nameEl  = document.getElementById("llExtModalName");
+  const skillEl = document.getElementById("llExtModalSkill");
+  const descEl  = document.getElementById("llExtModalDesc");
+
+  // フェーズ2のデータを事前にセット
+  if (artEl) {
+    artEl.style.opacity = "";  // 前回の onerror で 0.3 が残っている可能性をリセット
+    artEl.src = EXT_IMG(ext.extId);
+  }
+  if (nameEl)  nameEl.textContent  = ext.name;
+  if (skillEl) skillEl.textContent = `【${ext.skillName}】`;
+  if (descEl)  descEl.textContent  = ext.desc;
+
+  // フェーズ1を表示、フェーズ2を隠す
+  phaseChest?.classList.remove("hidden");
+  phaseReveal?.classList.add("hidden");
+
+  modal.classList.remove("hidden");
+  modal.removeAttribute("aria-hidden");
+  const stopConfetti = startConfetti();
+
+  return new Promise((resolve) => {
+    // 「開ける！」ボタン → フェーズ2へ切り替え
+    const btnOpen = document.getElementById("btnLlExtOpen");
+    const onOpen = () => {
+      btnOpen.removeEventListener("click", onOpen);
+      phaseChest?.classList.add("hidden");
+      phaseReveal?.classList.remove("hidden");
+    };
+    btnOpen?.addEventListener("click", onOpen);
+
+    // 「受け取る！」ボタン → 閉じて resolve
+    const btnClaim = document.getElementById("btnLlExtClaim");
+    const onClaim = () => {
+      btnClaim.removeEventListener("click", onClaim);
+      modal.classList.add("hidden");
+      modal.setAttribute("aria-hidden", "true");
+      stopConfetti?.();
+      resolve();
+    };
+    btnClaim?.addEventListener("click", onClaim);
+  });
+}
+
+// ─── LLエクステ スロット UI 同期 ─────────────────────────────────
+function syncLlExtSlots() {
+  if (!runState) return;
+  const slots = runState.llExtSlots;
+  const slotIds = [
+    ["mapLlSlot0",     "mapLlSlot1"],
+    ["combatLlSlot0", "combatLlSlot1"],
+  ];
+  for (const pair of slotIds) {
+    for (let i = 0; i < 2; i++) {
+      const el = document.getElementById(pair[i]);
+      if (!el) continue;
+      const ext = slots[i];
+      if (ext) {
+        el.classList.add("ll-slot--filled");
+        el.title = `${ext.name}【${ext.skillName}】 ${ext.desc}`;
+        el.innerHTML = `<img src="${EXT_IMG(ext.extId)}" alt="${ext.name}" onerror="this.style.opacity='0'" />`;
+      } else {
+        el.classList.remove("ll-slot--filled");
+        el.title = "";
+        el.textContent = "—";
+      }
+    }
+  }
+  renderLlExtBar();
+}
+
+function renderLlExtBar() {
+  const bar = document.getElementById("llExtBar");
+  if (!bar || !runState) return;
+  const slots = runState.llExtSlots;
+  const inCombat = combat && view === "combat";
+  if (!inCombat) { bar.classList.add("hidden"); return; }
+  const hasAny = slots.some(s => s !== null);
+  bar.classList.toggle("hidden", !hasAny);
+  for (let i = 0; i < 2; i++) {
+    const btn = document.getElementById(`btnUseLlExt${i}`);
+    if (!btn) continue;
+    const ext = slots[i];
+    if (ext) {
+      btn.classList.remove("ll-slot--empty");
+      btn.title = ext.desc;
+      btn.innerHTML =
+        `<img src="${EXT_IMG(ext.extId)}" alt="" onerror="this.style.opacity='0'" style="width:16px;height:16px;object-fit:contain;flex-shrink:0;image-rendering:pixelated" />` +
+        `<span>${ext.skillName}</span>`;
+    } else {
+      btn.classList.add("ll-slot--empty");
+      btn.title = "";
+      btn.textContent = "空きスロット";
+    }
+  }
+}
+
+// ─── LLエクステ エフェクト適用 ───────────────────────────────────
+function applyLlExtEffect(ext) {
+  const s = combat;
+  clog(`【LLエクステ】${ext.name}「${ext.skillName}」発動！`);
+  switch (ext.effectKey) {
+    case "blade":
+      dealPhySkillToEnemyRange(s, 300, 400);
+      break;
+    case "grande":
+      dealIntSkillToEnemy(s, 400, 500, false);
+      break;
+    case "pen":
+      healPlayerFromIntSkill(s, 200, 250);
+      break;
+    case "armor": {
+      const boost = Math.floor(s.playerPhy * 0.5);
+      s.playerPhy += boost;
+      s.playerGuard = (s.playerGuard || 0) + 20;
+      playBattleSe("buff"); playPortraitEffect("player", "buff");
+      clog(`PHY+${boost} GRD+20`);
+      break;
+    }
+    case "blue":
+      healPlayerFromIntSkill(s, 200, 250);
+      s.playerInt += 4;
+      playBattleSe("buff"); playPortraitEffect("player", "buff");
+      clog("INT+4");
+      break;
+    case "fish":
+      healPlayerFromIntSkill(s, 150, 200);
+      s.playerPhy += 3;
+      s.hasResurrection = true;
+      playBattleSe("buff"); playPortraitEffect("player", "buff");
+      clog("PHY+3 リザレクション付与");
+      break;
+    default:
+      clog("（不明なエフェクト）");
+  }
+}
+
+function useLlExt(slotIdx) {
+  if (!combat || view !== "combat") return;
+  const ext = runState?.llExtSlots?.[slotIdx];
+  if (!ext) return;
+  runState.llExtSlots[slotIdx] = null;
+  applyLlExtEffect(ext);
+  if (combat.enemyHp <= 0) { endCombatWin(); return; }
+  if (combat.playerHp <= 0) { endCombatLoss(); return; }
+  syncLlExtSlots();
+  renderCombat();
+}
+
 // ─── ログ / エフェクト ────────────────────────────────────────────
 function clog(msg) {
   const el = document.getElementById("clog");
@@ -268,6 +558,18 @@ function lungePortrait(who) {
 }
 
 // ─── ダメージ計算補助 ─────────────────────────────────────────────
+/** リザレクション発動チェック（致死ダメージ後に HP を 1 に戻す） */
+function checkResurrection(s) {
+  if (s.playerHp <= 0 && s.hasResurrection) {
+    s.playerHp = 1;
+    s.hasResurrection = false;
+    playBattleSe("buff"); playPortraitEffect("player", "buff");
+    clog("【リザレクション】致死ダメージを耐えた！HP 1 で生存！");
+    return true;
+  }
+  return false;
+}
+
 function applyGuardToDamage(target, raw) {
   const key = target === "player" ? "playerGuard" : "enemyGuard";
   let g = combat[key] || 0;
@@ -313,6 +615,7 @@ function dealPhySkillToEnemy(s, skillPct) {
   flashPortrait("enemy");
   playPortraitEffect("enemy", "hit");
   if (total > 0) playBattleSe("hit");
+  if (critBonus > 0) spawnCritDisplay("enemy", total);
   clog(
     `PHY攻撃 ${skillPct}% → 基礎${base} カット${cut}%` +
     (critBonus ? " +CRIT" + critBonus : "") +
@@ -341,6 +644,7 @@ function dealIntSkillToEnemy(s, minPct, maxPct, forceCrit = false) {
   flashPortrait("enemy");
   playPortraitEffect("enemy", "hit");
   if (total > 0) playBattleSe("hit");
+  if (critBonus > 0) spawnCritDisplay("enemy", total);
   clog(
     `INT攻撃 ${skillPct}% → 基礎${base} カット${cut}%` +
     (critBonus ? " +CRIT" + critBonus : "") +
@@ -380,21 +684,19 @@ function dealPhySkillFromEnemyToPlayer(s, skillPct) {
   }
   total = applyGuardToDamage("player", total);
   s.playerHp = Math.max(0, s.playerHp - total);
+  checkResurrection(s);
   lungePortrait("enemy");
   flashPortrait("player");
   playPortraitEffect("player", "hit");
   if (total > 0) playBattleSe("hit");
+  if (critBonus > 0) spawnCritDisplay("player", total);
   clog(
     `敵 PHY ${skillPct}% → 被ダメージ ${total}` +
     (critBonus ? "（CRIT+" + critBonus + "）" : "")
   );
-  // 張遼「遼来遼来」: 被ダメージ後に50%の確率で反撃
+  // 張遼パッシブ判定フラグを立てる（実際の反撃は enemyTurn で async に処理）
   if (LEADER.passiveKey === 'zhang' && s.playerHp > 0 && s.enemyHp > 0 && Math.random() < 0.5) {
-    const counterDmg = Math.max(1, Math.floor(s.playerPhy * 0.2));
-    s.enemyHp = Math.max(0, s.enemyHp - counterDmg);
-    playPortraitEffect("enemy", "hit");
-    playBattleSe("hit");
-    clog(`【遼来遼来】発動！ 反撃 ${counterDmg} ダメージ`);
+    s._zhangCounterPending = true;
   }
 }
 
@@ -413,21 +715,19 @@ function dealIntSkillFromEnemyToPlayer(s, skillPct) {
   }
   total = applyGuardToDamage("player", total);
   s.playerHp = Math.max(0, s.playerHp - total);
+  checkResurrection(s);
   lungePortrait("enemy");
   flashPortrait("player");
   playPortraitEffect("player", "hit");
   if (total > 0) playBattleSe("hit");
+  if (critBonus > 0) spawnCritDisplay("player", total);
   clog(
     `敵 INT ${skillPct}% → 被ダメージ ${total}` +
     (critBonus ? "（CRIT+" + critBonus + "）" : "")
   );
-  // 張遼「遼来遼来」: 被ダメージ後に50%の確率で反撃
+  // 張遼パッシブ判定フラグを立てる（実際の反撃は enemyTurn で async に処理）
   if (LEADER.passiveKey === 'zhang' && s.playerHp > 0 && s.enemyHp > 0 && Math.random() < 0.5) {
-    const counterDmg = Math.max(1, Math.floor(s.playerPhy * 0.2));
-    s.enemyHp = Math.max(0, s.enemyHp - counterDmg);
-    playPortraitEffect("enemy", "hit");
-    playBattleSe("hit");
-    clog(`【遼来遼来】発動！ 反撃 ${counterDmg} ダメージ`);
+    s._zhangCounterPending = true;
   }
 }
 
@@ -437,6 +737,7 @@ function dealSpecialMaxHpPercentToPlayer(s, pct) {
   if (s.damageReducedThisTurn) raw = Math.ceil(raw / 2);
   raw = applyDamageThroughShield(s, "player", raw);
   s.playerHp = Math.max(0, s.playerHp - raw);
+  checkResurrection(s);
   lungePortrait("enemy");
   flashPortrait("player");
   playPortraitEffect("player", "area");
@@ -508,6 +809,7 @@ function ensureRunState() {
       lastMapNodeId: null,
       pathNodeIds: [],
       runComplete: false,
+      llExtSlots: [null, null],
     };
   }
 }
@@ -568,6 +870,7 @@ function syncResources() {
   }
   const chapterEl = document.getElementById("chapterVal");
   if (chapterEl) chapterEl.textContent = String((runState.chapterIdx ?? 0) + 1);
+  syncLlExtSlots();
   const layerEl = document.getElementById("layerVal");
   if (layerEl) {
     if (runState.runComplete) {
@@ -608,13 +911,13 @@ function renderMap() {
   if (titleEl) {
     const chapter = CHAPTERS[runState.chapterIdx];
     titleEl.textContent = runState.runComplete
-      ? "全ランクリア！（3 章突破）"
+      ? `全ランクリア！（${CHAPTERS.length} 章突破・トロイ制覇）`
       : `章 ${chapter.id}「${chapter.name}」（下から上へ進む）`;
   }
 
   if (runState.runComplete) {
     host.innerHTML =
-      "<p style='color:var(--accent);margin:0 0 0.75rem'>3 章すべてをクリアしました！おめでとうございます。</p>" +
+      `<p style='color:var(--accent);margin:0 0 0.75rem'>全 ${CHAPTERS.length} 章（トロイまで）をクリアしました！おめでとうございます。</p>` +
       "<button type='button' class='action primary' id='btnRestartClear'>もう一度</button>";
     document.getElementById("btnRestartClear").addEventListener("click", resetRun);
     syncResources();
@@ -944,6 +1247,7 @@ function startCombatFromMapNode(node) {
     turn: 1,
     zhangPassiveTriggered: false,
     doylePassiveTriggered: false,
+    hasResurrection: false,
     _lastUi: null,
   };
 
@@ -969,6 +1273,7 @@ function startCombatFromMapNode(node) {
   if (isBoss && (enemyDef.initialShield || 0) > 0) {
     clog(`ボスはシールド ${enemyDef.initialShield} を持ちます！`);
   }
+  syncLlExtSlots();
   startPlayerTurn();
 }
 
@@ -1062,6 +1367,7 @@ function startPlayerTurn() {
     combat.playerHp = Math.max(0, combat.playerHp - dmg);
     flashPortrait("player"); playPortraitEffect("player", "debuff");
     clog(`毒ダメージ（自分）${dmg}`);
+    checkResurrection(combat);
     if (combat.playerHp <= 0) { endCombatLoss(); return; }
   }
   // 毒ティック（敵）
@@ -1211,7 +1517,7 @@ function setHandFocusByIndex(idx) {
 }
 
 function playCardByRef(cardRef) {
-  if (!combat || view !== "combat") return;
+  if (!combat || view !== "combat" || combatInputLocked) return;
   const idx = combat.hand.indexOf(cardRef);
   if (idx < 0) return;
   playCard(idx);
@@ -1273,6 +1579,7 @@ function bindHandCard(el, idx, card) {
   el.addEventListener("click", (ev) => {
     if (!window.matchMedia("(pointer: fine)").matches) return;
     ev.preventDefault();
+    if (combatInputLocked) return;
     if (card.cost > combat.energy || el.classList.contains("card-slot--disabled")) return;
     const slots = Array.from(document.querySelectorAll("#hand .card-slot"));
     const myIdx = slots.indexOf(el);
@@ -1388,7 +1695,8 @@ function renderCombat() {
     slot.innerHTML =
       '<div class="card-cost-above"><span class="cost-zeus" aria-hidden="true">⚡</span>' + card.cost + '</div>' +
       '<div class="card ' + card.type + (card.exhaust ? ' card--exhaust' : '') + '">' +
-      '<div class="card-name-hd">' + escapeHtml(card.extNameJa) + (card.exhaust ? '<span class="exhaust-badge" title="消耗：使い切り">🔥</span>' : '') + '</div>' +
+      '<div class="card-name-hd">' + escapeHtml(card.extNameJa) + (card.exhaust ? '<span class="exhaust-badge" title="消耗：使い切り">🔥</span>' : '') +
+      (card.skillNameJa ? '<span class="card-skill-sub">' + escapeHtml(card.skillNameJa) + '</span>' : '') + '</div>' +
       '<div class="card-icon-area">' +
       '<img class="card-ext-img-full" src="' + EXT_IMG(card.extId) + '" alt="" onerror="this.style.opacity=\'0\'" />' +
       '<img class="card-skill-icon-tl" src="' + battleIconUrl(card.skillIcon) + '" alt="" />' +
@@ -1415,8 +1723,49 @@ function renderCombat() {
   };
 }
 
+// ─── 甲斐姫パッシブ（浪切）非同期ヘルパー ────────────────────────
+async function applyKaihimePassive(s) {
+  if (LEADER.passiveKey !== 'kaihime') return;
+  if (s.enemyHp <= 0) return;
+  if (Math.random() >= 0.5) return;
+
+  const bonusDmg = Math.max(1, Math.floor(s.playerPhy * 0.5));
+  // カットイン表示（待機）
+  combatInputLocked = true;
+  await showPassiveCutin("浪切", typeof LEADER.img === "function" ? LEADER.img() : (LEADER.img || ""));
+  combatInputLocked = false;
+
+  if (!combat || s.enemyHp <= 0) return;
+  s.enemyHp = Math.max(0, s.enemyHp - bonusDmg);
+  playPortraitEffect("enemy", "hit");
+  playBattleSe("hit");
+  clog(`【浪切】発動！ 追加ダメージ ${bonusDmg}`);
+  renderCombat();
+}
+
+// ─── 張遼パッシブ（遼来遼来）非同期ヘルパー ──────────────────────
+async function applyZhangPassive(s) {
+  if (!s._zhangCounterPending) return;
+  s._zhangCounterPending = false;
+  if (s.playerHp <= 0 || s.enemyHp <= 0) return;
+
+  const counterDmg = Math.max(1, Math.floor(s.playerPhy * 0.2));
+  // カットイン表示（待機）
+  combatInputLocked = true;
+  await showPassiveCutin("遼来遼来", typeof LEADER.img === "function" ? LEADER.img() : (LEADER.img || ""));
+  combatInputLocked = false;
+
+  if (!combat || s.enemyHp <= 0) return;
+  s.enemyHp = Math.max(0, s.enemyHp - counterDmg);
+  playPortraitEffect("enemy", "hit");
+  playBattleSe("hit");
+  clog(`【遼来遼来】発動！ 反撃 ${counterDmg} ダメージ`);
+  renderCombat();
+}
+
 // ─── カードプレイ ─────────────────────────────────────────────────
-function playCard(idx) {
+async function playCard(idx) {
+  if (combatInputLocked) return;
   const card = combat.hand[idx];
   if (!card || card.cost > combat.energy) return;
   combat.energy -= card.cost;
@@ -1429,20 +1778,18 @@ function playCard(idx) {
     combat.discardPile.push(card);
   }
   card.play(combat);
-  // 甲斐姫「浪切」: スキルカード使用後に50%の確率で追加ダメージ
-  if (LEADER.passiveKey === 'kaihime' && combat.enemyHp > 0 && Math.random() < 0.5) {
-    const bonusDmg = Math.max(1, Math.floor(combat.playerPhy * 0.5));
-    combat.enemyHp = Math.max(0, combat.enemyHp - bonusDmg);
-    playPortraitEffect("enemy", "hit");
-    playBattleSe("hit");
-    clog(`【浪切】発動！ 追加ダメージ ${bonusDmg}`);
-  }
+  // カード効果を UI に反映してからパッシブへ
+  renderCombat();
+  if (combat.enemyHp <= 0) { endCombatWin(); return; }
+  // 甲斐姫「浪切」: スキルカード使用後に50%の確率で追加ダメージ（カットイン付き）
+  await applyKaihimePassive(combat);
+  if (!combat) return;
   if (combat.enemyHp <= 0) { endCombatWin(); return; }
   renderCombat();
 }
 
 // ─── 敵ターン ─────────────────────────────────────────────────────
-function enemyTurn() {
+async function enemyTurn() {
   const it = combat.enemyIntent;
   if (!it) { combat.turn++; startPlayerTurn(); return; }
 
@@ -1503,6 +1850,13 @@ function enemyTurn() {
   }
 
   if (combat.playerHp <= 0) { endCombatLoss(); return; }
+
+  // 張遼「遼来遼来」: 被ダメージ後に反撃（カットイン付き、非同期）
+  renderCombat();
+  await applyZhangPassive(combat);
+  if (!combat) return;
+  if (combat.enemyHp <= 0) { endCombatWin(); return; }
+
   combat.turn++;
   startPlayerTurn();
 }
@@ -1571,8 +1925,28 @@ function endCombatWin() {
     isBoss,
   };
   combat = null;
+
+  // ─── LLエクステ ドロップ判定（ホレリス以降、章インデックス >= 1） ───
+  let droppedLlExt = null;
+  if (runState.chapterIdx >= 1) {
+    const hasEmpty = runState.llExtSlots.some(s => s === null);
+    const dropChance = isElite ? 1.0 : 0.10;
+    if (hasEmpty && Math.random() < dropChance) {
+      droppedLlExt = LL_EXT_POOL[Math.floor(Math.random() * LL_EXT_POOL.length)];
+      const emptyIdx = runState.llExtSlots.indexOf(null);
+      runState.llExtSlots[emptyIdx] = droppedLlExt;
+      clog(`✨ LLエクステ「${droppedLlExt.name}」ドロップ！`);
+    }
+  }
+
   stopBgm();
-  showCutin("win").then(() => openRewardScreen(picks));
+  showCutin("win").then(() => {
+    if (droppedLlExt) {
+      showLlExtModal(droppedLlExt).then(() => openRewardScreen(picks));
+    } else {
+      openRewardScreen(picks);
+    }
+  });
 }
 
 // ─── 報酬画面 ─────────────────────────────────────────────────────
@@ -1595,7 +1969,9 @@ function buildRewardPickButton(def, mockS) {
     '<span class="card-cost-badge"><span class="cost-zeus" aria-hidden="true">⚡</span>' + def.cost + "</span>" +
     '<img class="card-skill-corner" src="' + battleIconUrl(def.skillIcon) + '" alt="" />' +
     "</div></div>" +
-    '<div class="card-ext-name">' + escapeHtml(def.extNameJa) + "</div>" +
+    '<div class="card-ext-name">' + escapeHtml(def.extNameJa) +
+    (def.skillNameJa ? '<span class="card-ext-skill-sub">' + escapeHtml(def.skillNameJa) + '</span>' : '') +
+    "</div>" +
     '<div class="card-effect-summary">' +
     summaryLines.map((t) => "<p>" + escapeHtml(t) + "</p>").join("") +
     "</div></div></div>";
@@ -1771,7 +2147,7 @@ function openShop() {
   removeSection.appendChild(removeTitle);
   const removeDesc = document.createElement("div");
   removeDesc.className = "shop-remove-desc";
-  removeDesc.textContent = "デッキ内のカードを1枚選んで除外できます（スターター以外）。";
+  removeDesc.textContent = "デッキ内のカードを1枚選んで除外できます（スターターも含む）。";
   removeSection.appendChild(removeDesc);
 
   const removeBtn = document.createElement("button");
@@ -1788,22 +2164,18 @@ function openShop() {
 
 // ─── ショップ カード破棄 ──────────────────────────────────────────
 const SHOP_REMOVE_COST = 50;
-// スターターカードのキー（破棄不可）
-const STARTER_KEYS = new Set(['ext1001', 'ext1004', 'ext1008']);
-
 function openShopRemoveCard(goldDisp) {
   ensureRunState();
   if (gold < SHOP_REMOVE_COST) {
     renderNavigator(`GUM が足りません（必要: ${SHOP_REMOVE_COST} GUM）`);
     return;
   }
-  // 破棄可能なカード（スターター以外）
+  // デッキ内の全カードが破棄対象（スターターも含む）
   const removable = runState.deck
-    .map((c, idx) => ({ card: c, idx }))
-    .filter(({ card }) => !STARTER_KEYS.has(card.libraryKey));
+    .map((c, idx) => ({ card: c, idx }));
 
   if (removable.length === 0) {
-    renderNavigator("破棄できるカードがありません（スターターカードは破棄不可）");
+    renderNavigator("破棄できるカードがありません");
     return;
   }
 
@@ -1892,6 +2264,7 @@ function startRunFromChapter(chapterIdx) {
     lastMapNodeId: null,
     pathNodeIds: [],
     runComplete: false,
+    llExtSlots: [null, null],
   };
   showView("map");
   renderMap();
@@ -1905,34 +2278,30 @@ function renderNodeSelect(justUnlockedIdx = null) {
   const el = document.getElementById("nodeSelectView");
   if (!el) return;
 
-  // CHAPTERS + ゴール「TROY」の構成
-  const TROY_BG_ID = '1052';
-  const goals = [
-    ...CHAPTERS.map((ch, idx) => ({ idx, name: ch.name.replace('node : ', ''), chapter: ch })),
-    { idx: CHAPTERS.length, name: 'TROY', chapter: null, bgId: TROY_BG_ID },
-  ];
+  // CHAPTERS のみ（トロイ実装済みのため最終目標 TROY エントリは廃止）
+  const goals = CHAPTERS.map((ch, idx) => ({ idx, name: ch.name.replace('node : ', ''), chapter: ch }));
 
   let html = '<div class="ns-header"><h2>node を選択してください</h2><p class="ns-sub">ボスを倒すと次の node が解放されます</p></div>';
   html += '<div class="ns-cards">';
 
   goals.forEach((goal) => {
-    const isTroy     = goal.chapter === null;
-    const isUnlocked = !isTroy && (goal.idx === 0 || clearedChapters.has(goal.idx - 1));
-    const isCleared  = !isTroy && clearedChapters.has(goal.idx);
+    const isUnlocked = goal.idx === 0 || clearedChapters.has(goal.idx - 1);
+    const isCleared  = clearedChapters.has(goal.idx);
     const isJustUnlocked = goal.idx === justUnlockedIdx;
+    const isFinal    = goal.idx === CHAPTERS.length - 1;
 
     const ch = goal.chapter;
-    const bgId = ch?.bgId ?? goal.bgId ?? '1001';
+    const bgId = ch?.bgId ?? '1001';
     const bgUrl = img('Image/Backgrounds/' + bgId + '.png');
 
     // 状態クラス
-    const stateClass = isTroy      ? 'ns-card--troy' :
-                       isCleared   ? 'ns-card--cleared' :
+    const stateClass = isCleared   ? 'ns-card--cleared' :
                        isUnlocked  ? 'ns-card--unlocked' :
                                      'ns-card--locked';
+    const finalClass = isFinal && isUnlocked && !isCleared ? ' ns-card--final' : '';
     const animClass  = isJustUnlocked ? ' ns-card--just-unlocked' : '';
 
-    html += `<div class="ns-card ${stateClass}${animClass}" data-idx="${goal.idx}" role="${isUnlocked ? 'button' : 'presentation'}" tabindex="${isUnlocked ? 0 : -1}" style="--ns-bg: url('${bgUrl}')">`;
+    html += `<div class="ns-card ${stateClass}${finalClass}${animClass}" data-idx="${goal.idx}" role="${isUnlocked ? 'button' : 'presentation'}" tabindex="${isUnlocked ? 0 : -1}" style="--ns-bg: url('${bgUrl}')">`;
 
     // 背景レイヤー
     html += '<div class="ns-card-bg"></div>';
@@ -1940,13 +2309,10 @@ function renderNodeSelect(justUnlockedIdx = null) {
     // ─── コンテンツ ───
     html += '<div class="ns-card-body">';
 
-    // node 名
-    html += `<div class="ns-card-title">${goal.name}</div>`;
+    // node 名（最終ステージは ★ マーカー付き）
+    html += `<div class="ns-card-title">${isFinal ? '★ ' : ''}${goal.name}${isFinal ? ' ★' : ''}</div>`;
 
-    if (isTroy) {
-      // TROY：最終目標ロック表示
-      html += '<div class="ns-card-troy-lock"><span>★</span><span class="ns-card-troy-label">最終目標</span></div>';
-    } else if (!isUnlocked) {
+    if (!isUnlocked) {
       // ロック中
       html += '<div class="ns-card-lock-overlay"><span class="ns-lock-icon">🔒</span><span class="ns-lock-label">ロック中</span></div>';
     } else {
@@ -2262,12 +2628,12 @@ function closeDeckModal() {
 
 // ─── 初期化 ───────────────────────────────────────────────────────
 function init() {
-  document.getElementById("btnEndTurn").addEventListener("click", () => {
-    if (!combat || view !== "combat") return;
+  document.getElementById("btnEndTurn").addEventListener("click", async () => {
+    if (!combat || view !== "combat" || combatInputLocked) return;
     combat.hand.forEach((c) => combat.discardPile.push(c));
     combat.hand = [];
     renderCombat();
-    enemyTurn();
+    await enemyTurn();
   });
   document.getElementById("btnDeckOpen").addEventListener("click", openDeckModal);
   document.getElementById("deckModalClose").addEventListener("click", closeDeckModal);
@@ -2325,6 +2691,10 @@ function init() {
       popup.classList.add("hidden");
     }
   });
+
+  // ── LLエクステ 使用ボタン ─────────────────────────────────────
+  document.getElementById("btnUseLlExt0")?.addEventListener("click", () => useLlExt(0));
+  document.getElementById("btnUseLlExt1")?.addEventListener("click", () => useLlExt(1));
 }
 
 init();

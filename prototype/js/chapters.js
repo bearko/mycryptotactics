@@ -72,4 +72,26 @@ export const CHAPTERS = [
     bossId: 'boss-ch2',
     bossRewardGold: 120,
   },
+  // ─── 章 4 ─────────────────────────────────────────────────────────
+  {
+    id: 5,
+    name: 'node : トロイ',
+    bgId: '1037',
+    mapRules: {
+      layers: 6,
+      nodesPerLayerMin: 3,
+      nodesPerLayerMax: 5,
+      // エリート出現率を高め・休憩を少なくして難易度を底上げ
+      nodeRatios: { fight: 0.38, rest: 0.07, shop: 0.13, elite: 0.20, craft: 0.10, event: 0.12 },
+    },
+    enemyPool: ['tr-001', 'tr-002', 'tr-003'],
+    elitePool: ['tr-e01'],
+    cardPool: [
+      'cd301', 'cd302', 'cd303', 'cd304', 'cd305',
+      'cd201', 'cd202', 'cd203', 'cd204', 'cd205', 'cd206',
+      'cdH01', 'cdH02', 'cdH03', 'cdH04',
+    ],
+    bossId: 'boss-troy',
+    bossRewardGold: 180,
+  },
 ];
