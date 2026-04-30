@@ -446,8 +446,12 @@
       position: relative;
     }
     .footer-topbar {
-      display: flex; align-items: center; justify-content: space-between;
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
       margin-bottom: 0.35rem;
+    }
+    .footer-topbar #btnEndTurn {
+      position: absolute; right: 0;
     }
     .footer-bottombar {
       display: flex; justify-content: flex-end;
@@ -885,6 +889,29 @@
       line-height: 1.28; text-align: left; z-index: 6;
     }
     .reward-card-inner .card-effect-summary p { margin: 0.06rem 0; }
+
+    /* Rarity border colors on reward / shop / craft cards */
+    .reward-card-btn[data-rarity="common"]    .reward-card-inner { border-color: #0984E3; }
+    .reward-card-btn[data-rarity="uncommon"]  .reward-card-inner { border-color: #00B894; }
+    .reward-card-btn[data-rarity="rare"]      .reward-card-inner { border-color: #FDCB6E; }
+    .reward-card-btn[data-rarity="epic"]      .reward-card-inner { border-color: #E17055; }
+    .reward-card-btn[data-rarity="legendary"] .reward-card-inner { border-color: #D63031; }
+
+    /* ── Portrait attack lunge animations ─────────────────────────── */
+    @keyframes portrait-lunge-right {
+      0%   { transform: translateX(0)    scale(1);    }
+      35%  { transform: translateX(20px) scale(1.07); }
+      65%  { transform: translateX(10px) scale(1.03); }
+      100% { transform: translateX(0)    scale(1);    }
+    }
+    @keyframes portrait-lunge-left {
+      0%   { transform: translateX(0)     scale(1);    }
+      35%  { transform: translateX(-20px) scale(1.07); }
+      65%  { transform: translateX(-10px) scale(1.03); }
+      100% { transform: translateX(0)     scale(1);    }
+    }
+    .portrait-lunge--player { animation: portrait-lunge-right 0.32s ease; }
+    .portrait-lunge--enemy  { animation: portrait-lunge-left  0.32s ease; }
 
     button.action {
       background: var(--border);

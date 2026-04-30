@@ -250,6 +250,18 @@ function flashPortrait(which) {
   setTimeout(() => wrap.classList.remove("portrait-hit"), 380);
 }
 
+/** 攻撃側のポートレートを突進アニメで動かす（player = 右へ, enemy = 左へ） */
+function lungePortrait(who) {
+  const id = who === "enemy" ? "enemyPortraitWrap" : "playerPortraitWrap";
+  const wrap = document.getElementById(id);
+  if (!wrap) return;
+  const cls = who === "player" ? "portrait-lunge--player" : "portrait-lunge--enemy";
+  wrap.classList.remove(cls);   // reset if still running
+  void wrap.offsetWidth;        // reflow to restart animation
+  wrap.classList.add(cls);
+  setTimeout(() => wrap.classList.remove(cls), 350);
+}
+
 // ─── ダメージ計算補助 ─────────────────────────────────────────────
 function applyGuardToDamage(target, raw) {
   const key = target === "player" ? "playerGuard" : "enemyGuard";
@@ -292,6 +304,7 @@ function dealPhySkillToEnemy(s, skillPct) {
   }
   total = applyGuardToDamage("enemy", total);
   s.enemyHp = Math.max(0, s.enemyHp - total);
+  lungePortrait("player");
   flashPortrait("enemy");
   playPortraitEffect("enemy", "hit");
   if (total > 0) playBattleSe("hit");
@@ -319,6 +332,7 @@ function dealIntSkillToEnemy(s, minPct, maxPct, forceCrit = false) {
   let total = base + critBonus;
   total = applyGuardToDamage("enemy", total);
   s.enemyHp = Math.max(0, s.enemyHp - total);
+  lungePortrait("player");
   flashPortrait("enemy");
   playPortraitEffect("enemy", "hit");
   if (total > 0) playBattleSe("hit");
@@ -361,6 +375,7 @@ function dealPhySkillFromEnemyToPlayer(s, skillPct) {
   }
   total = applyGuardToDamage("player", total);
   s.playerHp = Math.max(0, s.playerHp - total);
+  lungePortrait("enemy");
   flashPortrait("player");
   playPortraitEffect("player", "hit");
   if (total > 0) playBattleSe("hit");
@@ -385,6 +400,7 @@ function dealIntSkillFromEnemyToPlayer(s, skillPct) {
   }
   total = applyGuardToDamage("player", total);
   s.playerHp = Math.max(0, s.playerHp - total);
+  lungePortrait("enemy");
   flashPortrait("player");
   playPortraitEffect("player", "hit");
   if (total > 0) playBattleSe("hit");
@@ -400,6 +416,7 @@ function dealSpecialMaxHpPercentToPlayer(s, pct) {
   if (s.damageReducedThisTurn) raw = Math.ceil(raw / 2);
   raw = applyDamageThroughShield(s, "player", raw);
   s.playerHp = Math.max(0, s.playerHp - raw);
+  lungePortrait("enemy");
   flashPortrait("player");
   playPortraitEffect("player", "area");
   if (raw > 0) playBattleSe("area");
@@ -920,21 +937,64 @@ function startCombatFromMapNode(node) {
 }
 
 // ─── 意図テキスト ─────────────────────────────────────────────────
+/** 敵の PHY 攻撃が現在の防御力を考慮した上で与える推定ダメージを返す */
+function estEnemyPhyDmg(pct) {
+  const base = Math.floor(combat.enemyPhy * pct / 100);
+  const cut  = cutRateFromPhy(combat.playerPhy);
+  return Math.max(0, Math.floor(base * (100 - cut) / 100));
+}
+function estEnemyIntDmg(pct) {
+  const base = Math.floor(combat.enemyInt * pct / 100);
+  const cut  = cutRateFromInt(combat.playerInt);
+  return Math.max(0, Math.floor(base * (100 - cut) / 100));
+}
+
 function intentText() {
   const it = combat?.enemyIntent;
   if (!it) return "—";
   switch (it.kind) {
-    case "attack":          return `ATK PHY ${it.phyPct}%`;
-    case "attackPoison":    return `ATK PHY ${it.phyPct}% + 毒×${it.poisonStacks}`;
-    case "attackBleed":     return `ATK PHY ${it.phyPct}% + 出血×${it.bleedStacks}`;
-    case "attackDouble":    return `ATK PHY ${it.phyPct}% ×2`;
-    case "attackInt":       return `ATK INT ${it.intPct}%`;
-    case "attackIntDouble": return `ATK INT ${it.intPct}% ×2`;
-    case "healSelf":        return `自己回復 最大HP ${it.pct}%`;
-    case "buffSelf":        return `強化: PHY+${it.phyAdd || 0} INT+${it.intAdd || 0}`;
-    case "guard":           return `GUARD +${it.value}`;
-    case "special":         return `SPECIAL 最大HP ${it.pct}%`;
-    default:                return "—";
+    case "attack": {
+      const d = estEnemyPhyDmg(it.phyPct);
+      return `先頭：${d} ダメージ`;
+    }
+    case "attackPoison": {
+      const d = estEnemyPhyDmg(it.phyPct);
+      return `先頭：${d} ダメージ ＋毒×${it.poisonStacks}`;
+    }
+    case "attackBleed": {
+      const d = estEnemyPhyDmg(it.phyPct);
+      return `先頭：${d} ダメージ ＋出血×${it.bleedStacks}`;
+    }
+    case "attackDouble": {
+      const d = estEnemyPhyDmg(it.phyPct);
+      return `先頭：${d} ダメージ ×2`;
+    }
+    case "attackInt": {
+      const d = estEnemyIntDmg(it.intPct);
+      return `先頭：${d} ダメージ（INT）`;
+    }
+    case "attackIntDouble": {
+      const d = estEnemyIntDmg(it.intPct);
+      return `先頭：${d} ダメージ（INT）×2`;
+    }
+    case "healSelf": {
+      const h = Math.max(1, Math.floor(combat.enemyHpMax * it.pct / 100));
+      return `自己回復：${h} HP`;
+    }
+    case "buffSelf": {
+      const parts = [];
+      if (it.phyAdd) parts.push(`PHY+${it.phyAdd}`);
+      if (it.intAdd) parts.push(`INT+${it.intAdd}`);
+      return `強化：${parts.join(' ')}`;
+    }
+    case "guard":
+      return `防御：GRD+${it.value}`;
+    case "special": {
+      const d = Math.max(1, Math.floor(combat.playerHpMax * it.pct / 100));
+      return `先頭：${d} ダメージ（特殊）`;
+    }
+    default:
+      return "—";
   }
 }
 
@@ -1481,6 +1541,8 @@ function endCombatWin() {
 function buildRewardPickButton(def, mockS) {
   const b = document.createElement("button");
   b.type = "button"; b.className = "reward-card-btn";
+  const rarity = CARD_RARITIES[def.libraryKey] || 'common';
+  b.setAttribute("data-rarity", rarity);
   const summaryLines =
     typeof def.effectSummaryLines === "function" ? def.effectSummaryLines(mockS) :
     typeof def.previewLines === "function" ? def.previewLines(mockS) : [];

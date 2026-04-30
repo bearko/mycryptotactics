@@ -1141,7 +1141,7 @@ export const CARD_RARITIES = {
   ext1004: 'common',    // ノービスアーマー
   ext1005: 'uncommon',  // ノービスホース（次ターンエナジー）
   ext1006: 'common',    // ノービスカタナ
-  ext1008: 'uncommon',  // ノービスブック（INT+ドロー+ダメージ）
+  ext1008: 'common',    // ノービスブック（INT+ドロー+ダメージ）
   ext1011: 'common',    // アックス
   ext1012: 'common',    // ETHEREMON-EKOPI
   ext1022: 'uncommon',  // ドラゴン（全体+INT debuff）
