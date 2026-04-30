@@ -1,10 +1,4 @@
 import {
-  MAP_NODES,
-  MAP_EDGES,
-  mapNodeById,
-  reachableNextNodeIds,
-} from "./map.js";
-import {
   createCardRuntime,
   shuffle,
   battleIconUrl,
@@ -30,84 +24,97 @@ import {
   applyDamageThroughShield,
 } from "./battle-mch.js";
 import { initHelp } from "./help.js";
+import { ENEMY_DEFS } from "./enemies.js";
+import { BOSS_DEFS } from "./bosses.js";
+import { CHAPTERS } from "./chapters.js";
+import { generateChapterMap } from "./maps.js";
 
+// ─── アクティブマップ（章ごとに差し替え） ──────────────────────
+let activeMapNodes = [];
+let activeMapEdges = [];
+let activeEdgeFrom = new Map();
+
+function setActiveMap(nodes, edges) {
+  activeMapNodes = nodes;
+  activeMapEdges = edges;
+  activeEdgeFrom = new Map();
+  for (const [a, b] of edges) {
+    if (!activeEdgeFrom.has(a)) activeEdgeFrom.set(a, []);
+    activeEdgeFrom.get(a).push(b);
+  }
+}
+
+function mapNodeById(id) {
+  return activeMapNodes.find((n) => n.id === id) || null;
+}
+
+function reachableNextNodeIds(lastNodeId) {
+  if (!lastNodeId) return activeEdgeFrom.get("START") || [];
+  return activeEdgeFrom.get(lastNodeId) || [];
+}
+
+// ─── MAP_START（SVG 用の仮想入口ノード） ─────────────────────────
 const MAP_START = { id: "START", layer: -1, x: 50, y: 92 };
 
+// ─── 状態変数 ────────────────────────────────────────────────────
 let gold = 75;
 let view = "map";
-/** @type {null | { deck: any[], playerHp: number, playerHpMax: number, lastMapNodeId: string | null, pathNodeIds: string[], runComplete: boolean }} */
+/** @type {null | {
+ *   chapterIdx: number,
+ *   deck: any[],
+ *   playerHp: number,
+ *   playerHpMax: number,
+ *   lastMapNodeId: string | null,
+ *   pathNodeIds: string[],
+ *   runComplete: boolean,
+ * }} */
 let runState = null;
 let combat = null;
-/** @type {string | null} */
 let pendingShopNodeId = null;
 /** @type {'win'|'lose'|null} */
 let cutinKind = null;
-/** @type {null | { resolve: () => void }} */
 let cutinResolve = null;
-/** 勝利カットイン: 表示直後の誤タップを無視 */
 let cutinWinIgnoreUntil = 0;
-/** 勝利直後の同期用スナップショット（報酬画面で deck に加える） */
 let postCombatSnapshot = null;
-/** 手札でフォーカス中のインデックス（二段階タップ／クリックで使用） */
 let handFocusedIdx = -1;
 /** @type {HTMLAudioElement | null} */
 let bgmAudio = null;
 
+// ─── BGM / SE ────────────────────────────────────────────────────
 function stopBgm() {
-  if (bgmAudio) {
-    bgmAudio.pause();
-    bgmAudio.currentTime = 0;
-    bgmAudio = null;
-  }
+  if (bgmAudio) { bgmAudio.pause(); bgmAudio.currentTime = 0; bgmAudio = null; }
 }
 
 function startBgmCombat() {
   stopBgm();
   try {
     bgmAudio = new Audio(AUDIO_URLS.bgmPvp());
-    bgmAudio.loop = true;
-    bgmAudio.volume = 0.32;
+    bgmAudio.loop = true; bgmAudio.volume = 0.32;
     bgmAudio.play().catch(() => {});
   } catch (_) {}
 }
 
 function playSeClear() {
-  try {
-    const a = new Audio(AUDIO_URLS.seClear());
-    a.volume = 0.55;
-    a.play().catch(() => {});
-  } catch (_) {}
+  try { const a = new Audio(AUDIO_URLS.seClear()); a.volume = 0.55; a.play().catch(() => {}); } catch (_) {}
 }
 
 function playJingle(kind) {
-  const url =
-    kind === "win" ? AUDIO_URLS.jingleWin() : AUDIO_URLS.jingleLose();
-  try {
-    const a = new Audio(url);
-    a.volume = 0.52;
-    a.play().catch(() => {});
-  } catch (_) {}
+  const url = kind === "win" ? AUDIO_URLS.jingleWin() : AUDIO_URLS.jingleLose();
+  try { const a = new Audio(url); a.volume = 0.52; a.play().catch(() => {}); } catch (_) {}
 }
 
 /** @param {'hit'|'heal'|'buff'|'debuff'|'area'} kind */
 function playBattleSe(kind) {
   const url =
-    kind === "heal"
-      ? AUDIO_URLS.seBattleHeal()
-      : kind === "buff"
-        ? AUDIO_URLS.seBattleBuff()
-        : kind === "debuff"
-          ? AUDIO_URLS.seBattleDebuff()
-          : kind === "area"
-            ? AUDIO_URLS.seBattleAreaDamage()
-            : AUDIO_URLS.seBattleSingleDamage();
-  try {
-    const a = new Audio(url);
-    a.volume = 0.48;
-    a.play().catch(() => {});
-  } catch (_) {}
+    kind === "heal"   ? AUDIO_URLS.seBattleHeal() :
+    kind === "buff"   ? AUDIO_URLS.seBattleBuff() :
+    kind === "debuff" ? AUDIO_URLS.seBattleDebuff() :
+    kind === "area"   ? AUDIO_URLS.seBattleAreaDamage() :
+                        AUDIO_URLS.seBattleSingleDamage();
+  try { const a = new Audio(url); a.volume = 0.48; a.play().catch(() => {}); } catch (_) {}
 }
 
+// ─── ログ / エフェクト ────────────────────────────────────────────
 function clog(msg) {
   const el = document.getElementById("clog");
   const p = document.createElement("p");
@@ -121,15 +128,11 @@ function playPortraitEffect(who, kind) {
   const wrap = document.getElementById(wrapId);
   if (!wrap) return;
   const sheet =
-    kind === "heal"
-      ? BATTLE_EFFECT_SPRITE.heal()
-      : kind === "buff"
-        ? BATTLE_EFFECT_SPRITE.buff()
-        : kind === "debuff"
-          ? BATTLE_EFFECT_SPRITE.debuff()
-          : kind === "area"
-            ? BATTLE_EFFECT_SPRITE.areaDamage()
-            : BATTLE_EFFECT_SPRITE.singleDamage();
+    kind === "heal"   ? BATTLE_EFFECT_SPRITE.heal() :
+    kind === "buff"   ? BATTLE_EFFECT_SPRITE.buff() :
+    kind === "debuff" ? BATTLE_EFFECT_SPRITE.debuff() :
+    kind === "area"   ? BATTLE_EFFECT_SPRITE.areaDamage() :
+                        BATTLE_EFFECT_SPRITE.singleDamage();
   const el = document.createElement("div");
   el.className = "portrait-fx portrait-fx--" + kind;
   el.setAttribute("role", "presentation");
@@ -138,20 +141,16 @@ function playPortraitEffect(who, kind) {
   setTimeout(() => el.remove(), 900);
 }
 
-/** @param {string} anchorId */
 function spawnStatFloat(anchorId, delta) {
   if (!delta) return;
   const host = document.getElementById(anchorId);
   if (!host) return;
   const el = document.createElement("span");
-  el.className =
-    "stat-float " + (delta > 0 ? "stat-float--gain" : "stat-float--loss");
+  el.className = "stat-float " + (delta > 0 ? "stat-float--gain" : "stat-float--loss");
   el.textContent = (delta > 0 ? "+" : "") + String(delta);
   host.appendChild(el);
   requestAnimationFrame(() => el.classList.add("stat-float--show"));
-  setTimeout(() => {
-    el.remove();
-  }, 900);
+  setTimeout(() => el.remove(), 900);
 }
 
 function flashPortrait(which) {
@@ -162,7 +161,7 @@ function flashPortrait(which) {
   setTimeout(() => wrap.classList.remove("portrait-hit"), 380);
 }
 
-/** PHY/INT 依存ダメージをガードで軽減（残ダメージを返す） */
+// ─── ダメージ計算補助 ─────────────────────────────────────────────
 function applyGuardToDamage(target, raw) {
   const key = target === "player" ? "playerGuard" : "enemyGuard";
   let g = combat[key] || 0;
@@ -185,35 +184,33 @@ function drawCards(s, n) {
   }
 }
 
-/**
- * @param {number} skillPct skill の PHY% 係数
- */
+// ─── プレイヤー攻撃 ───────────────────────────────────────────────
 function dealPhySkillToEnemy(s, skillPct) {
   const cut = cutRateFromPhy(s.enemyPhy);
   let base = phyIntDamageAfterCut(s.playerPhy, skillPct, cut);
   let critBonus = 0;
   if (rollCrit(critRateFromAgi(s.playerAgi))) {
-    critBonus = criticalBonusDamage(
-      s.playerPhyBase,
-      skillPct,
-      s.enemyPhyBase,
-      "phy"
-    );
+    critBonus = criticalBonusDamage(s.playerPhyBase, skillPct, s.enemyPhyBase, "phy");
     clog("クリティカル（PHY）");
   }
   let vuln = s.enemyVulnerable || 0;
   let total = base + critBonus + vuln;
   s.enemyVulnerable = 0;
+  // 出血（敵が出血スタックを持つとき、被物理攻撃で追加ダメージ）
+  if ((s.enemyBleed || 0) > 0) {
+    total += s.enemyBleed;
+    clog(`出血 ×${s.enemyBleed} 追加`);
+  }
   total = applyGuardToDamage("enemy", total);
   s.enemyHp = Math.max(0, s.enemyHp - total);
   flashPortrait("enemy");
   playPortraitEffect("enemy", "hit");
   if (total > 0) playBattleSe("hit");
   clog(
-    `PHY攻撃 ${skillPct}% → 基礎${base} カット${cut}% 合計${base + critBonus}` +
-      (critBonus ? " +CRIT" + critBonus : "") +
-      (vuln ? " +脆弱" + vuln : "") +
-      ` → HP-${total}`
+    `PHY攻撃 ${skillPct}% → 基礎${base} カット${cut}%` +
+    (critBonus ? " +CRIT" + critBonus : "") +
+    (vuln ? " +脆弱" + vuln : "") +
+    ` → HP-${total}`
   );
 }
 
@@ -221,18 +218,13 @@ function dealPhySkillToEnemyRange(s, minPct, maxPct) {
   dealPhySkillToEnemy(s, randomSkillRatePct(minPct, maxPct));
 }
 
-function dealIntSkillToEnemy(s, minPct, maxPct) {
+function dealIntSkillToEnemy(s, minPct, maxPct, forceCrit = false) {
   const skillPct = randomSkillRatePct(minPct, maxPct);
   const cut = cutRateFromInt(s.enemyInt);
   let base = phyIntDamageAfterCut(s.playerInt, skillPct, cut);
   let critBonus = 0;
-  if (rollCrit(critRateFromAgi(s.playerAgi))) {
-    critBonus = criticalBonusDamage(
-      s.playerIntBase,
-      skillPct,
-      s.enemyIntBase,
-      "int"
-    );
+  if (forceCrit || rollCrit(critRateFromAgi(s.playerAgi))) {
+    critBonus = criticalBonusDamage(s.playerIntBase, skillPct, s.enemyIntBase, "int");
     clog("クリティカル（INT）");
   }
   let total = base + critBonus;
@@ -243,8 +235,8 @@ function dealIntSkillToEnemy(s, minPct, maxPct) {
   if (total > 0) playBattleSe("hit");
   clog(
     `INT攻撃 ${skillPct}% → 基礎${base} カット${cut}%` +
-      (critBonus ? " +CRIT" + critBonus : "") +
-      ` → HP-${total}`
+    (critBonus ? " +CRIT" + critBonus : "") +
+    ` → HP-${total}`
   );
 }
 
@@ -254,28 +246,30 @@ function healPlayerFromIntSkill(s, minPct, maxPct) {
   const heal = Math.max(0, Math.floor((coef * pct) / 100));
   const before = s.playerHp;
   s.playerHp = Math.min(s.playerHpMax, s.playerHp + heal);
-  if (s.playerHp > before) {
-    playBattleSe("heal");
-    playPortraitEffect("player", "heal");
-  }
+  if (s.playerHp > before) { playBattleSe("heal"); playPortraitEffect("player", "heal"); }
   clog(`リカバリー: 係数${coef.toFixed(1)}×${pct}% → HP+${s.playerHp - before}`);
 }
 
-/** 敵の PHY 攻撃（意図）。プレイヤー側カット＋クリ＋ガード */
+// ─── 敵攻撃 ───────────────────────────────────────────────────────
 function dealPhySkillFromEnemyToPlayer(s, skillPct) {
   const cut = cutRateFromPhy(s.playerPhy);
   let base = phyIntDamageAfterCut(s.enemyPhy, skillPct, cut);
   let critBonus = 0;
   if (rollCrit(critRateFromAgi(s.enemyAgi))) {
-    critBonus = criticalBonusDamage(
-      s.enemyPhyBase,
-      skillPct,
-      s.playerPhyBase,
-      "phy"
-    );
+    critBonus = criticalBonusDamage(s.enemyPhyBase, skillPct, s.playerPhyBase, "phy");
     clog("敵クリティカル（PHY）");
   }
   let total = base + critBonus;
+  // 出血（プレイヤーが出血スタックを持つとき、被物理攻撃で追加ダメージ）
+  if ((s.playerBleed || 0) > 0) {
+    total += s.playerBleed;
+    clog(`出血 ×${s.playerBleed} 追加`);
+  }
+  // 不屈（このターン被ダメ半減）
+  if (s.damageReducedThisTurn) {
+    total = Math.ceil(total / 2);
+    clog("不屈: ダメージ半減");
+  }
   total = applyGuardToDamage("player", total);
   s.playerHp = Math.max(0, s.playerHp - total);
   flashPortrait("player");
@@ -283,37 +277,104 @@ function dealPhySkillFromEnemyToPlayer(s, skillPct) {
   if (total > 0) playBattleSe("hit");
   clog(
     `敵 PHY ${skillPct}% → 被ダメージ ${total}` +
-      (critBonus ? "（含CRIT " + critBonus + "）" : "")
+    (critBonus ? "（CRIT+" + critBonus + "）" : "")
   );
 }
 
-/** 最大 HP の一定割合（特殊ダメージ）— カット無効、シールドのみ */
+function dealIntSkillFromEnemyToPlayer(s, skillPct) {
+  const cut = cutRateFromInt(s.playerInt);
+  let base = phyIntDamageAfterCut(s.enemyInt, skillPct, cut);
+  let critBonus = 0;
+  if (rollCrit(critRateFromAgi(s.enemyAgi))) {
+    critBonus = criticalBonusDamage(s.enemyIntBase, skillPct, s.playerIntBase, "int");
+    clog("敵クリティカル（INT）");
+  }
+  let total = base + critBonus;
+  if (s.damageReducedThisTurn) {
+    total = Math.ceil(total / 2);
+    clog("不屈: ダメージ半減");
+  }
+  total = applyGuardToDamage("player", total);
+  s.playerHp = Math.max(0, s.playerHp - total);
+  flashPortrait("player");
+  playPortraitEffect("player", "hit");
+  if (total > 0) playBattleSe("hit");
+  clog(
+    `敵 INT ${skillPct}% → 被ダメージ ${total}` +
+    (critBonus ? "（CRIT+" + critBonus + "）" : "")
+  );
+}
+
+/** 最大 HP 割合の特殊ダメージ（シールドのみ有効） */
 function dealSpecialMaxHpPercentToPlayer(s, pct) {
   let raw = Math.max(0, Math.floor((s.playerHpMax * pct) / 100));
+  if (s.damageReducedThisTurn) raw = Math.ceil(raw / 2);
   raw = applyDamageThroughShield(s, "player", raw);
   s.playerHp = Math.max(0, s.playerHp - raw);
   flashPortrait("player");
   playPortraitEffect("player", "area");
+  if (raw > 0) playBattleSe("area");
   clog(`特殊ダメージ（最大HP ${pct}%）→ HP-${raw}`);
 }
 
+// ─── Battle API（cards.js に渡す） ───────────────────────────────
 const battleApi = {
   dealPhySkillToEnemy: (s, a, b) => dealPhySkillToEnemyRange(s, a, b),
-  dealIntSkillToEnemy,
+  dealIntSkillToEnemy: (s, a, b) => dealIntSkillToEnemy(s, a, b, false),
+  dealIntSkillToEnemyCrit: (s, a, b) => dealIntSkillToEnemy(s, a, b, true),
   healPlayerFromIntSkill,
   drawCards,
   playBattleSe,
   portraitFx: (who, kind) => playPortraitEffect(who, kind),
+  // 章 2-3 カード用
+  addPoisonToEnemy(s, stacks) {
+    s.enemyPoison = (s.enemyPoison || 0) + stacks;
+    playBattleSe("debuff"); playPortraitEffect("enemy", "debuff");
+    clog(`毒 ×${stacks} 付与（敵）`);
+    renderStatusBadges();
+  },
+  addBleedToEnemy(s, stacks) {
+    s.enemyBleed = (s.enemyBleed || 0) + stacks;
+    playBattleSe("debuff"); playPortraitEffect("enemy", "debuff");
+    clog(`出血 ×${stacks} 付与（敵）`);
+    renderStatusBadges();
+  },
+  clearPlayerDebuffs(s) {
+    const had = (s.playerPoison || 0) + (s.playerBleed || 0);
+    s.playerPoison = 0; s.playerBleed = 0;
+    if (had > 0) {
+      playBattleSe("heal"); playPortraitEffect("player", "heal");
+      clog("状態異常解除（自分）");
+    }
+    renderStatusBadges();
+  },
+  addPlayerShield(s, amount) {
+    s.playerShield = (s.playerShield || 0) + amount;
+    playBattleSe("buff"); playPortraitEffect("player", "buff");
+    clog(`シールド +${amount}`);
+  },
+  addGold(amount) {
+    gold += amount;
+    clog(`GUM +${amount}`);
+    syncResources();
+  },
+  setDamageReducedThisTurn(s) {
+    s.damageReducedThisTurn = true;
+    playBattleSe("buff"); playPortraitEffect("player", "buff");
+    clog("不屈：このターン被ダメ半減");
+  },
 };
 
-const { CARD_LIBRARY, copyCard, makeStarterDeck } = createCardRuntime(
-  clog,
-  battleApi
-);
+const { CARD_LIBRARY, copyCard, makeStarterDeck } = createCardRuntime(clog, battleApi);
 
+// ─── ランステート管理 ─────────────────────────────────────────────
 function ensureRunState() {
   if (!runState) {
+    const chapter = CHAPTERS[0];
+    const { nodes, edges } = generateChapterMap(chapter, ENEMY_DEFS);
+    setActiveMap(nodes, edges);
     runState = {
+      chapterIdx: 0,
       deck: makeStarterDeck(),
       playerHp: LEADER.hpMax,
       playerHpMax: LEADER.hpMax,
@@ -324,17 +385,49 @@ function ensureRunState() {
   }
 }
 
+// ─── 章推移 ───────────────────────────────────────────────────────
+function advanceToNextChapter() {
+  if (!runState) return;
+  const nextIdx = runState.chapterIdx + 1;
+  if (nextIdx >= CHAPTERS.length) {
+    runState.runComplete = true;
+    playSeClear();
+    return;
+  }
+  runState.chapterIdx = nextIdx;
+  runState.lastMapNodeId = null;
+  runState.pathNodeIds = [];
+  const chapter = CHAPTERS[nextIdx];
+  const { nodes, edges } = generateChapterMap(chapter, ENEMY_DEFS);
+  setActiveMap(nodes, edges);
+  clog(`── 章 ${chapter.id}「${chapter.name}」へ ──`);
+}
+
+// ─── 現在の章カードプール（累積） ───────────────────────────────
+function getCumulativeCardPool() {
+  const pool = [];
+  const ci = runState?.chapterIdx ?? 0;
+  for (let i = 0; i <= ci; i++) {
+    pool.push(...CHAPTERS[i].cardPool);
+  }
+  return pool;
+}
+
+// ─── ノード位置 ───────────────────────────────────────────────────
 function nodeXY(id) {
   if (id === "START") return { x: MAP_START.x, y: MAP_START.y };
   const n = mapNodeById(id);
   return n ? { x: n.x, y: n.y } : { x: 0, y: 0 };
 }
 
+// ─── リソース表示更新 ─────────────────────────────────────────────
 function syncResources() {
   document.getElementById("goldVal").textContent = String(gold);
   ensureRunState();
   document.getElementById("hpMapVal").textContent =
     `${runState.playerHp}/${runState.playerHpMax}`;
+  const chapterEl = document.getElementById("chapterVal");
+  if (chapterEl) chapterEl.textContent = String((runState.chapterIdx ?? 0) + 1);
   const layerEl = document.getElementById("layerVal");
   if (runState.runComplete) {
     layerEl.textContent = "クリア";
@@ -342,12 +435,11 @@ function syncResources() {
     layerEl.textContent = "入口";
   } else {
     const cur = mapNodeById(runState.lastMapNodeId);
-    layerEl.textContent = cur
-      ? `第${cur.layer + 1}層 · ${cur.label}`
-      : "—";
+    layerEl.textContent = cur ? `第${cur.layer + 1}層 · ${cur.label}` : "—";
   }
 }
 
+// ─── マップ描画 ───────────────────────────────────────────────────
 function mapNodeClass(node) {
   ensureRunState();
   const allowed = new Set(reachableNextNodeIds(runState.lastMapNodeId));
@@ -358,10 +450,7 @@ function mapNodeClass(node) {
   if (pathSet.has(node.id)) return "map-node--visited";
   const lastNode = last ? mapNodeById(last) : null;
   const lastLayer = lastNode ? lastNode.layer : -1;
-  if (node.layer === lastLayer && last && node.id !== last) {
-    return "map-node--skipped";
-  }
-  if (node.layer > lastLayer) return "map-node--locked";
+  if (node.layer === lastLayer && last && node.id !== last) return "map-node--skipped";
   return "map-node--locked";
 }
 
@@ -371,14 +460,27 @@ function renderMap() {
   if (prevLeg) prevLeg.remove();
   host.innerHTML = "";
   ensureRunState();
+
+  // タイトル更新
+  const titleEl = document.getElementById("mapTitle");
+  if (titleEl) {
+    const chapter = CHAPTERS[runState.chapterIdx];
+    titleEl.textContent = runState.runComplete
+      ? "全ランクリア！（3 章突破）"
+      : `章 ${chapter.id}「${chapter.name}」（下から上へ進む）`;
+  }
+
   if (runState.runComplete) {
     host.innerHTML =
-      "<p style='color:var(--accent);margin:0 0 0.75rem'>このランをクリアしました。</p>" +
+      "<p style='color:var(--accent);margin:0 0 0.75rem'>3 章すべてをクリアしました！おめでとうございます。</p>" +
       "<button type='button' class='action primary' id='btnRestartClear'>もう一度</button>";
     document.getElementById("btnRestartClear").addEventListener("click", resetRun);
     syncResources();
     return;
   }
+
+  const MAP_NODES = activeMapNodes;
+  const MAP_EDGES = activeMapEdges;
 
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   svg.setAttribute("viewBox", "0 0 100 100");
@@ -389,49 +491,37 @@ function renderMap() {
   const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
   const mk = document.createElementNS("http://www.w3.org/2000/svg", "marker");
   mk.setAttribute("id", "arrowHead");
-  mk.setAttribute("markerWidth", "4");
-  mk.setAttribute("markerHeight", "4");
-  mk.setAttribute("refX", "3.2");
-  mk.setAttribute("refY", "2");
+  mk.setAttribute("markerWidth", "4"); mk.setAttribute("markerHeight", "4");
+  mk.setAttribute("refX", "3.2"); mk.setAttribute("refY", "2");
   mk.setAttribute("orient", "auto");
   const po = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
   po.setAttribute("points", "0 0, 4 2, 0 4");
   po.setAttribute("fill", "#5a5068");
-  mk.appendChild(po);
-  defs.appendChild(mk);
+  mk.appendChild(po); defs.appendChild(mk);
   for (const node of MAP_NODES) {
     if (node.type !== "fight" || !node.enemyImgId) continue;
     const clip = document.createElementNS("http://www.w3.org/2000/svg", "clipPath");
     clip.setAttribute("id", "mapEnemyClip-" + node.id);
     const cc = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-    cc.setAttribute("cx", String(node.x));
-    cc.setAttribute("cy", String(node.y));
-    cc.setAttribute("r", "3.5");
-    clip.appendChild(cc);
-    defs.appendChild(clip);
+    cc.setAttribute("cx", String(node.x)); cc.setAttribute("cy", String(node.y)); cc.setAttribute("r", "3.5");
+    clip.appendChild(cc); defs.appendChild(clip);
   }
   svg.appendChild(defs);
 
   const edgeG = document.createElementNS("http://www.w3.org/2000/svg", "g");
   edgeG.setAttribute("class", "map-edges");
   for (const [a, b] of MAP_EDGES) {
-    const pa = nodeXY(a);
-    const pb = nodeXY(b);
+    const pa = nodeXY(a); const pb = nodeXY(b);
     const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    line.setAttribute("x1", String(pa.x));
-    line.setAttribute("y1", String(pa.y));
-    line.setAttribute("x2", String(pb.x));
-    line.setAttribute("y2", String(pb.y));
+    line.setAttribute("x1", String(pa.x)); line.setAttribute("y1", String(pa.y));
+    line.setAttribute("x2", String(pb.x)); line.setAttribute("y2", String(pb.y));
     line.setAttribute("marker-end", "url(#arrowHead)");
     const allowed = new Set(reachableNextNodeIds(runState.lastMapNodeId));
     const onPath =
       runState.pathNodeIds.includes(a) &&
       (runState.pathNodeIds.includes(b) || allowed.has(b));
-    line.setAttribute(
-      "class",
-      onPath || (a === "START" && allowed.has(b))
-        ? "map-edge map-edge--active"
-        : "map-edge"
+    line.setAttribute("class",
+      onPath || (a === "START" && allowed.has(b)) ? "map-edge map-edge--active" : "map-edge"
     );
     edgeG.appendChild(line);
   }
@@ -440,16 +530,12 @@ function renderMap() {
   const startG = document.createElementNS("http://www.w3.org/2000/svg", "g");
   startG.setAttribute("class", "map-start");
   const sc = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-  sc.setAttribute("cx", String(MAP_START.x));
-  sc.setAttribute("cy", String(MAP_START.y));
-  sc.setAttribute("r", "3.2");
-  sc.setAttribute("class", "map-start-dot");
+  sc.setAttribute("cx", String(MAP_START.x)); sc.setAttribute("cy", String(MAP_START.y));
+  sc.setAttribute("r", "3.2"); sc.setAttribute("class", "map-start-dot");
   startG.appendChild(sc);
   const st = document.createElementNS("http://www.w3.org/2000/svg", "text");
-  st.setAttribute("x", String(MAP_START.x));
-  st.setAttribute("y", String(MAP_START.y + 7.5));
-  st.setAttribute("text-anchor", "middle");
-  st.setAttribute("class", "map-start-label");
+  st.setAttribute("x", String(MAP_START.x)); st.setAttribute("y", String(MAP_START.y + 7.5));
+  st.setAttribute("text-anchor", "middle"); st.setAttribute("class", "map-start-label");
   st.textContent = "入口";
   startG.appendChild(st);
   svg.appendChild(startG);
@@ -460,38 +546,24 @@ function renderMap() {
     g.setAttribute("data-node-id", node.id);
     g.style.cursor = "pointer";
     const circ = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-    circ.setAttribute("cx", String(node.x));
-    circ.setAttribute("cy", String(node.y));
-    circ.setAttribute("r", "4.2");
-    circ.setAttribute("class", "map-node-shape");
+    circ.setAttribute("cx", String(node.x)); circ.setAttribute("cy", String(node.y));
+    circ.setAttribute("r", "4.2"); circ.setAttribute("class", "map-node-shape");
     g.appendChild(circ);
     const lab = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    lab.setAttribute("x", String(node.x));
-    lab.setAttribute("y", String(node.y + 8.5));
-    lab.setAttribute("text-anchor", "middle");
-    lab.setAttribute("class", "map-node-cap");
+    lab.setAttribute("x", String(node.x)); lab.setAttribute("y", String(node.y + 8.5));
+    lab.setAttribute("text-anchor", "middle"); lab.setAttribute("class", "map-node-cap");
     lab.textContent = node.label;
     g.appendChild(lab);
     const ty = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    ty.setAttribute("x", String(node.x));
-    ty.setAttribute("y", String(node.y + 11.8));
-    ty.setAttribute("text-anchor", "middle");
-    ty.setAttribute("class", "map-node-type");
+    ty.setAttribute("x", String(node.x)); ty.setAttribute("y", String(node.y + 11.8));
+    ty.setAttribute("text-anchor", "middle"); ty.setAttribute("class", "map-node-type");
     ty.textContent =
-      node.type === "fight"
-        ? node.elite
-          ? "精鋭戦闘"
-          : "戦闘"
-        : node.type === "rest"
-          ? "休憩"
-          : node.type === "shop"
-            ? "店"
-            : "ボス";
+      node.type === "fight" ? (node.elite ? "精鋭戦闘" : "戦闘") :
+      node.type === "rest"  ? "休憩" :
+      node.type === "shop"  ? "店" : "ボス";
     g.appendChild(ty);
     const allowed = new Set(reachableNextNodeIds(runState.lastMapNodeId));
-    if (!allowed.has(node.id)) {
-      g.style.pointerEvents = "none";
-    }
+    if (!allowed.has(node.id)) g.style.pointerEvents = "none";
     g.addEventListener("click", () => tryEnterMapNode(node.id));
     svg.appendChild(g);
   }
@@ -500,52 +572,43 @@ function renderMap() {
   fightImgG.setAttribute("class", "map-fight-icons");
   for (const node of MAP_NODES) {
     if (node.type !== "fight" || !node.enemyImgId) continue;
-    const img = document.createElementNS("http://www.w3.org/2000/svg", "image");
-    img.setAttribute("href", ENEMY_IMG(node.enemyImgId));
-    img.setAttributeNS("http://www.w3.org/1999/xlink", "href", ENEMY_IMG(node.enemyImgId));
-    img.setAttribute("x", String(node.x - 3.8));
-    img.setAttribute("y", String(node.y - 3.8));
-    img.setAttribute("width", "7.6");
-    img.setAttribute("height", "7.6");
-    img.setAttribute("clip-path", "url(#mapEnemyClip-" + node.id + ")");
-    img.setAttribute("preserveAspectRatio", "xMidYMid slice");
-    img.setAttribute("class", "map-node-enemy-img");
-    fightImgG.appendChild(img);
+    const imgEl = document.createElementNS("http://www.w3.org/2000/svg", "image");
+    imgEl.setAttribute("href", ENEMY_IMG(node.enemyImgId));
+    imgEl.setAttributeNS("http://www.w3.org/1999/xlink", "href", ENEMY_IMG(node.enemyImgId));
+    imgEl.setAttribute("x", String(node.x - 3.8)); imgEl.setAttribute("y", String(node.y - 3.8));
+    imgEl.setAttribute("width", "7.6"); imgEl.setAttribute("height", "7.6");
+    imgEl.setAttribute("clip-path", "url(#mapEnemyClip-" + node.id + ")");
+    imgEl.setAttribute("preserveAspectRatio", "xMidYMid slice");
+    imgEl.setAttribute("class", "map-node-enemy-img");
+    fightImgG.appendChild(imgEl);
   }
   svg.appendChild(fightImgG);
-
   host.appendChild(svg);
+
   const legend = document.createElement("p");
   legend.className = "map-legend";
   legend.id = "mapDynLegend";
   legend.innerHTML =
-    "「始まりの塔」— 下から上へ進みます。金枠＝現在地 · 緑＝次に選べる · 灰＝見送り／未到達。戦闘ノードの丸の上に敵アイコンが載ります。";
+    "金枠＝現在地 · 緑＝次に選べる · 灰＝見送り／未到達。戦闘ノードの丸上に敵アイコン。";
   const mapPanel = host.parentNode;
-  if (mapPanel && host.nextSibling) {
-    mapPanel.insertBefore(legend, host.nextSibling);
-  } else if (mapPanel) {
-    mapPanel.appendChild(legend);
-  } else {
-    host.appendChild(legend);
-  }
+  if (mapPanel && host.nextSibling) mapPanel.insertBefore(legend, host.nextSibling);
+  else if (mapPanel) mapPanel.appendChild(legend);
+
   const scrollMapToCurrentNode = () => {
     const wrap = host;
     if (!wrap || !svg.isConnected) return;
     const curId = runState.lastMapNodeId || "START";
     const pt = nodeXY(curId);
     const vb = svg.viewBox.baseVal;
-    const vbW = vb.width || 100;
-    const vbH = vb.height || 100;
+    const vbW = vb.width || 100; const vbH = vb.height || 100;
     const wrapRect = wrap.getBoundingClientRect();
     const svgRect = svg.getBoundingClientRect();
     const nx = svgRect.left + (pt.x / vbW) * svgRect.width;
     const ny = svgRect.top + (pt.y / vbH) * svgRect.height;
     const contentY = wrap.scrollTop + (ny - wrapRect.top);
     const contentX = wrap.scrollLeft + (nx - wrapRect.left);
-    const maxY = Math.max(0, wrap.scrollHeight - wrap.clientHeight);
-    const maxX = Math.max(0, wrap.scrollWidth - wrap.clientWidth);
-    wrap.scrollTop = Math.max(0, Math.min(contentY - wrap.clientHeight / 2, maxY));
-    wrap.scrollLeft = Math.max(0, Math.min(contentX - wrap.clientWidth / 2, maxX));
+    wrap.scrollTop = Math.max(0, Math.min(contentY - wrap.clientHeight / 2, Math.max(0, wrap.scrollHeight - wrap.clientHeight)));
+    wrap.scrollLeft = Math.max(0, Math.min(contentX - wrap.clientWidth / 2, Math.max(0, wrap.scrollWidth - wrap.clientWidth)));
   };
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
@@ -556,6 +619,7 @@ function renderMap() {
   syncResources();
 }
 
+// ─── ノード進入 ───────────────────────────────────────────────────
 function tryEnterMapNode(nodeId) {
   ensureRunState();
   const allowed = reachableNextNodeIds(runState.lastMapNodeId);
@@ -567,6 +631,7 @@ function tryEnterMapNode(nodeId) {
     runState.playerHp = Math.min(runState.playerHpMax, runState.playerHp + heal);
     runState.pathNodeIds.push(nodeId);
     runState.lastMapNodeId = nodeId;
+    clog(`篝火で HP+${heal}`);
     renderMap();
     return;
   }
@@ -578,10 +643,9 @@ function tryEnterMapNode(nodeId) {
   startCombatFromMapNode(node);
 }
 
+// ─── ビュー切り替え ───────────────────────────────────────────────
 function showView(name) {
-  if (view === "combat" && name !== "combat") {
-    stopBgm();
-  }
+  if (view === "combat" && name !== "combat") stopBgm();
   view = name;
   document.getElementById("mapView").classList.toggle("hidden", name !== "map");
   document.getElementById("combatView").classList.toggle("hidden", name !== "combat");
@@ -591,125 +655,177 @@ function showView(name) {
   if (rv) rv.classList.toggle("hidden", name !== "reward");
 }
 
+// ─── 戦闘開始 ─────────────────────────────────────────────────────
 function startCombatFromMapNode(node) {
   ensureRunState();
+  const chapter = CHAPTERS[runState.chapterIdx];
+
+  let enemyDef;
+  let isBoss = false;
+  let bossDef = null;
+
+  if (node.type === "boss") {
+    isBoss = true;
+    bossDef = BOSS_DEFS[chapter.bossId];
+    enemyDef = bossDef;
+  } else if (node.enemyDefId && ENEMY_DEFS[node.enemyDefId]) {
+    enemyDef = ENEMY_DEFS[node.enemyDefId];
+  } else {
+    // フォールバック: プールからランダム
+    const pool = node.elite ? chapter.elitePool : chapter.enemyPool;
+    const id = pool[Math.floor(Math.random() * pool.length)];
+    enemyDef = ENEMY_DEFS[id] || { name: "敵", hp: 30, phy: 14, int: 8, agi: 8, imgId: 314, intentRota: [{ kind: "attack", phyPct: 100 }] };
+  }
+
   const deck = runState.deck.map((c) => ({ ...c }));
-  const playerHpMax = runState.playerHpMax;
-  const playerHp = runState.playerHp;
-  const boss = node.type === "boss";
-  const elite = !!node.elite;
-  const enemyHp = boss ? 72 : elite ? 48 : 32;
-  const enemyId =
-    node.type === "fight" && node.enemyImgId != null
-      ? node.enemyImgId
-      : boss
-        ? 505
-        : elite
-          ? 418
-          : 314;
   const pPhy = LEADER.basePhy;
   const pInt = LEADER.baseInt;
   const pAgi = LEADER.baseAgi;
-  const ePhy = boss ? 26 : elite ? 20 : 14;
-  const eInt = boss ? 22 : elite ? 16 : 12;
-  const eAgi = boss ? 18 : elite ? 14 : 10;
+
+  // ボスフェーズ
+  let intentRota, bossPhase;
+  if (isBoss && bossDef.phases) {
+    bossPhase = 0;
+    intentRota = bossDef.phases[0].intentRota;
+  } else {
+    bossPhase = -1;
+    intentRota = enemyDef.intentRota;
+  }
+
   combat = {
     deck,
     drawPile: [],
     discardPile: [],
     hand: [],
-    playerHp,
-    playerHpMax,
-    playerPhy: pPhy,
-    playerInt: pInt,
-    playerAgi: pAgi,
-    playerPhyBase: pPhy,
-    playerIntBase: pInt,
-    playerAgiBase: pAgi,
+    playerHp: runState.playerHp,
+    playerHpMax: runState.playerHpMax,
+    playerPhy: pPhy, playerInt: pInt, playerAgi: pAgi,
+    playerPhyBase: pPhy, playerIntBase: pInt, playerAgiBase: pAgi,
     playerGuard: 0,
     playerShield: 0,
+    playerPoison: 0,
+    playerBleed: 0,
     energy: 3,
     energyMax: 3,
-    enemyHp,
-    enemyHpMax: enemyHp,
-    enemyPhy: ePhy,
-    enemyInt: eInt,
-    enemyAgi: eAgi,
-    enemyPhyBase: ePhy,
-    enemyIntBase: eInt,
-    enemyAgiBase: eAgi,
-    enemyGuard: 0,
-    enemyShield: 0,
-    enemyVulnerable: 0,
     bonusEnergyNext: 0,
-    enemyIntent: { kind: "attack", phyPct: boss ? 38 : elite ? 32 : 28 },
-    turn: 1,
-    elite: !!elite,
-    boss: !!boss,
-    enemyName: boss ? "門番：影の軍勢" : elite ? "精鋭" : "斥候",
-    enemyImgId: enemyId,
+    phyPenaltyNext: 0,
+    damageReducedThisTurn: false,
+    enemyHp: enemyDef.hp,
+    enemyHpMax: enemyDef.hp,
+    enemyPhy: enemyDef.phy, enemyInt: enemyDef.int, enemyAgi: enemyDef.agi,
+    enemyPhyBase: enemyDef.phy, enemyIntBase: enemyDef.int, enemyAgiBase: enemyDef.agi,
+    enemyGuard: 0,
+    enemyShield: enemyDef.initialShield || 0,
+    enemyPoison: 0,
+    enemyBleed: 0,
+    enemyVulnerable: 0,
+    enemyIntent: null,
+    intentRota,
+    intentRotaIdx: 0,
+    isBoss,
+    bossPhase,
+    bossDef: isBoss ? bossDef : null,
+    enemyName: enemyDef.name,
+    enemyImgId: enemyDef.imgId,
+    enemyDefId: enemyDef.id,
     mapNodeId: node.id,
+    isElite: !!node.elite,
+    turn: 1,
     _lastUi: null,
   };
+
   combat.drawPile = shuffle(combat.deck.map((c) => copyCard(c.libraryKey)));
   showView("combat");
   startBgmCombat();
-  const bgFile = boss ? "1004" : elite ? "1002" : "1001";
-  document.getElementById("combatBg").style.backgroundImage =
-    "url('" + BATTLE_BG(bgFile) + "')";
+
+  const bgFile = isBoss ? "1004" : node.elite ? "1002" : "1001";
+  document.getElementById("combatBg").style.backgroundImage = "url('" + BATTLE_BG(bgFile) + "')";
   document.getElementById("leaderImg").src = LEADER.img();
   document.getElementById("leaderName").textContent = LEADER.nameJa;
-  document.getElementById("enemyImg").src = ENEMY_IMG(enemyId);
+  document.getElementById("enemyImg").src = ENEMY_IMG(enemyDef.imgId);
   document.getElementById("enemyName").textContent = combat.enemyName;
   document.getElementById("clog").innerHTML = "";
-  clog("戦闘開始（ダメージ・カット率・回復係数・クリは MCH ヘルプ準拠のプロト）");
+  clog(`戦闘開始 vs ${enemyDef.name}${isBoss ? "（ボス）" : node.elite ? "（精鋭）" : ""}`);
+  if (isBoss && (enemyDef.initialShield || 0) > 0) {
+    clog(`ボスはシールド ${enemyDef.initialShield} を持ちます！`);
+  }
   startPlayerTurn();
 }
 
+// ─── 意図テキスト ─────────────────────────────────────────────────
 function intentText() {
-  const it = combat.enemyIntent;
-  if (it.kind === "attack") return "ATK PHY " + it.phyPct + "%";
-  if (it.kind === "guard") return "GUARD +" + it.value;
-  if (it.kind === "special") return "SPECIAL maxHP " + it.pct + "%";
-  return "—";
-}
-
-function rollNextIntent() {
-  const r = Math.random();
-  if (combat.boss) {
-    if (r < 0.45) {
-      combat.enemyIntent = {
-        kind: "attack",
-        phyPct: 34 + Math.floor(Math.random() * 14),
-      };
-    } else if (r < 0.75) {
-      combat.enemyIntent = { kind: "guard", value: 8 + Math.floor(Math.random() * 5) };
-    } else {
-      combat.enemyIntent = { kind: "special", pct: 8 + Math.floor(Math.random() * 5) };
-    }
-  } else {
-    if (r < 0.5) {
-      combat.enemyIntent = {
-        kind: "attack",
-        phyPct: 24 + Math.floor(Math.random() * 14),
-      };
-    } else if (r < 0.82) {
-      combat.enemyIntent = { kind: "guard", value: 5 + Math.floor(Math.random() * 5) };
-    } else {
-      combat.enemyIntent = { kind: "special", pct: 5 + Math.floor(Math.random() * 4) };
-    }
+  const it = combat?.enemyIntent;
+  if (!it) return "—";
+  switch (it.kind) {
+    case "attack":          return `ATK PHY ${it.phyPct}%`;
+    case "attackPoison":    return `ATK PHY ${it.phyPct}% + 毒×${it.poisonStacks}`;
+    case "attackBleed":     return `ATK PHY ${it.phyPct}% + 出血×${it.bleedStacks}`;
+    case "attackDouble":    return `ATK PHY ${it.phyPct}% ×2`;
+    case "attackInt":       return `ATK INT ${it.intPct}%`;
+    case "attackIntDouble": return `ATK INT ${it.intPct}% ×2`;
+    case "healSelf":        return `自己回復 最大HP ${it.pct}%`;
+    case "buffSelf":        return `強化: PHY+${it.phyAdd || 0} INT+${it.intAdd || 0}`;
+    case "guard":           return `GUARD +${it.value}`;
+    case "special":         return `SPECIAL 最大HP ${it.pct}%`;
+    default:                return "—";
   }
 }
 
+// ─── 意図ローテーション（ボスフェーズ移行含む） ────────────────────
+function advanceEnemyIntent() {
+  // ボスフェーズ移行チェック
+  if (combat.isBoss && combat.bossDef?.phases?.length > 1) {
+    const hp50 = combat.enemyHpMax * 0.5;
+    const newPhase = combat.enemyHp <= hp50 ? 1 : 0;
+    if (newPhase !== combat.bossPhase) {
+      combat.bossPhase = newPhase;
+      combat.intentRota = combat.bossDef.phases[newPhase].intentRota;
+      combat.intentRotaIdx = 0;
+      clog(`──── フェーズ ${newPhase + 1} 移行！ ────`);
+    }
+  }
+  combat.enemyIntent = combat.intentRota[combat.intentRotaIdx % combat.intentRota.length];
+  combat.intentRotaIdx++;
+}
+
+// ─── プレイヤーターン開始 ─────────────────────────────────────────
 function startPlayerTurn() {
   combat.playerGuard = 0;
+  combat.damageReducedThisTurn = false;
+
+  // 毒ティック（ターン開始時に自分に毒ダメージ）
+  if ((combat.playerPoison || 0) > 0) {
+    const dmg = combat.playerPoison;
+    combat.playerHp = Math.max(0, combat.playerHp - dmg);
+    flashPortrait("player"); playPortraitEffect("player", "debuff");
+    clog(`毒ダメージ（自分）${dmg}`);
+    if (combat.playerHp <= 0) { endCombatLoss(); return; }
+  }
+  // 毒ティック（敵）
+  if ((combat.enemyPoison || 0) > 0) {
+    const dmg = combat.enemyPoison;
+    combat.enemyHp = Math.max(0, combat.enemyHp - dmg);
+    flashPortrait("enemy"); playPortraitEffect("enemy", "debuff");
+    clog(`毒ダメージ（敵）${dmg}`);
+    if (combat.enemyHp <= 0) { endCombatWin(); return; }
+  }
+
+  // 突撃ペナルティ
+  if ((combat.phyPenaltyNext || 0) > 0) {
+    const pen = combat.phyPenaltyNext;
+    combat.playerPhy = Math.max(1, combat.playerPhy - pen);
+    clog(`突撃の反動: PHY-${pen}`);
+    combat.phyPenaltyNext = 0;
+  }
+
   combat.energy = combat.energyMax + (combat.bonusEnergyNext || 0);
   combat.bonusEnergyNext = 0;
   drawCards(combat, 5);
-  rollNextIntent();
+  advanceEnemyIntent();
   renderCombat();
 }
 
+// ─── UI float diff ────────────────────────────────────────────────
 function diffUiFloats() {
   const cur = {
     playerHp: combat.playerHp,
@@ -725,53 +841,34 @@ function diffUiFloats() {
   };
   const prev = combat._lastUi;
   if (prev) {
-    const dHp = cur.playerHp - prev.playerHp;
-    if (dHp !== 0) spawnStatFloat("player-hp", dHp);
-    const dG = cur.playerGuard - prev.playerGuard;
-    if (dG !== 0) spawnStatFloat("player-guard", dG);
-    const dSh = cur.playerShield - prev.playerShield;
-    if (dSh !== 0) spawnStatFloat("player-shield", dSh);
-    const dPhy = cur.playerPhy - prev.playerPhy;
-    if (dPhy !== 0) spawnStatFloat("player-phy", dPhy);
-    const dInt = cur.playerInt - prev.playerInt;
-    if (dInt !== 0) spawnStatFloat("player-int", dInt);
-    const dAgi = cur.playerAgi - prev.playerAgi;
-    if (dAgi !== 0) spawnStatFloat("player-agi", dAgi);
-    const dEhp = cur.enemyHp - prev.enemyHp;
-    if (dEhp !== 0) spawnStatFloat("enemy-hp", dEhp);
-    const dEg = cur.enemyGuard - prev.enemyGuard;
-    if (dEg !== 0) spawnStatFloat("enemy-guard", dEg);
-    const dEs = cur.enemyShield - prev.enemyShield;
-    if (dEs !== 0) spawnStatFloat("enemy-shield", dEs);
-    const dEi = cur.enemyInt - prev.enemyInt;
-    if (dEi !== 0) spawnStatFloat("enemy-int", dEi);
+    if (cur.playerHp !== prev.playerHp)     spawnStatFloat("player-hp",     cur.playerHp - prev.playerHp);
+    if (cur.playerGuard !== prev.playerGuard) spawnStatFloat("player-guard", cur.playerGuard - prev.playerGuard);
+    if (cur.playerShield !== prev.playerShield) spawnStatFloat("player-shield", cur.playerShield - prev.playerShield);
+    if (cur.playerPhy !== prev.playerPhy)   spawnStatFloat("player-phy",    cur.playerPhy - prev.playerPhy);
+    if (cur.playerInt !== prev.playerInt)   spawnStatFloat("player-int",    cur.playerInt - prev.playerInt);
+    if (cur.playerAgi !== prev.playerAgi)   spawnStatFloat("player-agi",    cur.playerAgi - prev.playerAgi);
+    if (cur.enemyHp !== prev.enemyHp)       spawnStatFloat("enemy-hp",      cur.enemyHp - prev.enemyHp);
+    if (cur.enemyGuard !== prev.enemyGuard) spawnStatFloat("enemy-guard",   cur.enemyGuard - prev.enemyGuard);
+    if (cur.enemyShield !== prev.enemyShield) spawnStatFloat("enemy-shield", cur.enemyShield - prev.enemyShield);
+    if (cur.enemyInt !== prev.enemyInt)     spawnStatFloat("enemy-int",     cur.enemyInt - prev.enemyInt);
   }
 }
 
 function escapeHtml(s) {
-  return String(s)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
 const PEEK_HELP_SNIPPETS = {
-  guard:
-    "<strong>ガード</strong> — ターン中、PHY/INT ダメージを数値分だけ先に吸収（味方はターン開始で 0）。",
-  shield:
-    "<strong>シールド</strong> — 特殊ダメージ（最大 HP 割合など）のみ吸収。PHY/INT 通常攻撃には無効。",
-  energy:
-    "<strong>⚡ エナジー</strong> — ターンで使える行動コスト。次ターン開始時に最大まで回復。",
-  draw:
-    "<strong>ドロー</strong> — 山札から手札へカードを引く。山が空なら捨て札をシャッフルして山にする。",
-  phy: "<strong>PHY</strong> — 物理攻撃の基礎値。PHY 依存スキルのダメージに使う。",
-  int: "<strong>INT</strong> — 知略の基礎値。INT 攻撃や回復係数に関わる。",
-  agi: "<strong>AGI</strong> — このプロトでは主にクリティカル率に反映。",
-  hp: "<strong>HP</strong> — 0 で敗北。回復は最大値を超えない。",
+  guard:  "<strong>ガード</strong> — ターン中、PHY/INT ダメージを数値分だけ先に吸収（味方はターン開始で 0）。",
+  shield: "<strong>シールド</strong> — 特殊ダメージ（最大 HP 割合など）のみ吸収。PHY/INT 通常攻撃には無効。",
+  energy: "<strong>⚡ エナジー</strong> — ターンで使える行動コスト。次ターン開始時に最大まで回復。",
+  draw:   "<strong>ドロー</strong> — 山札から手札へカードを引く。山が空なら捨て札をシャッフルして山にする。",
+  phy:    "<strong>PHY</strong> — 物理攻撃の基礎値。PHY 依存スキルのダメージに使う。",
+  int:    "<strong>INT</strong> — 知略の基礎値。INT 攻撃や回復係数に関わる。",
+  agi:    "<strong>AGI</strong> — このプロトでは主にクリティカル率に反映。",
+  hp:     "<strong>HP</strong> — 0 で敗北。回復は最大値を超えない。",
 };
 
-/** @param {string[]} keys */
 function buildPeekHelpHtml(keys) {
   if (!keys || !keys.length) return "";
   const parts = keys.map((k) => PEEK_HELP_SNIPPETS[k]).filter(Boolean);
@@ -785,20 +882,13 @@ function buildPeekHelpHtml(keys) {
 
 function refreshHandPeekLift() {
   requestAnimationFrame(() => {
-    document
-      .querySelectorAll("#hand .card.card--peek, #hand .card.card--focused")
-      .forEach((el) => {
-        const sum = el.querySelector(".card-effect-summary");
-        if (!sum) {
-          el.style.setProperty("--peek-lift", "0px");
-          return;
-        }
-        const full = sum.scrollHeight;
-        const vis = sum.clientHeight;
-        const need = Math.max(0, full - vis);
-        const lift = need > 2 ? Math.min(48, need + 8) : 0;
-        el.style.setProperty("--peek-lift", lift + "px");
-      });
+    document.querySelectorAll("#hand .card.card--peek, #hand .card.card--focused").forEach((el) => {
+      const sum = el.querySelector(".card-effect-summary");
+      if (!sum) { el.style.setProperty("--peek-lift", "0px"); return; }
+      const need = Math.max(0, sum.scrollHeight - sum.clientHeight);
+      const lift = need > 2 ? Math.min(48, need + 8) : 0;
+      el.style.setProperty("--peek-lift", lift + "px");
+    });
   });
 }
 
@@ -810,19 +900,10 @@ function clearHandFocus() {
   });
 }
 
-/** @param {number} idx */
 function setHandFocusByIndex(idx) {
   const cards = Array.from(document.querySelectorAll("#hand .card"));
-  cards.forEach((c) => {
-    c.classList.remove("card--focused", "card--peek");
-    c.style.setProperty("--peek-lift", "0px");
-  });
-  if (
-    idx >= 0 &&
-    idx < cards.length &&
-    cards[idx] &&
-    !cards[idx].classList.contains("disabled")
-  ) {
+  cards.forEach((c) => { c.classList.remove("card--focused", "card--peek"); c.style.setProperty("--peek-lift", "0px"); });
+  if (idx >= 0 && idx < cards.length && cards[idx] && !cards[idx].classList.contains("disabled")) {
     handFocusedIdx = idx;
     cards[idx].classList.add("card--focused", "card--peek");
     refreshHandPeekLift();
@@ -838,21 +919,13 @@ function playCardByRef(cardRef) {
   playCard(idx);
 }
 
-/** @param {number} clientX @param {number} clientY @returns {number} hand index or -1 */
 function handIndexAtPoint(clientX, clientY) {
   const cards = Array.from(document.querySelectorAll("#hand .card"));
   for (let i = 0; i < cards.length; i++) {
     const c = cards[i];
     if (c.classList.contains("disabled")) continue;
     const r = c.getBoundingClientRect();
-    if (
-      clientX >= r.left &&
-      clientX <= r.right &&
-      clientY >= r.top &&
-      clientY <= r.bottom
-    ) {
-      return i;
-    }
+    if (clientX >= r.left && clientX <= r.right && clientY >= r.top && clientY <= r.bottom) return i;
   }
   return -1;
 }
@@ -870,61 +943,31 @@ function bindHandTouchDelegation() {
     document.removeEventListener("touchcancel", onHandDocCancel, true);
   };
 
-  const resetGestureState = () => {
-    removeDocListeners();
-    handTouchId = null;
-  };
-
   const onHandDocEnd = (ev) => {
     if (handTouchId === null) return;
-    if (
-      !Array.from(ev.changedTouches).some((x) => x.identifier === handTouchId)
-    ) {
-      return;
-    }
-    const t =
-      Array.from(ev.changedTouches).find((x) => x.identifier === handTouchId) ||
-      ev.changedTouches[0];
+    if (!Array.from(ev.changedTouches).some((x) => x.identifier === handTouchId)) return;
+    const t = Array.from(ev.changedTouches).find((x) => x.identifier === handTouchId) || ev.changedTouches[0];
     removeDocListeners();
     const releaseIdx = handIndexAtPoint(t.clientX, t.clientY);
-    if (!combat || view !== "combat") {
-      handTouchId = null;
-      return;
-    }
-    if (releaseIdx < 0) {
-      clearHandFocus();
-      handTouchId = null;
-      return;
-    }
+    if (!combat || view !== "combat") { handTouchId = null; return; }
+    if (releaseIdx < 0) { clearHandFocus(); handTouchId = null; return; }
     const c = combat.hand[releaseIdx];
-    if (!c || c.cost > combat.energy) {
-      handTouchId = null;
-      return;
-    }
-    if (handFocusedIdx === releaseIdx) {
-      playCardByRef(c);
-    } else {
-      setHandFocusByIndex(releaseIdx);
-    }
+    if (!c || c.cost > combat.energy) { handTouchId = null; return; }
+    if (handFocusedIdx === releaseIdx) playCardByRef(c);
+    else setHandFocusByIndex(releaseIdx);
     handTouchId = null;
   };
 
-  const onHandDocCancel = () => {
-    resetGestureState();
-  };
+  const onHandDocCancel = () => { removeDocListeners(); handTouchId = null; };
 
-  handEl.addEventListener(
-    "touchstart",
-    (ev) => {
-      if (!combat || view !== "combat" || ev.touches.length !== 1) return;
-      resetGestureState();
-      const t = ev.touches[0];
-      handTouchId = t.identifier;
-      document.addEventListener("touchend", onHandDocEnd, true);
-      document.addEventListener("touchcancel", onHandDocCancel, true);
-    },
-    { passive: true }
-  );
+  handEl.addEventListener("touchstart", (ev) => {
+    if (!combat || view !== "combat" || ev.touches.length !== 1) return;
+    removeDocListeners(); handTouchId = null;
+    const t = ev.touches[0];
+    handTouchId = t.identifier;
+    document.addEventListener("touchend", onHandDocEnd, true);
+    document.addEventListener("touchcancel", onHandDocCancel, true);
+  }, { passive: true });
 }
 
 function bindHandCard(el, idx, card) {
@@ -935,14 +978,33 @@ function bindHandCard(el, idx, card) {
     const cards = Array.from(document.querySelectorAll("#hand .card"));
     const myIdx = cards.indexOf(el);
     if (myIdx < 0) return;
-    if (handFocusedIdx === myIdx) {
-      playCard(idx);
-    } else {
-      setHandFocusByIndex(myIdx);
-    }
+    if (handFocusedIdx === myIdx) playCard(idx);
+    else setHandFocusByIndex(myIdx);
   });
 }
 
+// ─── 状態異常バッジ更新（簡易テキスト表示） ─────────────────────
+function renderStatusBadges() {
+  if (!combat) return;
+  const pBadge = document.getElementById("playerStatusBadge");
+  const eBadge = document.getElementById("enemyStatusBadge");
+  if (pBadge) {
+    const parts = [];
+    if ((combat.playerPoison || 0) > 0) parts.push(`☠×${combat.playerPoison}`);
+    if ((combat.playerBleed || 0) > 0)  parts.push(`🩸×${combat.playerBleed}`);
+    pBadge.textContent = parts.join(" ");
+    pBadge.style.display = parts.length ? "" : "none";
+  }
+  if (eBadge) {
+    const parts = [];
+    if ((combat.enemyPoison || 0) > 0) parts.push(`☠×${combat.enemyPoison}`);
+    if ((combat.enemyBleed || 0) > 0)  parts.push(`🩸×${combat.enemyBleed}`);
+    eBadge.textContent = parts.join(" ");
+    eBadge.style.display = parts.length ? "" : "none";
+  }
+}
+
+// ─── 戦闘 UI 描画 ─────────────────────────────────────────────────
 function renderCombat() {
   document.getElementById("pHp").textContent = String(combat.playerHp);
   document.getElementById("pHpMax").textContent = String(combat.playerHpMax);
@@ -961,11 +1023,12 @@ function renderCombat() {
   document.getElementById("energyVal").textContent = String(combat.energy);
   document.getElementById("energyMax").textContent = String(combat.energyMax);
   document.getElementById("enemyIntent").textContent = intentText();
-  const deckCount = combat.drawPile.length;
   const deckCountEl = document.getElementById("deckPileCount");
-  if (deckCountEl) deckCountEl.textContent = String(deckCount);
+  if (deckCountEl) deckCountEl.textContent = String(combat.drawPile.length);
 
+  renderStatusBadges();
   diffUiFloats();
+
   const handEl = document.getElementById("hand");
   handEl.innerHTML = "";
   handFocusedIdx = -1;
@@ -973,10 +1036,7 @@ function renderCombat() {
   handEl.style.setProperty("--n-cards", String(Math.max(n, 1)));
   combat.hand.forEach((card, idx) => {
     const el = document.createElement("div");
-    el.className =
-      "card " +
-      card.type +
-      (card.cost > combat.energy ? " disabled" : "");
+    el.className = "card " + card.type + (card.cost > combat.energy ? " disabled" : "");
     el.style.setProperty("--i", String(idx));
     el.style.setProperty("--n", String(Math.max(n - 1, 1)));
     const centerIdx = Math.floor((n - 1) / 2);
@@ -984,71 +1044,45 @@ function renderCombat() {
     const rot = rel === 0 ? 0 : rel < 0 ? -5 * Math.abs(rel) : 5 * rel;
     el.style.setProperty("--rot", rot + "deg");
     const summaryLines =
-      typeof card.effectSummaryLines === "function"
-        ? card.effectSummaryLines(combat)
-        : typeof card.previewLines === "function"
-          ? card.previewLines(combat)
-          : [card.text || ""];
+      typeof card.effectSummaryLines === "function" ? card.effectSummaryLines(combat) :
+      typeof card.previewLines === "function" ? card.previewLines(combat) : [card.text || ""];
     const detailLines =
-      typeof card.previewLines === "function"
-        ? card.previewLines(combat)
-        : summaryLines;
-    const helpKeys =
-      typeof card.peekHelpKeys === "function" ? card.peekHelpKeys() : [];
+      typeof card.previewLines === "function" ? card.previewLines(combat) : summaryLines;
+    const helpKeys = typeof card.peekHelpKeys === "function" ? card.peekHelpKeys() : [];
     const detailBody = detailLines.map((t) => "<p>" + escapeHtml(t) + "</p>").join("");
-    const summaryBody = summaryLines
-      .map((t) => "<p>" + escapeHtml(t) + "</p>")
-      .join("");
+    const summaryBody = summaryLines.map((t) => "<p>" + escapeHtml(t) + "</p>").join("");
     el.innerHTML =
       '<div class="card-art-full">' +
-      '<img class="card-ext-img" src="' +
-      EXT_IMG(card.extId) +
-      '" alt="" />' +
+      '<img class="card-ext-img" src="' + EXT_IMG(card.extId) + '" alt="" />' +
       "</div>" +
       '<div class="card-tint"></div>' +
       '<div class="card-fg">' +
       '<div class="card-header">' +
       '<div class="card-header-icons">' +
-      '<span class="card-cost-badge"><span class="cost-zeus" aria-hidden="true">⚡</span>' +
-      card.cost +
-      "</span>" +
-      '<img class="card-skill-corner" src="' +
-      battleIconUrl(card.skillIcon) +
-      '" alt="" />' +
-      "</div>" +
-      "</div>" +
-      '<div class="card-ext-name">' +
-      escapeHtml(card.extNameJa) +
-      "</div>" +
-      '<div class="card-effect-summary">' +
-      summaryBody +
-      "</div>" +
+      '<span class="card-cost-badge"><span class="cost-zeus" aria-hidden="true">⚡</span>' + card.cost + "</span>" +
+      '<img class="card-skill-corner" src="' + battleIconUrl(card.skillIcon) + '" alt="" />' +
+      "</div></div>" +
+      '<div class="card-ext-name">' + escapeHtml(card.extNameJa) + "</div>" +
+      '<div class="card-effect-summary">' + summaryBody + "</div>" +
       '<div class="card-peek-layer" aria-hidden="true">' +
       '<div class="card-peek-inner">' +
-      '<div class="card-peek-lines">' +
-      detailBody +
-      "</div>" +
+      '<div class="card-peek-lines">' + detailBody + "</div>" +
       buildPeekHelpHtml(helpKeys) +
-      "</div></div>" +
-      "</div>";
+      "</div></div></div>";
     bindHandCard(el, idx, card);
     handEl.appendChild(el);
   });
   syncResources();
   combat._lastUi = {
-    playerHp: combat.playerHp,
-    playerGuard: combat.playerGuard,
-    playerShield: combat.playerShield,
-    playerPhy: combat.playerPhy,
-    playerInt: combat.playerInt,
-    playerAgi: combat.playerAgi,
-    enemyHp: combat.enemyHp,
-    enemyGuard: combat.enemyGuard,
-    enemyShield: combat.enemyShield,
-    enemyInt: combat.enemyInt,
+    playerHp: combat.playerHp, playerGuard: combat.playerGuard,
+    playerShield: combat.playerShield, playerPhy: combat.playerPhy,
+    playerInt: combat.playerInt, playerAgi: combat.playerAgi,
+    enemyHp: combat.enemyHp, enemyGuard: combat.enemyGuard,
+    enemyShield: combat.enemyShield, enemyInt: combat.enemyInt,
   };
 }
 
+// ─── カードプレイ ─────────────────────────────────────────────────
 function playCard(idx) {
   const card = combat.hand[idx];
   if (!card || card.cost > combat.energy) return;
@@ -1056,34 +1090,77 @@ function playCard(idx) {
   combat.hand.splice(idx, 1);
   combat.discardPile.push(card);
   card.play(combat);
-  if (combat.enemyHp <= 0) {
-    endCombatWin();
-    return;
-  }
+  if (combat.enemyHp <= 0) { endCombatWin(); return; }
   renderCombat();
 }
 
+// ─── 敵ターン ─────────────────────────────────────────────────────
 function enemyTurn() {
   const it = combat.enemyIntent;
-  if (it.kind === "attack") {
-    dealPhySkillFromEnemyToPlayer(combat, it.phyPct);
-  } else if (it.kind === "guard") {
-    combat.enemyGuard += it.value;
-    playBattleSe("buff");
-    playPortraitEffect("enemy", "buff");
-    clog("敵はガード +" + it.value);
-  } else if (it.kind === "special") {
-    playBattleSe("area");
-    dealSpecialMaxHpPercentToPlayer(combat, it.pct);
+  if (!it) { combat.turn++; startPlayerTurn(); return; }
+
+  switch (it.kind) {
+    case "attack":
+      dealPhySkillFromEnemyToPlayer(combat, it.phyPct);
+      break;
+    case "attackPoison":
+      dealPhySkillFromEnemyToPlayer(combat, it.phyPct);
+      if (combat.playerHp > 0 && (it.poisonStacks || 0) > 0) {
+        combat.playerPoison = (combat.playerPoison || 0) + it.poisonStacks;
+        playBattleSe("debuff"); clog(`毒 ×${it.poisonStacks} 付与（自分）`);
+        renderStatusBadges();
+      }
+      break;
+    case "attackBleed":
+      dealPhySkillFromEnemyToPlayer(combat, it.phyPct);
+      if (combat.playerHp > 0 && (it.bleedStacks || 0) > 0) {
+        combat.playerBleed = (combat.playerBleed || 0) + it.bleedStacks;
+        playBattleSe("debuff"); clog(`出血 ×${it.bleedStacks} 付与（自分）`);
+        renderStatusBadges();
+      }
+      break;
+    case "attackDouble":
+      dealPhySkillFromEnemyToPlayer(combat, it.phyPct);
+      if (combat.playerHp > 0) dealPhySkillFromEnemyToPlayer(combat, it.phyPct);
+      break;
+    case "attackInt":
+      dealIntSkillFromEnemyToPlayer(combat, it.intPct);
+      break;
+    case "attackIntDouble":
+      dealIntSkillFromEnemyToPlayer(combat, it.intPct);
+      if (combat.playerHp > 0) dealIntSkillFromEnemyToPlayer(combat, it.intPct);
+      break;
+    case "healSelf": {
+      const heal = Math.max(1, Math.floor((combat.enemyHpMax * it.pct) / 100));
+      combat.enemyHp = Math.min(combat.enemyHpMax, combat.enemyHp + heal);
+      playBattleSe("heal"); playPortraitEffect("enemy", "heal");
+      clog(`敵 HP+${heal}（自己回復）`);
+      break;
+    }
+    case "buffSelf":
+      if (it.phyAdd) combat.enemyPhy += it.phyAdd;
+      if (it.intAdd) combat.enemyInt += it.intAdd;
+      playBattleSe("buff"); playPortraitEffect("enemy", "buff");
+      clog(`敵強化: ${it.phyAdd ? "PHY+" + it.phyAdd : ""}${it.intAdd ? " INT+" + it.intAdd : ""}`);
+      break;
+    case "guard":
+      combat.enemyGuard += it.value;
+      playBattleSe("buff"); playPortraitEffect("enemy", "buff");
+      clog(`敵 GUARD +${it.value}`);
+      break;
+    case "special":
+      dealSpecialMaxHpPercentToPlayer(combat, it.pct);
+      break;
+    default:
+      clog(`不明な意図: ${it.kind}`);
   }
-  if (combat.playerHp <= 0) {
-    endCombatLoss();
-    return;
-  }
+
+  if (combat.playerHp <= 0) { endCombatLoss(); return; }
   combat.turn++;
   startPlayerTurn();
 }
 
+// ─── カットイン ───────────────────────────────────────────────────
 function showCutin(kind) {
   cutinKind = kind;
   const overlay = document.getElementById("cutinOverlay");
@@ -1094,46 +1171,46 @@ function showCutin(kind) {
   const title = document.getElementById("cutinTitle");
   const sub = document.getElementById("cutinSub");
   if (kind === "win") {
-    title.textContent = "VICTORY";
-    sub.textContent = "タップして次へ";
+    title.textContent = "VICTORY"; sub.textContent = "タップして次へ";
     cutinWinIgnoreUntil = performance.now() + 480;
   } else {
-    title.textContent = "DEFEAT";
-    sub.textContent = "タップで続行";
+    title.textContent = "DEFEAT"; sub.textContent = "タップで続行";
   }
   playJingle(kind);
-  return new Promise((resolve) => {
-    cutinResolve = { resolve };
-  });
+  return new Promise((resolve) => { cutinResolve = { resolve }; });
 }
 
 function dismissCutin() {
   if (!cutinKind) return;
   if (cutinKind === "win" && performance.now() < cutinWinIgnoreUntil) return;
   const overlay = document.getElementById("cutinOverlay");
-  overlay.classList.add("hidden");
-  overlay.setAttribute("aria-hidden", "true");
+  overlay.classList.add("hidden"); overlay.setAttribute("aria-hidden", "true");
   cutinKind = null;
-  if (cutinResolve) {
-    cutinResolve.resolve();
-    cutinResolve = null;
-  }
+  if (cutinResolve) { cutinResolve.resolve(); cutinResolve = null; }
 }
 
+// ─── 戦闘勝利 ────────────────────────────────────────────────────
 function endCombatWin() {
-  gold += combat.boss ? 100 : combat.elite ? 45 : 28;
-  clog("勝利！");
-  const pool = shuffle([
-    "ext1002",
-    "ext1005",
-    "ext1003",
-    "ext1006",
-    "ext1001",
-    "ext1011",
-    "ext2001",
-    "ext2004",
-  ]);
-  const picks = pool.slice(0, 3).map((k) => CARD_LIBRARY[k]);
+  ensureRunState();
+  const chapter = CHAPTERS[runState.chapterIdx];
+  const isBoss = combat.isBoss;
+  const isElite = combat.isElite;
+
+  // ゴールド
+  const earnedGold = isBoss ? chapter.bossRewardGold : isElite ? 45 : 28;
+  gold += earnedGold;
+  clog(`勝利！ GUM +${earnedGold}`);
+
+  // 報酬カードプール（累積）
+  const pool = shuffle(getCumulativeCardPool());
+  const picks = pool.slice(0, 3).map((k) => CARD_LIBRARY[k]).filter(Boolean);
+  // picks が 3 未満なら既存カードで補完
+  const fallback = ["ext1002", "ext1005", "ext1003", "ext1006", "ext2001", "ext2004"];
+  while (picks.length < 3) {
+    const fb = fallback[Math.floor(Math.random() * fallback.length)];
+    if (CARD_LIBRARY[fb] && !picks.includes(CARD_LIBRARY[fb])) picks.push(CARD_LIBRARY[fb]);
+  }
+
   postCombatSnapshot = {
     playerHp: combat.playerHp,
     playerHpMax: combat.playerHpMax,
@@ -1144,53 +1221,35 @@ function endCombatWin() {
     playerAgi: combat.playerAgi,
     enemyPhy: combat.enemyPhy,
     enemyInt: combat.enemyInt,
+    isBoss,
   };
   combat = null;
   stopBgm();
-  showCutin("win").then(() => {
-    openRewardScreen(picks);
-  });
+  showCutin("win").then(() => openRewardScreen(picks));
 }
 
+// ─── 報酬画面 ─────────────────────────────────────────────────────
 function buildRewardPickButton(def, mockS) {
   const b = document.createElement("button");
-  b.type = "button";
-  b.className = "reward-card-btn";
+  b.type = "button"; b.className = "reward-card-btn";
   const summaryLines =
-    typeof def.effectSummaryLines === "function"
-      ? def.effectSummaryLines(mockS)
-      : typeof def.previewLines === "function"
-        ? def.previewLines(mockS)
-        : [];
+    typeof def.effectSummaryLines === "function" ? def.effectSummaryLines(mockS) :
+    typeof def.previewLines === "function" ? def.previewLines(mockS) : [];
   b.innerHTML =
-      '<div class="reward-card-inner ' +
-      def.type +
-      '">' +
-      '<div class="card-art-full">' +
-      '<img class="card-ext-img" src="' +
-      EXT_IMG(def.extId) +
-      '" alt="" />' +
-      "</div>" +
-      '<div class="card-tint"></div>' +
-      '<div class="card-fg">' +
-      '<div class="card-header">' +
-      '<div class="card-header-icons">' +
-      '<span class="card-cost-badge"><span class="cost-zeus" aria-hidden="true">⚡</span>' +
-      def.cost +
-      "</span>" +
-      '<img class="card-skill-corner" src="' +
-      battleIconUrl(def.skillIcon) +
-      '" alt="" />' +
-      "</div>" +
-      "</div>" +
-      '<div class="card-ext-name">' +
-      escapeHtml(def.extNameJa) +
-      "</div>" +
-      '<div class="card-effect-summary">' +
-      summaryLines.map((t) => "<p>" + escapeHtml(t) + "</p>").join("") +
-      "</div>" +
-      "</div>" +
-      "</div>";
+    '<div class="reward-card-inner ' + def.type + '">' +
+    '<div class="card-art-full">' +
+    '<img class="card-ext-img" src="' + EXT_IMG(def.extId) + '" alt="" />' +
+    "</div>" +
+    '<div class="card-tint"></div>' +
+    '<div class="card-fg">' +
+    '<div class="card-header"><div class="card-header-icons">' +
+    '<span class="card-cost-badge"><span class="cost-zeus" aria-hidden="true">⚡</span>' + def.cost + "</span>" +
+    '<img class="card-skill-corner" src="' + battleIconUrl(def.skillIcon) + '" alt="" />' +
+    "</div></div>" +
+    '<div class="card-ext-name">' + escapeHtml(def.extNameJa) + "</div>" +
+    '<div class="card-effect-summary">' +
+    summaryLines.map((t) => "<p>" + escapeHtml(t) + "</p>").join("") +
+    "</div></div></div>";
   return b;
 }
 
@@ -1204,12 +1263,13 @@ function openRewardScreen(picks) {
     playerAgi: postCombatSnapshot.playerAgi,
     enemyPhy: postCombatSnapshot.enemyPhy,
     enemyInt: postCombatSnapshot.enemyInt,
+    playerHp: postCombatSnapshot.playerHp,
+    playerHpMax: postCombatSnapshot.playerHpMax,
+    playerGuard: 0, playerShield: 0, energyMax: 3, energy: 3,
   };
   picks.forEach((def) => {
     const b = buildRewardPickButton(def, mockS);
-    b.addEventListener("click", () => {
-      advanceAfterRewardPick(def.libraryKey);
-    });
+    b.addEventListener("click", () => advanceAfterRewardPick(def.libraryKey));
     box.appendChild(b);
   });
   showView("reward");
@@ -1218,25 +1278,21 @@ function openRewardScreen(picks) {
 
 /** @param {string | null} libraryKey null = skip */
 function advanceAfterRewardPick(libraryKey) {
-  if (!postCombatSnapshot) {
-    showView("map");
-    renderMap();
-    return;
-  }
+  if (!postCombatSnapshot) { showView("map"); renderMap(); return; }
   ensureRunState();
   runState.playerHp = postCombatSnapshot.playerHp;
   runState.playerHpMax = postCombatSnapshot.playerHpMax;
   runState.deck = postCombatSnapshot.deck.map((c) => ({ ...c }));
-  if (libraryKey) {
-    runState.deck.push(copyCard(libraryKey));
-  }
+  if (libraryKey) runState.deck.push(copyCard(libraryKey));
+
   const mid = postCombatSnapshot.mapNodeId;
+  const wasBoss = postCombatSnapshot.isBoss;
   if (mid) {
     runState.pathNodeIds.push(mid);
     runState.lastMapNodeId = mid;
-    if (mapNodeById(mid)?.type === "boss") {
-      runState.runComplete = true;
-      playSeClear();
+    if (wasBoss) {
+      // 章クリア → 次章へ進む（advanceToNextChapter が runComplete を設定することも）
+      advanceToNextChapter();
     }
   }
   combat = null;
@@ -1245,47 +1301,54 @@ function advanceAfterRewardPick(libraryKey) {
   renderMap();
 }
 
+// ─── 戦闘敗北 ────────────────────────────────────────────────────
 function endCombatLoss() {
   stopBgm();
   postCombatSnapshot = null;
   showCutin("lose").then(() => {
     showView("over");
     document.getElementById("gameOverMsg").textContent =
-      "HP が 0 になりました。デッキとマップの立ち回りを調整して再挑戦しよう。";
+      "HP が 0 になりました。デッキと立ち回りを調整して再挑戦しよう。";
     combat = null;
     runState = null;
   });
 }
 
+// ─── ショップ ─────────────────────────────────────────────────────
 function openShop() {
   showView("shop");
   const list = document.getElementById("shopList");
   list.innerHTML = "";
-  const offers = [
-    { label: "エリートブレード", price: 95, key: "ext2001" },
-    { label: "エリートアーマー", price: 85, key: "ext2004" },
-    { label: "ドラゴン", price: 70, key: "ext1022" },
-    { label: "ノービスマスケット", price: 55, key: "ext1002" },
-  ];
-  offers.forEach((o) => {
-    const def = CARD_LIBRARY[o.key];
+
+  // 章の累積カードプールからショップ商品を選ぶ
+  const poolKeys = shuffle(getCumulativeCardPool());
+  const shopKeys = poolKeys.slice(0, 4);
+  // 少なければ既存カードで補完
+  const staticOffers = ["ext2001", "ext2004", "ext1022", "ext1002"];
+  while (shopKeys.length < 4) shopKeys.push(staticOffers[shopKeys.length]);
+
+  const prices = { 0: 20, 1: 55, 2: 85, 3: 120 };
+  shopKeys.forEach((key) => {
+    const def = CARD_LIBRARY[key];
+    if (!def) return;
+    const price = prices[def.cost] ?? 65;
     const b = document.createElement("button");
-    b.type = "button";
-    b.className = "node-btn shop";
-    b.style.width = "100%";
-    b.textContent = o.label + " — " + o.price + " GUM（「" + def.skillNameJa + "」）";
+    b.type = "button"; b.className = "node-btn shop"; b.style.width = "100%";
+    b.textContent = `${def.extNameJa}（⚡${def.cost}）— ${price} GUM`;
     b.addEventListener("click", () => {
-      if (gold < o.price) return;
-      gold -= o.price;
+      if (gold < price) { clog("GUM が足りません"); return; }
+      gold -= price;
       ensureRunState();
-      runState.deck.push(copyCard(o.key));
+      runState.deck.push(copyCard(key));
       b.disabled = true;
       syncResources();
+      clog(`購入: ${def.extNameJa}`);
     });
     list.appendChild(b);
   });
 }
 
+// ─── ランリセット ─────────────────────────────────────────────────
 function resetRun() {
   gold = 75;
   combat = null;
@@ -1298,37 +1361,28 @@ function resetRun() {
   renderMap();
 }
 
+// ─── アセット配線 ─────────────────────────────────────────────────
 function wireAssets() {
   document.querySelectorAll("[data-icon]").forEach((el) => {
     const key = el.getAttribute("data-icon");
-    const paths = {
-      gum: "Image/Icons/gum.png",
-      cp: "Image/Icons/cp.png",
-      ce: "Image/Icons/ce.png",
-      deck: "Image/Icons/ce.png",
-    };
+    const paths = { gum: "Image/Icons/gum.png", cp: "Image/Icons/cp.png", ce: "Image/Icons/ce.png", deck: "Image/Icons/ce.png" };
     el.src = img(paths[key]);
   });
   document.querySelectorAll("[data-stat]").forEach((el) => {
-    el.src = img(
-      "Image/BattleIcons/Parameters/" + el.getAttribute("data-stat") + ".png"
-    );
+    el.src = img("Image/BattleIcons/Parameters/" + el.getAttribute("data-stat") + ".png");
   });
   const agiIcon = img("Image/BattleIcons/Buffs/buf_agi.png");
-  const pi = document.getElementById("pAgiStatIcon");
-  const ei = document.getElementById("eAgiStatIcon");
-  if (pi) pi.src = agiIcon;
-  if (ei) ei.src = agiIcon;
+  const pi = document.getElementById("pAgiStatIcon"); if (pi) pi.src = agiIcon;
+  const ei = document.getElementById("eAgiStatIcon"); if (ei) ei.src = agiIcon;
 }
 
+// ─── デッキモーダル ───────────────────────────────────────────────
 function openDeckModal() {
   if (!combat) return;
   const modal = document.getElementById("deckModal");
   const list = document.getElementById("deckModalList");
   const count = document.getElementById("deckModalCount");
-  const cards = combat.drawPile
-    .slice()
-    .sort((a, b) => a.extNameJa.localeCompare(b.extNameJa, "ja"));
+  const cards = combat.drawPile.slice().sort((a, b) => a.extNameJa.localeCompare(b.extNameJa, "ja"));
   count.textContent = "残り " + cards.length + " 枚（引く順序は非表示）";
   list.innerHTML = "";
   const tally = new Map();
@@ -1337,23 +1391,21 @@ function openDeckModal() {
     tally.set(k, (tally.get(k) || 0) + 1);
   }
   for (const [k, num] of tally) {
-    const name = k.split("|")[0];
-    const cost = k.split("|")[1];
+    const name = k.split("|")[0]; const cost = k.split("|")[1];
     const row = document.createElement("div");
     row.className = "deck-modal-row";
     row.textContent = "×" + num + "  " + name + "（⚡" + cost + "）";
     list.appendChild(row);
   }
-  modal.classList.remove("hidden");
-  modal.setAttribute("aria-hidden", "false");
+  modal.classList.remove("hidden"); modal.setAttribute("aria-hidden", "false");
 }
 
 function closeDeckModal() {
   const modal = document.getElementById("deckModal");
-  modal.classList.add("hidden");
-  modal.setAttribute("aria-hidden", "true");
+  modal.classList.add("hidden"); modal.setAttribute("aria-hidden", "true");
 }
 
+// ─── 初期化 ───────────────────────────────────────────────────────
 function init() {
   document.getElementById("btnEndTurn").addEventListener("click", () => {
     if (!combat || view !== "combat") return;
@@ -1362,21 +1414,13 @@ function init() {
     renderCombat();
     enemyTurn();
   });
-  document.getElementById("btnDeckOpen").addEventListener("click", () => {
-    openDeckModal();
-  });
-  document.getElementById("deckModalClose").addEventListener("click", () => {
-    closeDeckModal();
-  });
+  document.getElementById("btnDeckOpen").addEventListener("click", openDeckModal);
+  document.getElementById("deckModalClose").addEventListener("click", closeDeckModal);
   document.getElementById("deckModal").addEventListener("click", (ev) => {
     if (ev.target.id === "deckModal") closeDeckModal();
   });
-  document.getElementById("cutinOverlay").addEventListener("click", () => {
-    dismissCutin();
-  });
-  document.getElementById("btnSkipReward").addEventListener("click", () => {
-    advanceAfterRewardPick(null);
-  });
+  document.getElementById("cutinOverlay").addEventListener("click", dismissCutin);
+  document.getElementById("btnSkipReward").addEventListener("click", () => advanceAfterRewardPick(null));
   document.getElementById("btnLeaveShop").addEventListener("click", () => {
     ensureRunState();
     if (pendingShopNodeId) {
