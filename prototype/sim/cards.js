@@ -140,11 +140,12 @@ function copyCard(LIB, key) {
   return { ...def, play: def.play };
 }
 
-function makeStarterDeck(LIB) {
+function makeStarterDeck(LIB, hero) {
   const d = [];
-  for (let i = 0; i < 5; i++) d.push(copyCard(LIB, "ext1001"));
-  for (let i = 0; i < 4; i++) d.push(copyCard(LIB, "ext1004"));
-  d.push(copyCard(LIB, "ext1008"));
+  const recipe = (hero && hero.starterDeck) || { ext1001: 5, ext1004: 4, ext1008: 1 };
+  for (const [key, count] of Object.entries(recipe)) {
+    for (let i = 0; i < count; i++) d.push(copyCard(LIB, key));
+  }
   return d;
 }
 

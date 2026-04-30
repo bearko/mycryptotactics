@@ -160,7 +160,7 @@ function simulateCombat(rs, enemyDef, opts, runtime) {
 
 // ── Run-state init ──────────────────────────────────────────────────────
 function makeRun(rng, hero, runtime) {
-  const deck = makeStarterDeck(runtime.LIB);
+  const deck = makeStarterDeck(runtime.LIB, hero);
   return {
     rng,
     hero,

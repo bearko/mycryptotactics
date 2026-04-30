@@ -134,24 +134,66 @@ function scoreCard(card, s, ctx) {
 }
 
 // Decide and execute one player turn. Returns when no plays remain.
+// Strategy improvements over baseline:
+//  1) Pre-turn assessment: if incoming damage is lethal, prioritize survival
+//     (heals, guard, damage-reduce, LL-extension defensive use).
+//  2) Lethal-burst detection: if hand+energy can kill enemy this turn,
+//     prefer attack sequence over defense.
+//  3) Energy-aware card ordering: play 0-cost utility (cd108, ext2003, cdH04,
+//     cd203, cd206, cd305) BEFORE spending energy on attacks.
+//  4) Don't heal at full HP. Don't waste expensive defenses if not in danger.
+//  5) Don't overkill: stop attacking once enemy guaranteed dead this turn.
 function playTurn(s, runtime) {
   const { engine } = runtime;
   let safety = 30;
+
+  // Pre-turn: estimate if we have lethal in hand
   while (safety-- > 0 && s.hand.length > 0 && s.enemyHp > 0 && s.playerHp > 0) {
     const incoming = estIncoming(s);
-    const ctx = { incoming, enemyHp: s.enemyHp };
-    let bestIdx = -1, bestScore = -Infinity, bestDmg = 0;
+    const survivalThreshold = s.playerHp - (s.playerGuard || 0);
+    const inDanger = incoming >= survivalThreshold; // would die if don't defend
+    const overkill = s.enemyHp;
+    const ctx = { incoming, enemyHp: s.enemyHp, inDanger, energy: s.energy };
+
+    let bestIdx = -1, bestScore = -Infinity;
     for (let i = 0; i < s.hand.length; i++) {
       const card = s.hand[i];
       if (card.cost > s.energy) continue;
-      const { score, dmg } = scoreCard(card, s, ctx);
-      if (score > bestScore) { bestScore = score; bestIdx = i; bestDmg = dmg; }
+      let { score, dmg } = scoreCard(card, s, ctx);
+
+      // Pump defensive priority when in danger
+      if (inDanger) {
+        const k = card.libraryKey;
+        if (k === "cd305") score += 80;                      // ½ damage this turn
+        if (k === "cd103" || k === "cd204" || k === "cdH03" || k === "ext1004" || k === "ext2005") {
+          score += Math.min(20, incoming);                    // guard cards
+        }
+        if (k === "ext1003" || k === "cd107" || k === "ext2003" || k === "cdH04") {
+          score += 25;                                        // heals
+        }
+      }
+
+      // Skip overkill: if this card alone exceeds remaining HP and we already
+      // queued lethal, deprioritize (let cheaper cards finish).
+      if (dmg > 0 && dmg > overkill * 1.4) score -= 10;
+
+      // Don't heal at full HP
+      if ((card.libraryKey === "ext1003" || card.libraryKey === "cd107" ||
+           card.libraryKey === "ext2003" || card.libraryKey === "cdH04") &&
+          s.playerHp >= s.playerHpMax - 2) {
+        score = -50;
+      }
+
+      // Cost-0 cards: play them eagerly for free value
+      if (card.cost === 0 && score > -10) score += 8;
+
+      if (score > bestScore) { bestScore = score; bestIdx = i; }
     }
-    if (bestIdx < 0 || bestScore < 0) break;
-    const won = engine.playCard(s, bestIdx);
+    if (bestIdx < 0 || bestScore < -5) break;
+    const ok = engine.playCard(s, bestIdx);
     if (s.enemyHp <= 0) return "win";
     if (s.playerHp <= 0) return "lose";
-    if (!won) break;
+    if (!ok) break;
   }
   return "continue";
 }

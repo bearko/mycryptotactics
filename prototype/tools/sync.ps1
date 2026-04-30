@@ -1,5 +1,5 @@
-# sync.ps1  —  CSV/JSON 同期ツール ラッパー（日本語パス対応）
-# 使用方法（このファイルがある tools/ ディレクトリで実行）:
+# sync.ps1 -- CSV/JSON sync wrapper (handles Japanese paths)
+# Usage:
 #   powershell -ExecutionPolicy Bypass -File sync.ps1 json-to-csv
 #   powershell -ExecutionPolicy Bypass -File sync.ps1 csv-to-json
 
@@ -9,11 +9,11 @@ param(
     [string]$Command
 )
 
-# prototype/ のルートパス（このスクリプトの 1 つ上）
+# prototype/ root path (one level above tools/)
 $protoRoot = Split-Path -Parent (Split-Path -Parent (Resolve-Path $MyInvocation.MyCommand.Path))
 $scriptSrc = Join-Path $protoRoot "tools\sync_csv_json.js"
 
-# 一時ディレクトリ（ASCII パス）にスクリプトをコピーして実行
+# Copy script to temp ASCII path then run (avoids Node.js Japanese-path crash)
 $tmpDir = Join-Path $env:TEMP ("mct_sync_" + [System.IO.Path]::GetRandomFileName().Replace('.',''))
 New-Item -ItemType Directory -Force -Path $tmpDir | Out-Null
 
@@ -26,7 +26,7 @@ try {
     Write-Host $result
 
     if ($LASTEXITCODE -ne 0) {
-        Write-Error "同期に失敗しました（exit code: $LASTEXITCODE）"
+        Write-Error "Sync failed (exit code: $LASTEXITCODE)"
         exit $LASTEXITCODE
     }
 } finally {

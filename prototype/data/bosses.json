@@ -2,7 +2,7 @@
   "boss-ch1": {
     "id": "boss-ch1",
     "name": "ゴースト・上杉謙信",
-    "hp": 65,
+    "hp": 55,
     "phy": 17,
     "int": 6,
     "agi": 6,

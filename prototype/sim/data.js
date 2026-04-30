@@ -63,13 +63,22 @@ const CHAPTERS = [
   },
 ];
 
+// Hero starter deck: balancer can edit `starterDeck` per hero.
+// Format: { key: count }. Keys must exist in cards.js library.
+// Default fallback (if starterDeck omitted): same as actual game (ext1001×5 + ext1004×4 + ext1008×1)
 const HEROES = [
   { heroId: 1002, key: "kaihime",  nameJa: "甲斐姫",
-    hpMax: 70, basePhy: 10, baseInt: 8,  baseAgi: 12, passiveKey: "kaihime" },
+    hpMax: 70, basePhy: 10, baseInt: 8,  baseAgi: 12, passiveKey: "kaihime",
+    // PHY-balanced hero — actual game starter (kept as baseline)
+    starterDeck: { ext1001: 5, ext1004: 4, ext1008: 1 } },
   { heroId: 1001, key: "doyle",    nameJa: "ドイル",
-    hpMax: 60, basePhy: 7,  baseInt: 14, baseAgi: 8,  passiveKey: "doyle" },
+    hpMax: 60, basePhy: 7,  baseInt: 14, baseAgi: 8,  passiveKey: "doyle",
+    // iter-001: PHY 寄せ→INT 寄せに変更。basePhy 7 では PHY カード機能しない
+    starterDeck: { ext1003: 3, ext1008: 4, ext1004: 3 } },
   { heroId: 1003, key: "zhang",    nameJa: "張遼",
-    hpMax: 85, basePhy: 15, baseInt: 6,  baseAgi: 10, passiveKey: "zhang" },
+    hpMax: 85, basePhy: 15, baseInt: 6,  baseAgi: 10, passiveKey: "zhang",
+    // Tank hero — high HP/PHY, weaker INT
+    starterDeck: { ext1001: 5, ext1004: 4, ext1008: 1 } },
 ];
 
 const LL_EXT_POOL = [

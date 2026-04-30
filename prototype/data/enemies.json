@@ -63,7 +63,7 @@
   "sn-e01": {
     "id": "sn-e01",
     "name": "クリーパー フラペチーノ",
-    "hp": 34,
+    "hp": 28,
     "phy": 17,
     "int": 6,
     "agi": 8,
@@ -75,11 +75,11 @@
       },
       {
         "kind": "attack",
-        "phyPct": 130
+        "phyPct": 115
       },
       {
         "kind": "attack",
-        "phyPct": 120
+        "phyPct": 110
       }
     ]
   },
@@ -354,14 +354,14 @@
     "id": "en-e01",
     "name": "ベーグル フラペチーノ",
     "hp": 62,
-    "phy": 25,
+    "phy": 22,
     "int": 10,
     "agi": 12,
     "imgId": 186,
     "intentRota": [
       {
         "kind": "attackDouble",
-        "phyPct": 105
+        "phyPct": 90
       },
       {
         "kind": "guard",

@@ -32,11 +32,11 @@ export const ENEMY_DEFS = {
   },
   'sn-e01': {
     id: 'sn-e01', name: 'クリーパー フラペチーノ',
-    hp: 34, phy: 17, int: 6, agi: 8, imgId: 106,
+    hp: 28, phy: 17, int: 6, agi: 8, imgId: 106,
     intentRota: [
       { kind: 'guard', value: 12 },
-      { kind: 'attack', phyPct: 130 },
-      { kind: 'attack', phyPct: 120 },
+      { kind: 'attack', phyPct: 115 },
+      { kind: 'attack', phyPct: 110 },
     ],
   },
   'hl-001': {
@@ -142,9 +142,9 @@ export const ENEMY_DEFS = {
   },
   'en-e01': {
     id: 'en-e01', name: 'ベーグル フラペチーノ',
-    hp: 62, phy: 25, int: 10, agi: 12, imgId: 186,
+    hp: 62, phy: 22, int: 10, agi: 12, imgId: 186,
     intentRota: [
-      { kind: 'attackDouble', phyPct: 105 },
+      { kind: 'attackDouble', phyPct: 90 },
       { kind: 'guard', value: 16 },
       { kind: 'special', pct: 18 },
       { kind: 'buffSelf', phyAdd: 4 },

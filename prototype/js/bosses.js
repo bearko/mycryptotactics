@@ -8,7 +8,7 @@ export const BOSS_DEFS = {
   'boss-ch1': {
     id: 'boss-ch1',
     name: 'ゴースト・上杉謙信',
-    hp: 65, phy: 17, int: 6, agi: 6, imgId: 425,
+    hp: 55, phy: 17, int: 6, agi: 6, imgId: 425,
     initialShield: 0,
     intentRota: [
       { kind: 'guard', value: 12 },
