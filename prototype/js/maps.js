@@ -23,7 +23,7 @@ function evenlySpaced(n, min, max) {
 function makeTypePicker(nodeRatios) {
   const pool = [];
   for (const [type, weight] of Object.entries(nodeRatios)) {
-    const resolved = type === 'event' ? 'rest' : type;
+    const resolved = type === 'event' ? 'rest' : type === 'craft' ? 'craft' : type;
     const count = Math.max(1, Math.round(weight * 20));
     for (let i = 0; i < count; i++) pool.push(resolved);
   }
@@ -32,7 +32,7 @@ function makeTypePicker(nodeRatios) {
 
 /** ノード種別の表示ラベル */
 function labelForType(type) {
-  return { fight: 'エネミー', rest: '休憩', shop: 'ショップ', elite: 'レアエネミー', boss: 'ボス' }[type] ?? '?';
+  return { fight: 'エネミー', rest: '休憩', shop: 'ショップ', elite: 'レアエネミー', boss: 'ボス', craft: 'クラフト' }[type] ?? '?';
 }
 
 /**

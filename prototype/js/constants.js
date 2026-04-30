@@ -2,16 +2,50 @@ export const ASSET_BASE = "https://raw.githubusercontent.com/bearko/mycryptohero
 export const img = (path) => ASSET_BASE + path;
 export const audioUrl = (relPath) => ASSET_BASE + relPath;
 
-/** リーダー基礎ステ（カードで PHY/INT が変化する前提の初期値） */
-export const LEADER = {
-  heroId: 1002,
-  nameJa: "甲斐姫",
-  hpMax: 70,
-  basePhy: 10,
-  baseInt: 8,
-  baseAgi: 12,
-  img: () => img("Image/Heroes/1002.png"),
-};
+/** 選択可能ヒーロー一覧 */
+export const HERO_ROSTER = [
+  {
+    heroId: 1002,
+    nameJa: "甲斐姫",
+    hpMax: 70,
+    basePhy: 10,
+    baseInt: 8,
+    baseAgi: 12,
+    passiveKey: "kaihime",
+    passiveDesc: "疾風：ターン開始時、AGI÷5 のガードを自動獲得",
+    img: () => img("Image/Heroes/1002.png"),
+  },
+  {
+    heroId: 1009,
+    nameJa: "コナン・ドイル",
+    hpMax: 60,
+    basePhy: 7,
+    baseInt: 14,
+    baseAgi: 8,
+    passiveKey: "doyle",
+    passiveDesc: "推理：戦闘開始時にカードを1枚余分にドロー",
+    img: () => img("Image/Heroes/1009.png"),
+  },
+  {
+    heroId: 1005,
+    nameJa: "張遼",
+    hpMax: 85,
+    basePhy: 15,
+    baseInt: 6,
+    baseAgi: 10,
+    passiveKey: "zhang",
+    passiveDesc: "武神：HP50%以下になったとき PHY +4（1回限り）",
+    img: () => img("Image/Heroes/1005.png"),
+  },
+];
+
+/** リーダー基礎ステ（カードで PHY/INT が変化する前提の初期値）。ヒーロー選択で書き換わる。 */
+export let LEADER = { ...HERO_ROSTER[0] };
+
+/** ヒーローを選択して LEADER を更新する */
+export function setLeader(hero) {
+  Object.assign(LEADER, hero);
+}
 
 export const ENEMY_IMG = (id) => img("Image/Enemies/" + id + ".png");
 export const EXT_IMG = (id) => img("Image/Extensions/" + id + ".png");

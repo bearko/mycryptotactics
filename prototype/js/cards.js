@@ -509,6 +509,69 @@ function makeCardLibrary(clog, api) {
       },
     },
 
+    ext2003: {
+      libraryKey: "ext2003",
+      extId: 2003,
+      extNameJa: "エリートペン",
+      skillNameJa: "エリートリカバリー",
+      skillIcon: "hp.png",
+      cost: 0,
+      type: "skl",
+      exhaust: true,
+      effectSummaryLines(s) {
+        const h = Math.floor((s.playerInt + s.playerPhy) / 2);
+        return [`HP　+${h}`, "【消耗】"];
+      },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) {
+        const h = Math.floor((s.playerInt + s.playerPhy) / 2);
+        return [`HP を ${h} 回復（(INT+PHY)÷2）`, "【消耗】使用後、山札に戻らず除外される"];
+      },
+      play(s) {
+        const heal = Math.floor((s.playerInt + s.playerPhy) / 2);
+        const before = s.playerHp;
+        s.playerHp = Math.min(s.playerHpMax, s.playerHp + heal);
+        if (s.playerHp > before) { se("heal"); fx("player", "heal"); }
+        clog(`エリートリカバリー: HP+${s.playerHp - before}`);
+      },
+    },
+    ext2005: {
+      libraryKey: "ext2005",
+      extId: 2005,
+      extNameJa: "エリートホース",
+      skillNameJa: "エリートチャージ",
+      skillIcon: "BUF_agi.png",
+      cost: 1,
+      type: "skl",
+      effectSummaryLines() { return ["ガード　+8", "AGI　+2（永続）"]; },
+      peekHelpKeys() { return ["guard", "agi"]; },
+      previewLines() { return ["ガードを 8 得る", "AGI を +2（永続）"]; },
+      play(s) {
+        se("buff"); fx("player", "buff");
+        s.playerGuard += 8;
+        s.playerAgi += 2;
+        clog("エリートチャージ: ガード+8、AGI+2");
+      },
+    },
+    ext2008: {
+      libraryKey: "ext2008",
+      extId: 2008,
+      extNameJa: "エリートブック",
+      skillNameJa: "エリートリーディング",
+      skillIcon: "int.png",
+      cost: 2,
+      type: "skl",
+      effectSummaryLines() { return ["INT　+2（永続）", "ドロー　3"]; },
+      peekHelpKeys() { return ["int", "draw"]; },
+      previewLines() { return ["INT を +2（永続）", "カードを 3 枚引く"]; },
+      play(s) {
+        se("buff"); fx("player", "buff");
+        s.playerInt += 2;
+        api.drawCards(s, 3);
+        clog("エリートリーディング: INT+2、ドロー3");
+      },
+    },
+
     // ════════════════════════════════════════
     // 章 1 ── 戦国回廊 カードプール（SPEC-004 §6.4）
     // ════════════════════════════════════════
@@ -536,7 +599,7 @@ function makeCardLibrary(clog, api) {
       libraryKey: "cd102",
       extId: 2011,
       extNameJa: "エリートアックス",
-      skillNameJa: "二段斬り",
+      skillNameJa: "エリートチョップ",
       skillIcon: "phy.png",
       cost: 2,
       type: "atk",
@@ -595,7 +658,7 @@ function makeCardLibrary(clog, api) {
       libraryKey: "cd105",
       extId: 2001,
       extNameJa: "エリートブレード",
-      skillNameJa: "一閃",
+      skillNameJa: "エリートスラッシュ",
       skillIcon: "phy.png",
       cost: 2,
       type: "atk",
@@ -688,7 +751,7 @@ function makeCardLibrary(clog, api) {
       libraryKey: "cdH01",
       extId: 2006,
       extNameJa: "エリートカタナ",
-      skillNameJa: "抜刀・一閃",
+      skillNameJa: "エリートイアイ",
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
@@ -753,7 +816,7 @@ function makeCardLibrary(clog, api) {
       libraryKey: "cdH04",
       extId: 2003,
       extNameJa: "エリートペン",
-      skillNameJa: "緊急回復",
+      skillNameJa: "エリートリカバリー",
       skillIcon: "hp.png",
       cost: 0,
       type: "skl",
@@ -803,7 +866,7 @@ function makeCardLibrary(clog, api) {
       libraryKey: "cdH06",
       extId: 2008,
       extNameJa: "エリートブック",
-      skillNameJa: "知識の爆発",
+      skillNameJa: "エリートリーディング",
       skillIcon: "int.png",
       cost: 2,
       type: "skl",
@@ -848,7 +911,7 @@ function makeCardLibrary(clog, api) {
       libraryKey: "cd202",
       extId: 2013,
       extNameJa: "エリートユミ",
-      skillNameJa: "出血弾",
+      skillNameJa: "エリートスナイプ",
       skillIcon: "phy.png",
       cost: 2,
       type: "atk",
@@ -885,7 +948,7 @@ function makeCardLibrary(clog, api) {
       libraryKey: "cd204",
       extId: 2004,
       extNameJa: "エリートアーマー",
-      skillNameJa: "防御陣",
+      skillNameJa: "エリートプロテクション",
       skillIcon: "BUF_phy.png",
       cost: 2,
       type: "skl",
@@ -903,7 +966,7 @@ function makeCardLibrary(clog, api) {
       libraryKey: "cd205",
       extId: 2002,
       extNameJa: "エリートマスケット",
-      skillNameJa: "連射",
+      skillNameJa: "エリートショット",
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
@@ -958,7 +1021,7 @@ function makeCardLibrary(clog, api) {
       libraryKey: "cd302",
       extId: 1011,
       extNameJa: "アックス",
-      skillNameJa: "大鎚",
+      skillNameJa: "ノービスチョップ",
       skillIcon: "phy.png",
       cost: 3,
       type: "atk",
@@ -978,7 +1041,7 @@ function makeCardLibrary(clog, api) {
       libraryKey: "cd303",
       extId: 2004,
       extNameJa: "エリートアーマー",
-      skillNameJa: "戦術指揮",
+      skillNameJa: "エリートプロテクション",
       skillIcon: "BUF_phy.png",
       cost: 2,
       type: "skl",
@@ -997,7 +1060,7 @@ function makeCardLibrary(clog, api) {
       libraryKey: "cd304",
       extId: 1022,
       extNameJa: "ドラゴン",
-      skillNameJa: "必殺の閃光",
+      skillNameJa: "ドラゴンブレス",
       skillIcon: "int.png",
       cost: 2,
       type: "atk",
@@ -1017,7 +1080,7 @@ function makeCardLibrary(clog, api) {
       libraryKey: "cd305",
       extId: 1005,
       extNameJa: "ノービスホース",
-      skillNameJa: "不屈",
+      skillNameJa: "ノービスチャージ",
       skillIcon: "BUF_agi.png",
       cost: 0,
       type: "skl",
@@ -1085,8 +1148,11 @@ export const CARD_RARITIES = {
   ext1023: 'common',    // ブル（全体+自己PHYダウン）
   ext2001: 'uncommon',  // エリートブレード
   ext2002: 'uncommon',  // エリートマスケット（全体）
+  ext2003: 'uncommon',  // エリートペン（HP回復・消耗）
   ext2004: 'uncommon',  // エリートアーマー（PHY%アップ）
+  ext2005: 'uncommon',  // エリートホース（ガード+AGI永続）
   ext2006: 'uncommon',  // エリートカタナ
+  ext2008: 'uncommon',  // エリートブック（INT+ドロー）
   ext2011: 'uncommon',  // エリートアックス
   ext2013: 'uncommon',  // エリートユミ
 
@@ -1117,9 +1183,25 @@ export const CARD_RARITIES = {
 
   // ─── 章3 アタナソフ カードプール ─────────────────────────────────
   cd201:   'uncommon',  // 毒の刃（PHY+毒×2）
-  cd202:   'rare',      // 出血弾（PHY90%+出血×2）
+  cd202:   'rare',      // エリートスナイプ（PHY90%+出血×2）
   cd203:   'common',    // 解毒（コスト0・デバフ解除）
-  cd204:   'rare',      // 防御陣（ガード+12）
-  cd205:   'rare',      // 連射（INT×3）
+  cd204:   'rare',      // エリートプロテクション（ガード+12）
+  cd205:   'rare',      // エリートショット（INT×3）
   cd206:   'uncommon',  // 投資（GUM+20）
+};
+
+/**
+ * カードランクアップ系列（ノービス → エリート）
+ * クラフトノードの「打ち直し」で使用。
+ * キーのカードを値のカードに 1 段階アップグレードできる。
+ */
+export const CARD_UPGRADE_SERIES = {
+  ext1001: 'ext2001',  // ノービスブレード → エリートブレード
+  ext1002: 'ext2002',  // ノービスマスケット → エリートマスケット
+  ext1003: 'ext2003',  // ノービスペン → エリートペン
+  ext1004: 'ext2004',  // ノービスアーマー → エリートアーマー
+  ext1005: 'ext2005',  // ノービスホース → エリートホース
+  ext1006: 'ext2006',  // ノービスカタナ → エリートカタナ
+  ext1008: 'ext2008',  // ノービスブック → エリートブック
+  ext1011: 'ext2011',  // アックス → エリートアックス
 };

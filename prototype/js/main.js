@@ -3,10 +3,13 @@ import {
   shuffle,
   battleIconUrl,
   CARD_RARITIES,
+  CARD_UPGRADE_SERIES,
 } from "./cards.js";
 import {
   img,
   LEADER,
+  HERO_ROSTER,
+  setLeader,
   ENEMY_IMG,
   EXT_IMG,
   BATTLE_BG,
@@ -113,6 +116,7 @@ let clearedChapters = new Set();
 let runState = null;
 let combat = null;
 let pendingShopNodeId = null;
+let pendingCraftNodeId = null;
 /** @type {'win'|'lose'|null} */
 let cutinKind = null;
 let cutinResolve = null;
@@ -149,8 +153,8 @@ function dismissTitle() {
   titleEl.classList.add("title-out");
   setTimeout(() => {
     titleEl.classList.add("hidden");
-    showView("nodeSelect");
-    renderNodeSelect();
+    showView("heroSelect");
+    renderHeroSelect();
   }, 380);
 }
 
@@ -658,9 +662,10 @@ function renderMap() {
     ty.setAttribute("x", String(node.x)); ty.setAttribute("y", String(node.y + 11.8));
     ty.setAttribute("text-anchor", "middle"); ty.setAttribute("class", "map-node-type");
     ty.textContent =
-      node.type === "fight" ? (node.elite ? "レアエネミー" : "エネミー") :
-      node.type === "rest"  ? "HP回復" :
-      node.type === "shop"  ? "ショップ" : "ボス";
+      node.type === "fight"  ? (node.elite ? "レアエネミー" : "エネミー") :
+      node.type === "rest"   ? "HP回復" :
+      node.type === "shop"   ? "ショップ" :
+      node.type === "craft"  ? "クラフト" : "ボス";
     g.appendChild(ty);
     const allowed = new Set(reachableNextNodeIds(runState.lastMapNodeId));
     if (!allowed.has(node.id)) g.style.pointerEvents = "none";
@@ -689,8 +694,9 @@ function renderMap() {
   nodeIconG.setAttribute("class", "map-node-icons");
   for (const node of MAP_NODES) {
     let iconUrl = null;
-    if (node.type === "shop") iconUrl = img("Image/Icons/gum.png");
-    else if (node.type === "rest") iconUrl = img("Image/BattleIcons/Parameters/hp.png");
+    if (node.type === "shop")  iconUrl = img("Image/Icons/gum.png");
+    else if (node.type === "rest")  iconUrl = img("Image/BattleIcons/Parameters/hp.png");
+    else if (node.type === "craft") iconUrl = img("Image/Icons/ce.png");
     if (!iconUrl) continue;
     const sz = 5.2;
     const iconEl = document.createElementNS("http://www.w3.org/2000/svg", "image");
@@ -773,6 +779,11 @@ function tryEnterMapNode(nodeId) {
     openShop();
     return;
   }
+  if (node.type === "craft") {
+    pendingCraftNodeId = nodeId;
+    openCraftScreen();
+    return;
+  }
   startCombatFromMapNode(node);
 }
 
@@ -788,14 +799,18 @@ function showView(name) {
   if (rv) rv.classList.toggle("hidden", name !== "reward");
   const nsv = document.getElementById("nodeSelectView");
   if (nsv) nsv.classList.toggle("hidden", name !== "nodeSelect");
-  // Show/hide map resources bar
+  const cv = document.getElementById("craftView");
+  if (cv) cv.classList.toggle("hidden", name !== "craft");
+  const hsv = document.getElementById("heroSelectView");
+  if (hsv) hsv.classList.toggle("hidden", name !== "heroSelect");
+  // Show/hide map resources bar（ヒーロー選択・戦闘中は非表示）
   const mapRes = document.getElementById("mapResources");
-  if (mapRes) mapRes.classList.toggle("hidden", name === "combat");
+  if (mapRes) mapRes.classList.toggle("hidden", name === "combat" || name === "heroSelect");
   // Mai navigator: マップビュー内にあるので mapView の hidden に連動
   const nav = document.getElementById("maiNavigator");
   if (nav) nav.classList.toggle("hidden", name !== "map");
-  // マップ BGM: マップ・ショップ・報酬・node選択ではBGMを再生
-  if (name === "map" || name === "nodeSelect") startBgmMap();
+  // マップ BGM: マップ・ショップ・報酬・node選択・ヒーロー選択ではBGMを再生
+  if (name === "map" || name === "nodeSelect" || name === "heroSelect") startBgmMap();
 }
 
 // ─── 戦闘開始 ─────────────────────────────────────────────────────
@@ -875,6 +890,7 @@ function startCombatFromMapNode(node) {
     mapNodeId: node.id,
     isElite: !!node.elite,
     turn: 1,
+    zhangPassiveTriggered: false,
     _lastUi: null,
   };
 
@@ -969,9 +985,29 @@ function startPlayerTurn() {
     combat.phyPenaltyNext = 0;
   }
 
+  // ─── パッシブスキル ────────────────────────────────────────────
+  const passive = LEADER.passiveKey;
+  // 甲斐姫「疾風」: ターン開始時 AGI÷5 のガードを自動獲得
+  if (passive === 'kaihime') {
+    const autoGuard = Math.max(1, Math.floor(combat.playerAgi / 5));
+    combat.playerGuard += autoGuard;
+    clog(`【疾風】ガード +${autoGuard}`);
+  }
+  // 張遼「武神」: HP が 50% 以下に落ちたとき PHY+4（1 回限り）
+  if (passive === 'zhang' && !combat.zhangPassiveTriggered) {
+    if (combat.playerHp <= combat.playerHpMax * 0.5) {
+      combat.playerPhy += 4;
+      combat.zhangPassiveTriggered = true;
+      playPortraitEffect("player", "buff");
+      clog('【武神】発動！ PHY +4');
+    }
+  }
+
   combat.energy = combat.energyMax + (combat.bonusEnergyNext || 0);
   combat.bonusEnergyNext = 0;
-  drawCards(combat, 5);
+  // コナン・ドイル「推理」: 毎ターン開始時に 1 枚余分にドロー
+  const drawN = (passive === 'doyle') ? 6 : 5;
+  drawCards(combat, drawN);
   advanceEnemyIntent();
   renderCombat();
 }
@@ -1624,8 +1660,98 @@ function openShop() {
     list.appendChild(item);
   });
 
+  // ─── カード破棄セクション ──────────────────────────────────────
+  const removeSection = document.createElement("div");
+  removeSection.className = "shop-remove-section";
+  const removeTitle = document.createElement("div");
+  removeTitle.className = "shop-remove-title";
+  removeTitle.textContent = "カード破棄（50 GUM）";
+  removeSection.appendChild(removeTitle);
+  const removeDesc = document.createElement("div");
+  removeDesc.className = "shop-remove-desc";
+  removeDesc.textContent = "デッキ内のカードを1枚選んで除外できます（スターター以外）。";
+  removeSection.appendChild(removeDesc);
+
+  const removeBtn = document.createElement("button");
+  removeBtn.type = "button";
+  removeBtn.className = "shop-remove-btn action";
+  removeBtn.textContent = "カードを破棄する";
+  removeBtn.addEventListener("click", () => openShopRemoveCard(goldDisp));
+  removeSection.appendChild(removeBtn);
+  list.parentElement.appendChild(removeSection);
+
   // マイのメッセージ（ショップ入店時）
   renderNavigator("エクステンションを購入してデッキを強化しましょう！GUMに余裕があるなら積極的に買いましょう！");
+}
+
+// ─── ショップ カード破棄 ──────────────────────────────────────────
+const SHOP_REMOVE_COST = 50;
+// スターターカードのキー（破棄不可）
+const STARTER_KEYS = new Set(['ext1001', 'ext1004', 'ext1008']);
+
+function openShopRemoveCard(goldDisp) {
+  ensureRunState();
+  if (gold < SHOP_REMOVE_COST) {
+    renderNavigator(`GUM が足りません（必要: ${SHOP_REMOVE_COST} GUM）`);
+    return;
+  }
+  // 破棄可能なカード（スターター以外）
+  const removable = runState.deck
+    .map((c, idx) => ({ card: c, idx }))
+    .filter(({ card }) => !STARTER_KEYS.has(card.libraryKey));
+
+  if (removable.length === 0) {
+    renderNavigator("破棄できるカードがありません（スターターカードは破棄不可）");
+    return;
+  }
+
+  // モーダル的に shopView 内にオーバーレイを出す
+  const overlay = document.createElement("div");
+  overlay.className = "shop-remove-overlay";
+  overlay.innerHTML = `<div class="shop-remove-modal">
+    <div class="shop-remove-modal-title">破棄するカードを選んでください</div>
+    <div class="shop-remove-card-list" id="shopRemoveCardList"></div>
+    <button class="shop-remove-cancel" id="shopRemoveCancel">キャンセル</button>
+  </div>`;
+  document.getElementById("shopView").appendChild(overlay);
+  document.getElementById("shopRemoveCancel").addEventListener("click", () => overlay.remove());
+
+  const mockS = {
+    playerPhy: LEADER.basePhy, playerInt: LEADER.baseInt, playerAgi: LEADER.baseAgi,
+    enemyPhy: 14, enemyInt: 8,
+    playerHp: runState.playerHp, playerHpMax: runState.playerHpMax,
+    playerGuard: 0, playerShield: 0, energyMax: 3, energy: 3,
+  };
+
+  const cardListEl = document.getElementById("shopRemoveCardList");
+  const seen = new Set();
+  removable.forEach(({ card, idx }) => {
+    if (seen.has(card.libraryKey)) return; // 重複は代表1枚のみ
+    seen.add(card.libraryKey);
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "shop-remove-card-wrapper";
+    const cardBtn = buildRewardPickButton(card, mockS);
+    cardBtn.style.pointerEvents = "none";
+    wrapper.appendChild(cardBtn);
+
+    const delBtn = document.createElement("button");
+    delBtn.className = "action shop-remove-confirm-btn";
+    delBtn.textContent = `破棄 (-${SHOP_REMOVE_COST} GUM)`;
+    delBtn.addEventListener("click", () => {
+      gold -= SHOP_REMOVE_COST;
+      // 同じキーの最初の1枚を削除
+      const removeIdx = runState.deck.findIndex(c => c.libraryKey === card.libraryKey);
+      if (removeIdx >= 0) runState.deck.splice(removeIdx, 1);
+      if (goldDisp) goldDisp.textContent = String(gold);
+      syncResources();
+      clog(`破棄: ${card.extNameJa}（-${SHOP_REMOVE_COST} GUM）`);
+      renderNavigator(`「${card.extNameJa}」を破棄しました！デッキが軽くなりましたよ！`);
+      overlay.remove();
+    });
+    wrapper.appendChild(delBtn);
+    cardListEl.appendChild(wrapper);
+  });
 }
 
 // ─── ランリセット ─────────────────────────────────────────────────
@@ -1634,6 +1760,7 @@ function resetRun() {
   combat = null;
   runState = null;
   pendingShopNodeId = null;
+  pendingCraftNodeId = null;
   postCombatSnapshot = null;
   stopBgm();
   dismissCutin();
@@ -1650,6 +1777,7 @@ function startRunFromChapter(chapterIdx) {
   gold = 75;
   combat = null;
   pendingShopNodeId = null;
+  pendingCraftNodeId = null;
   postCombatSnapshot = null;
   const chapter = CHAPTERS[chapterIdx];
   const { nodes, edges } = generateChapterMap(chapter, ENEMY_DEFS);
@@ -1777,6 +1905,200 @@ function renderNodeSelect(justUnlockedIdx = null) {
   }
 }
 
+// ─── ヒーロー選択画面 ────────────────────────────────────────────────
+function renderHeroSelect() {
+  const el = document.getElementById("heroSelectView");
+  if (!el) return;
+
+  let html = '<div class="hs-header"><h2>ヒーローを選んでください</h2><p class="hs-sub">パッシブスキルを持つ英雄があなたの旅を導きます</p></div>';
+  html += '<div class="hs-roster">';
+
+  HERO_ROSTER.forEach((hero, idx) => {
+    html += `<div class="hs-card" data-idx="${idx}" role="button" tabindex="0">`;
+    html += `<img class="hs-hero-img" src="${hero.img()}" alt="${hero.nameJa}" />`;
+    html += `<div class="hs-hero-body">`;
+    html += `<div class="hs-hero-name">${hero.nameJa}</div>`;
+    html += `<div class="hs-hero-stats">`;
+    html += `<span>HP ${hero.hpMax}</span>`;
+    html += `<span>PHY ${hero.basePhy}</span>`;
+    html += `<span>INT ${hero.baseInt}</span>`;
+    html += `<span>AGI ${hero.baseAgi}</span>`;
+    html += `</div>`;
+    html += `<div class="hs-passive">${hero.passiveDesc}</div>`;
+    html += `<button class="hs-select-btn action">このヒーローで始める</button>`;
+    html += `</div>`;
+    html += `</div>`;
+  });
+
+  html += '</div>';
+  el.innerHTML = html;
+
+  el.querySelectorAll('.hs-select-btn').forEach((btn, idx) => {
+    btn.addEventListener('click', () => {
+      setLeader(HERO_ROSTER[idx]);
+      showView("nodeSelect");
+      renderNodeSelect();
+    });
+  });
+}
+
+// ─── クラフト画面 ────────────────────────────────────────────────────
+function openCraftScreen() {
+  showView("craft");
+  const el = document.getElementById("craftView");
+  if (!el) return;
+
+  el.innerHTML = `
+    <div class="craft-header">
+      <h2>クラフト</h2>
+      <p class="craft-sub">エクステンションを獲得するか、デッキを強化しましょう</p>
+    </div>
+    <div class="craft-choices">
+      <div class="craft-option" id="craftOptGet">
+        <div class="craft-opt-title">エクステ獲得</div>
+        <div class="craft-opt-desc">累積カードプールからカードを3枚提示します。1枚をデッキに追加できます。</div>
+        <button class="action craft-opt-btn" id="btnCraftGet">獲得する</button>
+      </div>
+      <div class="craft-option" id="craftOptUpgrade">
+        <div class="craft-opt-title">打ち直し</div>
+        <div class="craft-opt-desc">デッキ内のノービスカードを1枚選んでエリートにランクアップします。</div>
+        <button class="action craft-opt-btn" id="btnCraftUpgrade">打ち直す</button>
+      </div>
+    </div>
+    <button class="craft-leave-btn" id="btnLeaveCraft">← マップに戻る</button>
+  `;
+
+  document.getElementById("btnCraftGet").addEventListener("click", () => {
+    openCraftGetCard();
+  });
+  document.getElementById("btnCraftUpgrade").addEventListener("click", () => {
+    openCraftUpgrade();
+  });
+  document.getElementById("btnLeaveCraft").addEventListener("click", () => {
+    leaveCraft();
+  });
+}
+
+function leaveCraft() {
+  ensureRunState();
+  if (pendingCraftNodeId) {
+    runState.pathNodeIds.push(pendingCraftNodeId);
+    runState.lastMapNodeId = pendingCraftNodeId;
+    pendingCraftNodeId = null;
+  }
+  showView("map");
+  renderMap();
+}
+
+function openCraftGetCard() {
+  const el = document.getElementById("craftView");
+  if (!el) return;
+  ensureRunState();
+
+  const poolKeys = shuffle(getCumulativeCardPool());
+  const offerKeys = poolKeys.slice(0, 3);
+  const mockS = {
+    playerPhy: LEADER.basePhy, playerInt: LEADER.baseInt, playerAgi: LEADER.baseAgi,
+    enemyPhy: 14, enemyInt: 8,
+    playerHp: runState.playerHp, playerHpMax: runState.playerHpMax,
+    playerGuard: 0, playerShield: 0, energyMax: 3, energy: 3,
+  };
+
+  el.innerHTML = `<div class="craft-header"><h2>エクステ獲得</h2><p class="craft-sub">1枚を選んでデッキに追加します</p></div>`;
+  const list = document.createElement("div");
+  list.className = "craft-reward-list";
+  offerKeys.forEach(key => {
+    const def = CARD_LIBRARY[key];
+    if (!def) return;
+    const btn = buildRewardPickButton(def, mockS);
+    btn.addEventListener("click", () => {
+      runState.deck.push(copyCard(key));
+      clog(`クラフト獲得: ${def.extNameJa}`);
+      leaveCraft();
+    });
+    list.appendChild(btn);
+  });
+  el.appendChild(list);
+
+  const skipBtn = document.createElement("button");
+  skipBtn.className = "craft-leave-btn";
+  skipBtn.textContent = "スキップ";
+  skipBtn.addEventListener("click", leaveCraft);
+  el.appendChild(skipBtn);
+}
+
+function openCraftUpgrade() {
+  const el = document.getElementById("craftView");
+  if (!el) return;
+  ensureRunState();
+
+  // アップグレード可能なカードを探す
+  const upgradeable = runState.deck
+    .map((c, idx) => ({ card: c, idx }))
+    .filter(({ card }) => CARD_UPGRADE_SERIES[card.libraryKey]);
+
+  if (upgradeable.length === 0) {
+    el.innerHTML = `
+      <div class="craft-header"><h2>打ち直し</h2></div>
+      <p style="text-align:center;color:var(--muted);margin:2rem 0;">アップグレード可能なノービスカードがありません</p>
+      <button class="craft-leave-btn" id="btnLeaveCraft2">← 戻る</button>
+    `;
+    document.getElementById("btnLeaveCraft2").addEventListener("click", () => openCraftScreen());
+    return;
+  }
+
+  el.innerHTML = `<div class="craft-header"><h2>打ち直し</h2><p class="craft-sub">ランクアップするカードを選んでください（ノービス → エリート）</p></div>`;
+  const list = document.createElement("div");
+  list.className = "craft-upgrade-list";
+
+  const mockS = {
+    playerPhy: LEADER.basePhy, playerInt: LEADER.baseInt, playerAgi: LEADER.baseAgi,
+    enemyPhy: 14, enemyInt: 8,
+    playerHp: runState.playerHp, playerHpMax: runState.playerHpMax,
+    playerGuard: 0, playerShield: 0, energyMax: 3, energy: 3,
+  };
+
+  upgradeable.forEach(({ card, idx }) => {
+    const upgradeKey = CARD_UPGRADE_SERIES[card.libraryKey];
+    const upgradeDef = CARD_LIBRARY[upgradeKey];
+    if (!upgradeDef) return;
+
+    const row = document.createElement("div");
+    row.className = "craft-upgrade-row";
+
+    const before = buildRewardPickButton(card, mockS);
+    before.style.pointerEvents = "none";
+    const arrow = document.createElement("span");
+    arrow.className = "craft-arrow";
+    arrow.textContent = "→";
+    const after = buildRewardPickButton(upgradeDef, mockS);
+    after.style.pointerEvents = "none";
+
+    const selBtn = document.createElement("button");
+    selBtn.className = "action craft-opt-btn";
+    selBtn.textContent = "このカードを強化";
+    selBtn.addEventListener("click", () => {
+      runState.deck[idx] = copyCard(upgradeKey);
+      clog(`打ち直し: ${card.extNameJa} → ${upgradeDef.extNameJa}`);
+      leaveCraft();
+    });
+
+    row.appendChild(before);
+    row.appendChild(arrow);
+    row.appendChild(after);
+    row.appendChild(selBtn);
+    list.appendChild(row);
+  });
+
+  el.appendChild(list);
+
+  const backBtn = document.createElement("button");
+  backBtn.className = "craft-leave-btn";
+  backBtn.textContent = "← 戻る";
+  backBtn.addEventListener("click", () => openCraftScreen());
+  el.appendChild(backBtn);
+}
+
 // ─── アセット配線 ─────────────────────────────────────────────────
 function wireAssets() {
   document.querySelectorAll("[data-icon]").forEach((el) => {
@@ -1866,8 +2188,8 @@ function init() {
       if (ev.key === "Enter" || ev.key === " ") dismissTitle();
     });
   }
-  // nodeSelect を非表示で待機（タイトルが覆うので見えない）
-  showView("nodeSelect"); // 内部状態は nodeSelect に初期化
+  // heroSelect を非表示で待機（タイトルが覆うので見えない）
+  showView("heroSelect"); // 内部状態は heroSelect に初期化
   // BGM はタイトルクリック時に開始（ブラウザのオートプレイ制限のため init では呼ばない）
 }
 

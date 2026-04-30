@@ -20,7 +20,7 @@ export const BOSS_DEFS = {
 
   'boss-hl': {
     id: 'boss-hl',
-    name: 'ゴースト・ビスマルク',
+    name: 'ゴースト・楊貴妃',
     hp: 80, phy: 17, int: 9, agi: 7, imgId: 435,
     initialShield: 0,
     intentRota: [
