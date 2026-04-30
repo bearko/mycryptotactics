@@ -12,7 +12,11 @@
 
 ## レビュー中・草案
 
-（該当 SPEC を追加）
+| ID | 題名 | 状態 | パス |
+|----|------|------|------|
+| SPEC-002.5 | プロトタイプ現況スナップショット | Draft | [SPEC-002.5-prototype-snapshot.md](./SPEC-002.5-prototype-snapshot.md) |
+| SPEC-003 | 一般公開リリース要件 | Draft | [SPEC-003-public-release.md](./SPEC-003-public-release.md) |
+| SPEC-004 | ステージコンテンツ（章 1〜章 3） | Draft | [SPEC-004-stage-content.md](./SPEC-004-stage-content.md) |
 
 ## 廃止（Deprecated）
 
