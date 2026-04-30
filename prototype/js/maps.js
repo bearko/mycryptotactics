@@ -110,7 +110,7 @@ export function generateChapterMap(chapter, enemyDefs = {}) {
 
       // 敵 ID を割り当て（fight / elite のみ）
       let enemyDefId = null;
-      let enemyImgId = isElite ? 418 : 314;
+      let enemyImgId = isElite ? 106 : 104;
       if (resolvedType === 'fight') {
         const pool = isElite ? chapter.elitePool : chapter.enemyPool;
         if (pool?.length) {

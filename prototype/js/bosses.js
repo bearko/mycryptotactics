@@ -1,14 +1,14 @@
 /**
  * ボスマスタ（SPEC-004 §6.5, §7.5, §8.5）
+ * 名称・imgId は MyCryptoHeroes 原作準拠（ゴースト系英雄）
  * phases: 配列なら HP% 閾値でフェーズ移行。
- * intentRota を直接持つ場合はシングルフェーズ。
  */
 export const BOSS_DEFS = {
 
   'boss-ch1': {
     id: 'boss-ch1',
-    name: '戦国の覇者',
-    hp: 60, phy: 16, int: 6, agi: 6, imgId: 505,
+    name: 'ゴースト・上杉謙信',
+    hp: 60, phy: 16, int: 6, agi: 6, imgId: 425,
     initialShield: 0,
     intentRota: [
       { kind: 'guard',   value: 10 },
@@ -20,8 +20,8 @@ export const BOSS_DEFS = {
 
   'boss-ch2': {
     id: 'boss-ch2',
-    name: '港の総督',
-    hp: 100, phy: 18, int: 12, agi: 8, imgId: 505,
+    name: 'ゴースト・ナポレオン',
+    hp: 100, phy: 18, int: 12, agi: 8, imgId: 445,
     initialShield: 0,
     intentRota: [
       { kind: 'attackPoison',    phyPct: 100, poisonStacks: 2 },
@@ -33,7 +33,7 @@ export const BOSS_DEFS = {
 
   'boss-ch3': {
     id: 'boss-ch3',
-    name: '決定者',
+    name: 'ゴースト・リンカーン',
     hp: 180, phy: 22, int: 18, agi: 10, imgId: 505,
     initialShield: 30,
     phases: [
