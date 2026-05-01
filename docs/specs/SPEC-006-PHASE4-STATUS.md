@@ -16,7 +16,7 @@
 | 4a | データ schema 追加 | P0 | ✅ **完了** | 4c で migration script を --apply 実行、cards.js が新 schema に |
 | 4b | `resolveCaster` / `canPlayCard` + グレーアウト | P0 | ✅ **完了** | caster.js を main.js にインポート、playCard で canPlayCard 検証、ハンド render に `card-unplayable-badge` (`⚡不足` / `👤不在`) を表示 |
 | 4c | 全 577 カードに `caster` + `effects` 付与 | P0 | ✅ **完了** | 569 件 (98.6%) 自動 + 9 件手動修正 (cd205/cd206/cdH04/cd107/cd104/ext2003/ext1023/ext1022/ext1012)。残り TODO ゼロ |
-| 4d | `play(s, ctx)` 化 + battleApi caster 引数化 | P0 | 未着手 | 次フェーズ最大の作業。全カード play() 書き換え |
+| 4d | `play(s, ctx)` 化 + caster 個別 stats 反映 | P0 | ✅ **完了** | swap 方式: `loadCasterStatsToLegacy` で caster の phy/int/agi/hp を legacy に load → card.play() 実行 → `syncLegacyStatsToCaster` で書き戻し。card.play() 本体は無変更 (=ctx は将来用に予約)。caster=A の攻撃カードは A の PHY で計算、self-buff も caster 個人に乗る |
 | 4e | カード券面 UI 左30/右70 + キャスターアイコン + ロールラベル | P0 | **基盤完成** | `target-labels.js` loader + CSS 変数 4 種を準備済み。実 UI 描画は 4d 後 |
 | 4f | per-hero state 化 + legacy 廃止 | P0 | 未着手 | 大規模、4d 完了後 |
 | 4g | Phase 3j 撤去 | P0 | 未着手 | 4f 完了後 |
@@ -24,13 +24,21 @@
 | 4i | 577 カード手動 caster 再指定 | P2 | 未着手 | content PR 全マージ完了済み (PR #51/#56)、差別化したいものを手動再指定 |
 | 4j | パッシブ trigger DSL 統合 (codemod) | P0 | 未着手 | PR #55 マージ済み (Rare hero 53)、計 113 関数を codemod 対象 |
 
-### 完了済みフェーズの動作確認済み事項 (Phase 4a-4c)
+### 完了済みフェーズの動作確認済み事項 (Phase 4a-4d)
 
 - 全 577 カードに `caster: "foremost"` + `effects: [{target, text}]` フィールドが付与されている (idempotent: re-run しても変化なし)
-- 旧 `effectSummaryLines` / `previewLines` / `play(s)` は無変更で従来通り動作 (Phase 4d/4f で段階廃止)
+- 旧 `effectSummaryLines` / `previewLines` / `play(s)` は無変更で従来通り動作 (Phase 4f で段階廃止)
 - `canPlayCard(card, combat)` がコスト不足 + キャスター不在の両方を判定
 - ハンド表示で原因バッジ (`⚡不足` / `👤不在`) が右上に出る
 - 現状 caster は全て `"foremost"` (デフォルト)、解決は `foremostAlive(combat.heroes)` → 前衛が生存している限り全カードプレイ可能
+- **Phase 4d**: card.play() は依然として `combat.player*` を読み書きするが、playCard 側で **caster の stats を毎回 swap** しているため、caster=A のカードは A の PHY/INT/AGI/HP で計算され、self バフ (`s.playerPhy += 5` 等) も A 個人に書き戻される
+- **使用ヒーロー明示ログ** (party 2+ 体時のみ): `【〇〇】が【△△】を使用` を clog に出力 (SPEC-006 §16 Q4 確定)
+- **`activeHeroIdx` を caster に同期**: Phase 3j の `▶ ACTIVE` バッジが caster 追従 (UX 整合)
+
+### Phase 4d の制約 / 既知事項
+
+- `combat.playerGuard` / `playerShield` / `playerPoison` / `playerBleed` は **legacy shared 据え置き** (Phase 4f で per-hero 化予定)。現状はどの caster がカードを使ってもガード/シールドは "プレイヤー陣営共通プール" として動作 (前衛の portrait に紐付く)
+- Phase 3j の `setActiveHero` (portrait click 切替) はそのまま残るが、playCard が caster を上書きするため事実上無効。Phase 4g で完全削除予定
 
 ## 完了した事前準備物 (このブランチ)
 
