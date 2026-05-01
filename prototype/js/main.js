@@ -58,6 +58,18 @@ import {
   STEP_MULT as ABS_STEP_MULT,
 } from "./absolute-config.js";
 import {
+  computeScoreBreakdown,
+  computeFinalScore,
+} from "./scoring.js";
+import {
+  submitScore,
+  fetchRanking,
+  getRankingApiUrl,
+  setRankingApiUrl,
+  getPlayerName,
+  setPlayerName,
+} from "./ranking-client.js";
+import {
   resolveCaster,
   canPlayCard,
   unplayableBadge,
@@ -1103,6 +1115,8 @@ function advanceToNextChapter() {
       clog(`★ レギュレーション「${r.nameJa}」が解放されました！`);
       runState.unlockedRegulationOnClear = newlyUnlocked;
     }
+    // SPEC-007: 全章クリア時にランキング送信モーダルを開く
+    setTimeout(() => openRankingSubmitModal(), 1500);
     return;
   }
   runState.chapterIdx = nextIdx;
@@ -1440,6 +1454,8 @@ function showView(name) {
   if (hsv) hsv.classList.toggle("hidden", name !== "heroSelect");
   const rsv = document.getElementById("regulationSelectView");
   if (rsv) rsv.classList.toggle("hidden", name !== "regulationSelect");
+  const rkv = document.getElementById("rankingView");
+  if (rkv) rkv.classList.toggle("hidden", name !== "ranking");
   // Show/hide map resources bar（ヒーロー選択・レギュレーション選択・戦闘中は非表示）
   const mapRes = document.getElementById("mapResources");
   if (mapRes) mapRes.classList.toggle("hidden", name === "combat" || name === "heroSelect" || name === "regulationSelect");
@@ -6328,6 +6344,187 @@ function updateAbsoluteScoreMultPreview() {
   }
 })();
 
+// ─── SPEC-007: ランキング送信 / 表示 ─────────────────────────────
+
+/**
+ * 現在の runState からランキング送信用ペイロードを構築。
+ */
+function buildRankingPayload(playerName) {
+  const reg = getCurrentRegulation();
+  const partyHeroes = (runState?.party || []).map(p => {
+    const hd = HERO_ROSTER.find(h => h.heroId === p.heroId);
+    return { heroId: p.heroId, rarity: hd?.rarity || "common" };
+  });
+  const llExtCount = (runState?.llExtSlots || []).filter(Boolean).length;
+  const deckSize = (runState?.deck || []).length;
+  const turns = runState?.totalTurns || 0;
+  const absConfig = reg.effects.isAbsolute ? loadAbsoluteConfig() : null;
+  const breakdown = computeScoreBreakdown({
+    turns, deckSize, llExtCount,
+    partyHeroes,
+    regulationId: reg.id,
+    absoluteConfig: absConfig,
+  });
+  return {
+    playerName,
+    score: breakdown.finalScore,
+    regulation: reg.id,
+    turns,
+    deckSize,
+    llExt: llExtCount,
+    heroIds: partyHeroes.map(h => h.heroId),
+    absoluteConfig: absConfig,
+    version: "beta1",
+    _breakdown: breakdown,
+  };
+}
+
+/** クリア時のランキング送信モーダルを開く */
+function openRankingSubmitModal() {
+  const overlay = document.getElementById("rankingSubmitOverlay");
+  if (!overlay) return;
+  if (!runState || !runState.runComplete) return;
+
+  const payload = buildRankingPayload(getPlayerName() || "");
+  const breakdown = payload._breakdown;
+
+  // 内訳表示
+  const setText = (sel, txt) => {
+    const el = overlay.querySelector(sel);
+    if (el) el.textContent = txt;
+  };
+  setText("[data-rs-final]", String(breakdown.finalScore));
+  setText("[data-rs-turn]", String(breakdown.turnBonus));
+  setText("[data-rs-deck]", String(breakdown.deckBonus));
+  setText("[data-rs-ll]", String(breakdown.llBonus));
+  setText("[data-rs-rarity]", String(breakdown.rarityBonus));
+  setText("[data-rs-base]", String(breakdown.baseScore));
+  setText("[data-rs-regmult]", `× ${breakdown.regMult.toFixed(2)} (${REGULATION_BY_ID[payload.regulation]?.nameJa || payload.regulation})`);
+  if (payload.regulation === "absolute") {
+    overlay.querySelector("[data-rs-absrow]")?.classList.remove("hidden");
+    setText("[data-rs-absmult]", `× ${breakdown.absMult.toFixed(2)}`);
+  } else {
+    overlay.querySelector("[data-rs-absrow]")?.classList.add("hidden");
+  }
+
+  const nameInput = overlay.querySelector("[data-rs-name]");
+  if (nameInput) nameInput.value = getPlayerName() || "";
+
+  overlay.classList.remove("hidden");
+
+  const cleanup = () => overlay.classList.add("hidden");
+  const cancelBtn = overlay.querySelector("[data-rs-cancel]");
+  const confirmBtn = overlay.querySelector("[data-rs-confirm]");
+  const statusEl = overlay.querySelector("[data-rs-status]");
+  if (statusEl) statusEl.textContent = "";
+
+  const onCancel = () => {
+    cancelBtn.removeEventListener("click", onCancel);
+    confirmBtn.removeEventListener("click", onConfirm);
+    cleanup();
+  };
+  const onConfirm = async () => {
+    const name = (nameInput?.value || "").trim() || "anonymous";
+    setPlayerName(name);
+    confirmBtn.disabled = true;
+    if (statusEl) statusEl.textContent = "送信中...";
+    const result = await submitScore({ ...payload, playerName: name });
+    if (result.ok) {
+      if (statusEl) statusEl.textContent = "送信完了！";
+      setTimeout(() => {
+        cancelBtn.removeEventListener("click", onCancel);
+        confirmBtn.removeEventListener("click", onConfirm);
+        confirmBtn.disabled = false;
+        cleanup();
+      }, 800);
+    } else {
+      if (statusEl) statusEl.textContent = `送信失敗: ${result.error || "unknown"}`;
+      confirmBtn.disabled = false;
+    }
+  };
+  cancelBtn.addEventListener("click", onCancel);
+  confirmBtn.addEventListener("click", onConfirm);
+}
+
+/** ランキング画面を開く */
+async function openRankingView() {
+  showView("ranking");
+  await renderRankingView();
+}
+
+async function renderRankingView() {
+  const el = document.getElementById("rankingView");
+  if (!el) return;
+  const apiUrl = getRankingApiUrl();
+  const filterEl = el.querySelector("[data-rk-filter]");
+  const listEl = el.querySelector("[data-rk-list]");
+  const apiUrlInput = el.querySelector("[data-rk-apiurl]");
+  if (apiUrlInput) apiUrlInput.value = apiUrl || "";
+  if (!listEl) return;
+  if (!apiUrl) {
+    listEl.innerHTML = '<p class="rk-msg">ランキング API URL が未設定です。下の設定欄に Apps Script の URL を入力して保存してください。</p>';
+    return;
+  }
+  listEl.innerHTML = '<p class="rk-msg">取得中...</p>';
+  const filterId = filterEl?.value || "";
+  const result = await fetchRanking({ regulation: filterId || undefined, limit: 50 });
+  if (!result.ok) {
+    listEl.innerHTML = `<p class="rk-msg rk-msg--error">取得失敗: ${result.error || "unknown"}</p>`;
+    return;
+  }
+  if (!result.ranking || result.ranking.length === 0) {
+    listEl.innerHTML = '<p class="rk-msg">エントリーはまだありません。</p>';
+    return;
+  }
+  const rows = result.ranking.map(e => {
+    const regJa = REGULATION_BY_ID[e.regulation]?.nameJa || e.regulation;
+    const absInfo = e.absolute
+      ? ` <span class="rk-abs">[敵HP×${e.absolute.enemyHpMult} 敵ダメ×${e.absolute.enemyDmgMult} 自HP×${e.absolute.playerHpMult} 自ダメ×${e.absolute.playerDmgMult}]</span>`
+      : "";
+    return `<tr>
+      <td class="rk-rank">${e.rank}</td>
+      <td class="rk-name">${escapeHtml(e.playerName)}</td>
+      <td class="rk-score">${e.score.toLocaleString()}</td>
+      <td class="rk-reg">${escapeHtml(regJa)}${absInfo}</td>
+      <td class="rk-meta">T:${e.turns} D:${e.deckSize} LL:${e.llExt}</td>
+    </tr>`;
+  }).join("");
+  listEl.innerHTML = `<table class="rk-table">
+    <thead><tr><th>#</th><th>プレイヤー</th><th>スコア</th><th>レギュ</th><th>内訳</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+/** ランキング画面の bind */
+(function bindRankingViewListeners() {
+  if (typeof window === "undefined" || typeof document === "undefined") return;
+  const setup = () => {
+    const el = document.getElementById("rankingView");
+    if (!el) return;
+    const filterEl = el.querySelector("[data-rk-filter]");
+    if (filterEl) {
+      // レギュレーション選択肢を埋める
+      const opts = ['<option value="">全レギュレーション</option>']
+        .concat(REGULATIONS.map(r => `<option value="${r.id}">${r.nameJa}</option>`));
+      filterEl.innerHTML = opts.join("");
+      filterEl.addEventListener("change", () => renderRankingView());
+    }
+    el.querySelector("[data-rk-refresh]")?.addEventListener("click", () => renderRankingView());
+    el.querySelector("[data-rk-back]")?.addEventListener("click", () => showView("title"));
+    el.querySelector("[data-rk-save-apiurl]")?.addEventListener("click", () => {
+      const input = el.querySelector("[data-rk-apiurl]");
+      if (!input) return;
+      setRankingApiUrl(input.value);
+      renderRankingView();
+    });
+  };
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", setup, { once: true });
+  } else {
+    setup();
+  }
+})();
+
 /** ヘッダーの右上（map / combat 両方）に現在のレギュレーションアイコンを表示 (#37) */
 function updateHeaderRegulationIcons() {
   const r = getCurrentRegulation();
@@ -6938,6 +7135,14 @@ function init() {
       if (ev.key === "Enter" || ev.key === " ") dismissTitle();
     });
   }
+  // SPEC-007: タイトル画面のランキングボタン
+  document.getElementById("btnRankingOpen")?.addEventListener("click", (ev) => {
+    ev.stopPropagation();
+    // タイトル画面を消してランキング画面へ
+    const tv = document.getElementById("titleView");
+    if (tv) tv.style.display = "none";
+    openRankingView();
+  });
   // ヘッダーアイコン (#37) を初期化
   updateHeaderRegulationIcons();
   // 事前に各画面をレンダリング（タイトルが覆うので見えない）

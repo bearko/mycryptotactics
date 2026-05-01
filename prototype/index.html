@@ -1342,6 +1342,63 @@
       display: flex; align-items: center; justify-content: center; padding: 0.75rem;
     }
     #absoluteConfigOverlay.hidden { display: none; }
+
+    /* SPEC-007: ランキング送信モーダル */
+    #rankingSubmitOverlay {
+      position: fixed; inset: 0; background: #000c; z-index: 215;
+      display: flex; align-items: center; justify-content: center; padding: 0.75rem;
+    }
+    #rankingSubmitOverlay.hidden { display: none; }
+    .rs-dialog {
+      background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+      width: 100%; max-width: 480px; padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: 0.6rem;
+    }
+    .rs-title { color: var(--accent); font-size: 1.1rem; font-weight: 600; margin: 0 0 0.25rem; }
+    .rs-final { font-size: 1.6rem; font-weight: 700; color: var(--accent); text-align: center; margin: 0.25rem 0; }
+    .rs-table { width: 100%; font-size: 0.85rem; border-collapse: collapse; }
+    .rs-table td { padding: 0.15rem 0.4rem; }
+    .rs-table td:first-child { color: var(--muted); }
+    .rs-table td:last-child { text-align: right; color: var(--text); font-variant-numeric: tabular-nums; }
+    .rs-row.hidden { display: none; }
+    .rs-name-row { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem; }
+    .rs-name-row label { flex: 0 0 6em; }
+    .rs-name-row input {
+      flex: 1 1 auto; padding: 0.4rem 0.5rem;
+      background: #1a1530; border: 1px solid var(--border); border-radius: 6px; color: var(--text);
+    }
+    .rs-buttons { display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 0.5rem; }
+    .rs-status { text-align: center; min-height: 1.2em; color: var(--muted); font-size: 0.85rem; }
+
+    /* SPEC-007: ランキング表示画面 */
+    #rankingView {
+      padding: 1rem 1.25rem; max-width: 800px; margin: 0 auto;
+      display: flex; flex-direction: column; gap: 0.75rem;
+    }
+    #rankingView.hidden { display: none; }
+    #rankingView .rk-header { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap; }
+    #rankingView .rk-header h2 { margin: 0; }
+    #rankingView .rk-controls { display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap; }
+    #rankingView .rk-controls select,
+    #rankingView .rk-controls input[type="text"] {
+      padding: 0.3rem 0.5rem; background: #1a1530; border: 1px solid var(--border); border-radius: 6px;
+      color: var(--text); font-size: 0.85rem;
+    }
+    #rankingView .rk-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    #rankingView .rk-table th,
+    #rankingView .rk-table td { padding: 0.3rem 0.4rem; border-bottom: 1px solid var(--border); }
+    #rankingView .rk-table th { text-align: left; color: var(--muted); font-weight: 500; }
+    #rankingView .rk-rank { font-weight: 600; color: var(--accent); }
+    #rankingView .rk-score { font-variant-numeric: tabular-nums; text-align: right; }
+    #rankingView .rk-meta { font-size: 0.75rem; color: var(--muted); white-space: nowrap; }
+    #rankingView .rk-abs { color: #a855f7; font-size: 0.7rem; display: block; }
+    #rankingView .rk-msg { color: var(--muted); padding: 1rem; text-align: center; }
+    #rankingView .rk-msg--error { color: #ff7878; }
+    #rankingView .rk-apiurl-row {
+      display: flex; gap: 0.4rem; align-items: center;
+      padding-top: 0.5rem; border-top: 1px dashed var(--border);
+    }
+    #rankingView .rk-apiurl-row label { flex: 0 0 9em; font-size: 0.8rem; color: var(--muted); }
+    #rankingView .rk-apiurl-row input { flex: 1 1 auto; }
     .abs-dialog {
       background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
       width: 100%; max-width: 460px; padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: 0.75rem;
@@ -2387,6 +2444,8 @@
     <img class="title-logo" src="./MCT_logo.jpg" alt="MyCryptoTactics" />
     <p class="title-alpha">ベータ１版</p>
     <p class="title-press">Press to Start</p>
+    <!-- SPEC-007: ランキング画面へのアクセスボタン（タイトル画面右下） -->
+    <button type="button" id="btnRankingOpen" class="action" style="position:absolute;right:0.75rem;bottom:0.75rem;z-index:10;font-size:0.85rem;padding:0.4rem 0.75rem;" onclick="event.stopPropagation();">🏆 ランキング</button>
   </div>
 
   <div class="wrap">
@@ -2569,6 +2628,25 @@
     </div>
 
     <div id="regulationSelectView" class="hidden"></div>
+    <!-- SPEC-007: ランキング表示画面 -->
+    <div id="rankingView" class="hidden">
+      <div class="rk-header">
+        <h2>ランキング</h2>
+        <div class="rk-controls">
+          <select data-rk-filter aria-label="レギュレーションでフィルタ"></select>
+          <button type="button" class="action" data-rk-refresh>更新</button>
+          <button type="button" class="action" data-rk-back>← タイトルへ</button>
+        </div>
+      </div>
+      <div data-rk-list>
+        <p class="rk-msg">取得中...</p>
+      </div>
+      <div class="rk-apiurl-row">
+        <label for="rkApiUrlInput">Apps Script URL</label>
+        <input id="rkApiUrlInput" type="text" placeholder="https://script.google.com/macros/s/.../exec" data-rk-apiurl />
+        <button type="button" class="action" data-rk-save-apiurl>保存</button>
+      </div>
+    </div>
 
     <div id="heroSelectView" class="hidden"></div>
 
@@ -2698,6 +2776,37 @@
       へ
     </span>
   </footer>
+
+  <!-- SPEC-007: ランキング送信モーダル（クリア時に表示）-->
+  <div id="rankingSubmitOverlay" class="hidden" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="rsTitle">
+    <div class="rs-dialog">
+      <h2 id="rsTitle" class="rs-title">クリア！ ランキングに登録</h2>
+
+      <div class="rs-final" data-rs-final>0</div>
+
+      <table class="rs-table">
+        <tr><td>ターン数ボーナス</td><td data-rs-turn>0</td></tr>
+        <tr><td>デッキ枚数ボーナス</td><td data-rs-deck>0</td></tr>
+        <tr><td>LL エクステボーナス</td><td data-rs-ll>0</td></tr>
+        <tr><td>レアリティボーナス</td><td data-rs-rarity>0</td></tr>
+        <tr><td>ベーススコア</td><td data-rs-base>0</td></tr>
+        <tr><td>レギュレーション乗数</td><td data-rs-regmult>×1.00</td></tr>
+        <tr class="rs-row hidden" data-rs-absrow><td>Absolute 倍率</td><td data-rs-absmult>×1.00</td></tr>
+      </table>
+
+      <div class="rs-name-row">
+        <label for="rsNameInput">プレイヤー名</label>
+        <input id="rsNameInput" type="text" maxlength="30" placeholder="anonymous" data-rs-name />
+      </div>
+
+      <div class="rs-status" data-rs-status></div>
+
+      <div class="rs-buttons">
+        <button type="button" class="action" data-rs-cancel>登録しない</button>
+        <button type="button" class="action" data-rs-confirm style="background:var(--accent);border-color:var(--accent);color:#1a1530;font-weight:600;">登録する</button>
+      </div>
+    </div>
+  </div>
 
   <!-- SPEC-007: Absolute レギュレーション設定モーダル -->
   <div id="absoluteConfigOverlay" class="hidden" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="absTitle">
