@@ -2023,13 +2023,15 @@ function advanceAfterRewardPick(libraryKey) {
       postCombatSnapshot = null;
       if (runState.runComplete) {
         // 全章クリア → ゲームオーバー画面（クリア）
+        lastReportSnapshot = captureRunSnapshot({ isCleared: true, defeatedBy: null });
         showView("over");
         document.getElementById("gameOverMsg").textContent =
           "全 node クリアおめでとうございます！あなたは最高ですよ〜！";
       } else {
-        // 次の node が解放された → node 選択画面へ（解放アニメ付き）
-        showView("nodeSelect");
-        renderNodeSelect(clearedIdx + 1); // 新たに解放されたインデックス
+        // 次章のマップへそのまま遷移（runState.deck / playerHp / llExtSlots を引き継ぎ） #31
+        // advanceToNextChapter() で chapterIdx++ と新章マップのセットアップは既に完了
+        showView("map");
+        renderMap();
       }
       return;
     }
@@ -2040,11 +2042,298 @@ function advanceAfterRewardPick(libraryKey) {
   renderMap();
 }
 
+// ─── 保有デッキ表示（#30） ───────────────────────────────────────
+/**
+ * libraryKey からシリーズキーを抽出。
+ * ext1001/ext2001 (ブレード系) → "001"
+ * cd101 (章1) → "cd1", cd201 (章2) → "cd2"
+ * その他は libraryKey そのまま（個別シリーズ）
+ */
+function deckSeriesKey(libraryKey) {
+  if (typeof libraryKey !== "string") return "zzz";
+  if (libraryKey.startsWith("ext")) {
+    // 末尾 3 桁をシリーズキーに
+    const m = libraryKey.match(/(\d+)$/);
+    if (m) {
+      const digits = m[1];
+      return digits.length >= 3 ? digits.slice(-3) : digits.padStart(3, "0");
+    }
+  }
+  if (libraryKey.startsWith("cd")) {
+    return "cd" + libraryKey.charAt(2);
+  }
+  return libraryKey;
+}
+
+const RARITY_ORDER = { common: 1, uncommon: 2, rare: 3, epic: 4, legendary: 5, ll: 6 };
+const RARITY_LABEL = { common: "コモン", uncommon: "アンコモン", rare: "レア", epic: "エピック", legendary: "レジェンド", ll: "LL" };
+
+function showOwnedDeckPeek(def) {
+  const peek = document.getElementById("ownedDeckPeek");
+  if (!peek) return;
+  const mockS = {
+    playerPhy: LEADER.basePhy,
+    playerInt: LEADER.baseInt,
+    playerAgi: LEADER.baseAgi,
+    enemyPhy: 14, enemyInt: 8,
+    playerHp: runState?.playerHp ?? LEADER.hpMax,
+    playerHpMax: runState?.playerHpMax ?? LEADER.hpMax,
+    playerGuard: 0, playerShield: 0, energyMax: 3, energy: 3,
+  };
+  const lines =
+    typeof def.previewLines === "function" ? def.previewLines(mockS) :
+    typeof def.effectSummaryLines === "function" ? def.effectSummaryLines(mockS) : [];
+  const rarity = CARD_RARITIES[def.libraryKey] || "common";
+  peek.innerHTML = `
+    <div class="owned-deck-peek-card" data-rarity="${rarity}">
+      <h3>${escapeHtml(def.extNameJa || "")}</h3>
+      ${def.skillNameJa ? `<p class="opc-skill">${escapeHtml(def.skillNameJa)}</p>` : ""}
+      <div class="opc-meta">
+        <span>⚡ ${def.cost}</span>
+        <span>${def.type === "atk" ? "攻撃" : def.type === "skl" ? "スキル" : def.type}</span>
+        <span>${RARITY_LABEL[rarity] || rarity}</span>
+      </div>
+      <div class="opc-lines">${lines.map(l => `<p>${escapeHtml(l)}</p>`).join("")}</div>
+      <button type="button" class="opc-close">閉じる</button>
+    </div>
+  `;
+  peek.classList.remove("hidden");
+  peek.removeAttribute("aria-hidden");
+  const close = () => {
+    peek.classList.add("hidden");
+    peek.setAttribute("aria-hidden", "true");
+  };
+  peek.querySelector(".opc-close").addEventListener("click", close);
+  peek.addEventListener("click", (e) => { if (e.target === peek) close(); }, { once: true });
+}
+
+function openOwnedDeckOverlay() {
+  const overlay = document.getElementById("ownedDeckOverlay");
+  if (!overlay) return;
+
+  // ソース: 戦闘中なら combat の deck（drawPile + hand + discardPile）、
+  // それ以外は runState.deck
+  let cards = [];
+  if (combat) {
+    cards = [...(combat.drawPile || []), ...(combat.hand || []), ...(combat.discardPile || []), ...(combat.exhaustPile || [])];
+  } else if (runState && runState.deck) {
+    cards = [...runState.deck];
+  }
+
+  // ソート: シリーズキー → レアリティ → libraryKey（カード単位）
+  const sorted = cards
+    .filter(c => c && c.libraryKey)
+    .map(c => CARD_LIBRARY[c.libraryKey] || c)
+    .sort((a, b) => {
+      const sa = deckSeriesKey(a.libraryKey);
+      const sb = deckSeriesKey(b.libraryKey);
+      if (sa !== sb) return sa < sb ? -1 : 1;
+      const ra = RARITY_ORDER[CARD_RARITIES[a.libraryKey] || "common"] || 0;
+      const rb = RARITY_ORDER[CARD_RARITIES[b.libraryKey] || "common"] || 0;
+      if (ra !== rb) return ra - rb;
+      return a.libraryKey < b.libraryKey ? -1 : 1;
+    });
+
+  // 上部サマリー: レアリティアイコン（L/E/R/U/C）と総数
+  const total = cards.length;
+  const rarityCounts = {};
+  for (const c of cards) {
+    if (!c || !c.libraryKey) continue;
+    const r = CARD_RARITIES[c.libraryKey] || "common";
+    rarityCounts[r] = (rarityCounts[r] || 0) + 1;
+  }
+  const summaryEl = document.getElementById("ownedDeckSummary");
+  const RARITY_DISPLAY = [
+    { key: "legendary", letter: "L" },
+    { key: "epic",      letter: "E" },
+    { key: "rare",      letter: "R" },
+    { key: "uncommon",  letter: "U" },
+    { key: "common",    letter: "C" },
+  ];
+  const pills = RARITY_DISPLAY.map(({ key, letter }) => {
+    const n = rarityCounts[key] || 0;
+    return `<span class="od-rarity-pill" data-rarity="${key}" data-zero="${n === 0}" title="${RARITY_LABEL[key]} ${n} 枚">
+      <span class="od-pill-letter">${letter}</span>
+      <span class="od-pill-count">${n}</span>
+    </span>`;
+  }).join("");
+  summaryEl.innerHTML = pills + `<span class="od-total">${total}</span>`;
+
+  // グリッド: カードを 1 枚ずつ並べる（×N スタックではなく N 個並べる）
+  const gridEl = document.getElementById("ownedDeckGrid");
+  gridEl.innerHTML = "";
+  if (sorted.length === 0) {
+    gridEl.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:0.8rem;padding:1rem">デッキは空です</p>`;
+  } else {
+    const mockS = {
+      playerPhy: LEADER.basePhy,
+      playerInt: LEADER.baseInt,
+      playerAgi: LEADER.baseAgi,
+      enemyPhy: 14, enemyInt: 8,
+      playerHp: runState?.playerHp ?? LEADER.hpMax,
+      playerHpMax: runState?.playerHpMax ?? LEADER.hpMax,
+      playerGuard: 0, playerShield: 0, energyMax: 3, energy: 3,
+    };
+    for (const def of sorted) {
+      const cell = document.createElement("button");
+      cell.type = "button";
+      cell.className = "owned-deck-cell";
+      cell.setAttribute("aria-label", def.extNameJa || def.libraryKey);
+      const cardBtn = buildRewardPickButton(def, mockS);
+      cell.appendChild(cardBtn);
+      cell.addEventListener("click", () => showOwnedDeckPeek(def));
+      gridEl.appendChild(cell);
+    }
+  }
+
+  overlay.classList.remove("hidden");
+  overlay.removeAttribute("aria-hidden");
+}
+
+function closeOwnedDeckOverlay() {
+  const overlay = document.getElementById("ownedDeckOverlay");
+  if (!overlay) return;
+  overlay.classList.add("hidden");
+  overlay.setAttribute("aria-hidden", "true");
+  const peek = document.getElementById("ownedDeckPeek");
+  if (peek) {
+    peek.classList.add("hidden");
+    peek.setAttribute("aria-hidden", "true");
+  }
+}
+
+// ─── 活動レポート（#23） ────────────────────────────────────────
+let lastReportSnapshot = null;
+const SHARE_URL = "https://mycryptotactics.vercel.app/";
+const SHARE_TITLE = "MyCryptoTactics";
+
+function captureRunSnapshot({ isCleared, defeatedBy }) {
+  if (!runState || !LEADER) return null;
+  const chapter = CHAPTERS[runState.chapterIdx] || null;
+  const stageName = chapter ? chapter.name : "";
+  return {
+    isCleared,
+    when: new Date(),
+    hero: { name: LEADER.nameJa, imgUrl: LEADER.img() },
+    stageName,
+    deck: (runState.deck || []).map((c) => ({
+      libraryKey: c.libraryKey,
+      extId: c.extId,
+      extNameJa: c.extNameJa,
+    })),
+    llExtSlots: (runState.llExtSlots || []).filter(Boolean).map((e) => ({
+      extId: e.extId,
+      name: e.name,
+    })),
+    opponent: defeatedBy
+      ? { name: defeatedBy.name, imgUrl: ENEMY_IMG(defeatedBy.imgId) }
+      // クリア時はディープ・ヨシュカ (boss-troy, imgId 171)
+      : { name: "ディープ・ヨシュカ", imgUrl: ENEMY_IMG(171) },
+  };
+}
+
+function fmtReportDateTime(d) {
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function buildExtChip(item) {
+  const chip = document.createElement("div");
+  chip.className = "report-ext-chip";
+  if (item.libraryKey) {
+    const rarity = CARD_RARITIES[item.libraryKey] || "common";
+    chip.setAttribute("data-rarity", rarity);
+  }
+  if (item.extId) {
+    const im = document.createElement("img");
+    im.src = EXT_IMG(item.extId);
+    im.alt = item.extNameJa || item.name || "";
+    im.onerror = () => {
+      im.remove();
+      const fb = document.createElement("span");
+      fb.className = "chip-fallback";
+      fb.textContent = item.extNameJa || item.name || "";
+      chip.appendChild(fb);
+    };
+    chip.appendChild(im);
+  } else {
+    const fb = document.createElement("span");
+    fb.className = "chip-fallback";
+    fb.textContent = item.extNameJa || item.name || "";
+    chip.appendChild(fb);
+  }
+  chip.title = item.extNameJa || item.name || "";
+  return chip;
+}
+
+function showActivityReport(snap) {
+  if (!snap) return;
+  const overlay = document.getElementById("activityReportOverlay");
+  if (!overlay) return;
+
+  document.getElementById("reportLogo")?.remove();
+  const logoEl = overlay.querySelector(".report-logo");
+  if (logoEl) logoEl.src = "MCT_logo.png";
+
+  document.getElementById("reportDatetime").textContent = fmtReportDateTime(snap.when);
+  document.getElementById("reportHeroImg").src = snap.hero.imgUrl;
+  document.getElementById("reportHeroName").textContent = snap.hero.name;
+  document.getElementById("reportOpponentLabel").textContent = snap.isCleared ? "撃破した相手" : "倒された相手";
+  document.getElementById("reportOpponentImg").src = snap.opponent.imgUrl;
+  document.getElementById("reportOpponentName").textContent = snap.opponent.name;
+  document.getElementById("reportStage").textContent =
+    (snap.isCleared ? "全ステージ制覇 / 最終: " : "到達ステージ: ") + (snap.stageName || "—");
+
+  const deckList = document.getElementById("reportDeckList");
+  deckList.innerHTML = "";
+  snap.deck.forEach((c) => deckList.appendChild(buildExtChip(c)));
+  document.getElementById("reportDeckCount").textContent = `(${snap.deck.length})`;
+
+  const llList = document.getElementById("reportLlList");
+  llList.innerHTML = "";
+  snap.llExtSlots.forEach((e) => llList.appendChild(buildExtChip(e)));
+  document.getElementById("reportLlCount").textContent = `(${snap.llExtSlots.length}/2)`;
+
+  overlay.classList.remove("hidden");
+  overlay.removeAttribute("aria-hidden");
+
+  const closeBtn = document.getElementById("reportCloseBtn");
+  const shareBtn = document.getElementById("reportShareBtn");
+  // クローン置換でリスナー重複を避ける
+  const newClose = closeBtn.cloneNode(true);
+  closeBtn.parentNode.replaceChild(newClose, closeBtn);
+  const newShare = shareBtn.cloneNode(true);
+  shareBtn.parentNode.replaceChild(newShare, shareBtn);
+
+  return new Promise((resolve) => {
+    newClose.addEventListener("click", () => {
+      overlay.classList.add("hidden");
+      overlay.setAttribute("aria-hidden", "true");
+      resolve();
+    });
+    newShare.addEventListener("click", () => {
+      const intro = snap.isCleared
+        ? `${snap.hero.name} で全ステージ制覇しました！`
+        : `${snap.hero.name} で「${snap.stageName}」まで到達。${snap.opponent.name} に倒された…`;
+      const text = `${intro} #${SHARE_TITLE}`;
+      const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(SHARE_URL)}`;
+      window.open(url, "_blank", "noopener,noreferrer");
+    });
+  });
+}
+
 // ─── 戦闘敗北 ────────────────────────────────────────────────────
 function endCombatLoss() {
   stopBgm();
   postCombatSnapshot = null;
-  showCutin("lose").then(() => {
+  // 敗北情報をリセット前にスナップショット
+  const defeatedBy = combat ? { name: combat.enemyName, imgId: combat.enemyImgId } : null;
+  lastReportSnapshot = captureRunSnapshot({ isCleared: false, defeatedBy });
+
+  showCutin("lose").then(async () => {
+    if (lastReportSnapshot) {
+      await showActivityReport(lastReportSnapshot);
+    }
     // 全ランステートをリセットしてヒーロー選択画面へ戻る
     combat = null;
     runState = null;
@@ -2653,6 +2942,20 @@ function init() {
     renderMap();
   });
   document.getElementById("btnRestart").addEventListener("click", resetRun);
+  // 保有デッキ表示（#30）
+  document.getElementById("btnDeckViewMap")?.addEventListener("click", openOwnedDeckOverlay);
+  document.getElementById("btnDeckViewCombat")?.addEventListener("click", openOwnedDeckOverlay);
+  document.getElementById("ownedDeckCloseBtn")?.addEventListener("click", closeOwnedDeckOverlay);
+  document.getElementById("ownedDeckOverlay")?.addEventListener("click", (e) => {
+    if (e.target.id === "ownedDeckOverlay") closeOwnedDeckOverlay();
+  });
+  // 活動レポート（クリア時）
+  document.getElementById("btnViewReportClear")?.addEventListener("click", () => {
+    if (!lastReportSnapshot && runState && runState.runComplete) {
+      lastReportSnapshot = captureRunSnapshot({ isCleared: true, defeatedBy: null });
+    }
+    if (lastReportSnapshot) showActivityReport(lastReportSnapshot);
+  });
   wireAssets();
   initHelp();
   bindHandTouchDelegation();

@@ -41,32 +41,31 @@ function makeCardLibrary(api) {
         s.playerPhy = Math.max(1, s.playerPhy - down);
       } },
 
-    // Elite cards
-    ext2001: { libraryKey: "ext2001", cost: 2, type: "atk",
-      play: (s) => api.dealPhySkillToEnemy(s, 55, 65) },
-    ext2002: { libraryKey: "ext2002", cost: 2, type: "atk",
-      play: (s) => api.dealIntSkillToEnemy(s, 30, 35) },
+    // Elite cards (rebalanced #22: cost 1 with stronger effects)
+    ext2001: { libraryKey: "ext2001", cost: 1, type: "atk",
+      play: (s) => api.dealPhySkillToEnemy(s, 65, 80) },
+    ext2002: { libraryKey: "ext2002", cost: 1, type: "atk",
+      play: (s) => {
+        api.dealIntSkillToEnemy(s, 35, 45);
+        s.enemyInt = Math.max(1, s.enemyInt - 3);
+      } },
     ext2003: { libraryKey: "ext2003", cost: 0, type: "skl", exhaust: true,
       play: (s) => {
         const heal = Math.floor((s.playerInt + s.playerPhy) / 2);
         s.playerHp = Math.min(s.playerHpMax, s.playerHp + heal);
       } },
-    ext2004: { libraryKey: "ext2004", cost: 2, type: "skl",
-      play: (s) => {
-        const up = Math.floor(s.rng.next() * 6) + 10; // 10..15 inclusive (randomSkillRatePct)
-        const add = Math.max(1, Math.floor((s.playerPhy * up) / 100));
-        s.playerPhy += add;
-      } },
+    ext2004: { libraryKey: "ext2004", cost: 1, type: "skl",
+      play: (s) => { s.playerPhy += 3; s.playerGuard += 12; } },
     ext2005: { libraryKey: "ext2005", cost: 1, type: "skl",
       play: (s) => { s.playerGuard += 8; s.playerAgi += 2; } },
-    ext2006: { libraryKey: "ext2006", cost: 2, type: "atk",
-      play: (s) => api.dealPhySkillToEnemy(s, 50, 60) },
-    ext2008: { libraryKey: "ext2008", cost: 2, type: "skl",
+    ext2006: { libraryKey: "ext2006", cost: 1, type: "atk",
+      play: (s) => api.dealPhySkillToEnemy(s, 60, 75) },
+    ext2008: { libraryKey: "ext2008", cost: 1, type: "skl",
       play: (s) => { s.playerInt += 2; api.drawCards(s, 3); } },
-    ext2011: { libraryKey: "ext2011", cost: 2, type: "atk",
-      play: (s) => api.dealPhySkillToEnemy(s, 50, 60) },
-    ext2013: { libraryKey: "ext2013", cost: 2, type: "atk",
-      play: (s) => api.dealPhySkillToEnemy(s, 40, 50) },
+    ext2011: { libraryKey: "ext2011", cost: 1, type: "atk",
+      play: (s) => api.dealPhySkillToEnemy(s, 60, 75) },
+    ext2013: { libraryKey: "ext2013", cost: 1, type: "atk",
+      play: (s) => api.dealPhySkillToEnemy(s, 55, 70) },
 
     // 章 0 アバカス
     cd101: { libraryKey: "cd101", cost: 1, type: "atk",

@@ -368,21 +368,21 @@ function makeCardLibrary(clog, api) {
       extNameJa: "エリートブレード",
       skillNameJa: "エリートスラッシュ",
       skillIcon: "phy.png",
-      cost: 2,
+      cost: 1,
       type: "atk",
       effectSummaryLines(s) {
-        const d = estPhyHit(s.playerPhy, s.enemyPhy, 55, 65);
+        const d = estPhyHit(s.playerPhy, s.enemyPhy, 65, 80);
         return [`敵にダメージ　${d}`];
       },
       peekHelpKeys() {
         return [];
       },
       previewLines(s) {
-        const d = estPhyHit(s.playerPhy, s.enemyPhy, 55, 65);
-        return [`敵1体に ${d} ダメージ（PHY ${55}〜${65}%）`];
+        const d = estPhyHit(s.playerPhy, s.enemyPhy, 65, 80);
+        return [`敵1体に ${d} ダメージ（PHY ${65}〜${80}%）`];
       },
       play(s) {
-        api.dealPhySkillToEnemy(s, 55, 65);
+        api.dealPhySkillToEnemy(s, 65, 80);
       },
     },
     ext2002: {
@@ -391,22 +391,25 @@ function makeCardLibrary(clog, api) {
       extNameJa: "エリートマスケット",
       skillNameJa: "エリートショット",
       skillIcon: "int.png",
-      cost: 2,
+      cost: 1,
       type: "atk",
       effectSummaryLines(s) {
-        const d = estIntHit(s.playerInt, s.enemyInt, 30, 35);
-        return [`敵にダメージ　${d}`];
+        const d = estIntHit(s.playerInt, s.enemyInt, 35, 45);
+        return [`敵にダメージ　${d}`, "INT　−3（敵）"];
       },
       peekHelpKeys() {
-        return [];
+        return ["int"];
       },
       previewLines(s) {
-        const d = estIntHit(s.playerInt, s.enemyInt, 30, 35);
-        return [`敵全体に相当する ${d} ダメージ（INT ${30}〜${35}%・単体敵プロト）`];
+        const d = estIntHit(s.playerInt, s.enemyInt, 35, 45);
+        return [`敵1体に ${d} ダメージ（INT ${35}〜${45}%）`, "敵の INT を 3 下げる"];
       },
       play(s) {
-        se("area");
-        api.dealIntSkillToEnemy(s, 30, 35);
+        api.dealIntSkillToEnemy(s, 35, 45);
+        s.enemyInt = Math.max(1, s.enemyInt - 3);
+        se("debuff");
+        fx("enemy", "debuff");
+        clog("敵 INT -3");
       },
     },
     ext2004: {
@@ -415,28 +418,23 @@ function makeCardLibrary(clog, api) {
       extNameJa: "エリートアーマー",
       skillNameJa: "エリートプロテクション",
       skillIcon: "BUF_phy.png",
-      cost: 2,
+      cost: 1,
       type: "skl",
-      effectSummaryLines(s) {
-        const lo = Math.max(1, Math.floor(s.playerPhy * 0.1));
-        const hi = Math.max(1, Math.floor(s.playerPhy * 0.15));
-        return [`PHY　+${lo}〜${hi}`];
+      effectSummaryLines() {
+        return ["PHY　+3", "ガード　+12"];
       },
       peekHelpKeys() {
-        return ["phy"];
+        return ["phy", "guard"];
       },
-      previewLines(s) {
-        const lo = Math.max(1, Math.floor(s.playerPhy * 0.1));
-        const hi = Math.max(1, Math.floor(s.playerPhy * 0.15));
-        return [`自身の PHY を ${lo}〜${hi} アップ（約 10〜15%）`];
+      previewLines() {
+        return ["PHY を +3", "ガードを 12 得る（ターン終了まで有効）"];
       },
       play(s) {
         se("buff");
         fx("player", "buff");
-        const up = randomSkillRatePct(10, 15);
-        const add = Math.max(1, Math.floor((s.playerPhy * up) / 100));
-        s.playerPhy += add;
-        clog("エリートプロテクション: PHY+" + add);
+        s.playerPhy += 3;
+        s.playerGuard += 12;
+        clog("エリートプロテクション: PHY+3、ガード+12");
       },
     },
     ext2006: {
@@ -445,21 +443,21 @@ function makeCardLibrary(clog, api) {
       extNameJa: "エリートカタナ",
       skillNameJa: "エリートイアイ",
       skillIcon: "phy.png",
-      cost: 2,
+      cost: 1,
       type: "atk",
       effectSummaryLines(s) {
-        const d = estPhyHit(s.playerPhy, s.enemyPhy, 50, 60);
+        const d = estPhyHit(s.playerPhy, s.enemyPhy, 60, 75);
         return [`敵にダメージ　${d}`];
       },
       peekHelpKeys() {
         return [];
       },
       previewLines(s) {
-        const d = estPhyHit(s.playerPhy, s.enemyPhy, 50, 60);
-        return [`敵1体に ${d} ダメージ（PHY ${50}〜${60}%）`];
+        const d = estPhyHit(s.playerPhy, s.enemyPhy, 60, 75);
+        return [`敵1体に ${d} ダメージ（PHY ${60}〜${75}%）`];
       },
       play(s) {
-        api.dealPhySkillToEnemy(s, 50, 60);
+        api.dealPhySkillToEnemy(s, 60, 75);
       },
     },
     ext2011: {
@@ -468,21 +466,21 @@ function makeCardLibrary(clog, api) {
       extNameJa: "エリートアックス",
       skillNameJa: "エリートチョップ",
       skillIcon: "phy.png",
-      cost: 2,
+      cost: 1,
       type: "atk",
       effectSummaryLines(s) {
-        const d = estPhyHit(s.playerPhy, s.enemyPhy, 50, 60);
+        const d = estPhyHit(s.playerPhy, s.enemyPhy, 60, 75);
         return [`敵にダメージ　${d}`];
       },
       peekHelpKeys() {
         return [];
       },
       previewLines(s) {
-        const d = estPhyHit(s.playerPhy, s.enemyPhy, 50, 60);
-        return [`敵1体に ${d} ダメージ（PHY ${50}〜${60}%）`];
+        const d = estPhyHit(s.playerPhy, s.enemyPhy, 60, 75);
+        return [`敵1体に ${d} ダメージ（PHY ${60}〜${75}%）`];
       },
       play(s) {
-        api.dealPhySkillToEnemy(s, 50, 60);
+        api.dealPhySkillToEnemy(s, 60, 75);
       },
     },
     ext2013: {
@@ -491,21 +489,21 @@ function makeCardLibrary(clog, api) {
       extNameJa: "エリートユミ",
       skillNameJa: "エリートスナイプ",
       skillIcon: "phy.png",
-      cost: 2,
+      cost: 1,
       type: "atk",
       effectSummaryLines(s) {
-        const d = estPhyHit(s.playerPhy, s.enemyPhy, 40, 50);
+        const d = estPhyHit(s.playerPhy, s.enemyPhy, 55, 70);
         return [`敵にダメージ　${d}`];
       },
       peekHelpKeys() {
         return [];
       },
       previewLines(s) {
-        const d = estPhyHit(s.playerPhy, s.enemyPhy, 40, 50);
-        return [`敵1体に ${d} ダメージ（PHY ${40}〜${50}%・高INT相手想定）`];
+        const d = estPhyHit(s.playerPhy, s.enemyPhy, 55, 70);
+        return [`敵1体に ${d} ダメージ（PHY ${55}〜${70}%・高INT相手想定）`];
       },
       play(s) {
-        api.dealPhySkillToEnemy(s, 40, 50);
+        api.dealPhySkillToEnemy(s, 55, 70);
       },
     },
 
@@ -559,7 +557,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "エリートブック",
       skillNameJa: "エリートリーディング",
       skillIcon: "int.png",
-      cost: 2,
+      cost: 1,
       type: "skl",
       effectSummaryLines() { return ["INT　+2（永続）", "ドロー　3"]; },
       peekHelpKeys() { return ["int", "draw"]; },

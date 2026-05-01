@@ -1,0 +1,4 @@
+heroId,nameJa,rarity,hpMax,basePhy,baseInt,baseAgi,passiveKey,passiveName,passiveDesc
+1002,甲斐姫,common,70,10,8,12,kaihime,浪切,スキルカード使用後に50%の確率で発動・先頭の敵にPHYの50%追加ダメージ
+1001,コナン・ドイル,common,85,7,23,8,doyle,シャーロック・ホームズ,HPが70%未満になったとき1回だけ発動・INT +3
+1003,張遼,common,85,15,6,10,zhang,遼来遼来,被ダメージ後に50%の確率で発動・先頭の敵にPHYの20%追加ダメージ

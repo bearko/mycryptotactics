@@ -2,48 +2,12 @@ export const ASSET_BASE = "https://raw.githubusercontent.com/bearko/mycryptohero
 export const img = (path) => ASSET_BASE + path;
 export const audioUrl = (relPath) => ASSET_BASE + relPath;
 
-/** 選択可能ヒーロー一覧 */
-export const HERO_ROSTER = [
-  {
-    heroId: 1002,
-    nameJa: "甲斐姫",
-    hpMax: 70,
-    basePhy: 10,
-    baseInt: 8,
-    baseAgi: 12,
-    passiveKey: "kaihime",
-    passiveName: "浪切",
-    passiveDesc: "スキルカード使用後に50%の確率で発動・先頭の敵にPHYの50%追加ダメージ",
-    img: () => img("Image/Heroes/1002.png"),
-  },
-  {
-    heroId: 1001,
-    nameJa: "コナン・ドイル",
-    hpMax: 85,
-    basePhy: 7,
-    baseInt: 23,
-    baseAgi: 8,
-    passiveKey: "doyle",
-    passiveName: "シャーロック・ホームズ",
-    passiveDesc: "HPが70%未満になったとき1回だけ発動・INT +3",
-    img: () => img("Image/Heroes/1001.png"),
-  },
-  {
-    heroId: 1003,
-    nameJa: "張遼",
-    hpMax: 85,
-    basePhy: 15,
-    baseInt: 6,
-    baseAgi: 10,
-    passiveKey: "zhang",
-    passiveName: "遼来遼来",
-    passiveDesc: "被ダメージ後に50%の確率で発動・先頭の敵にPHYの20%追加ダメージ",
-    img: () => img("Image/Heroes/1003.png"),
-  },
-];
+/** 選択可能ヒーロー一覧（auto-generated js/heroes.js から再エクスポート） */
+export { HERO_DEFS, HERO_ROSTER } from "./heroes.js";
+import { HERO_ROSTER as _HERO_ROSTER } from "./heroes.js";
 
 /** リーダー基礎ステ（カードで PHY/INT が変化する前提の初期値）。ヒーロー選択で書き換わる。 */
-export let LEADER = { ...HERO_ROSTER[0] };
+export let LEADER = { ..._HERO_ROSTER[0] };
 
 /** ヒーローを選択して LEADER を更新する */
 export function setLeader(hero) {

@@ -1,0 +1,50 @@
+[
+  {
+    "extId": 5501,
+    "name": "真・MCHブレード",
+    "skillName": "天の一撃",
+    "rarity": "ll",
+    "effectKey": "blade",
+    "desc": "先頭の敵にPHY極大ダメージを与える（PHY×350%）"
+  },
+  {
+    "extId": 5502,
+    "name": "真・グランダルメ",
+    "skillName": "グランダルメ攻撃縦隊",
+    "rarity": "ll",
+    "effectKey": "grande",
+    "desc": "敵全体にINT大ダメージを与える（INT×450%）"
+  },
+  {
+    "extId": 5503,
+    "name": "真・劇作家の羽ペン",
+    "skillName": "アンサンブル・カーテンコール",
+    "rarity": "ll",
+    "effectKey": "pen",
+    "desc": "味方を極大回復する（HC×225%）"
+  },
+  {
+    "extId": 5504,
+    "name": "真・MCHアーマー",
+    "skillName": "ダイヤモンドパワー",
+    "rarity": "ll",
+    "effectKey": "armor",
+    "desc": "PHY大幅バフ（+50%）＆ガード+20を付与する"
+  },
+  {
+    "extId": 5509,
+    "name": "マリーアントワネット・ブルー",
+    "skillName": "希望の燐光",
+    "rarity": "ll",
+    "effectKey": "blue",
+    "desc": "極大回復＆INTを大幅アップする（HC×225%回復、INT+4）"
+  },
+  {
+    "extId": 5561,
+    "name": "悪魔金魚",
+    "skillName": "悪魔だからな",
+    "rarity": "ll",
+    "effectKey": "fish",
+    "desc": "回復＆PHY+3＆リザレクション付与（致死時1HP生存）"
+  }
+]

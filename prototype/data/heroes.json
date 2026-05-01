@@ -1,0 +1,38 @@
+[
+  {
+    "heroId": 1002,
+    "nameJa": "甲斐姫",
+    "rarity": "common",
+    "hpMax": 70,
+    "basePhy": 10,
+    "baseInt": 8,
+    "baseAgi": 12,
+    "passiveKey": "kaihime",
+    "passiveName": "浪切",
+    "passiveDesc": "スキルカード使用後に50%の確率で発動・先頭の敵にPHYの50%追加ダメージ"
+  },
+  {
+    "heroId": 1001,
+    "nameJa": "コナン・ドイル",
+    "rarity": "common",
+    "hpMax": 85,
+    "basePhy": 7,
+    "baseInt": 23,
+    "baseAgi": 8,
+    "passiveKey": "doyle",
+    "passiveName": "シャーロック・ホームズ",
+    "passiveDesc": "HPが70%未満になったとき1回だけ発動・INT +3"
+  },
+  {
+    "heroId": 1003,
+    "nameJa": "張遼",
+    "rarity": "common",
+    "hpMax": 85,
+    "basePhy": 15,
+    "baseInt": 6,
+    "baseAgi": 10,
+    "passiveKey": "zhang",
+    "passiveName": "遼来遼来",
+    "passiveDesc": "被ダメージ後に50%の確率で発動・先頭の敵にPHYの20%追加ダメージ"
+  }
+]
