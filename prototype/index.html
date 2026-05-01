@@ -304,13 +304,14 @@
     .arena-inner {
       position: relative; z-index: 1;
       display: flex; align-items: flex-end; justify-content: space-between;
-      padding: 0.6rem 0.3rem 0.75rem;
-      min-height: 240px;
+      padding: 0.5rem 0.15rem 0.65rem;
+      min-height: clamp(180px, 22vw, 320px);
     }
-    /* SPEC-005 Phase 3h: 3 スロット同サイズ + V 字配置 (front=中央寄り・低い / back=外側・高い) */
+    /* SPEC-005 Phase 3h: 3 スロット同サイズ + V 字配置 (front=中央寄り・低い / back=外側・高い)
+       max-width 49% にして PC でも横幅をフル活用 */
     .party-side {
-      display: flex; gap: 0.25rem; align-items: flex-end;
-      flex: 1; max-width: 47%;
+      display: flex; gap: clamp(2px, 0.3vw, 6px); align-items: flex-end;
+      flex: 1; max-width: 49%;
     }
     .party-side--player { justify-content: flex-end; }
     .party-side--enemy  { justify-content: flex-start; }
@@ -318,10 +319,10 @@
       flex: 0 0 auto; min-width: 0;
       display: flex; flex-direction: column; align-items: center;
     }
-    /* V 字段差: front は最も低く、back は最も高い (画面では下向きの V) */
+    /* V 字段差: portrait サイズに比例 (~30% / ~60%) */
     .party-slot--front { margin-bottom: 0; }
-    .party-slot--mid   { margin-bottom: 26px; }
-    .party-slot--back  { margin-bottom: 52px; }
+    .party-slot--mid   { margin-bottom: clamp(14px, 2.2vw, 32px); }
+    .party-slot--back  { margin-bottom: clamp(28px, 4.4vw, 64px); }
     /* 空スロット (パーティ未充足) は非表示 */
     .party-slot--mid:empty,
     .party-slot--back:empty { display: none; }
@@ -331,14 +332,26 @@
     /* SPEC-006 Phase 4g: Phase 3j のアクティブキャスター切替 (▶ ACTIVE バッジ /
        portrait click / hover lift) は廃止。caster は card 券面で常時表示される。 */
 
+    /* SPEC-005 + UX 改善: 主要寸法を clamp() で流動化したため、固定 @media block は不要
+       (320-1920px+ で portrait・info・stats・intent・V字段差・VS が全て連続変化) */
+
     .combatant { display: flex; flex-direction: column; align-items: center; gap: 0.18rem; }
 
     /* Portrait */
+    /* SPEC-005 + UX 改善 2026-05-02: viewport 幅に追従する流動サイズ。
+       320px (狭い): portrait 46px / 320×6 + gap = ~315 で 6 ユニット全表示
+       768px (タブレット): portrait 53px
+       1280px (ノート PC): portrait 89px
+       1920px+ (大画面): portrait 110px (上限) */
     .combatant-portrait-wrap {
-      position: relative; width: 88px; height: 88px;
+      position: relative;
+      width:  clamp(46px, 7vw, 110px);
+      height: clamp(46px, 7vw, 110px);
     }
     .combatant-portrait {
-      width: 88px; height: 88px; object-fit: contain;
+      width:  clamp(46px, 7vw, 110px);
+      height: clamp(46px, 7vw, 110px);
+      object-fit: contain;
       image-rendering: pixelated; image-rendering: crisp-edges;
       border-radius: 6px; display: block;
     }
@@ -357,14 +370,22 @@
       border: 1px solid #6a3820;
     }
 
-    /* Combatant info */
-    .combatant-info { width: 110px; display: flex; flex-direction: column; gap: 0.14rem; }
+    /* Combatant info — HP ゲージ幅 = portrait × 80% (流動) */
+    .combatant-info {
+      width: clamp(38px, 5.5vw, 88px);
+      display: flex; flex-direction: column; gap: 0.14rem;
+    }
+    /* 名前は 2 行折返し許容 (「コナン・ドイル」が見切れないように) */
     .combatant-name {
-      font-size: 0.68rem; font-weight: 700; text-align: center; color: var(--text);
-      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      font-size: clamp(0.5rem, 0.95vw, 0.8rem);
+      font-weight: 700; text-align: center; color: var(--text);
+      line-height: 1.15;
+      white-space: normal; word-break: break-all;
+      overflow: hidden;
+      max-height: 2.4em;
     }
 
-    /* HP gauge */
+    /* HP gauge — combatant-info の width に追従 */
     .hp-bar-row { display: flex; flex-direction: column; gap: 2px; }
     .hp-bar-track {
       height: 5px; background: #2a2438; border-radius: 3px; overflow: hidden; width: 100%;
@@ -379,14 +400,15 @@
       font-variant-numeric: tabular-nums; line-height: 1;
     }
 
-    /* Stat badges row */
+    /* Stat badges row — combatant-info 幅に追従、フォントも流動 */
     .stat-row-badges {
       display: flex; flex-wrap: wrap; gap: 2px; justify-content: center;
     }
     .sbadge {
-      font-size: 0.58rem; font-weight: 700;
+      font-size: clamp(0.42rem, 0.75vw, 0.7rem);
+      font-weight: 700;
       border: 1px solid #4a4060; border-radius: 3px;
-      padding: 1px 3px; color: var(--text); line-height: 1.3;
+      padding: 0 2px; color: var(--text); line-height: 1.25;
       background: rgba(10,8,18,0.7); white-space: nowrap;
       position: relative;
     }
@@ -395,7 +417,7 @@
     .sbadge-agi { color: #8adf6a; border-color: #205020; }
     .sbadge-grd { color: #b0a8c0; border-color: #4a4068; }
     .sbadge-shd { color: var(--accent); border-color: #5a4020; }
-    .sbadge::before { content: attr(data-label); margin-right: 2px; opacity: 0.6; font-size: 0.52rem; }
+    .sbadge::before { content: attr(data-label); margin-right: 2px; opacity: 0.6; font-size: clamp(0.38rem, 0.65vw, 0.6rem); }
 
     /* stat-anchor for float animations */
     .stat-anchor { position: relative; display: inline-block; min-height: 1em; }
@@ -423,27 +445,33 @@
       100% { opacity: 0; transform: translateX(-50%) translateY(-22px) scale(1); }
     }
 
-    /* VS col — arena 全体の縦中央に揃える */
+    /* VS col — arena 全体の縦中央に揃える、min-width も流動 */
     .vs-col {
-      flex: 0 0 auto; min-width: 2.5rem;
+      flex: 0 0 auto;
+      min-width: clamp(1.4rem, 2vw, 3rem);
       display: flex; align-items: center; justify-content: center;
       align-self: center;
     }
     .vs-mark {
-      font-size: 1.2rem; font-weight: 800; color: var(--accent);
+      font-size: clamp(0.95rem, 1.5vw, 1.6rem);
+      font-weight: 800; color: var(--accent);
       text-shadow: 0 0 20px #c4a35a66; letter-spacing: 0.05em;
     }
 
-    /* Intent bubble (above enemy portrait) */
+    /* Intent bubble (above enemy portrait) — 流動フォント + 折返し許容 */
     .intent-bubble {
-      font-size: 0.6rem; color: #ffd4a8; text-align: center; line-height: 1.3;
-      padding: 0.28rem 0.4rem;
-      background: #1a1018ee; border: 1px solid #6a4048; border-radius: 7px;
-      max-width: 100px; margin-bottom: 0.2rem; letter-spacing: 0.03em;
+      font-size: clamp(0.42rem, 0.75vw, 0.7rem);
+      color: #ffd4a8; text-align: center; line-height: 1.25;
+      padding: 0.2rem 0.3rem;
+      background: #1a1018ee; border: 1px solid #6a4048; border-radius: 6px;
+      max-width: clamp(56px, 8vw, 110px);
+      margin-bottom: 0.15rem; letter-spacing: 0.02em;
+      white-space: normal; word-break: break-word;
     }
     .intent-bubble .intent-label {
-      display: block; font-size: 0.5rem; color: var(--muted);
-      margin-bottom: 0.1rem; letter-spacing: 0.1em;
+      display: block; font-size: clamp(0.38rem, 0.6vw, 0.55rem);
+      color: var(--muted);
+      margin-bottom: 0.08rem; letter-spacing: 0.08em;
     }
 
     /* Portrait FX */
@@ -1761,14 +1789,19 @@
       display: inline-flex; align-items: center; gap: 0.25rem;
       background: #15121c; border: 1px solid var(--border);
       color: var(--text); border-radius: 6px;
-      padding: 0.25rem 0.55rem; font-size: 0.78rem; cursor: pointer;
+      padding: 0.25rem 0.55rem;
+      font-size: clamp(0.6rem, 1.3vw, 0.85rem);
+      cursor: pointer;
       line-height: 1; height: 28px;
+      white-space: nowrap;       /* 改行禁止 (デッキ表示が縦に折れるのを防ぐ) */
+      flex-shrink: 0;
     }
     .btn-deck-view:hover { border-color: var(--accent); }
     .btn-deck-view:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-    .btn-deck-view-icon { font-size: 0.95rem; }
-    .btn-deck-view-label { font-weight: 600; letter-spacing: 0.02em; }
-    @media (max-width: 380px) {
+    .btn-deck-view-icon { font-size: clamp(0.7rem, 1.5vw, 1.05rem); }
+    .btn-deck-view-label { font-weight: 600; letter-spacing: 0.02em; white-space: nowrap; }
+    /* 極小画面 (≤340px) ではラベル隠してアイコンのみ。それ以上は流動フォントで縮小 */
+    @media (max-width: 340px) {
       .btn-deck-view-label { display: none; }
     }
 
