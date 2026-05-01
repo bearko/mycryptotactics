@@ -2114,6 +2114,54 @@ async function enemyTurn() {
 
   if (combat.playerHp <= 0 || isPartyWipedOut(combat)) { endCombatLoss(); return; }
 
+  // SPEC-005 Phase 3d: サブエネミー (enemies[1..]) も独立に行動。
+  // 各サブエネミーは intentRota を順に消化、攻撃系のみ自分のステで実行。
+  // (heal/buff/guard 系は legacy enemies[0] 状態を変えてしまうため Phase 3d ではスキップ)
+  if (Array.isArray(combat.enemies) && combat.enemies.length > 1) {
+    for (let i = 1; i < combat.enemies.length; i++) {
+      const sub = combat.enemies[i];
+      if (!sub || sub.alive === false || (sub.hp ?? 0) <= 0) continue;
+      // 次の intent
+      const rota = sub.intentRota || [];
+      if (rota.length === 0) continue;
+      const idx = (sub.intentRotaIdx ?? 0) % rota.length;
+      const subIt = rota[idx];
+      sub.intentRotaIdx = (sub.intentRotaIdx ?? 0) + 1;
+      // 攻撃系のみ (heal/buff/guard はスキップ)
+      if (!subIt || !subIt.kind || !subIt.kind.startsWith("attack") && subIt.kind !== "special") continue;
+      // 一時的に combat.enemyXxx を sub のステに差し替えて既存ヘルパを再利用
+      const saved = {
+        enemyPhy: combat.enemyPhy, enemyInt: combat.enemyInt, enemyAgi: combat.enemyAgi,
+        enemyPhyBase: combat.enemyPhyBase, enemyIntBase: combat.enemyIntBase, enemyAgiBase: combat.enemyAgiBase,
+        enemyHp: combat.enemyHp, enemyHpMax: combat.enemyHpMax,
+      };
+      combat.enemyPhy = sub.phy; combat.enemyInt = sub.int; combat.enemyAgi = sub.agi;
+      combat.enemyPhyBase = sub.phyBase; combat.enemyIntBase = sub.intBase; combat.enemyAgiBase = sub.agiBase;
+      combat.enemyHp = sub.hp; combat.enemyHpMax = sub.hpMax;
+      try {
+        switch (subIt.kind) {
+          case "attack":         dealPhySkillFromEnemyToPlayer(combat, subIt.phyPct); break;
+          case "attackPoison":   dealPhySkillFromEnemyToPlayer(combat, subIt.phyPct); break;
+          case "attackBleed":    dealPhySkillFromEnemyToPlayer(combat, subIt.phyPct); break;
+          case "attackDouble":
+            dealPhySkillFromEnemyToPlayer(combat, subIt.phyPct);
+            if (!isPartyWipedOut(combat)) dealPhySkillFromEnemyToPlayer(combat, subIt.phyPct);
+            break;
+          case "attackInt":      dealIntSkillFromEnemyToPlayer(combat, subIt.intPct); break;
+          case "attackIntDouble":
+            dealIntSkillFromEnemyToPlayer(combat, subIt.intPct);
+            if (!isPartyWipedOut(combat)) dealIntSkillFromEnemyToPlayer(combat, subIt.intPct);
+            break;
+          case "special":        dealSpecialMaxHpPercentToPlayer(combat, subIt.pct); break;
+        }
+      } finally {
+        // 戻す (heal/buff があった場合の HP 等変更は sub 反映済みなのでこれで問題なし)
+        Object.assign(combat, saved);
+      }
+      if (isPartyWipedOut(combat)) { endCombatLoss(); return; }
+    }
+  }
+
   // 張遼「遼来遼来」: 被ダメージ後に反撃（カットイン付き、非同期）
   renderCombat();
   await applyZhangPassive(combat);
