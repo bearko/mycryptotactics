@@ -51,9 +51,21 @@
 
 ## クレジット・ライセンス
 
+### アセット（画像・BGM・SE）
+
 キャラクター画像・エクステンション画像・BGM / SE は [bearko/mycryptoheroes](https://github.com/bearko/mycryptoheroes) の素材を使用しています。これらのアセットは **My Crypto Heroes (MCH Co., Ltd.)** に帰属し、ファンが作成した二次創作コンテンツとして利用しています。商用利用は行っていません。
 
-ゲームのソースコード (`.js`, `.html`, `.css`) は MIT ライセンスです。アセット（画像・音声）のライセンスは MCH の利用ガイドラインに従ってください。
+アセットの利用条件・ガイドラインは MCH 公式の方針に準じます。詳細はこちらを参照してください:
+
+**▶ [bearko/mycryptoheroes — README（アセット利用ガイドライン）](https://github.com/bearko/mycryptoheroes/blob/main/README.md)**
+
+二次創作 / アセット利用に関する問い合わせは MCH 公式または上記リポジトリへお願いします。
+
+### ソースコード
+
+ゲームのソースコード (`prototype/js/`, `prototype/index.html`, `prototype/sim/` 等) は MIT ライセンスです。フォーク・改変・再配布は自由です。
+
+ただしアセット（画像・音声）は上記の通り **MCH のガイドライン準拠** であり、ソースコードのライセンスとは別管轄である点に注意してください。
 
 ---
 

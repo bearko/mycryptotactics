@@ -2304,5 +2304,12 @@
   </div>
 
   <script type="module" src="./js/main.js"></script>
+
+  <!-- Vercel Web Analytics (#24): Vercel ホスティング上で自動的に /_vercel/insights/script.js が配信される。
+       ローカルや非 Vercel 環境では 404 となるが、無視されてゲーム動作には影響しない。 -->
+  <script>
+    window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+  </script>
+  <script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>
