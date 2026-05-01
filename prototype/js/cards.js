@@ -57,6 +57,140 @@ function makeCardLibrary(clog, api) {
   const se = api.playBattleSe;
   const fx = api.portraitFx;
   return {
+    // ─── SPEC-006 Phase 4i: caster ロール差別化デモカード (5 ペア) ────────
+    // 既存カードと caster ロール違いの「+ 強化版」を新設して動作デモ。
+    // 前衛限定 / 高 PHY / 高 INT / 後衛限定 / 高 HP の 5 種を網羅。
+    // ext9001-9005 はデモ用 ID range。実画像は無いので onerror で透過 fallback。
+
+    // (1/5) caster=front: 前衛限定の重攻撃 (vs ext1001 ノービスブレード=foremost)
+    //   trade-off: 前衛が死んだら使えなくなるが、威力が約 1.4 倍
+    ext9001: {
+      libraryKey: "ext9001",
+      extId: 1001,  // 画像は ext1001 を流用 (ノービスブレード)
+      extNameJa: "猛勇剣",
+      skillNameJa: "前衛斬",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      caster: "front",
+      // SPEC-006 Phase 4i: 前衛限定 + 強化威力
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 70-85%" },
+      ],
+      effectSummaryLines(s) { return [`敵にダメージ　${estPhyHit(s.playerPhy, s.enemyPhy, 70, 85)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 70, 85)} ダメージ（PHY 70〜85% / 前衛限定）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 70, 85);
+      },
+    },
+
+    // (2/5) caster=highest_int: INT 最高ヒーローが回復 (vs ext1003 ノービスペン=foremost)
+    //   trade-off: メンバー編成によって INT 高ヒーロー任せ、回復量大幅増
+    ext9002: {
+      libraryKey: "ext9002",
+      extId: 1003,  // 画像は ext1003 流用 (ノービスペン)
+      extNameJa: "賢者の薬",
+      skillNameJa: "高位リカバリー",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      caster: "highest_int",
+      effects: [
+        { target: "self", text: "HP回復 INT50-60%" },
+      ],
+      effectSummaryLines(s) {
+        const lo = estHealInt(s.playerInt, s.playerPhy, 50, 50);
+        const hi = estHealInt(s.playerInt, s.playerPhy, 60, 60);
+        return [`HP　+${lo}〜${hi}`];
+      },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) {
+        const lo = estHealInt(s.playerInt, s.playerPhy, 50, 50);
+        const hi = estHealInt(s.playerInt, s.playerPhy, 60, 60);
+        return [`HP を ${lo}〜${hi} 回復（INT 最高ヒーローが使用）`];
+      },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 50, 60);
+      },
+    },
+
+    // (3/5) caster=highest_phy: PHY 最高ヒーローが斬る (vs ext1006 ノービスカタナ=foremost)
+    //   trade-off: ダメージ計算は最高 PHY、攻撃力スタッキング有利
+    ext9003: {
+      libraryKey: "ext9003",
+      extId: 1006,  // 画像は ext1006 流用 (ノービスカタナ)
+      extNameJa: "闘士の槍",
+      skillNameJa: "豪快突き",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      caster: "highest_phy",
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 60-70%" },
+      ],
+      effectSummaryLines(s) { return [`敵にダメージ　${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)}`]; },
+      peekHelpKeys() { return [] ;},
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)} ダメージ（PHY 最高ヒーローが使用）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 60, 70);
+      },
+    },
+
+    // (4/5) caster=back: 後衛限定の防御カード (vs ext1004 ノービスアーマー=foremost)
+    //   trade-off: 後衛がいないと使えないが、後衛存在時に強力なバフ
+    ext9004: {
+      libraryKey: "ext9004",
+      extId: 1004,  // 画像は ext1004 流用 (ノービスアーマー)
+      extNameJa: "鉄壁の鎧",
+      skillNameJa: "後衛強化",
+      skillIcon: "BUF_phy.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      caster: "back",
+      effects: [
+        { target: "self", text: "PHY +3" },
+        { target: "self", text: "ガード +12" },
+      ],
+      effectSummaryLines() { return ["PHY　+3", "ガード　+12"]; },
+      peekHelpKeys() { return ["phy", "guard"]; },
+      previewLines() { return ["後衛ヒーローの PHY を +3 / ガード +12 (後衛限定)"]; },
+      play(s) {
+        api.playBattleSe("buff");
+        api.portraitFx("player", "buff");
+        s.playerPhy += 3;
+        s.playerGuard = (s.playerGuard || 0) + 12;
+        clog("鉄壁の鎧: PHY+3、ガード+12");
+      },
+    },
+
+    // (5/5) caster=highest_hp: HP 最高 (タンク) が振るう斧 (vs ext1011 アックス=foremost)
+    //   trade-off: タンクヒーローが使うほど強い、コンセプト型
+    ext9005: {
+      libraryKey: "ext9005",
+      extId: 1011,  // 画像は ext1011 流用 (アックス)
+      extNameJa: "狂戦士の斧",
+      skillNameJa: "タンクスイング",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      caster: "highest_hp",
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 55-65%" },
+      ],
+      effectSummaryLines(s) { return [`敵にダメージ　${estPhyHit(s.playerPhy, s.enemyPhy, 55, 65)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 55, 65)} ダメージ（HP 最高ヒーローが使用）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 55, 65);
+      },
+    },
+
     ext1001: {
       libraryKey: "ext1001",
       extId: 1001,
@@ -21512,6 +21646,13 @@ export { shuffle };
  * 色: common=#0984E3 / uncommon=#00B894 / rare=#FDCB6E / epic=#E17055 / legendary=#D63031
  */
 export const CARD_RARITIES = {
+  // ─── SPEC-006 Phase 4i: caster ロール差別化デモカード ─────────────
+  ext9001: 'uncommon',  // 猛勇剣 (caster=front 前衛限定)
+  ext9002: 'uncommon',  // 賢者の薬 (caster=highest_int)
+  ext9003: 'uncommon',  // 闘士の槍 (caster=highest_phy)
+  ext9004: 'uncommon',  // 鉄壁の鎧 (caster=back 後衛限定)
+  ext9005: 'uncommon',  // 狂戦士の斧 (caster=highest_hp)
+
   // ─── スターターカード ──────────────────────────────────────────────
   ext1001: 'common',    // ノービスブレード
   ext1002: 'common',    // ノービスマスケット
