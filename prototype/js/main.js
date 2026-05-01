@@ -1797,22 +1797,40 @@ function escapeHtml(s) {
   return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
-/** SPEC-006 Phase 4e: 効果テキストから冗長なプレフィックスを除去
- *  - "PHYダメ X-Y%" → "X-Y% ダメ"
- *  - "INTダメ X-Y%" → "X-Y% ダメ"
- *  - "HP回復 INTX%" → "X% 回復"
- *  - "HP回復 (INT+PHY)÷2" → "(INT+PHY)÷2 回復"
- *  カード左上の skill icon が PHY/INT/HP の種別を示すため、テキスト側の
- *  type プレフィックスは省略して数値部分を強調する。 */
+/** SPEC-006 Phase 4e: 効果テキストから冗長なプレフィックスを除去 + 全角空白を半角に
+ *
+ *  対応する 2 つの入力形式:
+ *  (A) effectSummaryLines(combat) の出力 (実数値、表示優先)
+ *      "敵にダメージ　7"     → "7 ダメージ"   (「敵に」省略・順序変更)
+ *      "HP　+20"            → "+20 回復"
+ *      "PHY　+2"            → "PHY +2"      (空白半角化のみ)
+ *      "AGI　-3（敵）"       → "AGI -3"       (陣営マーカー除去)
+ *      "毒 ×2 付与（敵）"        → "毒 ×2"
+ *
+ *  (B) effects[].text の係数形式 (フォールバック用)
+ *      "PHYダメ 50-60%" → "50-60% ダメ"
+ *      "HP回復 INT30%"  → "30% 回復"
+ *
+ *  カード左上の skill icon が PHY/INT/HP の種別、pill の色が陣営を示すため
+ *  テキスト側のプレフィックス・陣営マーカーは省略する。 */
 function simplifyEffectText(text) {
   if (!text) return "";
-  let t = String(text);
-  // ダメ系: "PHYダメ 50-60%" / "INTダメ 25%" → "50-60% ダメ" / "25% ダメ"
+  // 全角空白 → 半角空白に正規化
+  let t = String(text).replace(/　/g, " ");
+  // (A) 実数値ダメージ: "敵にダメージ 7" → "7 ダメージ"
+  t = t.replace(/^敵にダメージ\s+(.+?)\s*$/, "$1 ダメージ");
+  // (A) 実数値回復: "HP +20" / "HP +20〜30" → "+20 回復"
+  t = t.replace(/^HP\s*(\+.+?)\s*$/, "$1 回復");
+  // (B) 係数ダメージ: "PHYダメ 50-60%" → "50-60% ダメ"
   t = t.replace(/^(?:PHY|INT)ダメ\s*(.+?)\s*$/, "$1 ダメ");
-  // 回復系 (INT prefix あり): "HP回復 INT30%" → "30% 回復"
+  // (B) 係数回復 (INT prefix あり): "HP回復 INT30%" → "30% 回復"
   t = t.replace(/^HP回復\s*INT(.+?)\s*$/, "$1 回復");
-  // 回復系 (一般): "HP回復 (INT+PHY)÷2" → "(INT+PHY)÷2 回復"
+  // (B) 係数回復 (一般): "HP回復 (INT+PHY)÷2" → "(INT+PHY)÷2 回復"
   t = t.replace(/^HP回復\s+(.+?)\s*$/, "$1 回復");
+  // 陣営マーカー除去: "AGI -3（敵）" → "AGI -3"
+  t = t.replace(/[（(](?:敵|自分|味方)[)）]/g, "").trim();
+  // 「付与」尾語除去: "毒 ×2 付与" → "毒 ×2"
+  t = t.replace(/\s*付与\s*$/, "");
   return t;
 }
 
@@ -2132,9 +2150,20 @@ function renderCombat() {
     slot.style.setProperty("--i", String(idx + 1));
     slot.style.setProperty("--n", String(Math.max(n - 1, 1)));
 
+    // SPEC-006 Phase 4e: effectSummaryLines / previewLines は legacy combat.player* を読むので、
+    // **このカードの caster** の stats を一時的に swap してから呼ぶことで、UI に表示される
+    // ダメージ実数値が「caster の PHY/INT × ターゲット enemy の防御」で計算された正しい値になる。
+    const previewCaster = resolveCaster(card.caster, combat);
+    const _savedStats = previewCaster ? {
+      playerPhy: combat.playerPhy, playerInt: combat.playerInt, playerAgi: combat.playerAgi,
+      playerHp: combat.playerHp, playerHpMax: combat.playerHpMax,
+      playerPhyBase: combat.playerPhyBase, playerIntBase: combat.playerIntBase, playerAgiBase: combat.playerAgiBase,
+    } : null;
+    if (previewCaster) loadCasterStatsToLegacy(combat, previewCaster);
     const summaryLines = typeof card.effectSummaryLines === "function" ? card.effectSummaryLines(combat)
       : typeof card.previewLines === "function" ? card.previewLines(combat) : [card.text || ""];
     const detailLines = typeof card.previewLines === "function" ? card.previewLines(combat) : summaryLines;
+    if (_savedStats) Object.assign(combat, _savedStats); // 復元
     const helpKeys = typeof card.peekHelpKeys === "function" ? card.peekHelpKeys() : [];
     const detailBody = detailLines.map(t => "<p>" + escapeHtml(t) + "</p>").join("");
     const summaryBody = summaryLines.map(t => "<p>" + escapeHtml(t) + "</p>").join("");
@@ -2143,7 +2172,8 @@ function renderCombat() {
       : "";
 
     // SPEC-006 Phase 4e: caster icon (バトル中はヒーロー portrait + ロール名、不在時はロール名のみ)
-    const casterUnit = resolveCaster(card.caster, combat);
+    // 上の summary swap で resolveCaster(card.caster) は既に previewCaster として確定済み
+    const casterUnit = previewCaster;
     const roleKey = card.caster || "foremost";
     const roleLabel = CASTER_ROLE_LABELS[roleKey] || roleKey;
     const casterTitle = casterUnit
@@ -2159,12 +2189,18 @@ function renderCombat() {
         `</div>`;
 
     // SPEC-006 Phase 4e: effects 配列を「対象 30% + 効果テキスト 70%」の行で描画
-    // (effects が空 / 未定義の場合は旧 effectSummaryLines にフォールバック)
+    // 効果テキスト本体は effectSummaryLines(combat) (実数値計算済み) を優先利用し、
+    // 同一インデックスで pair した上で simplifyEffectText() で見栄えを整える。
+    // effectSummaryLines が存在しない場合は effects[].text (係数形式) にフォールバック。
     const effectRowsHtml = (Array.isArray(card.effects) && card.effects.length > 0)
-      ? card.effects.map(e => {
+      ? card.effects.map((e, i) => {
           const lbl = targetLabelText(e.target) || e.target || "";
           const colorVar = targetColorVar(e.target) || "--text";
-          const simplified = simplifyEffectText(e.text || "");
+          // 実数値テキストを優先 (caster の PHY/INT + ターゲット enemy の防御を反映)
+          const computedText = (Array.isArray(summaryLines) && summaryLines[i] != null)
+            ? summaryLines[i]
+            : (e.text || "");
+          const simplified = simplifyEffectText(computedText);
           return `<div class="card-effect-row">` +
             `<span class="card-effect-target" style="--target-pill-color: var(${colorVar})">${escapeHtml(lbl)}</span>` +
             `<span class="card-effect-text">${escapeHtml(simplified)}</span>` +
