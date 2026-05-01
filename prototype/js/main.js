@@ -50,6 +50,14 @@ import {
   unlockNextAfterClear,
 } from "./regulations.js";
 import {
+  loadAbsoluteConfig,
+  saveAbsoluteConfig,
+  getAbsoluteScoreMult,
+  MIN_MULT as ABS_MIN_MULT,
+  MAX_MULT as ABS_MAX_MULT,
+  STEP_MULT as ABS_STEP_MULT,
+} from "./absolute-config.js";
+import {
   resolveCaster,
   canPlayCard,
   unplayableBadge,
@@ -66,6 +74,18 @@ import {
 let currentRegulationId = loadCurrentRegulationId();
 function getCurrentRegulation() {
   return REGULATION_BY_ID[currentRegulationId] || REGULATIONS[0];
+}
+
+/**
+ * SPEC-007: 自ダメージに Absolute の playerDmgMult を乗算するヘルパー。
+ * Absolute 以外のレギュレーションでは恒等 (× 1.0)。
+ */
+function applyPlayerDmgMult(damage) {
+  const reg = getCurrentRegulation();
+  if (!reg.effects.isAbsolute) return damage;
+  const mult = loadAbsoluteConfig().playerDmgMult || 1.0;
+  if (mult === 1.0) return damage;
+  return Math.max(0, Math.round(damage * mult));
 }
 function setCurrentRegulation(id) {
   if (!REGULATION_BY_ID[id]) return;
@@ -731,6 +751,8 @@ function dealPhySkillToEnemy(s, skillPct) {
   if (target === s.enemies?.[0]) {
     total = applyGuardToDamage("enemy", total);
   }
+  // SPEC-007: Absolute レギュレーションの自ダメ倍率を最終ダメージに乗算
+  total = applyPlayerDmgMult(total);
   applyHpDeltaToEnemy(s, target, -total);
   lungePortrait("player", s._currentCaster ?? s.heroes?.[0]);
   flashPortrait("enemy", target);
@@ -763,6 +785,8 @@ function dealIntSkillToEnemy(s, minPct, maxPct, forceCrit = false) {
   if (target === s.enemies?.[0]) {
     total = applyGuardToDamage("enemy", total);
   }
+  // SPEC-007: Absolute レギュレーションの自ダメ倍率を最終ダメージに乗算
+  total = applyPlayerDmgMult(total);
   applyHpDeltaToEnemy(s, target, -total);
   lungePortrait("player", s._currentCaster ?? s.heroes?.[0]);
   flashPortrait("enemy", target);
@@ -1037,6 +1061,15 @@ function ensureRunState() {
       ? pendingPartyConfirmed
       : [LEADER.heroId];
     const party = buildPartyLoadout(partyIds);
+    // SPEC-007: Absolute レギュレーション選択中なら、ヒーロー HP に playerHpMult を適用して runState に反映。
+    const _curReg = REGULATION_BY_ID[loadCurrentRegulationId()] || REGULATIONS[0];
+    const _absHpMult = (_curReg && _curReg.effects.isAbsolute) ? loadAbsoluteConfig().playerHpMult : 1.0;
+    if (_absHpMult !== 1.0) {
+      for (const m of party) {
+        m.hpMax = Math.max(1, Math.round(m.hpMax * _absHpMult));
+        m.hpCurrent = Math.max(1, Math.round(m.hpCurrent * _absHpMult));
+      }
+    }
     runState = {
       chapterIdx: 0,
       deck: makeStarterDeck(),
@@ -1048,6 +1081,8 @@ function ensureRunState() {
       pathNodeIds: [],
       runComplete: false,
       llExtSlots: [null, null],
+      // SPEC-007: ランキング用のターン累計（各戦闘終了時に combat.turn を加算）
+      totalTurns: 0,
     };
   }
 }
@@ -1452,11 +1487,14 @@ function startCombatFromMapNode(node) {
     intentRota = enemyDef.intentRota;
   }
 
-  // レギュレーション効果適用 (#37)
+  // レギュレーション効果適用 (#37)、Absolute は absolute-config.js から読み込み (SPEC-007)
   const reg = getCurrentRegulation();
-  const regHp = Math.max(1, Math.round(enemyDef.hp * reg.effects.hpFactor));
-  const regPhy = Math.max(1, Math.round(enemyDef.phy * reg.effects.atkFactor));
-  const regInt = Math.max(1, Math.round(enemyDef.int * reg.effects.atkFactor));
+  const absConfig = reg.effects.isAbsolute ? loadAbsoluteConfig() : null;
+  const enemyHpFactor  = absConfig ? absConfig.enemyHpMult  : reg.effects.hpFactor;
+  const enemyAtkFactor = absConfig ? absConfig.enemyDmgMult : reg.effects.atkFactor;
+  const regHp = Math.max(1, Math.round(enemyDef.hp * enemyHpFactor));
+  const regPhy = Math.max(1, Math.round(enemyDef.phy * enemyAtkFactor));
+  const regInt = Math.max(1, Math.round(enemyDef.int * enemyAtkFactor));
 
   combat = {
     deck,
@@ -1545,9 +1583,9 @@ function startCombatFromMapNode(node) {
       const pick = pool[Math.floor(Math.random() * pool.length)];
       const def = ENEMY_DEFS[pick];
       if (!def) continue;
-      const subHp = Math.max(1, Math.round(def.hp * reg.effects.hpFactor));
-      const subPhy = Math.max(1, Math.round(def.phy * reg.effects.atkFactor));
-      const subInt = Math.max(1, Math.round(def.int * reg.effects.atkFactor));
+      const subHp = Math.max(1, Math.round(def.hp * enemyHpFactor));
+      const subPhy = Math.max(1, Math.round(def.phy * enemyAtkFactor));
+      const subInt = Math.max(1, Math.round(def.int * enemyAtkFactor));
       combat.enemies.push(makeEnemyUnit({
         position: i,
         defId: def.id,
@@ -5191,6 +5229,9 @@ function endCombatWin() {
   const isBoss = combat.isBoss;
   const isElite = combat.isElite;
 
+  // SPEC-007: ランキング用ターン累計（既存 combat.turn を runState に加算）
+  runState.totalTurns = (runState.totalTurns || 0) + (combat.turn || 1);
+
   // ゴールド
   const earnedGold = isBoss ? chapter.bossRewardGold : isElite ? 45 : 28;
   gold += earnedGold;
@@ -6139,7 +6180,11 @@ function renderRegulationSelect() {
     html += `<div class="rs-card-name" style="color:${r.color}">${r.nameJa}</div>`;
     html += `<div class="rs-card-desc">${r.descShort}</div>`;
     if (isUnlocked) {
-      html += `<button class="rs-select-btn action${isCurrent ? ' rs-select-btn--current' : ''}">${isCurrent ? '選択中' : 'このレギュレーションで始める'}</button>`;
+      // SPEC-007: Absolute は「設定して開始」ボタンに分岐
+      const btnText = r.effects.isAbsolute
+        ? (isCurrent ? '選択中（設定変更）' : 'Absolute を設定して開始')
+        : (isCurrent ? '選択中' : 'このレギュレーションで始める');
+      html += `<button class="rs-select-btn action${isCurrent ? ' rs-select-btn--current' : ''}">${btnText}</button>`;
     } else {
       html += `<div class="rs-locked-hint">前の難易度をクリアで解放</div>`;
     }
@@ -6155,12 +6200,100 @@ function renderRegulationSelect() {
       const card = btn.closest('.rs-card');
       const id = card?.dataset?.regId;
       if (!id) return;
+      // SPEC-007: Absolute なら設定モーダルを開いて、確定後にヒーロー選択へ
+      const reg = REGULATION_BY_ID[id];
+      if (reg && reg.effects.isAbsolute) {
+        openAbsoluteConfigModal(() => {
+          setCurrentRegulation(id);
+          showView("heroSelect");
+          renderHeroSelect();
+        });
+        return;
+      }
       setCurrentRegulation(id);
       showView("heroSelect");
       renderHeroSelect();
     });
   });
 }
+
+/**
+ * SPEC-007: Absolute 設定モーダルを開く。
+ * @param {() => void} onConfirm 確定後コールバック
+ */
+function openAbsoluteConfigModal(onConfirm) {
+  const overlay = document.getElementById("absoluteConfigOverlay");
+  if (!overlay) return;
+  const cur = loadAbsoluteConfig();
+  // 各 slider を現在値で初期化
+  const fields = ["enemyHpMult", "enemyDmgMult", "playerHpMult", "playerDmgMult"];
+  fields.forEach((key) => {
+    const slider = overlay.querySelector(`[data-abs-key="${key}"]`);
+    const valEl = overlay.querySelector(`[data-abs-val="${key}"]`);
+    if (!slider || !valEl) return;
+    slider.value = cur[key].toFixed(1);
+    valEl.textContent = cur[key].toFixed(1) + "x";
+  });
+  updateAbsoluteScoreMultPreview();
+  overlay.classList.remove("hidden");
+  // ボタン bind
+  const cancelBtn = overlay.querySelector("[data-abs-cancel]");
+  const confirmBtn = overlay.querySelector("[data-abs-confirm]");
+  const cleanup = () => {
+    overlay.classList.add("hidden");
+    cancelBtn.removeEventListener("click", onCancel);
+    confirmBtn.removeEventListener("click", onConfirmInner);
+  };
+  const onCancel = () => cleanup();
+  const onConfirmInner = () => {
+    const cfg = {};
+    fields.forEach((key) => {
+      const slider = overlay.querySelector(`[data-abs-key="${key}"]`);
+      cfg[key] = parseFloat(slider.value);
+    });
+    saveAbsoluteConfig(cfg);
+    cleanup();
+    onConfirm && onConfirm();
+  };
+  cancelBtn.addEventListener("click", onCancel);
+  confirmBtn.addEventListener("click", onConfirmInner);
+}
+
+/** Absolute モーダル内の「スコア倍率」プレビュー更新 */
+function updateAbsoluteScoreMultPreview() {
+  const overlay = document.getElementById("absoluteConfigOverlay");
+  if (!overlay) return;
+  const cfg = {};
+  ["enemyHpMult", "enemyDmgMult", "playerHpMult", "playerDmgMult"].forEach((key) => {
+    const slider = overlay.querySelector(`[data-abs-key="${key}"]`);
+    cfg[key] = slider ? parseFloat(slider.value) : 1.0;
+  });
+  const mult = getAbsoluteScoreMult(cfg);
+  const previewEl = overlay.querySelector("[data-abs-score-mult]");
+  if (previewEl) previewEl.textContent = mult.toFixed(2) + "x";
+}
+
+/** SPEC-007: Absolute モーダルのスライダーに input リスナーを 1 度だけ bind */
+(function bindAbsoluteSliderListeners() {
+  if (typeof window === "undefined" || typeof document === "undefined") return;
+  const setup = () => {
+    const overlay = document.getElementById("absoluteConfigOverlay");
+    if (!overlay) return;
+    overlay.querySelectorAll("input[type='range'][data-abs-key]").forEach((slider) => {
+      slider.addEventListener("input", () => {
+        const key = slider.dataset.absKey;
+        const valEl = overlay.querySelector(`[data-abs-val="${key}"]`);
+        if (valEl) valEl.textContent = parseFloat(slider.value).toFixed(1) + "x";
+        updateAbsoluteScoreMultPreview();
+      });
+    });
+  };
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", setup, { once: true });
+  } else {
+    setup();
+  }
+})();
 
 /** ヘッダーの右上（map / combat 両方）に現在のレギュレーションアイコンを表示 (#37) */
 function updateHeaderRegulationIcons() {

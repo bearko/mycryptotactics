@@ -1300,6 +1300,29 @@
       padding: 0.75rem;
     }
     #helpOverlay.hidden { display: none; }
+
+    /* SPEC-007: Absolute 設定モーダル */
+    #absoluteConfigOverlay {
+      position: fixed; inset: 0; background: #000c; z-index: 210;
+      display: flex; align-items: center; justify-content: center; padding: 0.75rem;
+    }
+    #absoluteConfigOverlay.hidden { display: none; }
+    .abs-dialog {
+      background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+      width: 100%; max-width: 460px; padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: 0.75rem;
+    }
+    .abs-title { color: #a855f7; font-size: 1.1rem; font-weight: 600; margin: 0 0 0.25rem; }
+    .abs-row { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+    .abs-row label { flex: 0 0 8em; font-size: 0.9rem; }
+    .abs-row input[type="range"] { flex: 1 1 auto; min-width: 100px; }
+    .abs-row .abs-val { flex: 0 0 4em; text-align: right; font-variant-numeric: tabular-nums; color: var(--accent); }
+    .abs-score-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.5rem 0.75rem; background: #2a2438; border-radius: 8px; margin-top: 0.25rem;
+    }
+    .abs-score-row .abs-score-label { color: var(--text); font-size: 0.95rem; }
+    .abs-score-row .abs-score-mult { color: #a855f7; font-size: 1.2rem; font-weight: 600; }
+    .abs-buttons { display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 0.5rem; }
     .help-dialog {
       background: var(--panel);
       border: 1px solid var(--border);
@@ -2640,6 +2663,45 @@
       へ
     </span>
   </footer>
+
+  <!-- SPEC-007: Absolute レギュレーション設定モーダル -->
+  <div id="absoluteConfigOverlay" class="hidden" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="absTitle">
+    <div class="abs-dialog">
+      <h2 id="absTitle" class="abs-title">Absolute レギュレーション設定</h2>
+      <p style="font-size:0.85rem;color:var(--muted);margin:0;">各倍率は 0.1〜5.0、0.1 刻み。スライダーを動かすとスコア倍率が再計算されます。</p>
+
+      <div class="abs-row">
+        <label for="absSlider-enemyHpMult">敵 HP 倍率</label>
+        <input id="absSlider-enemyHpMult" type="range" min="0.1" max="5.0" step="0.1" value="1.0" data-abs-key="enemyHpMult" />
+        <span class="abs-val" data-abs-val="enemyHpMult">1.0x</span>
+      </div>
+      <div class="abs-row">
+        <label for="absSlider-enemyDmgMult">敵ダメ倍率</label>
+        <input id="absSlider-enemyDmgMult" type="range" min="0.1" max="5.0" step="0.1" value="1.0" data-abs-key="enemyDmgMult" />
+        <span class="abs-val" data-abs-val="enemyDmgMult">1.0x</span>
+      </div>
+      <div class="abs-row">
+        <label for="absSlider-playerHpMult">自 HP 倍率</label>
+        <input id="absSlider-playerHpMult" type="range" min="0.1" max="5.0" step="0.1" value="1.0" data-abs-key="playerHpMult" />
+        <span class="abs-val" data-abs-val="playerHpMult">1.0x</span>
+      </div>
+      <div class="abs-row">
+        <label for="absSlider-playerDmgMult">自ダメ倍率</label>
+        <input id="absSlider-playerDmgMult" type="range" min="0.1" max="5.0" step="0.1" value="1.0" data-abs-key="playerDmgMult" />
+        <span class="abs-val" data-abs-val="playerDmgMult">1.0x</span>
+      </div>
+
+      <div class="abs-score-row">
+        <span class="abs-score-label">スコア倍率（敵HP×敵ダメ ÷ 自HP×自ダメ）</span>
+        <span class="abs-score-mult" data-abs-score-mult>1.00x</span>
+      </div>
+
+      <div class="abs-buttons">
+        <button type="button" class="action" data-abs-cancel>キャンセル</button>
+        <button type="button" class="action" data-abs-confirm style="background:#a855f7;border-color:#a855f7;">この設定で開始</button>
+      </div>
+    </div>
+  </div>
 
   <div id="helpOverlay" class="hidden" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
     <div class="help-dialog">
