@@ -1368,6 +1368,7 @@
       border-radius: 14px;
       padding: 0.8rem 0.7rem 1rem;
       color: var(--text);
+      box-sizing: border-box;
     }
     .owned-deck-header {
       display: flex; align-items: center; justify-content: space-between;
@@ -1386,11 +1387,10 @@
     .owned-deck-close:hover { border-color: var(--danger); color: #ff8090; }
     .owned-deck-summary {
       display: flex; align-items: center; justify-content: center;
-      gap: 0.55rem; flex-wrap: wrap;
-      margin-bottom: 0.7rem; padding: 0.55rem 0.4rem;
+      gap: 0.4rem; flex-wrap: wrap;
+      margin-bottom: 0.55rem; padding: 0.55rem 0.5rem;
       background: #0e0a18; border: 1px solid var(--border);
       border-radius: 8px;
-      position: relative;
     }
     .owned-deck-summary .od-rarity-pill {
       display: inline-flex; align-items: center; justify-content: center;
@@ -1418,25 +1418,38 @@
     .owned-deck-summary .od-rarity-pill[data-rarity="uncommon"]  { background: #00B894; }
     .owned-deck-summary .od-rarity-pill[data-rarity="common"]    { background: #0984E3; }
     .owned-deck-summary .od-total {
-      position: absolute; right: 0.7rem; top: calc(100% + 0.15rem);
+      display: inline-flex; align-items: baseline; gap: 0.2rem;
+      margin-left: auto;
       font-weight: 800; color: var(--text);
-      font-size: 1.15rem; line-height: 1;
+      font-size: 1rem; line-height: 1;
+    }
+    .owned-deck-summary .od-total::before {
+      content: "計"; font-size: 0.7rem; color: var(--muted); font-weight: 600;
+    }
+    .owned-deck-summary .od-total::after {
+      content: "枚"; font-size: 0.7rem; color: var(--muted); font-weight: 600;
     }
     .owned-deck-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      /* 列幅は 96px〜1fr で auto-fill。画面幅に応じて自動的に列数が変わる */
+      grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
       gap: 0.4rem;
-      margin-top: 1.1rem;
     }
     .owned-deck-cell {
       position: relative;
       cursor: pointer;
       transition: transform 0.1s;
+      min-width: 0;
     }
     .owned-deck-cell:hover { transform: translateY(-2px); }
     .owned-deck-cell:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
     .owned-deck-cell .reward-card-btn {
       width: 100%; pointer-events: none;
+    }
+    /* デッキ表示内のカードは列幅にフィットさせる（reward-card-inner の固定幅を上書き） */
+    .owned-deck-cell .reward-card-inner {
+      width: 100%; min-width: 0; max-width: 100%;
+      height: auto; aspect-ratio: 7 / 12;
     }
     .owned-deck-peek {
       position: fixed; inset: 0; z-index: 560;
@@ -1477,7 +1490,7 @@
     }
     .owned-deck-peek-card .opc-close:hover { border-color: var(--accent); }
     @media (max-width: 380px) {
-      .owned-deck-grid { grid-template-columns: repeat(4, 1fr); gap: 0.3rem; }
+      .owned-deck-grid { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 0.3rem; }
     }
 
     /* ── Activity Report ──────────────────────────────────────── */
