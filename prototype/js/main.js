@@ -7274,13 +7274,12 @@ function init() {
       if (ev.key === "Enter" || ev.key === " ") dismissTitle();
     });
   }
-  // SPEC-007: タイトル画面のランキングボタン
-  document.getElementById("btnRankingOpen")?.addEventListener("click", (ev) => {
-    ev.stopPropagation();
-    // タイトル画面を消してランキング画面へ
-    const tv = document.getElementById("titleView");
-    if (tv) tv.style.display = "none";
-    openRankingView();
+  // SPEC-007: ヘッダー右端のランキングボタン (map / combat 共通)
+  ["btnRankingOpenMap", "btnRankingOpenCombat"].forEach((id) => {
+    document.getElementById(id)?.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      openRankingView();
+    });
   });
   // ヘッダーアイコン (#37) を初期化
   updateHeaderRegulationIcons();
