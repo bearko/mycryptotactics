@@ -27,12 +27,33 @@
 const LS_API_URL = "mct.rankingApiUrl";
 const LS_PLAYER_NAME = "mct.playerName";
 
-/** GAS web app URL を取得（無設定なら null） */
+/**
+ * デフォルトの GAS web app URL（プレーンテキスト直書き回避のため base64）。
+ * クライアント側に存在する以上、Network タブやソース閲覧で完全な秘匿は不可能だが、
+ * ソースを casually 眺めただけでは URL が直接見えないようにする目的の難読化。
+ *
+ * 上書きする場合は localStorage.setItem("mct.rankingApiUrl", "<your URL>") で可能。
+ */
+const _DEFAULT_API_URL_ENC = "aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvcy9BS2Z5Y2J3YTJOYU5BOGJZTThkVUxMTFVfMTMwaHRMTUhmR0daVWF5S3VuYlNnSE1BMjVNWlNzSDdmbF9Fd25KcjFZcnBDb3RYZy9leGVj";
+function _decodeDefault() {
+  try {
+    return typeof atob === "function" ? atob(_DEFAULT_API_URL_ENC) : null;
+  } catch (e) { return null; }
+}
+
+/**
+ * GAS web app URL を取得。
+ * 1. localStorage の上書き値があればそれを返す
+ * 2. 無ければ組み込みデフォルト URL を返す
+ * 3. 組み込みデフォルトも無効ならば null
+ */
 export function getRankingApiUrl() {
   try {
     const v = localStorage.getItem(LS_API_URL);
-    return v && v.trim() ? v.trim() : null;
-  } catch (e) { return null; }
+    if (v && v.trim()) return v.trim();
+  } catch (e) { /* fallthrough */ }
+  const def = _decodeDefault();
+  return (def && def.trim()) ? def.trim() : null;
 }
 
 /** GAS web app URL を保存 */

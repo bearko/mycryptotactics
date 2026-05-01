@@ -1395,10 +1395,19 @@
     #rankingView .rk-msg--error { color: #ff7878; }
     #rankingView .rk-apiurl-row {
       display: flex; gap: 0.4rem; align-items: center;
-      padding-top: 0.5rem; border-top: 1px dashed var(--border);
+      padding-top: 0.5rem;
     }
     #rankingView .rk-apiurl-row label { flex: 0 0 9em; font-size: 0.8rem; color: var(--muted); }
     #rankingView .rk-apiurl-row input { flex: 1 1 auto; }
+    #rankingView .rk-advanced-details {
+      margin-top: 0.5rem; padding-top: 0.5rem;
+      border-top: 1px dashed var(--border);
+      font-size: 0.85rem;
+    }
+    #rankingView .rk-advanced-details summary {
+      color: var(--muted); cursor: pointer; padding: 0.25rem 0;
+    }
+    #rankingView .rk-advanced-details[open] summary { color: var(--accent); }
     .abs-dialog {
       background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
       width: 100%; max-width: 460px; padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: 0.75rem;
@@ -2665,11 +2674,17 @@
       <div data-rk-list>
         <p class="rk-msg">取得中...</p>
       </div>
-      <div class="rk-apiurl-row">
-        <label for="rkApiUrlInput">Apps Script URL</label>
-        <input id="rkApiUrlInput" type="text" placeholder="https://script.google.com/macros/s/.../exec" data-rk-apiurl />
-        <button type="button" class="action" data-rk-save-apiurl>保存</button>
-      </div>
+      <details class="rk-advanced-details">
+        <summary>上級設定: 別のランキングサーバーを使う</summary>
+        <p style="font-size:0.75rem;color:var(--muted);margin:0.25rem 0;">
+          通常は組み込みのランキング API を自動利用します。独自の Google Apps Script を使う場合のみ URL を入力してください。空欄で「保存」を押すと既定値に戻ります。
+        </p>
+        <div class="rk-apiurl-row">
+          <label for="rkApiUrlInput">Apps Script URL</label>
+          <input id="rkApiUrlInput" type="text" placeholder="（既定の URL を使用）" data-rk-apiurl />
+          <button type="button" class="action" data-rk-save-apiurl>保存</button>
+        </div>
+      </details>
     </div>
 
     <div id="heroSelectView" class="hidden"></div>
