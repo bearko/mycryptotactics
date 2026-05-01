@@ -859,6 +859,7 @@ function ensureRunState() {
       llExtSlots: [null, null],
       cp: 0,         // デッキ素材（休憩・クラフトで貯まる、打ち直しに使用）
       mchc: 0,       // 上位通貨（エリート/ボスでドロップ、ボス前ショップで Legendary 解放）
+      magicStones: 0, // 輝く原石（ext を 2 枚 burn で 1 個。LL 交換に使用）
     };
   }
 }
@@ -931,6 +932,8 @@ function syncResources() {
   if (cpEl) cpEl.textContent = String(runState.cp ?? 0);
   const mchcEl = document.getElementById("mchcVal");
   if (mchcEl) mchcEl.textContent = String(runState.mchc ?? 0);
+  const stoneEl = document.getElementById("stoneVal");
+  if (stoneEl) stoneEl.textContent = String(runState.magicStones ?? 0);
   // スカウトランド表示（選択済みなら名前を chapter 表示の脇に追加）
   const chapterEl2 = document.getElementById("chapterVal");
   if (chapterEl2) {
@@ -1236,8 +1239,10 @@ function tryEnterMapNode(nodeId) {
     openScoutScreen();
     return;
   }
-  // ボス突入前の MCHC ショップ：MCHC を持っていれば LL ext と交換できる
-  if (node.type === "boss" && (runState.mchc ?? 0) >= 1 && runState.llExtSlots.some(s => s === null)) {
+  // ボス突入前の MCHC / 原石ショップ：LL ext と交換できる（空きスロットがあるとき）
+  const canMchc = (runState.mchc ?? 0) >= 1;
+  const canStones = (runState.magicStones ?? 0) >= 2;
+  if (node.type === "boss" && (canMchc || canStones) && runState.llExtSlots.some(s => s === null)) {
     openMchcShopModal(() => startCombatFromMapNode(node));
     return;
   }
@@ -1256,42 +1261,68 @@ function openMchcShopModal(onClose) {
 
   const renderShop = () => {
     const remainingMchc = runState.mchc ?? 0;
+    const remainingStones = runState.magicStones ?? 0;
     const emptySlot = runState.llExtSlots.findIndex(s => s === null);
     const offers = shuffle(LL_EXT_POOL.slice()).slice(0, 3);
 
     card.innerHTML = `
       <h2 style="margin:0 0 0.5rem;color:var(--accent)">💠 MCHC ショップ</h2>
       <p style="margin:0 0 1rem;font-size:0.85rem;color:var(--muted)">
-        ボス前限定。MCHC を消費して Legendary 枠を解放できます。<br>
-        所持: 💠 <strong>${remainingMchc}</strong> MCHC・空きスロット: <strong>${runState.llExtSlots.filter(s => s === null).length}</strong>
+        ボス前限定。MCHC または 💎輝く原石 を消費して Legendary 枠を解放できます。<br>
+        所持: 💠 <strong>${remainingMchc}</strong> MCHC・💎 <strong>${remainingStones}</strong> 原石・空きスロット: <strong>${runState.llExtSlots.filter(s => s === null).length}</strong>
       </p>
     `;
     if (emptySlot < 0) {
       card.innerHTML += `<p style="color:var(--muted)">LLスロットに空きがありません。</p>`;
-    } else if (remainingMchc < 1) {
-      card.innerHTML += `<p style="color:var(--muted)">MCHC が足りません。</p>`;
+    } else if (remainingMchc < 1 && remainingStones < 2) {
+      card.innerHTML += `<p style="color:var(--muted)">MCHC または 💎×2 が必要です。</p>`;
     } else {
       const list = document.createElement("div");
       list.style.cssText = "display:flex;flex-direction:column;gap:0.5rem;margin:0.5rem 0";
       offers.forEach(ll => {
-        const row = document.createElement("button");
-        row.type = "button";
-        row.className = "action";
-        row.style.cssText =
-          "text-align:left;padding:0.5rem 0.75rem;background:var(--card-bg);border:1px solid var(--border);border-radius:6px;cursor:pointer";
-        row.innerHTML = `
-          <div style="font-weight:700;color:var(--accent)">✨ ${ll.name}（💠 1 MCHC）</div>
-          <div style="font-size:0.8rem;color:var(--muted)">${ll.skillName} ／ ${ll.desc}</div>
-        `;
-        row.addEventListener("click", () => {
-          runState.mchc -= 1;
-          const slot = runState.llExtSlots.findIndex(s => s === null);
-          if (slot >= 0) runState.llExtSlots[slot] = ll;
-          clog(`💠 MCHC -1：「${ll.name}」を Legendary 枠に獲得`);
-          syncResources();
-          renderShop();
-        });
-        list.appendChild(row);
+        const canBuyMchc = remainingMchc >= 1;
+        const canBuyStones = remainingStones >= 2;
+
+        if (canBuyMchc) {
+          const row = document.createElement("button");
+          row.type = "button";
+          row.className = "action";
+          row.style.cssText =
+            "text-align:left;padding:0.5rem 0.75rem;background:var(--card-bg);border:1px solid var(--border);border-radius:6px;cursor:pointer";
+          row.innerHTML = `
+            <div style="font-weight:700;color:var(--accent)">✨ ${ll.name}（💠 1 MCHC）</div>
+            <div style="font-size:0.8rem;color:var(--muted)">${ll.skillName} ／ ${ll.desc}</div>
+          `;
+          row.addEventListener("click", () => {
+            runState.mchc -= 1;
+            const slot = runState.llExtSlots.findIndex(s => s === null);
+            if (slot >= 0) runState.llExtSlots[slot] = ll;
+            clog(`💠 MCHC -1：「${ll.name}」を Legendary 枠に獲得`);
+            syncResources();
+            renderShop();
+          });
+          list.appendChild(row);
+        }
+        if (canBuyStones) {
+          const row2 = document.createElement("button");
+          row2.type = "button";
+          row2.className = "action";
+          row2.style.cssText =
+            "text-align:left;padding:0.5rem 0.75rem;background:var(--card-bg);border:1px solid #888;border-radius:6px;cursor:pointer";
+          row2.innerHTML = `
+            <div style="font-weight:700">💎 ${ll.name}（💎 2 原石）</div>
+            <div style="font-size:0.8rem;color:var(--muted)">${ll.skillName} ／ ${ll.desc}</div>
+          `;
+          row2.addEventListener("click", () => {
+            runState.magicStones -= 2;
+            const slot = runState.llExtSlots.findIndex(s => s === null);
+            if (slot >= 0) runState.llExtSlots[slot] = ll;
+            clog(`💎 原石 -2：「${ll.name}」を Legendary 枠に獲得`);
+            syncResources();
+            renderShop();
+          });
+          list.appendChild(row2);
+        }
       });
       card.appendChild(list);
     }
@@ -3333,10 +3364,13 @@ function openCraftScreen() {
     ? `<span style="color:var(--muted);font-size:0.85em">（Cp ${CRAFT_UPGRADE_CP_COST} 必要・所持 ${cp}）</span>`
     : `<span style="color:var(--accent);font-size:0.85em">（Cp ${CRAFT_UPGRADE_CP_COST} 消費・所持 ${cp}）</span>`;
 
+  const burnDisabled = runState.deck.length < 2;
+  const stones = runState.magicStones ?? 0;
+
   el.innerHTML = `
     <div class="craft-header">
       <h2>クラフト</h2>
-      <p class="craft-sub">エクステンションを獲得するか、デッキを強化しましょう</p>
+      <p class="craft-sub">エクステンションを獲得・打ち直し・焼却（EMA3）。所持 💎 ${stones} 個</p>
     </div>
     <div class="craft-choices">
       <div class="craft-option" id="craftOptGet">
@@ -3348,6 +3382,11 @@ function openCraftScreen() {
         <div class="craft-opt-title">打ち直し ${upgradeBadge}</div>
         <div class="craft-opt-desc">デッキ内のノービスカードを1枚選んでエリートにランクアップします。</div>
         <button class="action craft-opt-btn" id="btnCraftUpgrade" ${upgradeDisabled ? "disabled" : ""}>打ち直す</button>
+      </div>
+      <div class="craft-option" id="craftOptBurn">
+        <div class="craft-opt-title">焼却（EMA3）</div>
+        <div class="craft-opt-desc">不要なエクステ 2 枚を焼却して 💎輝く原石 +1 を獲得。原石は MCHC ショップで Legendary と交換可能。</div>
+        <button class="action craft-opt-btn" id="btnCraftBurn" ${burnDisabled ? "disabled" : ""}>焼却する</button>
       </div>
     </div>
     <button class="craft-leave-btn" id="btnLeaveCraft">← マップに戻る</button>
@@ -3362,9 +3401,73 @@ function openCraftScreen() {
       openCraftUpgrade();
     });
   }
+  const burnBtn = document.getElementById("btnCraftBurn");
+  if (!burnDisabled && burnBtn) {
+    burnBtn.addEventListener("click", () => openCraftBurn());
+  }
   document.getElementById("btnLeaveCraft").addEventListener("click", () => {
     leaveCraft();
   });
+}
+
+// クラフト：焼却（2枚選んで burn → 輝く原石+1）
+function openCraftBurn() {
+  const el = document.getElementById("craftView");
+  if (!el) return;
+  ensureRunState();
+
+  const selected = new Set();
+  const mockS = {
+    playerPhy: LEADER.basePhy, playerInt: LEADER.baseInt, playerAgi: LEADER.baseAgi,
+    enemyPhy: 14, enemyInt: 8,
+    playerHp: runState.playerHp, playerHpMax: runState.playerHpMax,
+    playerGuard: 0, playerShield: 0, energyMax: 3, energy: 3,
+  };
+
+  function render() {
+    el.innerHTML = `<div class="craft-header"><h2>焼却（EMA3）</h2><p class="craft-sub">焼却するエクステを <strong>2 枚</strong> 選択してください。<br>選択中：${selected.size}/2</p></div>`;
+    const list = document.createElement("div");
+    list.style.cssText = "display:flex;flex-wrap:wrap;gap:0.5rem;justify-content:center;margin:0.75rem 0";
+    runState.deck.forEach((card, idx) => {
+      const btn = buildRewardPickButton(card, mockS);
+      btn.style.cssText += selected.has(idx)
+        ? ";outline:3px solid var(--accent);outline-offset:2px;opacity:0.7"
+        : "";
+      btn.addEventListener("click", () => {
+        if (selected.has(idx)) selected.delete(idx);
+        else if (selected.size < 2) selected.add(idx);
+        render();
+      });
+      list.appendChild(btn);
+    });
+    el.appendChild(list);
+
+    const confirm = document.createElement("button");
+    confirm.type = "button";
+    confirm.className = "action primary";
+    confirm.style.cssText = "display:block;margin:0.5rem auto;min-width:200px";
+    confirm.textContent = `この 2 枚を焼却 → 💎+1`;
+    confirm.disabled = selected.size !== 2;
+    confirm.addEventListener("click", () => {
+      const indices = [...selected].sort((a, b) => b - a); // 末尾から削除
+      const burned = [];
+      indices.forEach(i => {
+        burned.push(runState.deck[i].extNameJa);
+        runState.deck.splice(i, 1);
+      });
+      runState.magicStones = (runState.magicStones ?? 0) + 1;
+      clog(`🔥 焼却：${burned.join(' + ')} → 💎 輝く原石 +1（合計 ${runState.magicStones}）`);
+      leaveCraft();
+    });
+    el.appendChild(confirm);
+
+    const back = document.createElement("button");
+    back.className = "craft-leave-btn";
+    back.textContent = "← 戻る";
+    back.addEventListener("click", () => openCraftScreen());
+    el.appendChild(back);
+  }
+  render();
 }
 
 function leaveCraft() {
