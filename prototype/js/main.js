@@ -850,6 +850,8 @@ function ensureRunState() {
       pathNodeIds: [],
       runComplete: false,
       llExtSlots: [null, null],
+      cp: 0,         // デッキ素材（休憩・クラフトで貯まる、打ち直しに使用）
+      mchc: 0,       // 上位通貨（エリート/ボスでドロップ、ボス前ショップで Legendary 解放）
     };
   }
 }
@@ -917,6 +919,11 @@ function syncResources() {
   }
   const chapterEl = document.getElementById("chapterVal");
   if (chapterEl) chapterEl.textContent = String((runState.chapterIdx ?? 0) + 1);
+  // Cp / MCHC 表示
+  const cpEl = document.getElementById("cpVal");
+  if (cpEl) cpEl.textContent = String(runState.cp ?? 0);
+  const mchcEl = document.getElementById("mchcVal");
+  if (mchcEl) mchcEl.textContent = String(runState.mchc ?? 0);
   syncLlExtSlots();
   const layerEl = document.getElementById("layerVal");
   if (layerEl) {
@@ -1168,18 +1175,20 @@ function tryEnterMapNode(nodeId) {
     const heal = Math.floor(runState.playerHpMax * 0.35);
     const actualHeal = Math.min(runState.playerHpMax, runState.playerHp + heal) - runState.playerHp;
     runState.playerHp = Math.min(runState.playerHpMax, runState.playerHp + heal);
+    runState.cp = (runState.cp ?? 0) + 1;  // 休憩で Cp+1
     runState.pathNodeIds.push(nodeId);
     runState.lastMapNodeId = nodeId;
-    clog(`休憩で HP+${actualHeal}`);
+    clog(`休憩で HP+${actualHeal}・Cp+1`);
     playBattleSe("heal");
     renderMap();
+    syncResources();
     // マイのナレーション（renderMap 内の renderNavigator より後に上書き）
     const hpAfter = runState.playerHp;
     const hpMax = runState.playerHpMax;
     renderNavigator(
       actualHeal > 0
-        ? `休憩できましたね！HP が ${hpAfter}/${hpMax} に回復しました。さあ、次へ進みましょう！`
-        : `すでに満タンです！${hpAfter}/${hpMax}。この調子でボスを倒しましょう！`
+        ? `休憩できましたね！HP が ${hpAfter}/${hpMax} に回復し、Cp も 1 貯まりました。さあ、次へ進みましょう！`
+        : `すでに満タンです！${hpAfter}/${hpMax}。Cp を 1 入手しました。この調子でボスを倒しましょう！`
     );
     return;
   }
@@ -1193,7 +1202,80 @@ function tryEnterMapNode(nodeId) {
     openCraftScreen();
     return;
   }
+  // ボス突入前の MCHC ショップ：MCHC を持っていれば LL ext と交換できる
+  if (node.type === "boss" && (runState.mchc ?? 0) >= 1 && runState.llExtSlots.some(s => s === null)) {
+    openMchcShopModal(() => startCombatFromMapNode(node));
+    return;
+  }
   startCombatFromMapNode(node);
+}
+
+// ─── MCHC ショップ（ボス前 Legendary 解放） ────────────────────────
+function openMchcShopModal(onClose) {
+  ensureRunState();
+  const overlay = document.createElement("div");
+  overlay.style.cssText =
+    "position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:9999;padding:1rem";
+  const card = document.createElement("div");
+  card.style.cssText =
+    "background:var(--bg);border:1px solid var(--accent);border-radius:8px;padding:1.5rem;max-width:520px;width:100%;max-height:90vh;overflow-y:auto";
+
+  const renderShop = () => {
+    const remainingMchc = runState.mchc ?? 0;
+    const emptySlot = runState.llExtSlots.findIndex(s => s === null);
+    const offers = shuffle(LL_EXT_POOL.slice()).slice(0, 3);
+
+    card.innerHTML = `
+      <h2 style="margin:0 0 0.5rem;color:var(--accent)">💠 MCHC ショップ</h2>
+      <p style="margin:0 0 1rem;font-size:0.85rem;color:var(--muted)">
+        ボス前限定。MCHC を消費して Legendary 枠を解放できます。<br>
+        所持: 💠 <strong>${remainingMchc}</strong> MCHC・空きスロット: <strong>${runState.llExtSlots.filter(s => s === null).length}</strong>
+      </p>
+    `;
+    if (emptySlot < 0) {
+      card.innerHTML += `<p style="color:var(--muted)">LLスロットに空きがありません。</p>`;
+    } else if (remainingMchc < 1) {
+      card.innerHTML += `<p style="color:var(--muted)">MCHC が足りません。</p>`;
+    } else {
+      const list = document.createElement("div");
+      list.style.cssText = "display:flex;flex-direction:column;gap:0.5rem;margin:0.5rem 0";
+      offers.forEach(ll => {
+        const row = document.createElement("button");
+        row.type = "button";
+        row.className = "action";
+        row.style.cssText =
+          "text-align:left;padding:0.5rem 0.75rem;background:var(--card-bg);border:1px solid var(--border);border-radius:6px;cursor:pointer";
+        row.innerHTML = `
+          <div style="font-weight:700;color:var(--accent)">✨ ${ll.name}（💠 1 MCHC）</div>
+          <div style="font-size:0.8rem;color:var(--muted)">${ll.skillName} ／ ${ll.desc}</div>
+        `;
+        row.addEventListener("click", () => {
+          runState.mchc -= 1;
+          const slot = runState.llExtSlots.findIndex(s => s === null);
+          if (slot >= 0) runState.llExtSlots[slot] = ll;
+          clog(`💠 MCHC -1：「${ll.name}」を Legendary 枠に獲得`);
+          syncResources();
+          renderShop();
+        });
+        list.appendChild(row);
+      });
+      card.appendChild(list);
+    }
+    const close = document.createElement("button");
+    close.type = "button";
+    close.className = "action primary";
+    close.style.cssText = "width:100%;margin-top:0.75rem";
+    close.textContent = "ボスへ進む →";
+    close.addEventListener("click", () => {
+      overlay.remove();
+      onClose && onClose();
+    });
+    card.appendChild(close);
+  };
+
+  renderShop();
+  overlay.appendChild(card);
+  document.body.appendChild(overlay);
 }
 
 // ─── ビュー切り替え ───────────────────────────────────────────────
@@ -2048,10 +2130,18 @@ function endCombatWin() {
   const isBoss = combat.isBoss;
   const isElite = combat.isElite;
 
-  // ゴールド
+  // GUM
   const earnedGold = isBoss ? chapter.bossRewardGold : isElite ? 45 : 28;
   gold += earnedGold;
-  clog(`勝利！ GUM +${earnedGold}`);
+
+  // MCHC：エリート +1 / ボス +2（高難度ノード突破でドロップ）
+  const earnedMchc = isBoss ? 2 : isElite ? 1 : 0;
+  if (earnedMchc > 0) {
+    runState.mchc = (runState.mchc ?? 0) + earnedMchc;
+    clog(`勝利！ GUM +${earnedGold}・💠 MCHC +${earnedMchc}`);
+  } else {
+    clog(`勝利！ GUM +${earnedGold}`);
+  }
 
   // 報酬カードプール（累積）
   const pool = shuffle(getCumulativeCardPool());
@@ -3063,10 +3153,28 @@ function renderHeroSelect() {
 }
 
 // ─── クラフト画面 ────────────────────────────────────────────────────
+const CRAFT_UPGRADE_CP_COST = 1;
+
 function openCraftScreen() {
   showView("craft");
   const el = document.getElementById("craftView");
   if (!el) return;
+  ensureRunState();
+  // クラフト訪問で Cp+1（同じノード再入場では加算しない）
+  if (!runState.craftCpAwarded) {
+    runState.craftCpAwarded = new Set();
+  }
+  if (pendingCraftNodeId && !runState.craftCpAwarded.has(pendingCraftNodeId)) {
+    runState.cp = (runState.cp ?? 0) + 1;
+    runState.craftCpAwarded.add(pendingCraftNodeId);
+  }
+  syncResources();
+
+  const cp = runState.cp ?? 0;
+  const upgradeDisabled = cp < CRAFT_UPGRADE_CP_COST;
+  const upgradeBadge = upgradeDisabled
+    ? `<span style="color:var(--muted);font-size:0.85em">（Cp ${CRAFT_UPGRADE_CP_COST} 必要・所持 ${cp}）</span>`
+    : `<span style="color:var(--accent);font-size:0.85em">（Cp ${CRAFT_UPGRADE_CP_COST} 消費・所持 ${cp}）</span>`;
 
   el.innerHTML = `
     <div class="craft-header">
@@ -3080,9 +3188,9 @@ function openCraftScreen() {
         <button class="action craft-opt-btn" id="btnCraftGet">獲得する</button>
       </div>
       <div class="craft-option" id="craftOptUpgrade">
-        <div class="craft-opt-title">打ち直し</div>
+        <div class="craft-opt-title">打ち直し ${upgradeBadge}</div>
         <div class="craft-opt-desc">デッキ内のノービスカードを1枚選んでエリートにランクアップします。</div>
-        <button class="action craft-opt-btn" id="btnCraftUpgrade">打ち直す</button>
+        <button class="action craft-opt-btn" id="btnCraftUpgrade" ${upgradeDisabled ? "disabled" : ""}>打ち直す</button>
       </div>
     </div>
     <button class="craft-leave-btn" id="btnLeaveCraft">← マップに戻る</button>
@@ -3091,9 +3199,12 @@ function openCraftScreen() {
   document.getElementById("btnCraftGet").addEventListener("click", () => {
     openCraftGetCard();
   });
-  document.getElementById("btnCraftUpgrade").addEventListener("click", () => {
-    openCraftUpgrade();
-  });
+  const upBtn = document.getElementById("btnCraftUpgrade");
+  if (!upgradeDisabled) {
+    upBtn.addEventListener("click", () => {
+      openCraftUpgrade();
+    });
+  }
   document.getElementById("btnLeaveCraft").addEventListener("click", () => {
     leaveCraft();
   });
@@ -3196,10 +3307,15 @@ function openCraftUpgrade() {
 
     const selBtn = document.createElement("button");
     selBtn.className = "action craft-opt-btn";
-    selBtn.textContent = "このカードを強化";
+    selBtn.textContent = `このカードを強化（Cp ${CRAFT_UPGRADE_CP_COST}）`;
     selBtn.addEventListener("click", () => {
+      if ((runState.cp ?? 0) < CRAFT_UPGRADE_CP_COST) {
+        clog("Cp が足りません");
+        return;
+      }
+      runState.cp -= CRAFT_UPGRADE_CP_COST;
       runState.deck[idx] = copyCard(upgradeKey);
-      clog(`打ち直し: ${card.extNameJa} → ${upgradeDef.extNameJa}`);
+      clog(`打ち直し: ${card.extNameJa} → ${upgradeDef.extNameJa}（Cp -${CRAFT_UPGRADE_CP_COST}）`);
       leaveCraft();
     });
 
