@@ -13,16 +13,24 @@
 
 | Phase | 内容 | 優先度 | 状態 | 備考 |
 |-------|------|--------|------|------|
-| 4a | データ schema 追加 | P0 | 進行中 | カード schema 拡張は migration script 経由で 4c と同時に実施 |
-| 4b | `resolveCaster` / `canPlayCard` + グレーアウト | P0 | **モジュール完成** | `prototype/js/caster.js` 作成済み。main.js への組み込みは未 |
-| 4c | 全 392 カードに `caster` + `effects` 付与 | P0 | **スクリプト完成** | `prototype/tools/migrate-cards-to-spec006.js` で 98% 自動化 (未マッチ 8 件のみ) |
-| 4d | `play(s, ctx)` 化 + battleApi caster 引数化 | P0 | 未着手 | content PR #50/#52 マージ後に着手 |
-| 4e | カード券面 UI 左30/右70 + キャスターアイコン + ロールラベル | P0 | **基盤完成** | `target-labels.js` loader + CSS 変数 4 種を準備済み。実 UI 描画は未 |
-| 4f | per-hero state 化 + legacy 廃止 | P0 | 未着手 | 大規模、最後に着手 |
+| 4a | データ schema 追加 | P0 | ✅ **完了** | 4c で migration script を --apply 実行、cards.js が新 schema に |
+| 4b | `resolveCaster` / `canPlayCard` + グレーアウト | P0 | ✅ **完了** | caster.js を main.js にインポート、playCard で canPlayCard 検証、ハンド render に `card-unplayable-badge` (`⚡不足` / `👤不在`) を表示 |
+| 4c | 全 577 カードに `caster` + `effects` 付与 | P0 | ✅ **完了** | 569 件 (98.6%) 自動 + 9 件手動修正 (cd205/cd206/cdH04/cd107/cd104/ext2003/ext1023/ext1022/ext1012)。残り TODO ゼロ |
+| 4d | `play(s, ctx)` 化 + battleApi caster 引数化 | P0 | 未着手 | 次フェーズ最大の作業。全カード play() 書き換え |
+| 4e | カード券面 UI 左30/右70 + キャスターアイコン + ロールラベル | P0 | **基盤完成** | `target-labels.js` loader + CSS 変数 4 種を準備済み。実 UI 描画は 4d 後 |
+| 4f | per-hero state 化 + legacy 廃止 | P0 | 未着手 | 大規模、4d 完了後 |
 | 4g | Phase 3j 撤去 | P0 | 未着手 | 4f 完了後 |
 | 4h | バトル外カード券面係数表記 + 使用ヒーローログ | P1 | 未着手 | 4e 完了後 |
-| 4i | 924 カード手動 caster 再指定 | P2 | 未着手 | content PR 全マージ後 |
-| 4j | パッシブ trigger DSL 統合 (codemod) | P0 | 未着手 | content PR #50/#52 マージ後 |
+| 4i | 577 カード手動 caster 再指定 | P2 | 未着手 | content PR 全マージ完了済み (PR #51/#56)、差別化したいものを手動再指定 |
+| 4j | パッシブ trigger DSL 統合 (codemod) | P0 | 未着手 | PR #55 マージ済み (Rare hero 53)、計 113 関数を codemod 対象 |
+
+### 完了済みフェーズの動作確認済み事項 (Phase 4a-4c)
+
+- 全 577 カードに `caster: "foremost"` + `effects: [{target, text}]` フィールドが付与されている (idempotent: re-run しても変化なし)
+- 旧 `effectSummaryLines` / `previewLines` / `play(s)` は無変更で従来通り動作 (Phase 4d/4f で段階廃止)
+- `canPlayCard(card, combat)` がコスト不足 + キャスター不在の両方を判定
+- ハンド表示で原因バッジ (`⚡不足` / `👤不在`) が右上に出る
+- 現状 caster は全て `"foremost"` (デフォルト)、解決は `foremostAlive(combat.heroes)` → 前衛が生存している限り全カードプレイ可能
 
 ## 完了した事前準備物 (このブランチ)
 
