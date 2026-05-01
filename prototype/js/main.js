@@ -5510,6 +5510,90 @@ function closeOwnedDeckOverlay() {
 
 // ─── 活動レポート（#23） ────────────────────────────────────────
 let lastReportSnapshot = null;
+
+/**
+ * SPEC-007: 活動レポート内のランキング表示。
+ * 同レギュレーションのトップ N を取得し、自分のスコアが入る位置を強調表示。
+ */
+async function renderReportRanking(container, snap) {
+  if (!container || !snap || !snap.scoreBreakdown) return;
+  const apiUrl = getRankingApiUrl();
+  if (!apiUrl) {
+    container.innerHTML = '<p class="report-rank-msg">ランキング API URL が未設定のため取得できません（タイトル画面のランキング設定から登録）</p>';
+    return;
+  }
+  container.innerHTML = '<p class="report-rank-msg">取得中...</p>';
+  const result = await fetchRanking({ regulation: snap.regulation?.id, limit: 50 });
+  if (!result.ok) {
+    container.innerHTML = `<p class="report-rank-msg report-rank-msg--error">取得失敗: ${result.error || "unknown"}</p>`;
+    return;
+  }
+  const myScore = snap.scoreBreakdown.finalScore;
+  const ranking = (result.ranking || []).slice();
+  // 自分のスコア順位を仮計算（送信前なので自分のエントリは含まれていない）
+  const myRank = ranking.filter((e) => e.score >= myScore).length + 1;
+  // 表示は前後 5 件 (myRank ± 5)、ただし 1〜10 位は常に表示
+  const displaySet = new Set();
+  for (let i = 0; i < Math.min(10, ranking.length); i++) displaySet.add(i);
+  const myIdx = myRank - 1; // 0-indexed (myRank が 1〜)
+  for (let i = Math.max(0, myIdx - 3); i <= Math.min(ranking.length, myIdx + 3); i++) {
+    if (i >= 0 && i < ranking.length) displaySet.add(i);
+  }
+  const indices = [...displaySet].sort((a, b) => a - b);
+
+  const rows = [];
+  let prevIdx = -1;
+  for (const i of indices) {
+    if (prevIdx >= 0 && i - prevIdx > 1) {
+      rows.push('<tr><td colspan="3" style="text-align:center;color:var(--muted);">…</td></tr>');
+    }
+    const e = ranking[i];
+    const regJa = REGULATION_BY_ID[e.regulation]?.nameJa || e.regulation;
+    rows.push(`<tr>
+      <td>${e.rank}</td>
+      <td>${escapeHtml(e.playerName)}</td>
+      <td style="text-align:right;">${e.score.toLocaleString()}</td>
+    </tr>`);
+    prevIdx = i;
+  }
+  // 自分の位置がランキング外（51 位以下 or 取得分外）の場合
+  const myInDisplay = indices.some((i) => ranking[i] && ranking[i].score < myScore && (i === 0 || ranking[i - 1].score >= myScore));
+  // 自分の予想位置をハイライト行として挿入
+  const myLine = `<tr class="report-rank-mine">
+    <td>★ ${myRank}</td>
+    <td>${escapeHtml(getPlayerName() || "anonymous")} (あなた)</td>
+    <td style="text-align:right;">${myScore.toLocaleString()}</td>
+  </tr>`;
+  // 自分の位置を行の中で挿入
+  const finalRows = [];
+  let inserted = false;
+  for (const i of indices) {
+    if (!inserted && i >= myIdx) {
+      finalRows.push(myLine);
+      inserted = true;
+    }
+    const e = ranking[i];
+    finalRows.push(`<tr>
+      <td>${e.rank}</td>
+      <td>${escapeHtml(e.playerName)}</td>
+      <td style="text-align:right;">${e.score.toLocaleString()}</td>
+    </tr>`);
+  }
+  if (!inserted) finalRows.push(myLine);
+
+  const regNameForHeader = REGULATION_BY_ID[snap.regulation?.id]?.nameJa || "全レギュレーション";
+  container.innerHTML = `
+    <p style="font-size:0.75rem;color:var(--muted);margin:0 0 0.25rem;">
+      ${escapeHtml(regNameForHeader)} 内・想定順位 <strong style="color:var(--accent);">${myRank}位</strong>
+      ${myRank > 50 ? "（51位以下）" : ""}
+    </p>
+    <table class="report-rank-table">
+      <thead><tr><th>#</th><th>プレイヤー</th><th style="text-align:right;">スコア</th></tr></thead>
+      <tbody>${finalRows.join("")}</tbody>
+    </table>
+    <p style="font-size:0.7rem;color:var(--muted);margin:0.25rem 0 0;">※ 表示順位はスコア送信前の想定値。送信後にランキング画面で正式な順位を確認できます。</p>
+  `;
+}
 const SHARE_URL = "https://mycryptotactics.vercel.app/";
 const SHARE_TITLE = "MyCryptoTactics";
 
@@ -5521,6 +5605,29 @@ function captureRunSnapshot({ isCleared, defeatedBy }) {
   const newlyUnlocked = isCleared && runState.unlockedRegulationOnClear
     ? REGULATION_BY_ID[runState.unlockedRegulationOnClear]
     : null;
+  // SPEC-007: クリア時のみスコア内訳を計算してスナップショットに含める
+  let scoreBreakdown = null;
+  if (isCleared) {
+    const partyHeroes = (runState.party || []).map((p) => {
+      const hd = HERO_ROSTER.find((h) => h.heroId === p.heroId);
+      return { heroId: p.heroId, rarity: hd?.rarity || "common" };
+    });
+    const llExtCount = (runState.llExtSlots || []).filter(Boolean).length;
+    const deckSize = (runState.deck || []).length;
+    const turns = runState.totalTurns || 0;
+    const absConfig = reg.effects.isAbsolute ? loadAbsoluteConfig() : null;
+    scoreBreakdown = computeScoreBreakdown({
+      turns, deckSize, llExtCount,
+      partyHeroes,
+      regulationId: reg.id,
+      absoluteConfig: absConfig,
+    });
+    scoreBreakdown.turns = turns;
+    scoreBreakdown.deckSize = deckSize;
+    scoreBreakdown.llExtCount = llExtCount;
+    scoreBreakdown.partyHeroes = partyHeroes;
+    scoreBreakdown.absoluteConfig = absConfig;
+  }
   return {
     isCleared,
     when: new Date(),
@@ -5546,6 +5653,8 @@ function captureRunSnapshot({ isCleared, defeatedBy }) {
       ? { name: defeatedBy.name, imgUrl: ENEMY_IMG(defeatedBy.imgId) }
       // クリア時はディープ・ヨシュカ (boss-troy, imgId 171)
       : { name: "ディープ・ヨシュカ", imgUrl: ENEMY_IMG(171) },
+    // SPEC-007
+    scoreBreakdown,
   };
 }
 
@@ -5632,6 +5741,36 @@ function showActivityReport(snap) {
   llList.innerHTML = "";
   snap.llExtSlots.forEach((e) => llList.appendChild(buildExtChip(e)));
   document.getElementById("reportLlCount").textContent = `(${snap.llExtSlots.length}/2)`;
+
+  // SPEC-007: クリアスコア表示
+  const scoreSection = document.getElementById("reportScoreSection");
+  const rankSection = document.getElementById("reportRankSection");
+  if (snap.scoreBreakdown && scoreSection) {
+    const b = snap.scoreBreakdown;
+    scoreSection.classList.remove("hidden");
+    document.getElementById("reportScoreFinal").textContent = b.finalScore.toLocaleString();
+    document.getElementById("reportScoreTurn").textContent = b.turnBonus.toLocaleString();
+    document.getElementById("reportScoreDeck").textContent = b.deckBonus.toLocaleString();
+    document.getElementById("reportScoreLl").textContent = b.llBonus.toLocaleString();
+    document.getElementById("reportScoreRarity").textContent = b.rarityBonus.toLocaleString();
+    document.getElementById("reportScoreRegMult").textContent = `× ${b.regMult.toFixed(2)}`;
+    const absRow = document.getElementById("reportScoreAbsRow");
+    if (snap.regulation?.id === "absolute") {
+      absRow?.classList.remove("hidden");
+      document.getElementById("reportScoreAbsMult").textContent = `× ${b.absMult.toFixed(2)}`;
+    } else {
+      absRow?.classList.add("hidden");
+    }
+    // ランキング表示はバックグラウンドで取得
+    if (rankSection) {
+      rankSection.classList.remove("hidden");
+      const rankBody = document.getElementById("reportRankBody");
+      if (rankBody) renderReportRanking(rankBody, snap);
+    }
+  } else {
+    scoreSection?.classList.add("hidden");
+    rankSection?.classList.add("hidden");
+  }
 
   overlay.classList.remove("hidden");
   overlay.removeAttribute("aria-hidden");
