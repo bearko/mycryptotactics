@@ -17,7 +17,7 @@
 | 4b | `resolveCaster` / `canPlayCard` + グレーアウト | P0 | ✅ **完了** | caster.js を main.js にインポート、playCard で canPlayCard 検証、ハンド render に `card-unplayable-badge` (`⚡不足` / `👤不在`) を表示 |
 | 4c | 全 577 カードに `caster` + `effects` 付与 | P0 | ✅ **完了** | 569 件 (98.6%) 自動 + 9 件手動修正 (cd205/cd206/cdH04/cd107/cd104/ext2003/ext1023/ext1022/ext1012)。残り TODO ゼロ |
 | 4d | `play(s, ctx)` 化 + caster 個別 stats 反映 | P0 | ✅ **完了** | swap 方式: `loadCasterStatsToLegacy` で caster の phy/int/agi/hp を legacy に load → card.play() 実行 → `syncLegacyStatsToCaster` で書き戻し。card.play() 本体は無変更 (=ctx は将来用に予約)。caster=A の攻撃カードは A の PHY で計算、self-buff も caster 個人に乗る |
-| 4e | カード券面 UI 左30/右70 + キャスターアイコン + ロールラベル | P0 | **基盤完成** | `target-labels.js` loader + CSS 変数 4 種を準備済み。実 UI 描画は 4d 後 |
+| 4e | カード券面 UI 左30/右70 + キャスターアイコン + ロールラベル | P0 | ✅ **完了** | バトル中ハンド render が effects 配列 + caster icon (hero portrait + ロール名) を使用。target-labels.js を init で load し CSS 変数注入。card-effect-row はターゲット pill (色付) 30% + 効果テキスト 70% のグリッド |
 | 4f | per-hero state 化 + legacy 廃止 | P0 | 未着手 | 大規模、4d 完了後 |
 | 4g | Phase 3j 撤去 | P0 | 未着手 | 4f 完了後 |
 | 4h | バトル外カード券面係数表記 + 使用ヒーローログ | P1 | 未着手 | 4e 完了後 |
@@ -39,6 +39,14 @@
 
 - `combat.playerGuard` / `playerShield` / `playerPoison` / `playerBleed` は **legacy shared 据え置き** (Phase 4f で per-hero 化予定)。現状はどの caster がカードを使ってもガード/シールドは "プレイヤー陣営共通プール" として動作 (前衛の portrait に紐付く)
 - Phase 3j の `setActiveHero` (portrait click 切替) はそのまま残るが、playCard が caster を上書きするため事実上無効。Phase 4g で完全削除予定
+
+### Phase 4e の動作確認済み事項
+
+- バトル中の手札カード右下に **caster ヒーローの portrait + ロール名** (`先頭`/`前衛`/`高PHY` 等) が表示される
+- 効果エリアが「**対象 pill (30%) + 効果テキスト (70%)**」のグリッド構成に
+- 対象 pill の色は target-labels.json の `_meta.css_variables` から動的に注入 (味方=緑 / 敵=赤 / 全=紫 / 自身=シアン)
+- `app init` 時に `loadTargetLabels()` → `applyCssVariables()` で CSS 変数 :root に注入。fetch 失敗時は HTML 側の fallback CSS 変数を使用
+- effects 配列が空のカード (将来発生し得る) は旧 effectSummaryLines にフォールバック
 
 ## 完了した事前準備物 (このブランチ)
 
