@@ -1409,30 +1409,53 @@
       }
     }
 
-    .hs-header { text-align: center; margin-bottom: 1.2rem; }
+    .hs-header { text-align: center; margin-bottom: 0.8rem; }
     .hs-header h2 { margin: 0 0 0.3rem; font-size: 1.2rem; color: var(--accent); }
     .hs-sub { margin: 0; font-size: 0.78rem; color: var(--muted); }
+    /* SPEC-005 Phase 3a + UX 改善: 編成可能ヒーロー一覧をレスポンシブグリッドに */
     .hs-roster {
-      display: flex; flex-wrap: wrap;
-      gap: 0.9rem; justify-content: center; align-items: stretch;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 0.6rem;
+      align-items: stretch;
+    }
+    @media (max-width: 480px) {
+      .hs-roster { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 0.45rem; }
     }
     .hs-card {
       background: var(--panel);
       border: 2px solid var(--border);
-      border-radius: 14px;
-      width: 200px; max-width: 200px;
+      border-radius: 12px;
       display: flex; flex-direction: column;
-      align-items: center;
+      align-items: stretch;
       overflow: hidden;
+      cursor: pointer;
       transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+      position: relative;
     }
-    .hs-card:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: 0 8px 24px #000a; }
-    /* SPEC-005 Phase 3a: パーティ編成画面 */
-    .hs-card--in-party { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(253,203,110,0.18); }
-    .hs-in-party-mark { color: var(--accent); font-size: 0.7rem; font-weight: 700; }
+    .hs-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 6px 18px #000a; }
+    .hs-card--in-party { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(196,163,90,0.25); }
+    .hs-card--in-party::after {
+      content: "✓ 編成中";
+      position: absolute; top: 4px; right: 4px;
+      font-size: 0.6rem; font-weight: 800;
+      color: var(--accent);
+      background: rgba(20,16,32,0.85);
+      padding: 2px 6px; border-radius: 8px;
+      border: 1px solid var(--accent);
+    }
+    /* レアリティ枠色 (cards.js の RARITY 色を流用) */
+    .hs-card[data-rarity="legendary"] { border-color: #D63031; }
+    .hs-card[data-rarity="epic"]      { border-color: #E17055; }
+    .hs-card[data-rarity="rare"]      { border-color: #FDCB6E; }
+    .hs-card[data-rarity="uncommon"]  { border-color: #00B894; }
+    .hs-card[data-rarity="common"]    { border-color: #0984E3; }
+    .hs-card.hs-card--in-party { border-color: var(--accent); }
+
+    /* ── 上部: 現在のパーティ + 確定ボタン ────────────────── */
     .ps-current {
       display: flex; gap: 0.55rem; justify-content: center; flex-wrap: wrap;
-      margin: 0.6rem auto 1.1rem;
+      margin: 0.6rem auto 0.6rem;
       padding: 0.55rem 0.5rem;
       background: #0e0a18; border: 1px solid var(--border);
       border-radius: 10px; max-width: 520px;
@@ -1443,9 +1466,17 @@
       border-radius: 8px; padding: 0.45rem 0.4rem 0.55rem;
       display: flex; flex-direction: column; align-items: center; gap: 0.25rem;
       position: relative; min-height: 110px;
+      transition: border-color 0.15s, background 0.15s, transform 0.15s;
+    }
+    .ps-slot[draggable="true"] { cursor: grab; }
+    .ps-slot[draggable="true"]:active { cursor: grabbing; }
+    .ps-slot.ps-slot--dragging { opacity: 0.4; }
+    .ps-slot.ps-slot--drop-target {
+      border-color: var(--accent); border-style: solid;
+      background: #1f1830; transform: scale(1.04);
     }
     .ps-slot-pos { font-size: 0.65rem; color: var(--accent); font-weight: 800; letter-spacing: 0.06em; }
-    .ps-slot-img { width: 60px; height: 60px; object-fit: contain; image-rendering: pixelated; }
+    .ps-slot-img { width: 60px; height: 60px; object-fit: contain; image-rendering: pixelated; pointer-events: none; }
     .ps-slot-name { font-size: 0.7rem; font-weight: 700; color: var(--text); line-height: 1.2; text-align: center; }
     .ps-slot-empty { font-size: 0.7rem; color: var(--muted); padding: 1.4rem 0 0; }
     .ps-slot-remove {
@@ -1456,51 +1487,82 @@
     }
     .ps-confirm-row {
       display: flex; justify-content: center;
-      margin: 1.2rem 0 0.6rem;
+      margin: 0.4rem 0 0.8rem;
     }
     .ps-confirm-btn {
       font-size: 0.95rem; padding: 0.6rem 1.4rem;
     }
+
+    /* ── レアリティフィルタ ───────────────────────── */
+    .hs-rarity-filter {
+      display: flex; gap: 0.4rem; flex-wrap: wrap;
+      justify-content: center; align-items: center;
+      margin: 0.4rem 0 0.7rem;
+    }
+    .hs-rarity-filter-label {
+      font-size: 0.7rem; color: var(--muted); font-weight: 700;
+      margin-right: 0.3rem;
+    }
+    .hs-rarity-pill {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 32px; height: 32px;
+      border-radius: 999px;
+      font-size: 0.85rem; font-weight: 800;
+      color: #fff; cursor: pointer; user-select: none;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+      transition: transform 0.1s, opacity 0.15s, outline 0.1s;
+      border: 2px solid transparent;
+      opacity: 0.5;
+    }
+    .hs-rarity-pill:hover { transform: scale(1.08); opacity: 0.8; }
+    .hs-rarity-pill[data-active="true"] { opacity: 1; outline: 2px solid var(--text); outline-offset: 2px; }
+    .hs-rarity-pill[data-rarity="legendary"] { background: #D63031; }
+    .hs-rarity-pill[data-rarity="epic"]      { background: #E17055; }
+    .hs-rarity-pill[data-rarity="rare"]      { background: #FDCB6E; color: #2c1810; }
+    .hs-rarity-pill[data-rarity="uncommon"]  { background: #00B894; }
+    .hs-rarity-pill[data-rarity="common"]    { background: #0984E3; }
+    .hs-rarity-pill[data-rarity="normal"]    { background: #6c6c80; }
+    .hs-rarity-pill[data-rarity="all"]       { background: #2a2438; color: var(--text); border-color: var(--border); }
+    .hs-rarity-pill[data-rarity="all"][data-active="true"] { border-color: var(--accent); }
+
+    /* ── 編成可能ヒーローカード ──────────────────── */
     .hs-hero-img {
-      width: 100%; height: 160px;
+      width: 100%; height: 110px;
       object-fit: contain; image-rendering: pixelated;
       background: #0f0c18;
       display: block;
+      pointer-events: none;
     }
     .hs-hero-body {
-      padding: 0.65rem 0.6rem 0.75rem;
-      display: flex; flex-direction: column; gap: 0.45rem;
+      padding: 0.5rem 0.5rem 0.55rem;
+      display: flex; flex-direction: column; gap: 0.35rem;
       width: 100%;
     }
     .hs-hero-name {
-      font-size: 0.95rem; font-weight: 800;
+      font-size: 0.85rem; font-weight: 800;
       color: var(--accent); text-align: center;
+      line-height: 1.2;
     }
     .hs-hero-stats {
-      display: flex; flex-wrap: wrap; gap: 0.3rem;
-      justify-content: center; font-size: 0.7rem; color: var(--muted);
+      display: flex; flex-wrap: wrap; gap: 0.2rem;
+      justify-content: center; font-size: 0.62rem; color: var(--muted);
     }
     .hs-hero-stats span {
       background: #15121c;
       border: 1px solid var(--border);
-      border-radius: 4px; padding: 0.15rem 0.4rem;
+      border-radius: 4px; padding: 0.1rem 0.3rem;
     }
     .hs-passive {
-      font-size: 0.68rem; color: #a0c8d8; line-height: 1.45;
+      font-size: 0.62rem; color: #a0c8d8; line-height: 1.35;
       background: rgba(0,120,160,0.12);
       border-left: 2px solid #5ab4c4;
-      padding: 0.3rem 0.4rem;
+      padding: 0.25rem 0.35rem;
       border-radius: 0 6px 6px 0;
     }
     .hs-passive-name {
       display: block;
-      font-size: 0.75rem; font-weight: 800;
-      color: #7de8f8; margin-bottom: 0.2rem;
-    }
-    .hs-select-btn {
-      width: 100%; font-size: 0.78rem;
-      padding: 0.45rem; border-radius: 8px;
-      margin-top: auto;
+      font-size: 0.68rem; font-weight: 800;
+      color: #7de8f8; margin-bottom: 0.15rem;
     }
 
     /* ── Craft Screen ─────────────────────────────────────────────── */

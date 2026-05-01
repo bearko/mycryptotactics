@@ -4849,6 +4849,19 @@ function renderEnemySubUnits() {
 let pendingPartyHeroIds = []; // ユーザーが選択中のヒーロー id 配列（最大 3）
 const PARTY_MAX = 3;
 
+// レアリティフィルタの選択状態 ('all' or 個別 rarity 名 1 種)。リロードまで保持。
+let pendingRarityFilter = "all";
+
+const RARITY_FILTER_PILLS = [
+  { key: "all",       letter: "全",  label: "すべて" },
+  { key: "legendary", letter: "L",  label: "レジェンド" },
+  { key: "epic",      letter: "E",  label: "エピック" },
+  { key: "rare",      letter: "R",  label: "レア" },
+  { key: "uncommon",  letter: "U",  label: "アンコモン" },
+  { key: "common",    letter: "C",  label: "コモン" },
+  { key: "normal",    letter: "N",  label: "ノーマル" },
+];
+
 function renderHeroSelect() {
   // SPEC-005 Phase 3: ヒーロー選択 → パーティ選択 (1〜3 体)
   // 関数名は既存呼び出しとの互換のため維持。中身はパーティ編成。
@@ -4863,7 +4876,7 @@ function renderHeroSelect() {
   const renderInner = () => {
     let html = '<div class="hs-header">';
     html += '<h2>パーティを編成</h2>';
-    html += '<p class="hs-sub">最大 3 体まで選べます。先に選んだヒーローほど前衛 (画面中央寄り) に配置されます</p>';
+    html += '<p class="hs-sub">最大 3 体まで選べます。先に選んだヒーローほど前衛 (画面中央寄り) に配置 / 下のスロットを<strong>ドラッグ＆ドロップ</strong>で並び替え可能</p>';
     html += '</div>';
 
     // 現在のパーティ表示 (3 スロット)
@@ -4872,7 +4885,8 @@ function renderHeroSelect() {
       const hid = pendingPartyHeroIds[pos];
       const h = hid ? HERO_ROSTER.find(x => x.heroId === hid) : null;
       const posLabel = ["前衛", "中衛", "後衛"][pos];
-      html += `<div class="ps-slot ps-slot--${pos}" data-pos="${pos}">`;
+      const dragAttr = h ? 'draggable="true"' : '';
+      html += `<div class="ps-slot ps-slot--${pos}" data-pos="${pos}" ${dragAttr}>`;
       html += `<div class="ps-slot-pos">${posLabel}</div>`;
       if (h) {
         html += `<img class="ps-slot-img" src="${h.img()}" alt="${h.nameJa}" />`;
@@ -4885,37 +4899,7 @@ function renderHeroSelect() {
     }
     html += '</div>';
 
-    // 選択可能なヒーロー一覧
-    html += '<div class="hs-header" style="margin-top:1.2rem;"><h3 style="font-size:1rem;color:var(--accent);margin:0;">編成可能なヒーロー</h3></div>';
-    html += '<div class="hs-roster">';
-    HERO_ROSTER.forEach((hero) => {
-      const inParty = pendingPartyHeroIds.includes(hero.heroId);
-      const partyFull = pendingPartyHeroIds.length >= PARTY_MAX;
-      const cls = ['hs-card'];
-      if (inParty) cls.push('hs-card--in-party');
-      html += `<div class="${cls.join(' ')}" data-hid="${hero.heroId}" role="button" tabindex="0">`;
-      html += `<img class="hs-hero-img" src="${hero.img()}" alt="${hero.nameJa}" />`;
-      html += `<div class="hs-hero-body">`;
-      html += `<div class="hs-hero-name">${hero.nameJa}${inParty ? ' <span class="hs-in-party-mark">(編成中)</span>' : ''}</div>`;
-      html += `<div class="hs-hero-stats">`;
-      html += `<span>HP ${hero.hpMax}</span>`;
-      html += `<span>PHY ${hero.basePhy}</span>`;
-      html += `<span>INT ${hero.baseInt}</span>`;
-      html += `<span>AGI ${hero.baseAgi}</span>`;
-      html += `</div>`;
-      html += `<div class="hs-passive"><span class="hs-passive-name">【${hero.passiveName || '—'}】</span>${hero.passiveDesc}</div>`;
-      if (inParty) {
-        html += `<button class="hs-select-btn action" data-action="remove" data-hid="${hero.heroId}">パーティから外す</button>`;
-      } else if (partyFull) {
-        html += `<button class="hs-select-btn action" disabled>パーティ満員</button>`;
-      } else {
-        html += `<button class="hs-select-btn action" data-action="add" data-hid="${hero.heroId}">パーティに加える</button>`;
-      }
-      html += `</div></div>`;
-    });
-    html += '</div>';
-
-    // 確定ボタン
+    // 確定ボタン (画面上部に移動)
     html += '<div class="ps-confirm-row">';
     const partyCount = pendingPartyHeroIds.length;
     const canStart = partyCount >= 1;
@@ -4923,27 +4907,74 @@ function renderHeroSelect() {
     html += `編成を確定（${partyCount}/${PARTY_MAX} 体）→ 出撃</button>`;
     html += '</div>';
 
+    // 選択可能なヒーロー一覧
+    html += '<div class="hs-header" style="margin-top:1.0rem;"><h3 style="font-size:1rem;color:var(--accent);margin:0;">編成可能なヒーロー</h3>';
+    html += '<p class="hs-sub" style="margin-top:0.25rem;">カードをタップで追加 / もう一度タップで外す</p>';
+    html += '</div>';
+
+    // レアリティフィルタ
+    html += '<div class="hs-rarity-filter" role="group" aria-label="レアリティで絞り込み">';
+    html += '<span class="hs-rarity-filter-label">レアリティ</span>';
+    for (const p of RARITY_FILTER_PILLS) {
+      const active = (pendingRarityFilter === p.key);
+      html += `<button class="hs-rarity-pill" data-rarity="${p.key}" data-active="${active}" type="button" title="${p.label}">${p.letter}</button>`;
+    }
+    html += '</div>';
+
+    // ヒーロー一覧 (フィルタ適用)
+    html += '<div class="hs-roster">';
+    const filtered = HERO_ROSTER.filter(hero => {
+      if (pendingRarityFilter === "all") return true;
+      const r = hero.rarity || "normal";
+      return r === pendingRarityFilter;
+    });
+    if (filtered.length === 0) {
+      html += `<p style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:0.8rem;padding:1rem;">該当するヒーローがいません</p>`;
+    }
+    filtered.forEach((hero) => {
+      const inParty = pendingPartyHeroIds.includes(hero.heroId);
+      const cls = ['hs-card'];
+      if (inParty) cls.push('hs-card--in-party');
+      const r = hero.rarity || "normal";
+      html += `<div class="${cls.join(' ')}" data-hid="${hero.heroId}" data-rarity="${r}" role="button" tabindex="0" aria-pressed="${inParty}">`;
+      html += `<img class="hs-hero-img" src="${hero.img()}" alt="${hero.nameJa}" />`;
+      html += `<div class="hs-hero-body">`;
+      html += `<div class="hs-hero-name">${hero.nameJa}</div>`;
+      html += `<div class="hs-hero-stats">`;
+      html += `<span>HP ${hero.hpMax}</span>`;
+      html += `<span>PHY ${hero.basePhy}</span>`;
+      html += `<span>INT ${hero.baseInt}</span>`;
+      html += `<span>AGI ${hero.baseAgi}</span>`;
+      html += `</div>`;
+      html += `<div class="hs-passive"><span class="hs-passive-name">【${hero.passiveName || '—'}】</span>${hero.passiveDesc}</div>`;
+      html += `</div></div>`;
+    });
+    html += '</div>';
+
     el.innerHTML = html;
 
-    // イベント
-    el.querySelectorAll('[data-action="add"]').forEach(btn => {
-      btn.addEventListener('click', (ev) => {
+    // ── イベント ──────────────────────────────────
+    // (1) ヒーローカード click でトグル追加/削除
+    el.querySelectorAll('.hs-card').forEach(card => {
+      const handle = (ev) => {
         ev.stopPropagation();
-        const hid = parseInt(btn.dataset.hid, 10);
-        if (pendingPartyHeroIds.length < PARTY_MAX && !pendingPartyHeroIds.includes(hid)) {
+        const hid = parseInt(card.dataset.hid, 10);
+        const inParty = pendingPartyHeroIds.includes(hid);
+        if (inParty) {
+          pendingPartyHeroIds = pendingPartyHeroIds.filter(id => id !== hid);
+        } else {
+          if (pendingPartyHeroIds.length >= PARTY_MAX) return; // 満員時は追加不可
           pendingPartyHeroIds.push(hid);
-          renderInner();
         }
-      });
-    });
-    el.querySelectorAll('[data-action="remove"]').forEach(btn => {
-      btn.addEventListener('click', (ev) => {
-        ev.stopPropagation();
-        const hid = parseInt(btn.dataset.hid, 10);
-        pendingPartyHeroIds = pendingPartyHeroIds.filter(id => id !== hid);
         renderInner();
+      };
+      card.addEventListener('click', handle);
+      card.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); handle(ev); }
       });
     });
+
+    // (2) スロット内 ✕ ボタンで外す
     el.querySelectorAll('[data-remove-pos]').forEach(btn => {
       btn.addEventListener('click', (ev) => {
         ev.stopPropagation();
@@ -4952,6 +4983,8 @@ function renderHeroSelect() {
         renderInner();
       });
     });
+
+    // (3) 確定ボタン
     el.querySelector('.ps-confirm-btn')?.addEventListener('click', () => {
       if (pendingPartyHeroIds.length < 1) return;
       // パーティ確定 → setLeader は前衛 (party[0]) を従来通り反映
@@ -4960,6 +4993,69 @@ function renderHeroSelect() {
       pendingPartyConfirmed = pendingPartyHeroIds.slice(); // 後で startRunFromChapter / ensureRunState で読む
       showView("nodeSelect");
       renderNodeSelect();
+    });
+
+    // (4) レアリティフィルタピル
+    el.querySelectorAll('.hs-rarity-pill').forEach(pill => {
+      pill.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        const key = pill.dataset.rarity;
+        // 同じピル再タップで "all" に戻す。それ以外なら選択切替
+        if (pendingRarityFilter === key && key !== "all") {
+          pendingRarityFilter = "all";
+        } else {
+          pendingRarityFilter = key;
+        }
+        renderInner();
+      });
+    });
+
+    // (5) スロット間の D&D 並び替え
+    let dragSourcePos = null;
+    el.querySelectorAll('.ps-slot[draggable="true"]').forEach(slot => {
+      slot.addEventListener('dragstart', (ev) => {
+        dragSourcePos = parseInt(slot.dataset.pos, 10);
+        slot.classList.add('ps-slot--dragging');
+        try { ev.dataTransfer.setData('text/plain', String(dragSourcePos)); } catch {}
+        ev.dataTransfer.effectAllowed = 'move';
+      });
+      slot.addEventListener('dragend', () => {
+        slot.classList.remove('ps-slot--dragging');
+        el.querySelectorAll('.ps-slot--drop-target').forEach(s => s.classList.remove('ps-slot--drop-target'));
+        dragSourcePos = null;
+      });
+    });
+    el.querySelectorAll('.ps-slot').forEach(slot => {
+      slot.addEventListener('dragover', (ev) => {
+        if (dragSourcePos === null) return;
+        const targetPos = parseInt(slot.dataset.pos, 10);
+        if (targetPos === dragSourcePos) return;
+        ev.preventDefault();
+        ev.dataTransfer.dropEffect = 'move';
+        slot.classList.add('ps-slot--drop-target');
+      });
+      slot.addEventListener('dragleave', () => {
+        slot.classList.remove('ps-slot--drop-target');
+      });
+      slot.addEventListener('drop', (ev) => {
+        ev.preventDefault();
+        slot.classList.remove('ps-slot--drop-target');
+        const targetPos = parseInt(slot.dataset.pos, 10);
+        const srcPos = dragSourcePos !== null
+          ? dragSourcePos
+          : parseInt(ev.dataTransfer.getData('text/plain') || '-1', 10);
+        if (!Number.isFinite(srcPos) || srcPos < 0 || srcPos === targetPos) return;
+        // pendingPartyHeroIds[srcPos] と [targetPos] を入れ替え (ドロップ先が空なら移動)
+        const arr = pendingPartyHeroIds.slice();
+        // 配列を 3 要素 (空は undefined) に正規化
+        const slots = [arr[0], arr[1], arr[2]];
+        const tmp = slots[srcPos];
+        slots[srcPos] = slots[targetPos];
+        slots[targetPos] = tmp;
+        // undefined を除去して詰める (空スロットを末尾に寄せる)
+        pendingPartyHeroIds = slots.filter(x => x !== undefined && x !== null);
+        renderInner();
+      });
     });
   };
 
