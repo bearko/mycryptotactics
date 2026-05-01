@@ -504,21 +504,21 @@ function applyLlExtEffect(ext) {
       const boost = Math.floor(s.playerPhy * 0.5);
       s.playerPhy += boost;
       s.playerGuard = (s.playerGuard || 0) + 20;
-      playBattleSe("buff"); playPortraitEffect("player", "buff");
+      playBattleSe("buff"); playPortraitEffect("player", "buff", s.heroes?.[0]);
       clog(`PHY+${boost} GRD+20`);
       break;
     }
     case "blue":
       healPlayerFromIntSkill(s, 200, 250);
       s.playerInt += 4;
-      playBattleSe("buff"); playPortraitEffect("player", "buff");
+      playBattleSe("buff"); playPortraitEffect("player", "buff", s.heroes?.[0]);
       clog("INT+4");
       break;
     case "fish":
       healPlayerFromIntSkill(s, 150, 200);
       s.playerPhy += 3;
       s.hasResurrection = true;
-      playBattleSe("buff"); playPortraitEffect("player", "buff");
+      playBattleSe("buff"); playPortraitEffect("player", "buff", s.heroes?.[0]);
       clog("PHY+3 リザレクション付与");
       break;
     default:
@@ -629,7 +629,7 @@ function checkResurrection(s) {
       s.heroes[0].alive = true;
     }
     s.hasResurrection = false;
-    playBattleSe("buff"); playPortraitEffect("player", "buff");
+    playBattleSe("buff"); playPortraitEffect("player", "buff", s.heroes?.[0]);
     clog("【リザレクション】致死ダメージを耐えた！HP 1 で生存！");
     return true;
   }
@@ -755,7 +755,7 @@ function healPlayerFromIntSkill(s, minPct, maxPct) {
   const heal = Math.max(0, Math.floor((coef * pct) / 100));
   const before = s.playerHp;
   s.playerHp = Math.min(s.playerHpMax, s.playerHp + heal);
-  if (s.playerHp > before) { playBattleSe("heal"); playPortraitEffect("player", "heal"); }
+  if (s.playerHp > before) { playBattleSe("heal"); playPortraitEffect("player", "heal", s.heroes?.[0]); }
   clog(`リカバリー: 係数${coef.toFixed(1)}×${pct}% → HP+${s.playerHp - before}`);
 }
 
@@ -787,7 +787,7 @@ function isPartyWipedOut(s) {
   return s.heroes.every(h => !h || h.alive === false || (h.hp ?? 0) <= 0);
 }
 
-function dealPhySkillFromEnemyToPlayer(s, skillPct) {
+function dealPhySkillFromEnemyToPlayer(s, skillPct, caster) {
   // Phase 3b: 敵攻撃は foremost living hero を対象に
   const target = getEnemyAttackTargetHero(s);
   // ダメージ計算は legacy stats (heroes[0] 前衛) を使う - 簡略化のため
@@ -818,7 +818,8 @@ function dealPhySkillFromEnemyToPlayer(s, skillPct) {
   applyHpDeltaToHero(s, target, -total);
   checkResurrection(s);
   // SPEC-005 Phase 3f: エフェクトを実際の被弾ヒーローに向ける
-  lungePortrait("enemy");
+  // Phase 3g: 攻撃側 (caster) が指定されていればその portrait を lunge させる
+  lungePortrait("enemy", caster);
   flashPortrait("player", target);
   playPortraitEffect("player", "hit", target);
   if (total > 0) playBattleSe("hit");
@@ -833,7 +834,7 @@ function dealPhySkillFromEnemyToPlayer(s, skillPct) {
   }
 }
 
-function dealIntSkillFromEnemyToPlayer(s, skillPct) {
+function dealIntSkillFromEnemyToPlayer(s, skillPct, caster) {
   const target = getEnemyAttackTargetHero(s);
   const cut = cutRateFromInt(s.playerInt);
   let base = phyIntDamageAfterCut(s.enemyInt, skillPct, cut);
@@ -852,7 +853,7 @@ function dealIntSkillFromEnemyToPlayer(s, skillPct) {
   }
   applyHpDeltaToHero(s, target, -total);
   checkResurrection(s);
-  lungePortrait("enemy");
+  lungePortrait("enemy", caster);
   flashPortrait("player", target);
   playPortraitEffect("player", "hit", target);
   if (total > 0) playBattleSe("hit");
@@ -868,7 +869,7 @@ function dealIntSkillFromEnemyToPlayer(s, skillPct) {
 }
 
 /** 最大 HP 割合の特殊ダメージ（シールドのみ有効） */
-function dealSpecialMaxHpPercentToPlayer(s, pct) {
+function dealSpecialMaxHpPercentToPlayer(s, pct, caster) {
   const target = getEnemyAttackTargetHero(s);
   // 特殊ダメージは対象 hero の最大 HP 基準
   const refMaxHp = (target?.hpMax ?? s.playerHpMax) || s.playerHpMax;
@@ -880,7 +881,7 @@ function dealSpecialMaxHpPercentToPlayer(s, pct) {
   }
   applyHpDeltaToHero(s, target, -raw);
   checkResurrection(s);
-  lungePortrait("enemy");
+  lungePortrait("enemy", caster);
   flashPortrait("player", target);
   playPortraitEffect("player", "area", target);
   if (raw > 0) playBattleSe("area");
@@ -899,13 +900,15 @@ const battleApi = {
   // 章 2-3 カード用
   addPoisonToEnemy(s, stacks) {
     s.enemyPoison = (s.enemyPoison || 0) + stacks;
-    playBattleSe("debuff"); playPortraitEffect("enemy", "debuff");
+    const tgt = getPlayerAttackTargetEnemy(s) || s.enemies?.[0];
+    playBattleSe("debuff"); playPortraitEffect("enemy", "debuff", tgt);
     clog(`毒 ×${stacks} 付与（敵）`);
     renderStatusBadges();
   },
   addBleedToEnemy(s, stacks) {
     s.enemyBleed = (s.enemyBleed || 0) + stacks;
-    playBattleSe("debuff"); playPortraitEffect("enemy", "debuff");
+    const tgt = getPlayerAttackTargetEnemy(s) || s.enemies?.[0];
+    playBattleSe("debuff"); playPortraitEffect("enemy", "debuff", tgt);
     clog(`出血 ×${stacks} 付与（敵）`);
     renderStatusBadges();
   },
@@ -913,14 +916,14 @@ const battleApi = {
     const had = (s.playerPoison || 0) + (s.playerBleed || 0);
     s.playerPoison = 0; s.playerBleed = 0;
     if (had > 0) {
-      playBattleSe("heal"); playPortraitEffect("player", "heal");
+      playBattleSe("heal"); playPortraitEffect("player", "heal", s.heroes?.[0]);
       clog("状態異常解除（自分）");
     }
     renderStatusBadges();
   },
   addPlayerShield(s, amount) {
     s.playerShield = (s.playerShield || 0) + amount;
-    playBattleSe("buff"); playPortraitEffect("player", "buff");
+    playBattleSe("buff"); playPortraitEffect("player", "buff", s.heroes?.[0]);
     clog(`シールド +${amount}`);
   },
   addGold(amount) {
@@ -930,7 +933,7 @@ const battleApi = {
   },
   setDamageReducedThisTurn(s) {
     s.damageReducedThisTurn = true;
-    playBattleSe("buff"); playPortraitEffect("player", "buff");
+    playBattleSe("buff"); playPortraitEffect("player", "buff", s.heroes?.[0]);
     clog("不屈：このターン被ダメ半減");
   },
 };
@@ -1603,16 +1606,26 @@ function startPlayerTurn() {
   if ((combat.playerPoison || 0) > 0) {
     const dmg = combat.playerPoison;
     combat.playerHp = Math.max(0, combat.playerHp - dmg);
-    flashPortrait("player"); playPortraitEffect("player", "debuff");
+    if (combat.heroes?.[0]) {
+      combat.heroes[0].hp = combat.playerHp;
+      if (combat.heroes[0].hp <= 0) combat.heroes[0].alive = false;
+    }
+    flashPortrait("player", combat.heroes?.[0]);
+    playPortraitEffect("player", "debuff", combat.heroes?.[0]);
     clog(`毒ダメージ（自分）${dmg}`);
     checkResurrection(combat);
     if (isPartyWipedOut(combat)) { endCombatLoss(); return; }
   }
-  // 毒ティック（敵）
+  // 毒ティック（敵 - 前衛のみ。combat.enemyPoison は従来仕様の単一インスタンス）
   if ((combat.enemyPoison || 0) > 0) {
     const dmg = combat.enemyPoison;
     combat.enemyHp = Math.max(0, combat.enemyHp - dmg);
-    flashPortrait("enemy"); playPortraitEffect("enemy", "debuff");
+    if (combat.enemies?.[0]) {
+      combat.enemies[0].hp = combat.enemyHp;
+      if (combat.enemies[0].hp <= 0) combat.enemies[0].alive = false;
+    }
+    flashPortrait("enemy", combat.enemies?.[0]);
+    playPortraitEffect("enemy", "debuff", combat.enemies?.[0]);
     clog(`毒ダメージ（敵）${dmg}`);
     if (areAllEnemiesDefeated(combat)) { endCombatWin(); return; }
   }
@@ -1632,7 +1645,7 @@ function startPlayerTurn() {
     if (combat.playerHp < combat.playerHpMax * 0.7) {
       combat.playerInt += 3;
       combat.doylePassiveTriggered = true;
-      playPortraitEffect("player", "buff");
+      playPortraitEffect("player", "buff", combat.heroes?.[0]);
       playBattleSe("buff");
       clog('【シャーロック・ホームズ】発動！ INT +3');
     }
@@ -2128,19 +2141,20 @@ async function enemyTurn() {
     case "healSelf": {
       const heal = Math.max(1, Math.floor((combat.enemyHpMax * it.pct) / 100));
       combat.enemyHp = Math.min(combat.enemyHpMax, combat.enemyHp + heal);
-      playBattleSe("heal"); playPortraitEffect("enemy", "heal");
+      if (combat.enemies?.[0]) combat.enemies[0].hp = combat.enemyHp;
+      playBattleSe("heal"); playPortraitEffect("enemy", "heal", combat.enemies?.[0]);
       clog(`敵 HP+${heal}（自己回復）`);
       break;
     }
     case "buffSelf":
       if (it.phyAdd) combat.enemyPhy += it.phyAdd;
       if (it.intAdd) combat.enemyInt += it.intAdd;
-      playBattleSe("buff"); playPortraitEffect("enemy", "buff");
+      playBattleSe("buff"); playPortraitEffect("enemy", "buff", combat.enemies?.[0]);
       clog(`敵強化: ${it.phyAdd ? "PHY+" + it.phyAdd : ""}${it.intAdd ? " INT+" + it.intAdd : ""}`);
       break;
     case "guard":
       combat.enemyGuard += it.value;
-      playBattleSe("buff"); playPortraitEffect("enemy", "buff");
+      playBattleSe("buff"); playPortraitEffect("enemy", "buff", combat.enemies?.[0]);
       clog(`敵 GUARD +${it.value}`);
       break;
     case "special":
@@ -2171,8 +2185,21 @@ async function enemyTurn() {
       // (idx 進行も advanceEnemyIntent でしているため二重インクリメントしない)
       const subIt = sub.enemyIntent;
       if (!subIt) continue;
-      // 攻撃系のみ (heal/buff/guard はスキップ)
-      if (!subIt.kind || (!subIt.kind.startsWith("attack") && subIt.kind !== "special")) continue;
+      // 攻撃系以外 (guard/buffSelf/healSelf 等): 攻撃ヘルパは流用できないので
+      // 自身の HP/portrait に最低限の演出だけ反映し、データには触らない。
+      const isAttack = subIt.kind && (subIt.kind.startsWith("attack") || subIt.kind === "special");
+      if (!isAttack) {
+        if (subIt.kind === "healSelf" && (subIt.pct || 0) > 0) {
+          const heal = Math.max(1, Math.floor(((sub.hpMax || 0) * subIt.pct) / 100));
+          sub.hp = Math.min(sub.hpMax || sub.hp, (sub.hp || 0) + heal);
+          playBattleSe("heal"); playPortraitEffect("enemy", "heal", sub);
+          clog(`${sub.name || "敵"} HP+${heal}（自己回復）`);
+        } else if (subIt.kind === "buffSelf" || subIt.kind === "guard") {
+          playBattleSe("buff"); playPortraitEffect("enemy", "buff", sub);
+          clog(`${sub.name || "敵"} 行動: ${subIt.kind}`);
+        }
+        continue;
+      }
       // 一時的に combat.enemyXxx を sub のステに差し替えて既存ヘルパを再利用
       const saved = {
         enemyPhy: combat.enemyPhy, enemyInt: combat.enemyInt, enemyAgi: combat.enemyAgi,
@@ -2183,20 +2210,37 @@ async function enemyTurn() {
       combat.enemyPhyBase = sub.phyBase; combat.enemyIntBase = sub.intBase; combat.enemyAgiBase = sub.agiBase;
       combat.enemyHp = sub.hp; combat.enemyHpMax = sub.hpMax;
       try {
+        // Phase 3g: caster=sub を渡し、sub の portrait が lunge するように
         switch (subIt.kind) {
-          case "attack":         dealPhySkillFromEnemyToPlayer(combat, subIt.phyPct); break;
-          case "attackPoison":   dealPhySkillFromEnemyToPlayer(combat, subIt.phyPct); break;
-          case "attackBleed":    dealPhySkillFromEnemyToPlayer(combat, subIt.phyPct); break;
+          case "attack":         dealPhySkillFromEnemyToPlayer(combat, subIt.phyPct, sub); break;
+          case "attackPoison":
+            dealPhySkillFromEnemyToPlayer(combat, subIt.phyPct, sub);
+            if (!isPartyWipedOut(combat) && (subIt.poisonStacks || 0) > 0) {
+              combat.playerPoison = (combat.playerPoison || 0) + subIt.poisonStacks;
+              playBattleSe("debuff");
+              clog(`毒 ×${subIt.poisonStacks} 付与（自分）`);
+              renderStatusBadges();
+            }
+            break;
+          case "attackBleed":
+            dealPhySkillFromEnemyToPlayer(combat, subIt.phyPct, sub);
+            if (!isPartyWipedOut(combat) && (subIt.bleedStacks || 0) > 0) {
+              combat.playerBleed = (combat.playerBleed || 0) + subIt.bleedStacks;
+              playBattleSe("debuff");
+              clog(`出血 ×${subIt.bleedStacks} 付与（自分）`);
+              renderStatusBadges();
+            }
+            break;
           case "attackDouble":
-            dealPhySkillFromEnemyToPlayer(combat, subIt.phyPct);
-            if (!isPartyWipedOut(combat)) dealPhySkillFromEnemyToPlayer(combat, subIt.phyPct);
+            dealPhySkillFromEnemyToPlayer(combat, subIt.phyPct, sub);
+            if (!isPartyWipedOut(combat)) dealPhySkillFromEnemyToPlayer(combat, subIt.phyPct, sub);
             break;
-          case "attackInt":      dealIntSkillFromEnemyToPlayer(combat, subIt.intPct); break;
+          case "attackInt":      dealIntSkillFromEnemyToPlayer(combat, subIt.intPct, sub); break;
           case "attackIntDouble":
-            dealIntSkillFromEnemyToPlayer(combat, subIt.intPct);
-            if (!isPartyWipedOut(combat)) dealIntSkillFromEnemyToPlayer(combat, subIt.intPct);
+            dealIntSkillFromEnemyToPlayer(combat, subIt.intPct, sub);
+            if (!isPartyWipedOut(combat)) dealIntSkillFromEnemyToPlayer(combat, subIt.intPct, sub);
             break;
-          case "special":        dealSpecialMaxHpPercentToPlayer(combat, subIt.pct); break;
+          case "special":        dealSpecialMaxHpPercentToPlayer(combat, subIt.pct, sub); break;
         }
       } finally {
         // 戻す (heal/buff があった場合の HP 等変更は sub 反映済みなのでこれで問題なし)
