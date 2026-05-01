@@ -22,7 +22,7 @@
 | 4g | Phase 3j 撤去 | P0 | ✅ **完了** | setActiveHero / getActiveHero / ensureActiveHeroAlive / loadActiveHeroStatsToLegacy / syncLegacyStatsToActiveHero / activeHeroIdx を全削除。portrait click handler + ▶ ACTIVE バッジ + hover lift CSS も撤去。getActiveHero 利用箇所は transient な `combat._currentCaster` (playCard スコープ) に置換 |
 | 4h | バトル外カード券面 effects ベース統一 + caster ロール表示 | P1 | ✅ **完了** | buildRewardPickButton (リワード/デッキ/ショップ/クラフト共通) と showOwnedDeckPeek を effects 配列 + caster ロールラベル ベースに更新。バトル外は具体ヒーロー portrait は出さず「先頭」「前衛」等のロール pill のみ表示 |
 | 4i | 577 カード手動 caster 再指定 | P2 | 未着手 | content PR 全マージ完了済み (PR #51/#56)、差別化したいものを手動再指定 |
-| 4j | パッシブ trigger DSL 統合 (codemod) | P0 | 未着手 | PR #55 マージ済み (Rare hero 53)、計 113 関数を codemod 対象 |
+| 4j | パッシブ trigger DSL 統合 (codemod) | P0 | **runtime 完成、codemod 出力待ち** | passive-runtime.js + 12 種 effect handler + 5 件サンプル変換完了。content 担当の codemod 出力 (210 関数 → PassiveDef) を待って既存 hardcoded 関数を全削除 |
 
 ### 完了済みフェーズの動作確認済み事項 (Phase 4a-4d)
 
@@ -80,6 +80,33 @@
 - 効果テキストは effects[].text を simplifyEffectText で整形、effects 未定義時は旧 effectSummaryLines にフォールバック
 - showOwnedDeckPeek (タップ tooltip) も「使い手: 先頭」のロール表記を opc-meta に追加
 - reward-card-inner 用 CSS で effect-row のフォントサイズを container query で大きめに調整 (バトル中より見やすく)
+
+### Phase 4j の進捗 (runtime 完成、codemod 出力待ち)
+
+- **passive-runtime.js** 新設:
+  - `registerPassives(defs)` / `registerEffectHandlers(handlers)` で外部注入
+  - `applyPassiveTrigger(s, kind, ctx)` で trigger 別 dispatch
+  - `applyPassiveEffect(s, caster, effect)` で effect ごとの dispatch
+  - `checkPassiveThresholds(s, hero)` で HP/statRatio 閾値ベース判定
+  - oncePerCombat 管理 (hero.passiveTriggered Set)、triggerRate (確率発動)
+- **12 種 effect handler 実装** (PASSIVE_EFFECT_HANDLERS in main.js):
+  damage / damageRaw / damageMaxHpPct / heal / healRaw / applyStatus /
+  buffStat / addGuard / addShield / addEnergy / drawCards / revive / clearStatus + showCutin
+- **passives-sample.js** 新設: 5 件手動変換 (kaihime / zhang / doyle / seton / schubert)
+  → 復活系 schubert は §18.6.3 case A (hasResurrection 廃止) で revive action を直接実行
+- **既存 hook 点に applyPassiveTrigger 設置**:
+  - startCombatFromMapNode 末尾: `combat.started`
+  - playCard 末尾: `self.cardPlayed` (caster 一致のみ発動)
+  - dealPhy/IntSkillFromEnemyToPlayer 末尾: `self.tookDamage` (target=被弾ヒーロー)
+  - applyHpDeltaToHero 内 alive=false 化直後: `self.died` (§18.6.1 同期実行)
+  - applyHpDeltaToHero 内 HP 減少時: `checkPassiveThresholds` で self.hpBelow / party.hpBelow / enemy.hpBelow / self.statRatioAbove を判定
+- **既存 hardcoded apply\*Passive 関数群は維持** (PASSIVES 出力到着までの保険)
+  → Phase 4j 完了時に codemod 出力で全 210 関数を一括削除予定
+
+### Phase 4j 残作業 (content 担当依頼中: HANDOFF-PHASE4J-KICKOFF.md)
+- 依頼 1: 210 関数 → PassiveDef 変換 codemod スクリプト + 出力 (passives-generated.js)
+- 依頼 2: caster × trigger 対応表 (Epic / Legendary)
+- 依頼 3: triggerRate 元 DB 値抽出
 
 ## 完了した事前準備物 (このブランチ)
 

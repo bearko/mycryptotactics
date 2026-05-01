@@ -76,6 +76,13 @@ import {
   CASTER_ROLE_LABELS,
 } from "./caster.js";
 import {
+  registerPassives,
+  registerEffectHandlers,
+  applyPassiveTrigger,
+  checkPassiveThresholds,
+} from "./passive-runtime.js";
+import { SAMPLE_PASSIVES } from "./passives-sample.js";
+import {
   loadTargetLabels,
   targetLabelText,
   targetColorVar,
@@ -834,13 +841,20 @@ function getEnemyAttackTargetHero(s) {
 /** ヒーローユニットの hp / alive を更新し、必要に応じて legacy フィールドを同期する。 */
 function applyHpDeltaToHero(s, hero, delta) {
   if (!hero) return;
+  const wasAlive = hero.alive !== false && (hero.hp ?? 0) > 0;
   hero.hp = Math.max(0, (hero.hp ?? 0) + delta);
   if (hero.hp <= 0) hero.alive = false;
   // heroes[0] (前衛) なら legacy combat.playerHp と同期
   if (s.heroes && hero === s.heroes[0]) {
     s.playerHp = hero.hp;
   }
-  // SPEC-006 Phase 4g: アクティブキャスター方式は廃止。caster は毎回カード定義から解決される。
+  // SPEC-006 §18.6.1: 同期実行制約 — self.died trigger は同関数内で発動
+  // (revive 系パッシブが alive=true に戻すため、UI 上「死亡 → 復活」が瞬間的に見える)
+  if (wasAlive && hero.alive === false) {
+    applyPassiveTrigger(s, "self.died", { hero });
+  }
+  // §18.6: HP 閾値ベースの trigger (self.hpBelow / party.hpBelow / enemy.hpBelow) チェック
+  if (delta < 0) checkPassiveThresholds(s, hero);
 }
 
 /** 全ヒーロー死亡判定 */
@@ -957,6 +971,10 @@ function dealPhySkillFromEnemyToPlayer(s, skillPct, caster) {
   if (LEADER.passiveKey === 'zhang' && s.playerHp > 0 && s.enemyHp > 0 && Math.random() < 0.5) {
     s._zhangCounterPending = true;
   }
+  // SPEC-006 §18.6: 被弾ヒーローの self.tookDamage trigger
+  if (target && target.alive !== false && (target.hp ?? 0) > 0) {
+    applyPassiveTrigger(s, "self.tookDamage", { hero: target });
+  }
 }
 
 function dealIntSkillFromEnemyToPlayer(s, skillPct, caster) {
@@ -989,6 +1007,10 @@ function dealIntSkillFromEnemyToPlayer(s, skillPct, caster) {
   // 張遼パッシブ判定フラグを立てる（実際の反撃は enemyTurn で async に処理）
   if (LEADER.passiveKey === 'zhang' && s.playerHp > 0 && s.enemyHp > 0 && Math.random() < 0.5) {
     s._zhangCounterPending = true;
+  }
+  // SPEC-006 §18.6: 被弾ヒーローの self.tookDamage trigger
+  if (target && target.alive !== false && (target.hp ?? 0) > 0) {
+    applyPassiveTrigger(s, "self.tookDamage", { hero: target });
   }
 }
 
@@ -1061,6 +1083,192 @@ const battleApi = {
 };
 
 const { CARD_LIBRARY, copyCard, makeStarterDeck } = createCardRuntime(clog, battleApi);
+
+// ─── SPEC-006 Phase 4j: PassiveDef effect action ハンドラ ──────────
+// passive-runtime.js が dispatch する effect.action 種別を実装。
+// 引数: (s = combat, caster = passive を持つ hero, target = effect 適用対象, effect = effect entry)
+const PASSIVE_EFFECT_HANDLERS = {
+  // damage: PHY/INT 倍率の物理/魔法ダメージ
+  damage(s, caster, target, effect) {
+    const phyCoef = effect.coef?.phy || 0;
+    const intCoef = effect.coef?.int || 0;
+    let dmg = 0;
+    if (phyCoef > 0) dmg += Math.max(1, Math.floor((caster.phy ?? 0) * phyCoef));
+    if (intCoef > 0) dmg += Math.max(1, Math.floor((caster.int ?? 0) * intCoef));
+    if (dmg <= 0) return;
+    if (target.side === "enemy") {
+      applyHpDeltaToEnemy(s, target, -dmg);
+      playPortraitEffect("enemy", "hit", target);
+    } else {
+      applyHpDeltaToHero(s, target, -dmg);
+      playPortraitEffect("player", "hit", target);
+    }
+    playBattleSe("hit");
+    clog(`【${caster.name || "パッシブ"}】 ${target.name || ""} に ${dmg} ダメ`);
+  },
+
+  // damageRaw: 固定値ダメージ
+  damageRaw(s, caster, target, effect) {
+    const dmg = Math.max(1, effect.value || 0);
+    if (target.side === "enemy") applyHpDeltaToEnemy(s, target, -dmg);
+    else applyHpDeltaToHero(s, target, -dmg);
+    playBattleSe("hit");
+    clog(`【${caster.name || "パッシブ"}】 ${target.name || ""} に ${dmg} ダメ (固定)`);
+  },
+
+  // damageMaxHpPct: 最大 HP の N% 特殊ダメージ
+  damageMaxHpPct(s, caster, target, effect) {
+    const pct = effect.pct || 0;
+    const dmg = Math.max(1, Math.floor((target.hpMax || 0) * pct / 100));
+    if (target.side === "enemy") applyHpDeltaToEnemy(s, target, -dmg);
+    else applyHpDeltaToHero(s, target, -dmg);
+    playBattleSe("area");
+    playPortraitEffect(target.side === "enemy" ? "enemy" : "player", "area", target);
+    clog(`【${caster.name || "パッシブ"}】 特殊ダメ ${pct}% → ${dmg}`);
+  },
+
+  // heal: INT 倍率 or HP 倍率の回復
+  heal(s, caster, target, effect) {
+    const intCoef = effect.coef?.int || 0;
+    const hpCoef = effect.coef?.hp || 0;
+    let amt = 0;
+    if (intCoef > 0) amt += Math.max(1, Math.floor((caster.int ?? 0) * intCoef));
+    if (hpCoef > 0) amt += Math.max(1, Math.floor((target.hpMax || 0) * hpCoef));
+    if (amt <= 0) return;
+    applyHpDeltaToHero(s, target, +amt);
+    playPortraitEffect("player", "heal", target);
+    playBattleSe("heal");
+    clog(`【${caster.name || "パッシブ"}】 ${target.name || ""} HP+${amt}`);
+  },
+
+  // healRaw: 固定値回復
+  healRaw(s, caster, target, effect) {
+    const amt = Math.max(1, effect.value || 0);
+    applyHpDeltaToHero(s, target, +amt);
+    playPortraitEffect("player", "heal", target);
+    playBattleSe("heal");
+    clog(`【${caster.name || "パッシブ"}】 ${target.name || ""} HP+${amt}`);
+  },
+
+  // applyStatus: 状態異常付与 (poison/bleed/vulnerable)
+  applyStatus(s, caster, target, effect) {
+    const stacks = effect.stacks || 1;
+    if (target.side === "enemy") {
+      const field = { poison: "poison", bleed: "bleed", vulnerable: "vulnerable" }[effect.status];
+      if (!field) return;
+      target[field] = (target[field] || 0) + stacks;
+      if (s.enemies?.[0] === target) {
+        if (field === "poison") s.enemyPoison = target.poison;
+        else if (field === "bleed") s.enemyBleed = target.bleed;
+        else if (field === "vulnerable") s.enemyVulnerable = target.vulnerable;
+      }
+    } else {
+      addStatusToHero(s, target, effect.status, stacks);
+    }
+    playBattleSe("debuff");
+    clog(`【${caster.name || "パッシブ"}】 ${target.name || ""} に ${effect.status} ×${stacks}`);
+  },
+
+  // buffStat: ステ加算 (stat: phy/int/agi、value 定数 or coef 倍率)
+  buffStat(s, caster, target, effect) {
+    const field = { phy: "phy", int: "int", agi: "agi" }[effect.stat];
+    if (!field) return;
+    let delta = effect.value;
+    if (delta == null && effect.coef != null) {
+      const baseField = field + "Base";
+      delta = Math.max(1, Math.floor((target[baseField] ?? target[field] ?? 0) * effect.coef));
+    }
+    if (!delta) return;
+    target[field] = (target[field] ?? 0) + delta;
+    // 法 mirror
+    if (s.heroes?.[0] === target) {
+      if (field === "phy") s.playerPhy = target.phy;
+      else if (field === "int") s.playerInt = target.int;
+      else if (field === "agi") s.playerAgi = target.agi;
+    }
+    playBattleSe("buff");
+    playPortraitEffect("player", "buff", target);
+    clog(`【${caster.name || "パッシブ"}】 ${target.name || ""} ${effect.stat.toUpperCase()} ${delta >= 0 ? "+" : ""}${delta}`);
+  },
+
+  // addGuard: ガード付与
+  addGuard(s, caster, target, effect) {
+    const v = effect.value || 0;
+    target.guard = (target.guard || 0) + v;
+    if (s.heroes?.[0] === target) s.playerGuard = target.guard;
+    playBattleSe("buff");
+    playPortraitEffect("player", "buff", target);
+    clog(`【${caster.name || "パッシブ"}】 ${target.name || ""} ガード +${v}`);
+  },
+
+  // addShield: シールド付与
+  addShield(s, caster, target, effect) {
+    const v = effect.value || 0;
+    target.shield = (target.shield || 0) + v;
+    if (s.heroes?.[0] === target) s.playerShield = target.shield;
+    playBattleSe("buff");
+    playPortraitEffect("player", "buff", target);
+    clog(`【${caster.name || "パッシブ"}】 ${target.name || ""} シールド +${v}`);
+  },
+
+  // addEnergy: エナジー +N (即時 or 次ターン)
+  addEnergy(s, caster, target, effect) {
+    const v = effect.value || 0;
+    if (effect.nextTurn) {
+      s.bonusEnergyNext = (s.bonusEnergyNext || 0) + v;
+      clog(`【${caster.name || "パッシブ"}】 次ターン ⚡+${v}`);
+    } else {
+      s.energy = Math.min(s.energy + v, (s.energyMax || 3) + 3);
+      clog(`【${caster.name || "パッシブ"}】 ⚡+${v}`);
+    }
+  },
+
+  // drawCards: カード ドロー
+  drawCards(s, caster, target, effect) {
+    const v = effect.value || 0;
+    drawCards(s, v);
+    clog(`【${caster.name || "パッシブ"}】 ドロー +${v}`);
+  },
+
+  // revive: 復活 (self.died trigger 専用、§18.6.1 同期実行)
+  // hpRatio で hpMax × N% 回復、alive=true 復元
+  revive(s, caster, target, effect) {
+    const ratio = effect.coef?.hpRatio || 0.2;
+    const heal = Math.max(1, Math.floor((target.hpMax || 0) * ratio));
+    target.hp = Math.min(target.hpMax || target.hp, target.hp + heal);
+    target.alive = true;
+    if (s.heroes?.[0] === target) s.playerHp = target.hp;
+    playBattleSe("heal");
+    playPortraitEffect("player", "heal", target);
+    clog(`【${caster.name || "パッシブ"}】 復活！ HP+${heal}`);
+  },
+
+  // clearStatus: 状態異常解除
+  clearStatus(s, caster, target, effect) {
+    const which = effect.status || "all";
+    if (which === "all" || which === "poison") {
+      target.poison = 0;
+      if (s.heroes?.[0] === target) s.playerPoison = 0;
+    }
+    if (which === "all" || which === "bleed") {
+      target.bleed = 0;
+      if (s.heroes?.[0] === target) s.playerBleed = 0;
+    }
+    if (which === "all" || which === "vulnerable") {
+      target.vulnerable = 0;
+      if (s.heroes?.[0] === target) s.playerVulnerable = 0;
+    }
+    playBattleSe("heal");
+    clog(`【${caster.name || "パッシブ"}】 ${target.name || ""} 状態異常解除`);
+  },
+
+  // showCutin (effect ではないが、PassiveDef.cutinSkillName のためのフック)
+  showCutin(hero, skillName) {
+    clog(`【${skillName}】発動！`);
+    // showPassiveCutin の重い演出を呼びたい場合はここで await できないので
+    // 簡略化として clog のみ。Phase 4j 完成時に必要なら拡張。
+  },
+};
 
 // ─── ランステート管理 ─────────────────────────────────────────────
 function ensureRunState() {
@@ -1641,6 +1849,9 @@ function startCombatFromMapNode(node) {
     clog(`ボスはシールド ${enemyDef.initialShield} を持ちます！`);
   }
   applyHeroPassiveOnCombatStart(combat);
+  // SPEC-006 §18.6: PassiveDef DSL の combat.started trigger を発動
+  // (登録済みの SAMPLE_PASSIVES のみ。既存 hardcoded 関数とは独立に動作)
+  applyPassiveTrigger(combat, "combat.started");
   syncLlExtSlots();
   startPlayerTurn();
 }
@@ -5006,6 +5217,10 @@ async function playCard(idx) {
   await applyHeroPassiveOnCardUse(combat);
   if (!combat) return;
   if (areAllEnemiesDefeated(combat)) { endCombatWin(); return; }
+  // SPEC-006 §18.6: PassiveDef DSL の self.cardPlayed trigger
+  // (caster を渡し、発動対象は caster と一致する hero のみに限定)
+  applyPassiveTrigger(combat, "self.cardPlayed", { caster, card });
+  if (areAllEnemiesDefeated(combat)) { endCombatWin(); return; }
   renderCombat();
 }
 
@@ -7312,6 +7527,11 @@ function init() {
   loadTargetLabels()
     .then(() => applyCssVariables())
     .catch(err => console.warn("[target-labels] load failed", err));
+
+  // SPEC-006 Phase 4j: passive runtime の effect handler を注入 + サンプル登録
+  // codemod 出力 (passives-generated.js) が来たらここで一括 register に置き換える
+  registerEffectHandlers(PASSIVE_EFFECT_HANDLERS);
+  registerPassives(SAMPLE_PASSIVES);
 }
 
 init();
