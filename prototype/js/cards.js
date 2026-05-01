@@ -1197,6 +1197,125 @@ function makeCardLibrary(clog, api) {
     },
 
     // ════════════════════════════════════════
+    // ヒーローカード（C-1 JIN 編成のパーツ）
+    // 各カードは単体でも使える攻撃/補助。デッキに 3 種揃うと「陣」が発動する。
+    // ════════════════════════════════════════
+    cardZhang: {
+      libraryKey: "cardZhang",
+      extId: 1003,
+      extNameJa: "張遼",
+      skillNameJa: "遼来遼来",
+      skillIcon: "phy.png",
+      cost: 1, type: "atk", target: "enemy.foremost",
+      effectSummaryLines(s) {
+        const d = estPhyHit(s.playerPhy, s.enemyPhy, 100, 110);
+        return [`敵にダメージ　${d}`];
+      },
+      peekHelpKeys() { return []; },
+      previewLines(s) {
+        const d = estPhyHit(s.playerPhy, s.enemyPhy, 100, 110);
+        return [`敵1体に ${d} ダメージ（PHY 100〜110%）`];
+      },
+      play(s) { api.dealPhySkillToEnemy(s, 100, 110); },
+    },
+    cardLubu: {
+      libraryKey: "cardLubu",
+      extId: 1029, // 赤兎馬の imgId 流用
+      extNameJa: "呂布",
+      skillNameJa: "天下無双",
+      skillIcon: "phy.png",
+      cost: 2, type: "atk", target: "enemy.foremost",
+      effectSummaryLines(s) {
+        const d = estPhyHit(s.playerPhy, s.enemyPhy, 180, 200);
+        return [`敵にダメージ　${d}`];
+      },
+      peekHelpKeys() { return []; },
+      previewLines(s) {
+        const d = estPhyHit(s.playerPhy, s.enemyPhy, 180, 200);
+        return [`敵1体に ${d} ダメージ（PHY 180〜200%）`];
+      },
+      play(s) { api.dealPhySkillToEnemy(s, 180, 200); },
+    },
+    cardZhaoyun: {
+      libraryKey: "cardZhaoyun",
+      extId: 1058,
+      extNameJa: "趙雲",
+      skillNameJa: "一身是胆",
+      skillIcon: "phy.png",
+      cost: 1, type: "atk", target: "enemy.foremost",
+      effectSummaryLines(s) {
+        const d = estPhyHit(s.playerPhy, s.enemyPhy, 80, 90);
+        return [`敵にダメージ　${d}`, "ドロー +1"];
+      },
+      peekHelpKeys() { return ["draw"]; },
+      previewLines(s) {
+        const d = estPhyHit(s.playerPhy, s.enemyPhy, 80, 90);
+        return [`敵1体に ${d} ダメージ（PHY 80〜90%）＋カードを 1 枚ドロー`];
+      },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 80, 90);
+        api.drawCards(s, 1);
+      },
+    },
+    cardNapoleon: {
+      libraryKey: "cardNapoleon",
+      extId: 1063,
+      extNameJa: "ナポレオン",
+      skillNameJa: "グランダルメ",
+      skillIcon: "int.png",
+      cost: 2, type: "atk", target: "enemy.all",
+      effectSummaryLines(s) {
+        const d = estIntHit(s.playerInt, s.enemyInt, 90, 100);
+        return [`敵全体に　${d}`];
+      },
+      peekHelpKeys() { return []; },
+      previewLines(s) {
+        const d = estIntHit(s.playerInt, s.enemyInt, 90, 100);
+        return [`敵全体に ${d} ダメージ（INT 90〜100%）`];
+      },
+      play(s) { api.dealIntSkillToEnemy(s, 90, 100); },
+    },
+    cardLincoln: {
+      libraryKey: "cardLincoln",
+      extId: 1064,
+      extNameJa: "リンカーン",
+      skillNameJa: "解放宣言",
+      skillIcon: "BUF_int.png",
+      cost: 1, type: "skl", target: "self",
+      effectSummaryLines() { return ["ガード +8", "INT +2"]; },
+      peekHelpKeys() { return ["guard", "int"]; },
+      previewLines() { return ["ガードを 8 得る・INT を +2"]; },
+      play(s) {
+        se("buff"); fx("player", "buff");
+        s.playerGuard += 8;
+        s.playerInt += 2;
+        clog("解放宣言: ガード+8、INT+2");
+      },
+    },
+    cardRobinhood: {
+      libraryKey: "cardRobinhood",
+      extId: 1083,
+      extNameJa: "ロビンフッド",
+      skillNameJa: "シャーウッドの矢",
+      skillIcon: "phy.png",
+      cost: 1, type: "atk", target: "enemy.foremost",
+      effectSummaryLines(s) {
+        const d = estPhyHit(s.playerPhy, s.enemyPhy, 80, 90);
+        return [`敵にダメージ　${d}`, "出血 ×2 付与"];
+      },
+      peekHelpKeys() { return ["bleed"]; },
+      previewLines(s) {
+        const d = estPhyHit(s.playerPhy, s.enemyPhy, 80, 90);
+        return [`敵1体に ${d} ダメージ＋出血 ×2 付与`];
+      },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 80, 90);
+        s.enemyBleed = (s.enemyBleed || 0) + 2;
+        clog("出血 ×2 付与（敵）");
+      },
+    },
+
+    // ════════════════════════════════════════
     // 特殊：「ヨシュカ・チョコ」耐久報酬
     // 30ターン耐え切ったプレイヤーに渡される伝説の Power 系カード。
     // 元タイトル 2019 年 2nd レイドで時間切れになった証。
@@ -1333,7 +1452,52 @@ export const CARD_RARITIES = {
   cardShingenPre:  'legendary', // 武田信玄（暫定版・1戦闘後にナーフ）
   cardShingenPost: 'rare',      // 武田信玄（ナーフ後）
   cardChocoFragment: 'legendary', // チョコ片（ヨシュカ・チョコ耐久報酬）
+
+  // ─── ヒーローカード（C-1 JIN 編成のパーツ） ───────────────────
+  cardZhang:      'rare',
+  cardLubu:       'epic',
+  cardZhaoyun:    'rare',
+  cardNapoleon:   'epic',
+  cardLincoln:    'rare',
+  cardRobinhood:  'rare',
 };
+
+/**
+ * JIN（陣）定義 — 元タイトル 2019 年 JINβ のリスペクト。
+ * デッキに該当ヒーローカード3枚が揃うと発動。
+ *  applyAtCombatStart(combat, runState): 戦闘開始時に1度だけ呼ばれる
+ *  applyDiscount(card, combat) → number  : カードプレイ時のコスト割引
+ */
+export const JIN_DEFS = [
+  {
+    id: 'sangokushi',
+    name: '三国志陣',
+    members: ['cardZhang', 'cardLubu', 'cardZhaoyun'],
+    desc: 'PHY 攻撃カードのコスト -1（最低 0）',
+    color: '#d63031',
+    applyDiscount(card) {
+      // type=atk かつ skillIcon が phy.png のものを 1 ディスカウント
+      if (card.type === 'atk' && (card.skillIcon || '').toLowerCase().includes('phy')) return 1;
+      return 0;
+    },
+  },
+  {
+    id: 'revolution',
+    name: '西洋革命陣',
+    members: ['cardNapoleon', 'cardLincoln', 'cardRobinhood'],
+    desc: 'HP1 で行動時、致死ダメで 1 度だけ生存（リザレクション）',
+    color: '#0984e3',
+    applyAtCombatStart(combat) {
+      combat.hasResurrection = true;
+    },
+  },
+];
+
+/** デッキから発動中の JIN を抽出（重複ID無視） */
+export function detectActiveJins(deck) {
+  const ids = new Set(deck.map(c => c.libraryKey));
+  return JIN_DEFS.filter(j => j.members.every(m => ids.has(m)));
+}
 
 /**
  * カードランクアップ系列（ノービス → エリート）

@@ -20,7 +20,9 @@ export const CHAPTERS = [
     },
     enemyPool: ['sn-001', 'sn-002', 'sn-003'],
     elitePool: ['sn-e01'],
-    cardPool: ['cd101', 'cd102', 'cd103', 'cd104', 'cd105', 'cd106', 'cd107', 'cd108', 'ext2004'],
+    cardPool: ['cd101', 'cd102', 'cd103', 'cd104', 'cd105', 'cd106', 'cd107', 'cd108', 'ext2004',
+      // 三国志陣のパーツ（C-1 JIN）
+      'cardZhang', 'cardLubu', 'cardZhaoyun'],
     bossId: 'boss-ch1',
     bossRewardGold: 50,
     extSeries: {
@@ -42,7 +44,9 @@ export const CHAPTERS = [
     },
     enemyPool: ['hl-001', 'hl-002', 'hl-003'],
     elitePool: ['hl-e01'],
-    cardPool: ['cdH01', 'cdH02', 'cdH03', 'cdH04', 'cdH05', 'cdH06'],
+    cardPool: ['cdH01', 'cdH02', 'cdH03', 'cdH04', 'cdH05', 'cdH06',
+      // 西洋革命陣のパーツ（C-1 JIN）
+      'cardNapoleon', 'cardLincoln', 'cardRobinhood'],
     bossId: 'boss-hl',
     bossRewardGold: 70,
     extSeries: {

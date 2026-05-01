@@ -4,6 +4,8 @@ import {
   battleIconUrl,
   CARD_RARITIES,
   CARD_UPGRADE_SERIES,
+  JIN_DEFS,
+  detectActiveJins,
 } from "./cards.js";
 import {
   img,
@@ -931,8 +933,15 @@ function syncResources() {
   if (mchcEl) mchcEl.textContent = String(runState.mchc ?? 0);
   // スカウトランド表示（選択済みなら名前を chapter 表示の脇に追加）
   const chapterEl2 = document.getElementById("chapterVal");
-  if (chapterEl2 && runState.scoutLandName) {
-    chapterEl2.textContent = `${(runState.chapterIdx ?? 0) + 1}・🏳️ ${runState.scoutLandName}`;
+  if (chapterEl2) {
+    let suffix = '';
+    if (runState.scoutLandName) suffix += `・🏳️ ${runState.scoutLandName}`;
+    // JIN 発動状況：デッキスキャンしてラベルを生成
+    const jins = detectActiveJins(runState.deck || []);
+    if (jins.length > 0) {
+      suffix += `・🪄 陣：${jins.map(j => j.name).join('+')}`;
+    }
+    chapterEl2.textContent = `${(runState.chapterIdx ?? 0) + 1}${suffix}`;
   }
   syncLlExtSlots();
   const layerEl = document.getElementById("layerVal");
@@ -1438,6 +1447,14 @@ function startCombatFromMapNode(node) {
     combat.playerPhy += 2;
     combat.playerInt += 2;
   }
+  // JIN（陣）— デッキ内のヒーロー編成を検出して開始時に適用
+  combat.activeJins = detectActiveJins(combat.deck);
+  for (const jin of combat.activeJins) {
+    if (typeof jin.applyAtCombatStart === 'function') {
+      jin.applyAtCombatStart(combat);
+    }
+    clog(`【陣】「${jin.name}」発動：${jin.desc}`);
+  }
 
   // SPEC-005 Phase 2: heroes[] / enemies[] を並行で初期化（Phase 3 で正式に使用、現状は表示・解決用の参照のみ）
   combat.heroes = [makeHeroUnit({
@@ -1817,7 +1834,7 @@ function bindHandTouchDelegation() {
     if (!combat || view !== "combat") { handTouchId = null; return; }
     if (releaseIdx < 0) { clearHandFocus(); handTouchId = null; return; }
     const c = combat.hand[releaseIdx];
-    if (!c || c.cost > combat.energy) { handTouchId = null; return; }
+    if (!c || effectiveCost(c) > combat.energy) { handTouchId = null; return; }
     if (handFocusedIdx === releaseIdx) playCardByRef(c);
     else setHandFocusByIndex(releaseIdx);
     handTouchId = null;
@@ -1841,7 +1858,7 @@ function bindHandCard(el, idx, card) {
     if (!window.matchMedia("(pointer: fine)").matches) return;
     ev.preventDefault();
     if (combatInputLocked) return;
-    if (card.cost > combat.energy || el.classList.contains("card-slot--disabled")) return;
+    if (effectiveCost(card) > combat.energy || el.classList.contains("card-slot--disabled")) return;
     const slots = Array.from(document.querySelectorAll("#hand .card-slot"));
     const myIdx = slots.indexOf(el);
     if (myIdx < 0) return;
@@ -1940,8 +1957,9 @@ function renderCombat() {
   combat.hand.forEach((card, idx) => {
     const slot = document.createElement("div");
     const rarity = CARD_RARITIES[card.libraryKey] || 'common';
-    slot.className = "card-slot" + (card.cost > combat.energy ? " card-slot--disabled" : "");
-    slot.setAttribute("data-cost", String(card.cost));
+    const eCost = effectiveCost(card);
+    slot.className = "card-slot" + (eCost > combat.energy ? " card-slot--disabled" : "");
+    slot.setAttribute("data-cost", String(eCost));
     slot.setAttribute("data-rarity", rarity);
     slot.style.setProperty("--i", String(idx + 1));
     slot.style.setProperty("--n", String(Math.max(n - 1, 1)));
@@ -1953,8 +1971,11 @@ function renderCombat() {
     const detailBody = detailLines.map(t => "<p>" + escapeHtml(t) + "</p>").join("");
     const summaryBody = summaryLines.map(t => "<p>" + escapeHtml(t) + "</p>").join("");
 
+    const costDisplay = (eCost !== card.cost)
+      ? `<span style="text-decoration:line-through;opacity:0.5;font-size:0.7em">${card.cost}</span>${eCost}`
+      : String(card.cost);
     slot.innerHTML =
-      '<div class="card-cost-above"><span class="cost-zeus" aria-hidden="true">⚡</span>' + card.cost + '</div>' +
+      '<div class="card-cost-above"><span class="cost-zeus" aria-hidden="true">⚡</span>' + costDisplay + '</div>' +
       '<div class="card ' + card.type + (card.exhaust ? ' card--exhaust' : '') + '">' +
       '<div class="card-name-hd">' + escapeHtml(card.extNameJa) + (card.exhaust ? '<span class="exhaust-badge" title="消耗：使い切り">🔥</span>' : '') +
       (card.skillNameJa ? '<span class="card-skill-sub">' + escapeHtml(card.skillNameJa) + '</span>' : '') + '</div>' +
@@ -2024,12 +2045,26 @@ async function applyZhangPassive(s) {
   renderCombat();
 }
 
+// JIN（陣）によるコスト割引を含めた実効コスト
+function effectiveCost(card) {
+  if (!card) return 0;
+  let discount = 0;
+  if (combat?.activeJins) {
+    for (const jin of combat.activeJins) {
+      if (typeof jin.applyDiscount === 'function') {
+        discount += jin.applyDiscount(card) || 0;
+      }
+    }
+  }
+  return Math.max(0, (card.cost ?? 0) - discount);
+}
+
 // ─── カードプレイ ─────────────────────────────────────────────────
 async function playCard(idx) {
   if (combatInputLocked) return;
   const card = combat.hand[idx];
-  if (!card || card.cost > combat.energy) return;
-  combat.energy -= card.cost;
+  if (!card || effectiveCost(card) > combat.energy) return;
+  combat.energy -= effectiveCost(card);
   combat.hand.splice(idx, 1);
   // 消耗カードは exhaustPile へ、通常カードは捨て札へ
   if (card.exhaust) {
