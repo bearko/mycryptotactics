@@ -1326,14 +1326,17 @@
       display: flex; flex-wrap: wrap; gap: 0.65rem;
       justify-content: center; margin: 0.6rem 0;
     }
-    .craft-upgrade-list { display: flex; flex-direction: column; gap: 0.65rem; margin: 0.6rem 0; }
+    .craft-upgrade-list {
+      display: flex; flex-direction: row; flex-wrap: wrap;
+      gap: 0.65rem; margin: 0.6rem 0; justify-content: center;
+    }
     .craft-upgrade-row {
-      display: flex; flex-wrap: wrap; align-items: center;
-      gap: 0.5rem; justify-content: center;
+      display: flex; flex-direction: column; align-items: center;
+      gap: 0.4rem; justify-content: center;
       background: #15121c; border: 1px solid var(--border);
       border-radius: 10px; padding: 0.6rem;
     }
-    .craft-arrow { font-size: 1.5rem; color: var(--accent); font-weight: 700; }
+    .craft-arrow { font-size: 1.5rem; color: var(--accent); font-weight: 700; transform: rotate(90deg); }
 
     /* ── Shop Remove ─────────────────────────────────────────────── */
     .shop-remove-section {
