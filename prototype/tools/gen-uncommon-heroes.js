@@ -240,19 +240,27 @@ function generatePassiveDesc(e, isOnCardUse) {
 }
 
 // ─── パッシブ関数本体生成 ─────────────────────────────────────
+// 3v3 helper API (applyHpDeltaToEnemy / applyHpDeltaToHero / etc.) を使用
 function generatePassiveFunction(passiveKey, passiveName, e, isOnCardUse) {
   const fnName = "apply" + pascalize(passiveKey) + "Passive";
   const lines = [];
   const isAsync = isOnCardUse;
   lines.push(`${isAsync ? "async " : ""}function ${fnName}(s) {`);
 
+  // Determine if we need target/hero refs
+  const needsTarget = !!(e.phyDmg || e.intDmg || e.enemyPhy || e.enemyInt || e.enemyAgi || e.poison || e.bleed);
+  const needsHero = !!(e.heal || e.selfPhy || e.selfInt || e.selfAgi || e.shield || e.guard || e.resurrect);
+
+  if (needsTarget) lines.push(`  const target = getPlayerAttackTargetEnemy(s);`);
+  if (needsHero) lines.push(`  const hero = s.heroes?.[0];`);
+
   if (isOnCardUse) {
-    lines.push(`  if (s.playerHp <= 0 || s.enemyHp <= 0) return;`);
+    lines.push(`  if (isPartyWipedOut(s) || areAllEnemiesDefeated(s)) return;`);
     lines.push(`  if (Math.random() >= 0.4) return;`);
     lines.push(`  combatInputLocked = true;`);
     lines.push(`  await showPassiveCutin("${passiveName}", typeof LEADER.img === "function" ? LEADER.img() : (LEADER.img || ""));`);
     lines.push(`  combatInputLocked = false;`);
-    lines.push(`  if (!combat || s.playerHp <= 0 || s.enemyHp <= 0) return;`);
+    lines.push(`  if (!combat || isPartyWipedOut(s) || areAllEnemiesDefeated(s)) return;`);
   }
 
   // Apply effects
@@ -262,16 +270,16 @@ function generatePassiveFunction(passiveKey, passiveName, e, isOnCardUse) {
     hasEffect = true;
     const avg = Math.floor((e.phyDmg.min + e.phyDmg.max) / 2);
     if (e.phyDmg.repeat > 1) {
-      lines.push(`  for (let i = 0; i < ${e.phyDmg.repeat} && s.enemyHp > 0; i++) {`);
+      lines.push(`  for (let i = 0; i < ${e.phyDmg.repeat} && !areAllEnemiesDefeated(s); i++) {`);
       lines.push(`    const dmg = Math.max(1, Math.floor(s.playerPhy * ${avg / 100}));`);
-      lines.push(`    s.enemyHp = Math.max(0, s.enemyHp - dmg);`);
-      lines.push(`    playPortraitEffect("enemy", "hit"); playBattleSe("hit");`);
+      lines.push(`    applyHpDeltaToEnemy(s, target, -dmg);`);
+      lines.push(`    playPortraitEffect("enemy", "hit", target); playBattleSe("hit");`);
       lines.push(`    clog(\`【${passiveName}】PHY ${"$"}{dmg} ダメージ\`);`);
       lines.push(`  }`);
     } else {
       lines.push(`  { const dmg = Math.max(1, Math.floor(s.playerPhy * ${avg / 100}));`);
-      lines.push(`    s.enemyHp = Math.max(0, s.enemyHp - dmg);`);
-      lines.push(`    playPortraitEffect("enemy", "hit"); playBattleSe("hit");`);
+      lines.push(`    applyHpDeltaToEnemy(s, target, -dmg);`);
+      lines.push(`    playPortraitEffect("enemy", "hit", target); playBattleSe("hit");`);
       lines.push(`    clog(\`【${passiveName}】発動！ PHY ${"$"}{dmg} ダメージ\`); }`);
     }
   }
@@ -280,16 +288,16 @@ function generatePassiveFunction(passiveKey, passiveName, e, isOnCardUse) {
     hasEffect = true;
     const avg = Math.floor((e.intDmg.min + e.intDmg.max) / 2);
     if (e.intDmg.repeat > 1) {
-      lines.push(`  for (let i = 0; i < ${e.intDmg.repeat} && s.enemyHp > 0; i++) {`);
+      lines.push(`  for (let i = 0; i < ${e.intDmg.repeat} && !areAllEnemiesDefeated(s); i++) {`);
       lines.push(`    const dmg = Math.max(1, Math.floor(s.playerInt * ${avg / 100}));`);
-      lines.push(`    s.enemyHp = Math.max(0, s.enemyHp - dmg);`);
-      lines.push(`    playPortraitEffect("enemy", "hit"); playBattleSe("hit");`);
+      lines.push(`    applyHpDeltaToEnemy(s, target, -dmg);`);
+      lines.push(`    playPortraitEffect("enemy", "hit", target); playBattleSe("hit");`);
       lines.push(`    clog(\`【${passiveName}】INT ${"$"}{dmg} ダメージ\`);`);
       lines.push(`  }`);
     } else {
       lines.push(`  { const dmg = Math.max(1, Math.floor(s.playerInt * ${avg / 100}));`);
-      lines.push(`    s.enemyHp = Math.max(0, s.enemyHp - dmg);`);
-      lines.push(`    playPortraitEffect("enemy", "hit"); playBattleSe("hit");`);
+      lines.push(`    applyHpDeltaToEnemy(s, target, -dmg);`);
+      lines.push(`    playPortraitEffect("enemy", "hit", target); playBattleSe("hit");`);
       lines.push(`    clog(\`【${passiveName}】発動！ INT ${"$"}{dmg} ダメージ\`); }`);
     }
   }
@@ -298,46 +306,47 @@ function generatePassiveFunction(passiveKey, passiveName, e, isOnCardUse) {
     hasEffect = true;
     const avg = Math.floor((e.heal.min + e.heal.max) / 2);
     lines.push(`  { const heal = Math.max(1, Math.floor(s.playerHpMax * ${avg / 100}));`);
-    lines.push(`    s.playerHp = Math.min(s.playerHpMax, s.playerHp + heal);`);
-    lines.push(`    playPortraitEffect("player", "heal"); playBattleSe("heal");`);
+    lines.push(`    applyHpDeltaToHero(s, hero, +heal);`);
+    lines.push(`    playPortraitEffect("player", "heal", hero); playBattleSe("heal");`);
     lines.push(`    clog(\`【${passiveName}】HP +${"$"}{heal}\`); }`);
   }
 
   if (e.selfPhy) {
     hasEffect = true;
-    lines.push(`  s.playerPhy += ${e.selfPhy}; playBattleSe("buff"); clog(\`【${passiveName}】PHY +${e.selfPhy}\`);`);
+    lines.push(`  s.playerPhy += ${e.selfPhy}; playPortraitEffect("player", "buff", hero); playBattleSe("buff"); clog(\`【${passiveName}】PHY +${e.selfPhy}\`);`);
   }
   if (e.selfInt) {
     hasEffect = true;
-    lines.push(`  s.playerInt += ${e.selfInt}; playBattleSe("buff"); clog(\`【${passiveName}】INT +${e.selfInt}\`);`);
+    lines.push(`  s.playerInt += ${e.selfInt}; playPortraitEffect("player", "buff", hero); playBattleSe("buff"); clog(\`【${passiveName}】INT +${e.selfInt}\`);`);
   }
   if (e.selfAgi) {
     hasEffect = true;
-    lines.push(`  s.playerAgi += ${e.selfAgi}; playBattleSe("buff"); clog(\`【${passiveName}】AGI +${e.selfAgi}\`);`);
+    lines.push(`  s.playerAgi += ${e.selfAgi}; playPortraitEffect("player", "buff", hero); playBattleSe("buff"); clog(\`【${passiveName}】AGI +${e.selfAgi}\`);`);
   }
   if (e.enemyPhy) {
     hasEffect = true;
-    lines.push(`  s.enemyPhy = Math.max(1, s.enemyPhy + (${e.enemyPhy})); playBattleSe("debuff"); clog(\`【${passiveName}】敵 PHY ${e.enemyPhy}\`);`);
+    lines.push(`  s.enemyPhy = Math.max(1, s.enemyPhy + (${e.enemyPhy})); playPortraitEffect("enemy", "debuff", target); playBattleSe("debuff"); clog(\`【${passiveName}】敵 PHY ${e.enemyPhy}\`);`);
   }
   if (e.enemyInt) {
     hasEffect = true;
-    lines.push(`  s.enemyInt = Math.max(1, s.enemyInt + (${e.enemyInt})); playBattleSe("debuff"); clog(\`【${passiveName}】敵 INT ${e.enemyInt}\`);`);
+    lines.push(`  s.enemyInt = Math.max(1, s.enemyInt + (${e.enemyInt})); playPortraitEffect("enemy", "debuff", target); playBattleSe("debuff"); clog(\`【${passiveName}】敵 INT ${e.enemyInt}\`);`);
   }
   if (e.enemyAgi) {
     hasEffect = true;
-    lines.push(`  s.enemyAgi = Math.max(1, s.enemyAgi + (${e.enemyAgi})); playBattleSe("debuff"); clog(\`【${passiveName}】敵 AGI ${e.enemyAgi}\`);`);
+    lines.push(`  s.enemyAgi = Math.max(1, s.enemyAgi + (${e.enemyAgi})); playPortraitEffect("enemy", "debuff", target); playBattleSe("debuff"); clog(\`【${passiveName}】敵 AGI ${e.enemyAgi}\`);`);
   }
   if (e.poison) {
     hasEffect = true;
-    lines.push(`  s.enemyPoison = (s.enemyPoison || 0) + ${e.poison}; playBattleSe("debuff"); clog(\`【${passiveName}】毒 ×${e.poison} 付与\`);`);
+    lines.push(`  s.enemyPoison = (s.enemyPoison || 0) + ${e.poison}; playPortraitEffect("enemy", "debuff", target); playBattleSe("debuff"); clog(\`【${passiveName}】毒 ×${e.poison} 付与\`);`);
   }
   if (e.bleed) {
     hasEffect = true;
-    lines.push(`  s.enemyBleed = (s.enemyBleed || 0) + ${e.bleed}; playBattleSe("debuff"); clog(\`【${passiveName}】出血 ×${e.bleed} 付与\`);`);
+    lines.push(`  s.enemyBleed = (s.enemyBleed || 0) + ${e.bleed}; playPortraitEffect("enemy", "debuff", target); playBattleSe("debuff"); clog(\`【${passiveName}】出血 ×${e.bleed} 付与\`);`);
   }
   if (e.resurrect) {
     hasEffect = true;
-    lines.push(`  s.hasResurrection = true; playBattleSe("buff"); clog(\`【${passiveName}】リザレクション付与\`);`);
+    // hero.alive=true は checkResurrection が自動復元するため不要だが、防御的に残す
+    lines.push(`  s.hasResurrection = true; if (hero) hero.alive = true; playBattleSe("buff"); clog(\`【${passiveName}】リザレクション付与\`);`);
   }
   if (e.shield) {
     hasEffect = true;
