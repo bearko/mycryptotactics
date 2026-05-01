@@ -957,9 +957,16 @@ function renderMap() {
   const titleEl = document.getElementById("mapTitle");
   if (titleEl) {
     const chapter = CHAPTERS[runState.chapterIdx];
-    titleEl.textContent = runState.runComplete
-      ? `全ランクリア！（${CHAPTERS.length} 章突破・トロイ制覇）`
-      : `章 ${chapter.id}「${chapter.name}」（下から上へ進む）`;
+    if (runState.runComplete) {
+      titleEl.textContent = `全ランクリア！（${CHAPTERS.length} 章突破・トロイ制覇）`;
+    } else {
+      const series = chapter.extSeries;
+      const seriesLine = series
+        ? `\n📦 ${series.nodeVer}・${series.era}：${series.items.join(' / ')}`
+        : '';
+      titleEl.textContent = `章 ${chapter.id}「${chapter.name}」（下から上へ進む）${seriesLine}`;
+      titleEl.style.whiteSpace = 'pre-line';
+    }
   }
 
   if (runState.runComplete) {

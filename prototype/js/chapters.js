@@ -2,6 +2,9 @@
  * 章定義（SPEC-004 §6〜§8）
  * cardPool: cards.js の CARD_LIBRARY のキー。報酬とショップで使用。
  * 章 N の報酬プールは章 1〜N の cardPool を累積する（main.js 側で処理）。
+ *
+ * extSeries: 表示専用フレーバー。元タイトル「ノードVer.x」更新の歴史を踏襲し、
+ *   各章で「あの頃のドロップ」を体感する仕掛け（main.js 側でマップヘッダーに表示）。
  */
 export const CHAPTERS = [
   // ─── 章 0 ─────────────────────────────────────────────────────────
@@ -20,6 +23,11 @@ export const CHAPTERS = [
     cardPool: ['cd101', 'cd102', 'cd103', 'cd104', 'cd105', 'cd106', 'cd107', 'cd108', 'ext2004'],
     bossId: 'boss-ch1',
     bossRewardGold: 50,
+    extSeries: {
+      nodeVer: 'Ver 1.1',
+      era: 'Eco 1.0 (Lab/GUM)',
+      items: ['カタナ', 'ブック', 'リング', 'シールド'],
+    },
   },
   // ─── 章 1 ─────────────────────────────────────────────────────────
   {
@@ -37,6 +45,11 @@ export const CHAPTERS = [
     cardPool: ['cdH01', 'cdH02', 'cdH03', 'cdH04', 'cdH05', 'cdH06'],
     bossId: 'boss-hl',
     bossRewardGold: 70,
+    extSeries: {
+      nodeVer: 'Ver 1.2',
+      era: 'ランド時代',
+      items: ['ハルバード', 'スクロール', 'ネックレス', 'カブト'],
+    },
   },
   // ─── 章 2 ─────────────────────────────────────────────────────────
   {
@@ -54,6 +67,11 @@ export const CHAPTERS = [
     cardPool: ['cd301', 'cd302', 'cd303', 'cd304', 'cd305'],
     bossId: 'boss-ch3',
     bossRewardGold: 100,
+    extSeries: {
+      nodeVer: 'Ver 1.5',
+      era: 'JIN試験時代',
+      items: ['ナイフ', 'リソグラフィ', 'アルケブス', 'ウィップ'],
+    },
   },
   // ─── 章 3 ─────────────────────────────────────────────────────────
   {
@@ -71,6 +89,11 @@ export const CHAPTERS = [
     cardPool: ['cd201', 'cd202', 'cd203', 'cd204', 'cd205', 'cd206'],
     bossId: 'boss-ch2',
     bossRewardGold: 120,
+    extSeries: {
+      nodeVer: 'Ver 1.6',
+      era: 'Eco 3.0 / MCHC時代',
+      items: ['シックル', 'ワンド', 'サケ', 'ハット'],
+    },
   },
   // ─── 章 4 ─────────────────────────────────────────────────────────
   {
@@ -93,5 +116,10 @@ export const CHAPTERS = [
     ],
     bossId: 'boss-troy',
     bossRewardGold: 180,
+    extSeries: {
+      nodeVer: 'Ver 1.8',
+      era: 'MCH Verse時代',
+      items: ['スタッフ', 'ホーキ', 'ヨロイ'],
+    },
   },
 ];
