@@ -298,13 +298,13 @@
     .arena-inner {
       position: relative; z-index: 1;
       display: flex; align-items: flex-end; justify-content: space-between;
-      padding: 0.6rem 0.5rem 0.75rem;
+      padding: 0.6rem 0.3rem 0.75rem;
       min-height: 240px;
     }
     /* SPEC-005 Phase 3h: 3 スロット同サイズ + V 字配置 (front=中央寄り・低い / back=外側・高い) */
     .party-side {
-      display: flex; gap: 0.4rem; align-items: flex-end;
-      flex: 1; max-width: 50%;
+      display: flex; gap: 0.25rem; align-items: flex-end;
+      flex: 1; max-width: 47%;
     }
     .party-side--player { justify-content: flex-end; }
     .party-side--enemy  { justify-content: flex-start; }
@@ -314,12 +314,12 @@
     }
     /* V 字段差: front は最も低く、back は最も高い (画面では下向きの V) */
     .party-slot--front { margin-bottom: 0; }
-    .party-slot--mid   { margin-bottom: 18px; }
-    .party-slot--back  { margin-bottom: 36px; }
+    .party-slot--mid   { margin-bottom: 26px; }
+    .party-slot--back  { margin-bottom: 52px; }
     /* 空スロット (パーティ未充足) は非表示 */
     .party-slot--mid:empty,
     .party-slot--back:empty { display: none; }
-    /* 死亡したサブユニットはグレースケール */
+    /* 死亡ユニット (前衛・サブ共通) はグレースケール + intent 非表示 */
     .combatant--dead .combatant-portrait { filter: grayscale(1) brightness(0.55); }
     .combatant--dead .intent-bubble { display: none; }
 
@@ -350,7 +350,7 @@
     }
 
     /* Combatant info */
-    .combatant-info { width: 148px; display: flex; flex-direction: column; gap: 0.14rem; }
+    .combatant-info { width: 110px; display: flex; flex-direction: column; gap: 0.14rem; }
     .combatant-name {
       font-size: 0.68rem; font-weight: 700; text-align: center; color: var(--text);
       overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -415,10 +415,11 @@
       100% { opacity: 0; transform: translateX(-50%) translateY(-22px) scale(1); }
     }
 
-    /* VS col */
+    /* VS col — arena 全体の縦中央に揃える */
     .vs-col {
       flex: 0 0 auto; min-width: 2.5rem;
       display: flex; align-items: center; justify-content: center;
+      align-self: center;
     }
     .vs-mark {
       font-size: 1.2rem; font-weight: 800; color: var(--accent);

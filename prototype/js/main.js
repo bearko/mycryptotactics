@@ -1951,6 +1951,19 @@ function renderCombat() {
   renderPartySubHeroes();
   // SPEC-005 Phase 3c: enemies.length > 1 ならサブエネミーも ghost slot に表示
   renderEnemySubUnits();
+  // SPEC-005 Phase 3h: 前衛 (heroes[0] / enemies[0]) の死亡時グレーアウト
+  const heroFrontEl = document.querySelector('.party-slot--front[data-side="player"] .combatant');
+  if (heroFrontEl) {
+    const h0 = combat.heroes?.[0];
+    const dead = !h0 || h0.alive === false || (h0.hp ?? combat.playerHp) <= 0;
+    heroFrontEl.classList.toggle("combatant--dead", dead);
+  }
+  const enemyFrontEl = document.querySelector('.party-slot--front[data-side="enemy"] .combatant');
+  if (enemyFrontEl) {
+    const e0 = combat.enemies?.[0];
+    const dead = !e0 || e0.alive === false || (e0.hp ?? combat.enemyHp) <= 0;
+    enemyFrontEl.classList.toggle("combatant--dead", dead);
+  }
 
   const handEl = document.getElementById("hand");
   handEl.innerHTML = "";
@@ -3311,6 +3324,8 @@ function renderPartySubHeroes() {
             `<span class="sbadge sbadge-phy" data-label="PHY">${hero.phy ?? "-"}</span>` +
             `<span class="sbadge sbadge-int" data-label="INT">${hero.int ?? "-"}</span>` +
             `<span class="sbadge sbadge-agi" data-label="AGI">${hero.agi ?? "-"}</span>` +
+            `<span class="sbadge sbadge-grd" data-label="GRD">🛡${hero.guard ?? 0}</span>` +
+            `<span class="sbadge sbadge-shd" data-label="SHD">✦${hero.shield ?? 0}</span>` +
           `</div>` +
         `</div>` +
       `</div>`;
@@ -3376,6 +3391,8 @@ function renderEnemySubUnits() {
             `<span class="sbadge sbadge-phy" data-label="PHY">${en.phy ?? "-"}</span>` +
             `<span class="sbadge sbadge-int" data-label="INT">${en.int ?? "-"}</span>` +
             `<span class="sbadge sbadge-agi" data-label="AGI">${en.agi ?? "-"}</span>` +
+            `<span class="sbadge sbadge-grd" data-label="GRD">🛡${en.guard ?? 0}</span>` +
+            `<span class="sbadge sbadge-shd" data-label="SHD">✦${en.shield ?? 0}</span>` +
           `</div>` +
         `</div>` +
       `</div>`;
