@@ -2119,78 +2119,87 @@ async function enemyTurn() {
   const isAttackKind = it.kind && it.kind.startsWith && it.kind.startsWith("attack");
   const regBleedStacks = reg.effects.bleedOnAttack || 0;
 
-  switch (it.kind) {
-    case "attack":
-      dealPhySkillFromEnemyToPlayer(combat, it.phyPct);
-      break;
-    case "attackPoison":
-      dealPhySkillFromEnemyToPlayer(combat, it.phyPct);
-      if (combat.playerHp > 0 && (it.poisonStacks || 0) > 0) {
-        combat.playerPoison = (combat.playerPoison || 0) + it.poisonStacks;
-        playBattleSe("debuff"); clog(`毒 ×${it.poisonStacks} 付与（自分）`);
-        renderStatusBadges();
-      }
-      break;
-    case "attackBleed":
-      dealPhySkillFromEnemyToPlayer(combat, it.phyPct);
-      if (combat.playerHp > 0 && (it.bleedStacks || 0) > 0) {
-        combat.playerBleed = (combat.playerBleed || 0) + it.bleedStacks;
-        playBattleSe("debuff"); clog(`出血 ×${it.bleedStacks} 付与（自分）`);
-        renderStatusBadges();
-      }
-      break;
-    case "attackDouble":
-      dealPhySkillFromEnemyToPlayer(combat, it.phyPct);
-      if (combat.playerHp > 0) dealPhySkillFromEnemyToPlayer(combat, it.phyPct);
-      break;
-    case "attackInt":
-      dealIntSkillFromEnemyToPlayer(combat, it.intPct);
-      break;
-    case "attackIntDouble":
-      dealIntSkillFromEnemyToPlayer(combat, it.intPct);
-      if (combat.playerHp > 0) dealIntSkillFromEnemyToPlayer(combat, it.intPct);
-      break;
-    case "healSelf": {
-      const heal = Math.max(1, Math.floor((combat.enemyHpMax * it.pct) / 100));
-      combat.enemyHp = Math.min(combat.enemyHpMax, combat.enemyHp + heal);
-      if (combat.enemies?.[0]) combat.enemies[0].hp = combat.enemyHp;
-      playBattleSe("heal"); playPortraitEffect("enemy", "heal", combat.enemies?.[0]);
-      clog(`敵 HP+${heal}（自己回復）`);
-      break;
-    }
-    case "buffSelf":
-      if (it.phyAdd) combat.enemyPhy += it.phyAdd;
-      if (it.intAdd) combat.enemyInt += it.intAdd;
-      playBattleSe("buff"); playPortraitEffect("enemy", "buff", combat.enemies?.[0]);
-      clog(`敵強化: ${it.phyAdd ? "PHY+" + it.phyAdd : ""}${it.intAdd ? " INT+" + it.intAdd : ""}`);
-      break;
-    case "guard":
-      combat.enemyGuard += it.value;
-      playBattleSe("buff"); playPortraitEffect("enemy", "buff", combat.enemies?.[0]);
-      clog(`敵 GUARD +${it.value}`);
-      break;
-    case "special":
-      dealSpecialMaxHpPercentToPlayer(combat, it.pct);
-      break;
-    default:
-      clog(`不明な意図: ${it.kind}`);
-  }
+  // Phase 3g: 行動した直後だけ次のアクションとの間に sleep を挟む
+  let actorActed = false;
 
-  // レギュレーション効果: 攻撃に出血付与（Red+） (#37)
-  if (isAttackKind && regBleedStacks > 0 && combat.playerHp > 0) {
-    combat.playerBleed = (combat.playerBleed || 0) + regBleedStacks;
-    playBattleSe("debuff");
-    clog(`出血 ×${regBleedStacks} 付与（自分・${reg.nameJa} 効果）`);
-    renderStatusBadges();
+  // 前衛 (enemies[0]) — 死亡している場合はスキップ
+  const front = combat.enemies?.[0];
+  const frontAlive = front && front.alive !== false && (front.hp ?? combat.enemyHp ?? 0) > 0;
+  if (frontAlive) {
+    switch (it.kind) {
+      case "attack":
+        dealPhySkillFromEnemyToPlayer(combat, it.phyPct);
+        break;
+      case "attackPoison":
+        dealPhySkillFromEnemyToPlayer(combat, it.phyPct);
+        if (combat.playerHp > 0 && (it.poisonStacks || 0) > 0) {
+          combat.playerPoison = (combat.playerPoison || 0) + it.poisonStacks;
+          playBattleSe("debuff"); clog(`毒 ×${it.poisonStacks} 付与（自分）`);
+          renderStatusBadges();
+        }
+        break;
+      case "attackBleed":
+        dealPhySkillFromEnemyToPlayer(combat, it.phyPct);
+        if (combat.playerHp > 0 && (it.bleedStacks || 0) > 0) {
+          combat.playerBleed = (combat.playerBleed || 0) + it.bleedStacks;
+          playBattleSe("debuff"); clog(`出血 ×${it.bleedStacks} 付与（自分）`);
+          renderStatusBadges();
+        }
+        break;
+      case "attackDouble":
+        dealPhySkillFromEnemyToPlayer(combat, it.phyPct);
+        if (combat.playerHp > 0) dealPhySkillFromEnemyToPlayer(combat, it.phyPct);
+        break;
+      case "attackInt":
+        dealIntSkillFromEnemyToPlayer(combat, it.intPct);
+        break;
+      case "attackIntDouble":
+        dealIntSkillFromEnemyToPlayer(combat, it.intPct);
+        if (combat.playerHp > 0) dealIntSkillFromEnemyToPlayer(combat, it.intPct);
+        break;
+      case "healSelf": {
+        const heal = Math.max(1, Math.floor((combat.enemyHpMax * it.pct) / 100));
+        combat.enemyHp = Math.min(combat.enemyHpMax, combat.enemyHp + heal);
+        if (combat.enemies?.[0]) combat.enemies[0].hp = combat.enemyHp;
+        playBattleSe("heal"); playPortraitEffect("enemy", "heal", combat.enemies?.[0]);
+        clog(`敵 HP+${heal}（自己回復）`);
+        break;
+      }
+      case "buffSelf":
+        if (it.phyAdd) combat.enemyPhy += it.phyAdd;
+        if (it.intAdd) combat.enemyInt += it.intAdd;
+        playBattleSe("buff"); playPortraitEffect("enemy", "buff", combat.enemies?.[0]);
+        clog(`敵強化: ${it.phyAdd ? "PHY+" + it.phyAdd : ""}${it.intAdd ? " INT+" + it.intAdd : ""}`);
+        break;
+      case "guard":
+        combat.enemyGuard += it.value;
+        playBattleSe("buff"); playPortraitEffect("enemy", "buff", combat.enemies?.[0]);
+        clog(`敵 GUARD +${it.value}`);
+        break;
+      case "special":
+        dealSpecialMaxHpPercentToPlayer(combat, it.pct);
+        break;
+      default:
+        clog(`不明な意図: ${it.kind}`);
+    }
+
+    // レギュレーション効果: 攻撃に出血付与（Red+） (#37)
+    if (isAttackKind && regBleedStacks > 0 && combat.playerHp > 0) {
+      combat.playerBleed = (combat.playerBleed || 0) + regBleedStacks;
+      playBattleSe("debuff");
+      clog(`出血 ×${regBleedStacks} 付与（自分・${reg.nameJa} 効果）`);
+      renderStatusBadges();
+    }
+
+    actorActed = true;
   }
 
   if (isPartyWipedOut(combat)) { endCombatLoss(); return; }
 
   // SPEC-005 Phase 3d: サブエネミー (enemies[1..]) も独立に行動。
-  // Phase 3g: 前衛アクション → 中衛 → 後衛 の順で 1 体ずつ演出を完走させる
+  // Phase 3g: 前衛 → 中衛 → 後衛 の順で 1 体ずつ演出を完走させる
+  // Phase 3i: 死亡しているユニットは丸ごとスキップ (sleep も走らせない)
   if (Array.isArray(combat.enemies) && combat.enemies.length > 1) {
-    // 前衛アクションのアニメ完了を待ってから次に進む
-    await sleep(ENEMY_ACTION_GAP_MS);
     for (let i = 1; i < combat.enemies.length; i++) {
       const sub = combat.enemies[i];
       if (!sub || sub.alive === false || (sub.hp ?? 0) <= 0) continue;
@@ -2198,6 +2207,8 @@ async function enemyTurn() {
       // (idx 進行も advanceEnemyIntent でしているため二重インクリメントしない)
       const subIt = sub.enemyIntent;
       if (!subIt) continue;
+      // 直前の生存ユニットが行動済みなら、その演出が終わるまで待つ
+      if (actorActed) await sleep(ENEMY_ACTION_GAP_MS);
       // 攻撃系以外 (guard/buffSelf/healSelf 等): 攻撃ヘルパは流用できないので
       // 自身の HP/portrait に最低限の演出だけ反映し、データには触らない。
       const isAttack = subIt.kind && (subIt.kind.startsWith("attack") || subIt.kind === "special");
@@ -2211,8 +2222,7 @@ async function enemyTurn() {
           playBattleSe("buff"); playPortraitEffect("enemy", "buff", sub);
           clog(`${sub.name || "敵"} 行動: ${subIt.kind}`);
         }
-        // 演出終了を待ってから次のサブへ
-        await sleep(ENEMY_ACTION_GAP_MS);
+        actorActed = true;
         continue;
       }
       // 一時的に combat.enemyXxx を sub のステに差し替えて既存ヘルパを再利用
@@ -2262,8 +2272,8 @@ async function enemyTurn() {
         Object.assign(combat, saved);
       }
       if (isPartyWipedOut(combat)) { endCombatLoss(); return; }
-      // Phase 3g: 攻撃アニメ (lunge 350ms / flash 380ms / fx 900ms) を待って次のサブへ
-      await sleep(ENEMY_ACTION_GAP_MS);
+      // Phase 3i: このサブが行動した。次の生存サブが来た時に sleep が入る
+      actorActed = true;
     }
   }
 
