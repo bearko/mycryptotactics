@@ -70,6 +70,7 @@ function setCurrentRegulation(id) {
     pendingShopNodeId = null;
     pendingCraftNodeId = null;
     pendingEventNodeId = null;
+    pendingScoutNodeId = null;
     postCombatSnapshot = null;
   }
 }
@@ -166,6 +167,7 @@ let combat = null;
 let pendingShopNodeId = null;
 let pendingCraftNodeId = null;
 let pendingEventNodeId = null;
+let pendingScoutNodeId = null;
 /** @type {'win'|'lose'|null} */
 let cutinKind = null;
 let cutinResolve = null;
@@ -646,10 +648,11 @@ function dealPhySkillToEnemy(s, skillPct) {
   let vuln = s.enemyVulnerable || 0;
   let total = base + critBonus + vuln;
   s.enemyVulnerable = 0;
-  // 出血（敵が出血スタックを持つとき、被物理攻撃で追加ダメージ）
+  // 出血（敵が出血スタックを持つとき、被物理攻撃で追加ダメージ）— Graphite ランド：+1 ボーナス
   if ((s.enemyBleed || 0) > 0) {
-    total += s.enemyBleed;
-    clog(`出血 ×${s.enemyBleed} 追加`);
+    const graphiteBonus = runState?.scoutLand === 'graphite' ? 1 : 0;
+    total += s.enemyBleed + graphiteBonus;
+    clog(`出血 ×${s.enemyBleed}${graphiteBonus ? ' +1⟨Graphite⟩' : ''} 追加`);
   }
   total = applyGuardToDamage("enemy", total);
   s.enemyHp = Math.max(0, s.enemyHp - total);
@@ -926,6 +929,11 @@ function syncResources() {
   if (cpEl) cpEl.textContent = String(runState.cp ?? 0);
   const mchcEl = document.getElementById("mchcVal");
   if (mchcEl) mchcEl.textContent = String(runState.mchc ?? 0);
+  // スカウトランド表示（選択済みなら名前を chapter 表示の脇に追加）
+  const chapterEl2 = document.getElementById("chapterVal");
+  if (chapterEl2 && runState.scoutLandName) {
+    chapterEl2.textContent = `${(runState.chapterIdx ?? 0) + 1}・🏳️ ${runState.scoutLandName}`;
+  }
   syncLlExtSlots();
   const layerEl = document.getElementById("layerVal");
   if (layerEl) {
@@ -1072,7 +1080,8 @@ function renderMap() {
       node.type === "rest"   ? "HP回復" :
       node.type === "shop"   ? "ショップ" :
       node.type === "craft"  ? "クラフト" :
-      node.type === "event"  ? "？イベント" : "ボス";
+      node.type === "event"  ? "？イベント" :
+      node.type === "scout"  ? "スカウト掲示板" : "ボス";
     g.appendChild(ty);
     const allowed = new Set(reachableNextNodeIds(runState.lastMapNodeId));
     if (!allowed.has(node.id)) g.style.pointerEvents = "none";
@@ -1176,7 +1185,9 @@ function tryEnterMapNode(nodeId) {
   const node = mapNodeById(nodeId);
   if (!node) return;
   if (node.type === "rest") {
-    const heal = Math.floor(runState.playerHpMax * 0.35);
+    // Ocean ランド：ヒール +20%
+    const healPct = runState.scoutLand === 'ocean' ? 0.42 : 0.35;
+    const heal = Math.floor(runState.playerHpMax * healPct);
     const actualHeal = Math.min(runState.playerHpMax, runState.playerHp + heal) - runState.playerHp;
     runState.playerHp = Math.min(runState.playerHpMax, runState.playerHp + heal);
     runState.cp = (runState.cp ?? 0) + 1;  // 休憩で Cp+1
@@ -1209,6 +1220,11 @@ function tryEnterMapNode(nodeId) {
   if (node.type === "event") {
     pendingEventNodeId = nodeId;
     openEventScreen();
+    return;
+  }
+  if (node.type === "scout") {
+    pendingScoutNodeId = nodeId;
+    openScoutScreen();
     return;
   }
   // ボス突入前の MCHC ショップ：MCHC を持っていれば LL ext と交換できる
@@ -1303,6 +1319,8 @@ function showView(name) {
   if (cv) cv.classList.toggle("hidden", name !== "craft");
   const ev = document.getElementById("eventView");
   if (ev) ev.classList.toggle("hidden", name !== "event");
+  const sv2 = document.getElementById("scoutView");
+  if (sv2) sv2.classList.toggle("hidden", name !== "scout");
   const hsv = document.getElementById("heroSelectView");
   if (hsv) hsv.classList.toggle("hidden", name !== "heroSelect");
   const rsv = document.getElementById("regulationSelectView");
@@ -1356,7 +1374,11 @@ function startCombatFromMapNode(node) {
 
   // レギュレーション効果適用 (#37)
   const reg = getCurrentRegulation();
-  const regHp = Math.max(1, Math.round(enemyDef.hp * reg.effects.hpFactor));
+  let regHp = Math.max(1, Math.round(enemyDef.hp * reg.effects.hpFactor));
+  // Ruby ランド：エリート敵 HP -10%
+  if (runState.scoutLand === 'ruby' && node.elite) {
+    regHp = Math.max(1, Math.round(regHp * 0.9));
+  }
   const regPhy = Math.max(1, Math.round(enemyDef.phy * reg.effects.atkFactor));
   const regInt = Math.max(1, Math.round(enemyDef.int * reg.effects.atkFactor));
 
@@ -1405,6 +1427,15 @@ function startCombatFromMapNode(node) {
     hasResurrection: false,
     _lastUi: null,
   };
+  // Strawberry ランド：戦闘開始時にガード+5
+  if (runState.scoutLand === 'strawberry') {
+    combat.playerGuard += 5;
+  }
+  // Grape ランド：戦闘開始時 PHY+2 / INT+2
+  if (runState.scoutLand === 'grape') {
+    combat.playerPhy += 2;
+    combat.playerInt += 2;
+  }
 
   // SPEC-005 Phase 2: heroes[] / enemies[] を並行で初期化（Phase 3 で正式に使用、現状は表示・解決用の参照のみ）
   combat.heroes = [makeHeroUnit({
@@ -1551,12 +1582,13 @@ function startPlayerTurn() {
     checkResurrection(combat);
     if (combat.playerHp <= 0) { endCombatLoss(); return; }
   }
-  // 毒ティック（敵）
+  // 毒ティック（敵）— Graphite ランド：+1 ボーナス
   if ((combat.enemyPoison || 0) > 0) {
-    const dmg = combat.enemyPoison;
+    const graphiteBonus = runState?.scoutLand === 'graphite' ? 1 : 0;
+    const dmg = combat.enemyPoison + graphiteBonus;
     combat.enemyHp = Math.max(0, combat.enemyHp - dmg);
     flashPortrait("enemy"); playPortraitEffect("enemy", "debuff");
-    clog(`毒ダメージ（敵）${dmg}`);
+    clog(`毒ダメージ（敵）${dmg}${graphiteBonus ? ' ⟨Graphite +1⟩' : ''}`);
     if (combat.enemyHp <= 0) { endCombatWin(); return; }
   }
 
@@ -1583,7 +1615,9 @@ function startPlayerTurn() {
 
   combat.energy = combat.energyMax + (combat.bonusEnergyNext || 0);
   combat.bonusEnergyNext = 0;
-  const drawN = 5;
+  // Lime ランド：戦闘開始時の手札 +1（最初のターンのみ）
+  let drawN = 5;
+  if (combat.turn === 1 && runState?.scoutLand === 'lime') drawN += 1;
   drawCards(combat, drawN);
   advanceEnemyIntent();
   renderCombat();
@@ -2142,7 +2176,9 @@ function endCombatWin() {
   const isElite = combat.isElite;
 
   // GUM
-  const earnedGold = isBoss ? chapter.bossRewardGold : isElite ? 45 : 28;
+  let earnedGold = isBoss ? chapter.bossRewardGold : isElite ? 45 : 28;
+  // Blueberry ランド：戦闘勝利時 GUM +5
+  if (runState.scoutLand === 'blueberry') earnedGold += 5;
   gold += earnedGold;
 
   // MCHC：エリート +1 / ボス +2（高難度ノード突破でドロップ）
@@ -2152,6 +2188,13 @@ function endCombatWin() {
     clog(`勝利！ GUM +${earnedGold}・💠 MCHC +${earnedMchc}`);
   } else {
     clog(`勝利！ GUM +${earnedGold}`);
+  }
+
+  // Sage ランド：戦闘勝利時 HP+3（snapshot に反映されるよう combat 側を増やす）
+  if (runState.scoutLand === 'sage') {
+    const before = combat.playerHp;
+    combat.playerHp = Math.min(combat.playerHpMax, combat.playerHp + 3);
+    if (combat.playerHp > before) clog(`Sage の知恵：HP +${combat.playerHp - before}`);
   }
 
   // 報酬カードプール（累積）
@@ -2778,17 +2821,24 @@ function openShop() {
     buyBtn.className = "shop-buy-btn action";
     buyBtn.textContent = "購入する";
     buyBtn.addEventListener("click", () => {
-      if (gold < price) { clog("GUM が足りません"); return; }
-      gold -= price;
       ensureRunState();
+      // 流星街ランド：ラン中で最初の購入が無料
+      const isMeteorFree = runState.meteorFirstFree === true;
+      if (!isMeteorFree && gold < price) { clog("GUM が足りません"); return; }
+      if (isMeteorFree) {
+        runState.meteorFirstFree = false;
+        clog(`🌌 流星街の権利：${def.extNameJa} を無料で獲得`);
+      } else {
+        gold -= price;
+      }
       runState.deck.push(copyCard(key));
       buyBtn.disabled = true;
-      buyBtn.textContent = "購入済み";
+      buyBtn.textContent = isMeteorFree ? "獲得済み（無料）" : "購入済み";
       if (goldDisp) goldDisp.textContent = String(gold);
       playSeShopBuy();
       syncResources();
-      clog(`購入: ${def.extNameJa}`);
-      renderNavigator(`「${def.extNameJa}」を購入しました！デッキが強化されましたよ！`);
+      clog(`購入: ${def.extNameJa}${isMeteorFree ? '（無料）' : ''}`);
+      renderNavigator(`「${def.extNameJa}」を${isMeteorFree ? '入手' : '購入'}しました！デッキが強化されましたよ！`);
     });
     item.appendChild(buyBtn);
 
@@ -2911,6 +2961,8 @@ function resetRun() {
   clearedChapters = new Set();
   pendingShopNodeId = null;
   pendingCraftNodeId = null;
+  pendingEventNodeId = null;
+  pendingScoutNodeId = null;
   postCombatSnapshot = null;
   stopBgm();
   dismissCutin();
@@ -2928,6 +2980,8 @@ function startRunFromChapter(chapterIdx) {
   combat = null;
   pendingShopNodeId = null;
   pendingCraftNodeId = null;
+  pendingEventNodeId = null;
+  pendingScoutNodeId = null;
   postCombatSnapshot = null;
   const chapter = CHAPTERS[chapterIdx];
   const { nodes, edges, viewH, startY } = generateChapterMap(chapter, ENEMY_DEFS);
@@ -3323,6 +3377,92 @@ function leaveEvent() {
     runState.pathNodeIds.push(pendingEventNodeId);
     runState.lastMapNodeId = pendingEventNodeId;
     pendingEventNodeId = null;
+  }
+  syncResources();
+  showView("map");
+  renderMap();
+}
+
+// ─── スカウト掲示板（9 ランド + 流星街 = 10 国のパッシブ） ─────────
+/**
+ * 元タイトル「ランド勧誘」のリスペクト。
+ * runState.scoutLand に選んだ ID が入る。各 ID に対する効果は applyScout* 関数群。
+ */
+const SCOUT_LANDS = [
+  { id: 'ocean',      name: 'Ocean',      color: '#3aa6ff', flavor: '初代キング Elvis さん',     desc: 'ヒール+20%（休憩・回復系の効果が +20%）' },
+  { id: 'strawberry', name: 'Strawberry', color: '#ff5c7a', flavor: 'ファオ帝国・初代統一国',     desc: '戦闘開始時にガード+5' },
+  { id: 'tangerine',  name: 'Tangerine',  color: '#ff9b3d', flavor: 'マエストロのギブアウェイ',   desc: 'ラン開始時に GUM +30（既に経過していても遡って付与）' },
+  { id: 'lime',       name: 'Lime',       color: '#7ed957', flavor: '初代キング yamap さん',      desc: '戦闘開始時の手札 +1' },
+  { id: 'graphite',   name: 'Graphite',   color: '#444444', flavor: '黒系（毒・出血）の聖地',     desc: '毒・出血ティック ダメージ +1' },
+  { id: 'grape',      name: 'Grape',      color: '#9c5ad9', flavor: 'バフ・支援に強いランド',     desc: '戦闘開始時に PHY +2, INT +2（バフを纏った状態でスタート）' },
+  { id: 'sage',       name: 'Sage',       color: '#7bbf7b', flavor: '賢者の知恵',                 desc: '戦闘勝利時に HP +3' },
+  { id: 'blueberry',  name: 'Blueberry',  color: '#4d6cff', flavor: 'チキン海賊団の本拠',         desc: '戦闘勝利時に GUM +5' },
+  { id: 'ruby',       name: 'Ruby',       color: '#d63031', flavor: '団長ロアの源流',             desc: 'エリート敵の HP -10%' },
+  { id: 'meteor',     name: '流星街',     color: '#7c2a2a', flavor: '初心者に一番お勧めしないランド', desc: '最初のショップ：1枚目の購入が無料' },
+];
+
+function openScoutScreen() {
+  showView("scout");
+  const el = document.getElementById("scoutView");
+  if (!el) return;
+  ensureRunState();
+
+  if (runState.scoutLand) {
+    // すでに選択済みの場合は休憩扱い
+    el.innerHTML = `
+      <div class="craft-header">
+        <h2>スカウト掲示板（選択済）</h2>
+        <p class="craft-sub">既に「${runState.scoutLand}」を選択しています。同じ掲示板は2度使えません。</p>
+      </div>
+      <button class="craft-leave-btn" id="btnLeaveScout2">← マップに戻る</button>
+    `;
+    document.getElementById("btnLeaveScout2").addEventListener("click", leaveScout);
+    return;
+  }
+
+  el.innerHTML = `
+    <div class="craft-header">
+      <h2>スカウト掲示板</h2>
+      <p class="craft-sub">所属ランドを選んでください。選んだ国の文化が、この後のラン全体に影響します。<br><span style="color:var(--muted);font-size:0.85em">※ ラン中1度だけ選択可能</span></p>
+    </div>
+  `;
+  const list = document.createElement("div");
+  list.style.cssText = "display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:0.5rem;margin:0.75rem 0";
+  SCOUT_LANDS.forEach(land => {
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "action";
+    card.style.cssText =
+      `text-align:left;padding:0.6rem 0.75rem;background:var(--card-bg);border-left:4px solid ${land.color};border-radius:6px;cursor:pointer`;
+    card.innerHTML = `
+      <div style="font-weight:700;color:${land.color}">${land.name}</div>
+      <div style="font-size:0.75rem;color:var(--muted);margin:0.15rem 0">${land.flavor}</div>
+      <div style="font-size:0.85rem">${land.desc}</div>
+    `;
+    card.addEventListener("click", () => {
+      runState.scoutLand = land.id;
+      runState.scoutLandName = land.name;
+      // tangerine: GUM +30（即時付与）
+      if (land.id === 'tangerine') {
+        gold += 30;
+        clog('🍊 Tangerine ギブアウェイ：GUM +30');
+      }
+      // meteor: 最初のショップ 1枚目無料
+      if (land.id === 'meteor') runState.meteorFirstFree = true;
+      clog(`🏳️ ランド「${land.name}」に所属：${land.desc}`);
+      leaveScout();
+    });
+    list.appendChild(card);
+  });
+  el.appendChild(list);
+}
+
+function leaveScout() {
+  ensureRunState();
+  if (pendingScoutNodeId) {
+    runState.pathNodeIds.push(pendingScoutNodeId);
+    runState.lastMapNodeId = pendingScoutNodeId;
+    pendingScoutNodeId = null;
   }
   syncResources();
   showView("map");

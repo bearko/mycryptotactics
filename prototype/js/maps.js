@@ -45,6 +45,7 @@ function labelForType(type) {
     boss: 'ボス',
     craft: 'クラフト',
     event: '？イベント',
+    scout: 'スカウト',
   }[type] ?? '?';
 }
 
@@ -184,6 +185,16 @@ export function generateChapterMap(chapter, enemyDefs = {}) {
   // エッジ: 各層 → 次層（隣接のみ）
   for (let l = 0; l < layerNodes.length - 1; l++) {
     edges.push(...connectLayersAdjacent(layerNodes[l], layerNodes[l + 1]));
+  }
+
+  // 各章に最大 1 個「スカウト掲示板」ノードを配置（既存 rest を置換）
+  // 元タイトル「ランド勧誘」のリスペクト。プレイヤーがランドを選んでパッシブを得る
+  const restNodes = nodes.filter(n => n.type === 'rest');
+  if (restNodes.length >= 2) {
+    // 真ん中あたりの rest を scout に転換
+    const target = restNodes[Math.floor(restNodes.length / 2)];
+    target.type = 'scout';
+    target.label = 'スカウト';
   }
 
   return { nodes, edges, viewH, startY };
