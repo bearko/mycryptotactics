@@ -546,10 +546,33 @@ function clog(msg) {
   el.insertBefore(p, el.firstChild);
 }
 
-/** @param {'player'|'enemy'} who @param {'hit'|'heal'|'buff'|'debuff'|'area'} kind */
-function playPortraitEffect(who, kind) {
+/** SPEC-005 Phase 3f: ユニットからエフェクト用 DOM 要素を解決
+ *  - heroes[0] / enemies[0] (前衛) → 中央スロット (#playerPortraitWrap / #enemyPortraitWrap)
+ *  - サブユニット → ghost slot 内の .ps-mini-img 要素
+ *  unit 未指定の場合は中央スロット (legacy) */
+function resolveUnitPortraitWrap(who, unit) {
+  if (unit && combat) {
+    const arr = who === "enemy" ? combat.enemies : combat.heroes;
+    const idx = Array.isArray(arr) ? arr.indexOf(unit) : -1;
+    if (idx > 0) {
+      const sideEl = document.querySelector(who === "enemy" ? ".party-side--enemy" : ".party-side--player");
+      if (sideEl) {
+        const filled = sideEl.querySelectorAll(".party-slot--filled .ps-mini");
+        // renderEnemy/PartySubUnits の slice(1).forEach 順に対応
+        // i=0 → 上 ghost (filled[0]) / i=1 → 下 ghost (filled[1])
+        const subOrder = idx - 1;
+        if (filled[subOrder]) return filled[subOrder];
+      }
+    }
+  }
+  // 中央スロットフォールバック
   const wrapId = who === "enemy" ? "enemyPortraitWrap" : "playerPortraitWrap";
-  const wrap = document.getElementById(wrapId);
+  return document.getElementById(wrapId);
+}
+
+/** @param {'player'|'enemy'} who @param {'hit'|'heal'|'buff'|'debuff'|'area'} kind @param {object} [unit] 被弾/対象ユニット (省略時は中央スロット) */
+function playPortraitEffect(who, kind, unit) {
+  const wrap = resolveUnitPortraitWrap(who, unit);
   if (!wrap) return;
   const sheet =
     kind === "heal"   ? BATTLE_EFFECT_SPRITE.heal() :
@@ -577,18 +600,16 @@ function spawnStatFloat(anchorId, delta) {
   setTimeout(() => el.remove(), 900);
 }
 
-function flashPortrait(which) {
-  const id = which === "enemy" ? "enemyPortraitWrap" : "playerPortraitWrap";
-  const wrap = document.getElementById(id);
+function flashPortrait(which, unit) {
+  const wrap = resolveUnitPortraitWrap(which, unit);
   if (!wrap) return;
   wrap.classList.add("portrait-hit");
   setTimeout(() => wrap.classList.remove("portrait-hit"), 380);
 }
 
 /** 攻撃側のポートレートを突進アニメで動かす（player = 右へ, enemy = 左へ） */
-function lungePortrait(who) {
-  const id = who === "enemy" ? "enemyPortraitWrap" : "playerPortraitWrap";
-  const wrap = document.getElementById(id);
+function lungePortrait(who, unit) {
+  const wrap = resolveUnitPortraitWrap(who, unit);
   if (!wrap) return;
   const cls = who === "player" ? "portrait-lunge--player" : "portrait-lunge--enemy";
   wrap.classList.remove(cls);   // reset if still running
@@ -685,8 +706,8 @@ function dealPhySkillToEnemy(s, skillPct) {
   }
   applyHpDeltaToEnemy(s, target, -total);
   lungePortrait("player");
-  flashPortrait("enemy");
-  playPortraitEffect("enemy", "hit");
+  flashPortrait("enemy", target);
+  playPortraitEffect("enemy", "hit", target);
   if (total > 0) playBattleSe("hit");
   if (critBonus > 0) spawnCritDisplay("enemy", total);
   clog(
@@ -717,8 +738,8 @@ function dealIntSkillToEnemy(s, minPct, maxPct, forceCrit = false) {
   }
   applyHpDeltaToEnemy(s, target, -total);
   lungePortrait("player");
-  flashPortrait("enemy");
-  playPortraitEffect("enemy", "hit");
+  flashPortrait("enemy", target);
+  playPortraitEffect("enemy", "hit", target);
   if (total > 0) playBattleSe("hit");
   if (critBonus > 0) spawnCritDisplay("enemy", total);
   clog(
@@ -796,9 +817,10 @@ function dealPhySkillFromEnemyToPlayer(s, skillPct) {
   // 対象ヒーローへ HP 反映
   applyHpDeltaToHero(s, target, -total);
   checkResurrection(s);
+  // SPEC-005 Phase 3f: エフェクトを実際の被弾ヒーローに向ける
   lungePortrait("enemy");
-  flashPortrait("player");
-  playPortraitEffect("player", "hit");
+  flashPortrait("player", target);
+  playPortraitEffect("player", "hit", target);
   if (total > 0) playBattleSe("hit");
   if (critBonus > 0) spawnCritDisplay("player", total);
   clog(
@@ -831,8 +853,8 @@ function dealIntSkillFromEnemyToPlayer(s, skillPct) {
   applyHpDeltaToHero(s, target, -total);
   checkResurrection(s);
   lungePortrait("enemy");
-  flashPortrait("player");
-  playPortraitEffect("player", "hit");
+  flashPortrait("player", target);
+  playPortraitEffect("player", "hit", target);
   if (total > 0) playBattleSe("hit");
   if (critBonus > 0) spawnCritDisplay("player", total);
   clog(
@@ -859,8 +881,8 @@ function dealSpecialMaxHpPercentToPlayer(s, pct) {
   applyHpDeltaToHero(s, target, -raw);
   checkResurrection(s);
   lungePortrait("enemy");
-  flashPortrait("player");
-  playPortraitEffect("player", "area");
+  flashPortrait("player", target);
+  playPortraitEffect("player", "area", target);
   if (raw > 0) playBattleSe("area");
   clog(`特殊ダメージ（最大HP ${pct}%）→ HP-${raw}`);
 }
@@ -2003,7 +2025,7 @@ async function applyKaihimePassive(s) {
   // SPEC-005 Phase 3: foremost living enemy へ
   const target = getPlayerAttackTargetEnemy(s);
   applyHpDeltaToEnemy(s, target, -bonusDmg);
-  playPortraitEffect("enemy", "hit");
+  playPortraitEffect("enemy", "hit", target);
   playBattleSe("hit");
   clog(`【浪切】発動！ 追加ダメージ ${bonusDmg}`);
   renderCombat();
@@ -2025,7 +2047,7 @@ async function applyZhangPassive(s) {
   // SPEC-005 Phase 3: foremost living enemy へ
   const target = getPlayerAttackTargetEnemy(s);
   applyHpDeltaToEnemy(s, target, -counterDmg);
-  playPortraitEffect("enemy", "hit");
+  playPortraitEffect("enemy", "hit", target);
   playBattleSe("hit");
   clog(`【遼来遼来】発動！ 反撃 ${counterDmg} ダメージ`);
   renderCombat();
