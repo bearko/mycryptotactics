@@ -532,7 +532,7 @@ function useLlExt(slotIdx) {
   if (!ext) return;
   runState.llExtSlots[slotIdx] = null;
   applyLlExtEffect(ext);
-  if (combat.enemyHp <= 0) { endCombatWin(); return; }
+  if (combat.enemyHp <= 0 || areAllEnemiesDefeated(combat)) { endCombatWin(); return; }
   if (combat.playerHp <= 0 || isPartyWipedOut(combat)) { endCombatLoss(); return; }
   syncLlExtSlots();
   renderCombat();
@@ -633,7 +633,32 @@ function drawCards(s, n) {
 }
 
 // ─── プレイヤー攻撃 ───────────────────────────────────────────────
+/** SPEC-005 Phase 3c: プレイヤー攻撃の対象 = foremost living enemy */
+function getPlayerAttackTargetEnemy(s) {
+  if (!s || !Array.isArray(s.enemies)) return null;
+  return foremostAlive(s.enemies) || s.enemies[0] || null;
+}
+
+/** 敵 HP を更新し、必要に応じて legacy フィールドを同期 */
+function applyHpDeltaToEnemy(s, enemy, delta) {
+  if (!enemy) return;
+  enemy.hp = Math.max(0, (enemy.hp ?? 0) + delta);
+  if (enemy.hp <= 0) enemy.alive = false;
+  if (s.enemies && enemy === s.enemies[0]) {
+    s.enemyHp = enemy.hp;
+  }
+}
+
+/** 全エネミー死亡判定 */
+function areAllEnemiesDefeated(s) {
+  if (!s || !Array.isArray(s.enemies) || s.enemies.length === 0) {
+    return (s?.enemyHp ?? 0) <= 0;
+  }
+  return s.enemies.every(e => !e || e.alive === false || (e.hp ?? 0) <= 0);
+}
+
 function dealPhySkillToEnemy(s, skillPct) {
+  const target = getPlayerAttackTargetEnemy(s);
   const cut = cutRateFromPhy(s.enemyPhy);
   let base = phyIntDamageAfterCut(s.playerPhy, skillPct, cut);
   let critBonus = 0;
@@ -649,8 +674,11 @@ function dealPhySkillToEnemy(s, skillPct) {
     total += s.enemyBleed;
     clog(`出血 ×${s.enemyBleed} 追加`);
   }
-  total = applyGuardToDamage("enemy", total);
-  s.enemyHp = Math.max(0, s.enemyHp - total);
+  // ガードは前衛 (enemies[0]) のみ
+  if (target === s.enemies?.[0]) {
+    total = applyGuardToDamage("enemy", total);
+  }
+  applyHpDeltaToEnemy(s, target, -total);
   lungePortrait("player");
   flashPortrait("enemy");
   playPortraitEffect("enemy", "hit");
@@ -669,6 +697,7 @@ function dealPhySkillToEnemyRange(s, minPct, maxPct) {
 }
 
 function dealIntSkillToEnemy(s, minPct, maxPct, forceCrit = false) {
+  const target = getPlayerAttackTargetEnemy(s);
   const skillPct = randomSkillRatePct(minPct, maxPct);
   const cut = cutRateFromInt(s.enemyInt);
   let base = phyIntDamageAfterCut(s.playerInt, skillPct, cut);
@@ -678,8 +707,10 @@ function dealIntSkillToEnemy(s, minPct, maxPct, forceCrit = false) {
     clog("クリティカル（INT）");
   }
   let total = base + critBonus;
-  total = applyGuardToDamage("enemy", total);
-  s.enemyHp = Math.max(0, s.enemyHp - total);
+  if (target === s.enemies?.[0]) {
+    total = applyGuardToDamage("enemy", total);
+  }
+  applyHpDeltaToEnemy(s, target, -total);
   lungePortrait("player");
   flashPortrait("enemy");
   playPortraitEffect("enemy", "hit");
@@ -1387,6 +1418,35 @@ function startCombatFromMapNode(node) {
   })];
   combat.activeHeroIdx = 0;
 
+  // SPEC-005 Phase 3c: 多エネミースポーン (fight ノードのみ。boss / elite は 1 体維持)
+  // 単純化のため fight 時は party.length と同数 (最大 3) のエネミーを章プールから補充
+  if (!isBoss && !node.elite && partyArr.length > 1) {
+    const desiredCount = Math.min(3, partyArr.length);
+    const pool = (chapter.enemyPool || []).filter(id => id && id !== enemyDef.id);
+    for (let i = 1; i < desiredCount; i++) {
+      if (pool.length === 0) break;
+      const pick = pool[Math.floor(Math.random() * pool.length)];
+      const def = ENEMY_DEFS[pick];
+      if (!def) continue;
+      const subHp = Math.max(1, Math.round(def.hp * reg.effects.hpFactor));
+      const subPhy = Math.max(1, Math.round(def.phy * reg.effects.atkFactor));
+      const subInt = Math.max(1, Math.round(def.int * reg.effects.atkFactor));
+      combat.enemies.push(makeEnemyUnit({
+        position: i,
+        defId: def.id,
+        name: def.name,
+        imgId: def.imgId,
+        hp: subHp, hpMax: subHp,
+        phy: subPhy, int: subInt, agi: def.agi,
+        phyBase: subPhy, intBase: subInt, agiBase: def.agi,
+        shield: def.initialShield || 0,
+        intentRota: def.intentRota,
+        bossPhase: -1,
+        isBoss: false,
+      }));
+    }
+  }
+
   combat.drawPile = shuffle(combat.deck.map((c) => copyCard(c.libraryKey)));
   showView("combat");
   startBgmCombat();
@@ -1512,7 +1572,7 @@ function startPlayerTurn() {
     combat.enemyHp = Math.max(0, combat.enemyHp - dmg);
     flashPortrait("enemy"); playPortraitEffect("enemy", "debuff");
     clog(`毒ダメージ（敵）${dmg}`);
-    if (combat.enemyHp <= 0) { endCombatWin(); return; }
+    if (combat.enemyHp <= 0 || areAllEnemiesDefeated(combat)) { endCombatWin(); return; }
   }
 
   // 突撃ペナルティ
@@ -1833,8 +1893,10 @@ function renderCombat() {
 
   renderStatusBadges();
   diffUiFloats();
-  // SPEC-005 Phase 3a: party.length > 1 ならサブヒーローを ghost slot に表示（表示のみ、Phase 3b で戦闘ロジック統合予定）
+  // SPEC-005 Phase 3a: party.length > 1 ならサブヒーローを ghost slot に表示
   renderPartySubHeroes();
+  // SPEC-005 Phase 3c: enemies.length > 1 ならサブエネミーも ghost slot に表示
+  renderEnemySubUnits();
 
   const handEl = document.getElementById("hand");
   handEl.innerHTML = "";
@@ -1962,11 +2024,11 @@ async function playCard(idx) {
   card.play(combat);
   // カード効果を UI に反映してからパッシブへ
   renderCombat();
-  if (combat.enemyHp <= 0) { endCombatWin(); return; }
+  if (combat.enemyHp <= 0 || areAllEnemiesDefeated(combat)) { endCombatWin(); return; }
   // 甲斐姫「浪切」: スキルカード使用後に50%の確率で追加ダメージ（カットイン付き）
   await applyKaihimePassive(combat);
   if (!combat) return;
-  if (combat.enemyHp <= 0) { endCombatWin(); return; }
+  if (combat.enemyHp <= 0 || areAllEnemiesDefeated(combat)) { endCombatWin(); return; }
   renderCombat();
 }
 
@@ -2056,7 +2118,7 @@ async function enemyTurn() {
   renderCombat();
   await applyZhangPassive(combat);
   if (!combat) return;
-  if (combat.enemyHp <= 0) { endCombatWin(); return; }
+  if (combat.enemyHp <= 0 || areAllEnemiesDefeated(combat)) { endCombatWin(); return; }
 
   combat.turn++;
   startPlayerTurn();
@@ -3105,6 +3167,32 @@ function renderPartySubHeroes() {
       `<img class="ps-mini-img" src="${portraitImg}" alt="${escapeHtml(hero.name || "")}" onerror="this.style.opacity='0.2'" />` +
       `<div class="ps-mini-name">${escapeHtml(hero.name || "")}</div>` +
       `<div class="ps-mini-hp">♥${hero.hp ?? "?"}/${hero.hpMax ?? "?"}</div>` +
+      `</div>`;
+  });
+}
+
+// ─── 戦闘中: サブエネミー（enemies[1]/enemies[2]）を右側 ghost スロットに表示 ────
+// SPEC-005 Phase 3c: 表示 + プレイヤー攻撃の対象になる。各エネミーの個別 intent 表示は今後。
+function renderEnemySubUnits() {
+  const enemySide = document.querySelector(".party-side--enemy");
+  if (!enemySide || !combat || !Array.isArray(combat.enemies)) return;
+  const ghosts = enemySide.querySelectorAll(".party-slot--ghost");
+  ghosts.forEach((slot) => {
+    slot.classList.remove("party-slot--filled");
+    slot.innerHTML = "";
+  });
+  const subs = combat.enemies.slice(1);
+  subs.forEach((en, i) => {
+    const slot = ghosts[i === 0 ? 0 : ghosts.length - 1];
+    if (!slot) return;
+    slot.classList.add("party-slot--filled");
+    const isDead = en.alive === false || (en.hp != null && en.hp <= 0);
+    const portraitImg = en.imgId ? ENEMY_IMG(en.imgId) : "";
+    slot.innerHTML =
+      `<div class="ps-mini${isDead ? " ps-mini--dead" : ""}" title="${escapeHtml(en.name || "")}">` +
+      `<img class="ps-mini-img" src="${portraitImg}" alt="${escapeHtml(en.name || "")}" onerror="this.style.opacity='0.2'" />` +
+      `<div class="ps-mini-name">${escapeHtml(en.name || "")}</div>` +
+      `<div class="ps-mini-hp">♥${en.hp ?? "?"}/${en.hpMax ?? "?"}</div>` +
       `</div>`;
   });
 }
