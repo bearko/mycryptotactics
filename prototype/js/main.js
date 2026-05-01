@@ -1555,6 +1555,21 @@ function advanceEnemyIntent() {
   }
   combat.enemyIntent = combat.intentRota[combat.intentRotaIdx % combat.intentRota.length];
   combat.intentRotaIdx++;
+  // 旧コード互換: enemies[0] の intent も同期
+  if (combat.enemies && combat.enemies[0]) {
+    combat.enemies[0].enemyIntent = combat.enemyIntent;
+  }
+  // SPEC-005 Phase 3d: サブエネミーも次の intent を表示用に設定（インクリメントもここで）
+  if (combat.enemies && combat.enemies.length > 1) {
+    for (let i = 1; i < combat.enemies.length; i++) {
+      const sub = combat.enemies[i];
+      if (!sub || sub.alive === false || (sub.hp ?? 0) <= 0) { if (sub) sub.enemyIntent = null; continue; }
+      const rota = sub.intentRota || [];
+      if (rota.length === 0) { sub.enemyIntent = null; continue; }
+      sub.enemyIntent = rota[(sub.intentRotaIdx ?? 0) % rota.length];
+      sub.intentRotaIdx = (sub.intentRotaIdx ?? 0) + 1;
+    }
+  }
 }
 
 // ─── プレイヤーターン開始 ─────────────────────────────────────────
@@ -2130,14 +2145,12 @@ async function enemyTurn() {
     for (let i = 1; i < combat.enemies.length; i++) {
       const sub = combat.enemies[i];
       if (!sub || sub.alive === false || (sub.hp ?? 0) <= 0) continue;
-      // 次の intent
-      const rota = sub.intentRota || [];
-      if (rota.length === 0) continue;
-      const idx = (sub.intentRotaIdx ?? 0) % rota.length;
-      const subIt = rota[idx];
-      sub.intentRotaIdx = (sub.intentRotaIdx ?? 0) + 1;
+      // SPEC-005 Phase 3d: advanceEnemyIntent で割り当て済みの sub.enemyIntent を使う
+      // (idx 進行も advanceEnemyIntent でしているため二重インクリメントしない)
+      const subIt = sub.enemyIntent;
+      if (!subIt) continue;
       // 攻撃系のみ (heal/buff/guard はスキップ)
-      if (!subIt || !subIt.kind || !subIt.kind.startsWith("attack") && subIt.kind !== "special") continue;
+      if (!subIt.kind || (!subIt.kind.startsWith("attack") && subIt.kind !== "special")) continue;
       // 一時的に combat.enemyXxx を sub のステに差し替えて既存ヘルパを再利用
       const saved = {
         enemyPhy: combat.enemyPhy, enemyInt: combat.enemyInt, enemyAgi: combat.enemyAgi,
@@ -3228,8 +3241,37 @@ function renderPartySubHeroes() {
   });
 }
 
+/** SPEC-005 Phase 3d: 個別ユニットの intent からプレイヤー向け表示テキスト */
+function intentTextForUnit(unit) {
+  if (!unit || !unit.enemyIntent) return "";
+  const it = unit.enemyIntent;
+  // ダメージ概算は legacy のヘルパが combat.playerXxx を読むため、unit のステを一時参照
+  const phy = unit.phy ?? 0;
+  const int = unit.int ?? 0;
+  const playerPhy = combat?.playerPhy ?? 0;
+  const playerInt = combat?.playerInt ?? 0;
+  const playerHpMax = combat?.playerHpMax ?? 0;
+  const cutPhy = Math.min(40, Math.floor(playerPhy / 2));
+  const cutInt = Math.min(40, Math.floor(playerInt / 2));
+  const phyDmg = (pct) => Math.max(0, Math.floor(phy * pct / 100 * (100 - cutPhy) / 100));
+  const intDmg = (pct) => Math.max(0, Math.floor(int * pct / 100 * (100 - cutInt) / 100));
+  switch (it.kind) {
+    case "attack":         return `先頭：${phyDmg(it.phyPct)}`;
+    case "attackPoison":   return `先頭：${phyDmg(it.phyPct)}＋毒×${it.poisonStacks}`;
+    case "attackBleed":    return `先頭：${phyDmg(it.phyPct)}＋出血×${it.bleedStacks}`;
+    case "attackDouble":   return `先頭：${phyDmg(it.phyPct)}×2`;
+    case "attackInt":      return `先頭：${intDmg(it.intPct)}（INT）`;
+    case "attackIntDouble":return `先頭：${intDmg(it.intPct)}（INT）×2`;
+    case "healSelf":       return `回復`;
+    case "buffSelf":       return `強化`;
+    case "guard":          return `防御 +${it.value}`;
+    case "special":        return `特殊：${Math.max(1, Math.floor(playerHpMax * it.pct / 100))}`;
+    default: return "";
+  }
+}
+
 // ─── 戦闘中: サブエネミー（enemies[1]/enemies[2]）を右側 ghost スロットに表示 ────
-// SPEC-005 Phase 3c: 表示 + プレイヤー攻撃の対象になる。各エネミーの個別 intent 表示は今後。
+// SPEC-005 Phase 3c+3d: 表示 + プレイヤー攻撃の対象 + 個別 intent バルーン
 function renderEnemySubUnits() {
   const enemySide = document.querySelector(".party-side--enemy");
   if (!enemySide || !combat || !Array.isArray(combat.enemies)) return;
@@ -3245,8 +3287,10 @@ function renderEnemySubUnits() {
     slot.classList.add("party-slot--filled");
     const isDead = en.alive === false || (en.hp != null && en.hp <= 0);
     const portraitImg = en.imgId ? ENEMY_IMG(en.imgId) : "";
+    const intentTxt = isDead ? "" : intentTextForUnit(en);
     slot.innerHTML =
       `<div class="ps-mini${isDead ? " ps-mini--dead" : ""}" title="${escapeHtml(en.name || "")}">` +
+      (intentTxt ? `<div class="ps-mini-intent">${escapeHtml(intentTxt)}</div>` : "") +
       `<img class="ps-mini-img" src="${portraitImg}" alt="${escapeHtml(en.name || "")}" onerror="this.style.opacity='0.2'" />` +
       `<div class="ps-mini-name">${escapeHtml(en.name || "")}</div>` +
       `<div class="ps-mini-hp">♥${en.hp ?? "?"}/${en.hpMax ?? "?"}</div>` +

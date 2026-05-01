@@ -333,6 +333,14 @@
     .party-slot--filled .ps-mini-hp {
       font-size: 0.55rem; color: #e07080; font-weight: 700;
     }
+    .party-slot--filled .ps-mini-intent {
+      background: rgba(20,16,32,0.92); color: var(--text);
+      border: 1px solid #ff8090; border-radius: 4px;
+      padding: 1px 4px; font-size: 0.55rem; font-weight: 700;
+      max-width: 80px; line-height: 1.15; text-align: center;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .party-slot--filled .ps-mini--dead .ps-mini-intent { display: none; }
 
     .combatant { display: flex; flex-direction: column; align-items: center; gap: 0.18rem; }
 
