@@ -34,7 +34,7 @@ const LS_PLAYER_NAME = "mct.playerName";
  *
  * 上書きする場合は localStorage.setItem("mct.rankingApiUrl", "<your URL>") で可能。
  */
-const _DEFAULT_API_URL_ENC = "aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvcy9BS2Z5Y2J3YTJOYU5BOGJZTThkVUxMTFVfMTMwaHRMTUhmR0daVWF5S3VuYlNnSE1BMjVNWlNzSDdmbF9Fd25KcjFZcnBDb3RYZy9leGVj";
+const _DEFAULT_API_URL_ENC = "aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvcy9BS2Z5Y2J4MVJScnhMMzFPSHFXY1lkWk90QW5OWUtVX1VGUWtxblBVeURRYkRESThiVGgxVWFUSHhPYWxFQ2tuTkhXVHIzeHFsQS9leGVj";
 function _decodeDefault() {
   try {
     return typeof atob === "function" ? atob(_DEFAULT_API_URL_ENC) : null;
