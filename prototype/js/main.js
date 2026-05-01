@@ -36,6 +36,12 @@ import { CHAPTERS } from "./chapters.js";
 import { generateChapterMap } from "./maps.js";
 import { LL_EXT_POOL } from "./ll-extensions.js";
 import {
+  ACHIEVEMENTS,
+  tryUnlock as tryUnlockAchievement,
+  recordVisitedLand,
+  openAchievementsModal,
+} from "./achievements.js";
+import {
   resolveTargets,
   makeHeroUnit,
   makeEnemyUnit,
@@ -1298,6 +1304,7 @@ function openMchcShopModal(onClose) {
             const slot = runState.llExtSlots.findIndex(s => s === null);
             if (slot >= 0) runState.llExtSlots[slot] = ll;
             clog(`💠 MCHC -1：「${ll.name}」を Legendary 枠に獲得`);
+            tryUnlockAchievement('mchc-shop-buy');
             syncResources();
             renderShop();
           });
@@ -1486,6 +1493,7 @@ function startCombatFromMapNode(node) {
     }
     clog(`【陣】「${jin.name}」発動：${jin.desc}`);
   }
+  if (combat.activeJins.length > 0) tryUnlockAchievement('jin-active');
 
   // SPEC-005 Phase 2: heroes[] / enemies[] を並行で初期化（Phase 3 で正式に使用、現状は表示・解決用の参照のみ）
   combat.heroes = [makeHeroUnit({
@@ -2263,15 +2271,18 @@ function endCombatWin() {
       runState.deck.push(copyCard("cardChocoFragment"));
       clog("🍫 「チョコ片」を入手！（耐久勝利の証）");
       renderNavigator("ヨシュカ・チョコの30ターン耐久に成功しました！「チョコ片」をデッキに追加しました。");
+      tryUnlockAchievement('yoshiko-choco-endured');
     } else if (isChoco) {
       // 通常撃破は基本起こらないが、念のため
       runState.deck.push(copyCard("cardChocoFragment"));
       clog("🍫 まさかの撃破！「チョコ片」を入手");
+      tryUnlockAchievement('yoshiko-choco-endured');
     } else {
       // ヨシュカ通常撃破：報酬は微妙な GUM のみ
       gold += 12;
       clog("🍵 ヨシュカ撃破：GUM +12（…報酬は微妙）");
       renderNavigator("ヨシュカは弱すぎて1日で討伐されました。報酬は微妙でしたね…");
+      tryUnlockAchievement('yoshiko-defeated');
     }
     runState.activeInterlude = null;
     combat = null;
@@ -2430,6 +2441,12 @@ function advanceAfterRewardPick(libraryKey) {
       postCombatSnapshot = null;
       if (runState.runComplete) {
         // 全章クリア → ゲームオーバー画面（クリア）
+        tryUnlockAchievement('first-clear');
+        // 武田信玄ナーフ後カードを含むデッキでクリア → 専用実績
+        const hasShingen = runState.deck.some(
+          c => c.libraryKey === 'cardShingenPre' || c.libraryKey === 'cardShingenPost'
+        );
+        if (hasShingen) tryUnlockAchievement('shingen-clear');
         lastReportSnapshot = captureRunSnapshot({ isCleared: true, defeatedBy: null });
         showView("over");
         document.getElementById("gameOverMsg").textContent =
@@ -3457,6 +3474,7 @@ function openCraftBurn() {
       });
       runState.magicStones = (runState.magicStones ?? 0) + 1;
       clog(`🔥 焼却：${burned.join(' + ')} → 💎 輝く原石 +1（合計 ${runState.magicStones}）`);
+      tryUnlockAchievement('ema3-burn');
       leaveCraft();
     });
     el.appendChild(confirm);
@@ -3642,6 +3660,8 @@ function openScoutScreen() {
       // meteor: 最初のショップ 1枚目無料
       if (land.id === 'meteor') runState.meteorFirstFree = true;
       clog(`🏳️ ランド「${land.name}」に所属：${land.desc}`);
+      // ラン横断で全ランド達成（実績）
+      recordVisitedLand(land.id);
       leaveScout();
     });
     list.appendChild(card);
@@ -3928,6 +3948,14 @@ function init() {
     titleEl.addEventListener("click", dismissTitle);
     titleEl.addEventListener("keydown", (ev) => {
       if (ev.key === "Enter" || ev.key === " ") dismissTitle();
+    });
+  }
+  // 実績ボタン（タイトル画面の上から押せる、伝播は止める）
+  const btnAch = document.getElementById("btnTitleAchievements");
+  if (btnAch) {
+    btnAch.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      openAchievementsModal();
     });
   }
   // ヘッダーアイコン (#37) を初期化
