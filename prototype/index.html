@@ -304,13 +304,13 @@
     .arena-inner {
       position: relative; z-index: 1;
       display: flex; align-items: flex-end; justify-content: space-between;
-      padding: 0.6rem 0.3rem 0.75rem;
-      min-height: 240px;
+      padding: 0.6rem 0.2rem 0.75rem;
+      min-height: 220px;
     }
     /* SPEC-005 Phase 3h: 3 スロット同サイズ + V 字配置 (front=中央寄り・低い / back=外側・高い) */
     .party-side {
-      display: flex; gap: 0.25rem; align-items: flex-end;
-      flex: 1; max-width: 47%;
+      display: flex; gap: 0.2rem; align-items: flex-end;
+      flex: 1; max-width: 48%;
     }
     .party-side--player { justify-content: flex-end; }
     .party-side--enemy  { justify-content: flex-start; }
@@ -318,10 +318,10 @@
       flex: 0 0 auto; min-width: 0;
       display: flex; flex-direction: column; align-items: center;
     }
-    /* V 字段差: front は最も低く、back は最も高い (画面では下向きの V) */
+    /* V 字段差: portrait 70px に対して 22 / 44px */
     .party-slot--front { margin-bottom: 0; }
-    .party-slot--mid   { margin-bottom: 26px; }
-    .party-slot--back  { margin-bottom: 52px; }
+    .party-slot--mid   { margin-bottom: 22px; }
+    .party-slot--back  { margin-bottom: 44px; }
     /* 空スロット (パーティ未充足) は非表示 */
     .party-slot--mid:empty,
     .party-slot--back:empty { display: none; }
@@ -331,14 +331,37 @@
     /* SPEC-006 Phase 4g: Phase 3j のアクティブキャスター切替 (▶ ACTIVE バッジ /
        portrait click / hover lift) は廃止。caster は card 券面で常時表示される。 */
 
+    /* スマホ (≤480px): 6 ユニット (前衛/中衛/後衛 ×2) 全表示のため更に縮小
+       portrait 70 → 50 / info 56 → 42 / V 字段差 22 → 14, 44 → 28 */
+    @media (max-width: 480px) {
+      .arena-inner { padding: 0.4rem 0.15rem 0.6rem; min-height: 190px; }
+      .party-side { gap: 0.15rem; max-width: 49%; }
+      .combatant-portrait-wrap { width: 50px; height: 50px; }
+      .combatant-portrait { width: 50px; height: 50px; }
+      .combatant-info { width: 42px; gap: 0.1rem; }
+      .combatant-name { font-size: 0.5rem; }
+      .hp-bar-track { height: 4px; }
+      .hp-bar-nums { font-size: 0.5rem; }
+      .sbadge { font-size: 0.42rem; padding: 0 1px; }
+      .sbadge::before { font-size: 0.38rem; margin-right: 1px; }
+      .intent-bubble { font-size: 0.42rem; padding: 0.15rem 0.22rem; max-width: 56px; border-radius: 5px; }
+      .intent-bubble .intent-label { font-size: 0.38rem; }
+      .party-slot--mid  { margin-bottom: 14px; }
+      .party-slot--back { margin-bottom: 28px; }
+      .vs-mark { font-size: 0.95rem; }
+      .vs-col { min-width: 1.4rem; }
+    }
+
     .combatant { display: flex; flex-direction: column; align-items: center; gap: 0.18rem; }
 
     /* Portrait */
+    /* SPEC-005 + UX 改善 2026-05-02: ベース portrait を 80% に縮小 (88 → 70px)。
+       スマホでは 6 ユニット (前衛/中衛/後衛 ×2) 全表示のため更に 50px へ。 */
     .combatant-portrait-wrap {
-      position: relative; width: 88px; height: 88px;
+      position: relative; width: 70px; height: 70px;
     }
     .combatant-portrait {
-      width: 88px; height: 88px; object-fit: contain;
+      width: 70px; height: 70px; object-fit: contain;
       image-rendering: pixelated; image-rendering: crisp-edges;
       border-radius: 6px; display: block;
     }
@@ -357,14 +380,14 @@
       border: 1px solid #6a3820;
     }
 
-    /* Combatant info */
-    .combatant-info { width: 110px; display: flex; flex-direction: column; gap: 0.14rem; }
+    /* Combatant info — HP ゲージ幅 = 56px (ポートレート 70px の 80%) */
+    .combatant-info { width: 56px; display: flex; flex-direction: column; gap: 0.14rem; }
     .combatant-name {
-      font-size: 0.68rem; font-weight: 700; text-align: center; color: var(--text);
+      font-size: 0.6rem; font-weight: 700; text-align: center; color: var(--text);
       overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
 
-    /* HP gauge */
+    /* HP gauge — combatant-info の width に追従 */
     .hp-bar-row { display: flex; flex-direction: column; gap: 2px; }
     .hp-bar-track {
       height: 5px; background: #2a2438; border-radius: 3px; overflow: hidden; width: 100%;
@@ -379,14 +402,14 @@
       font-variant-numeric: tabular-nums; line-height: 1;
     }
 
-    /* Stat badges row */
+    /* Stat badges row — combatant-info の 56px に収まるよう wrap、フォント縮小 */
     .stat-row-badges {
       display: flex; flex-wrap: wrap; gap: 2px; justify-content: center;
     }
     .sbadge {
-      font-size: 0.58rem; font-weight: 700;
+      font-size: 0.5rem; font-weight: 700;
       border: 1px solid #4a4060; border-radius: 3px;
-      padding: 1px 3px; color: var(--text); line-height: 1.3;
+      padding: 0 2px; color: var(--text); line-height: 1.25;
       background: rgba(10,8,18,0.7); white-space: nowrap;
       position: relative;
     }
@@ -395,7 +418,7 @@
     .sbadge-agi { color: #8adf6a; border-color: #205020; }
     .sbadge-grd { color: #b0a8c0; border-color: #4a4068; }
     .sbadge-shd { color: var(--accent); border-color: #5a4020; }
-    .sbadge::before { content: attr(data-label); margin-right: 2px; opacity: 0.6; font-size: 0.52rem; }
+    .sbadge::before { content: attr(data-label); margin-right: 2px; opacity: 0.6; font-size: 0.45rem; }
 
     /* stat-anchor for float animations */
     .stat-anchor { position: relative; display: inline-block; min-height: 1em; }
@@ -434,16 +457,17 @@
       text-shadow: 0 0 20px #c4a35a66; letter-spacing: 0.05em;
     }
 
-    /* Intent bubble (above enemy portrait) */
+    /* Intent bubble (above enemy portrait) — 中身は折返し許容、フォントは小さく */
     .intent-bubble {
-      font-size: 0.6rem; color: #ffd4a8; text-align: center; line-height: 1.3;
-      padding: 0.28rem 0.4rem;
-      background: #1a1018ee; border: 1px solid #6a4048; border-radius: 7px;
-      max-width: 100px; margin-bottom: 0.2rem; letter-spacing: 0.03em;
+      font-size: 0.5rem; color: #ffd4a8; text-align: center; line-height: 1.25;
+      padding: 0.2rem 0.3rem;
+      background: #1a1018ee; border: 1px solid #6a4048; border-radius: 6px;
+      max-width: 70px; margin-bottom: 0.15rem; letter-spacing: 0.02em;
+      white-space: normal; word-break: break-word;
     }
     .intent-bubble .intent-label {
-      display: block; font-size: 0.5rem; color: var(--muted);
-      margin-bottom: 0.1rem; letter-spacing: 0.1em;
+      display: block; font-size: 0.42rem; color: var(--muted);
+      margin-bottom: 0.08rem; letter-spacing: 0.08em;
     }
 
     /* Portrait FX */
