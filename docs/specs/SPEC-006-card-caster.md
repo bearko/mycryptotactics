@@ -162,8 +162,77 @@ libraryKey, extId, extNameJa, skillNameJa, skillIcon, cost, type, caster, effect
 ```
 
 - **キャスター表示エリア**: エクステ画像の右下に重ねて配置。バトル中は **解決された個別ヒーローの portrait**。アイコン下にキャスターロール（"先頭" 等の小ラベル）を併記
-- **効果エリア**: 縦に 1 〜 N 行（カード設計時の `effects` 配列）。左カラムにターゲット (色付きピル: 自身=緑 / 味方=緑 / 敵=赤)、右カラムに係数テキスト
+- **効果エリア**: 縦に 1 〜 N 行（カード設計時の `effects` 配列）。左カラム (約 60-80px 幅) にターゲットラベル (色付きピル)、右カラムに係数テキスト
 - **解決不能カード**（caster が全員死亡）: 全体グレーアウト + クリック無効。コスト不足と同じ視覚処理を流用
+
+#### 7.1.1 TargetSpec → 表示ラベル対応表
+
+カード効果行の左カラムに表示する各 TargetSpec のラベル定義。SPEC-005 §6 のターゲット仕様語彙を全網羅し、現状未使用の TargetSpec も将来の Epic / Legendary カードや派生作で使用される前提で確定。
+
+**色定義 (CSS 変数として `prototype/index.html` に追加)**:
+
+```css
+:root {
+  --target-ally: #7ed957;   /* 味方系 = 緑 */
+  --target-enemy: #e76060;  /* 敵系 = 赤 */
+  --target-all: #c47ed9;    /* 全体系 = 紫 (--accent #c4a35a 金との視認区別) */
+  --target-self: #5ab4c4;   /* 自身 = シアン (--energy と同色, "自分" 概念で統一) */
+}
+```
+
+**ラベル対応表 (左カラム約 60-80px / 日本語 3-4 文字基準)**:
+
+| TargetSpec | 表示ラベル | 色変数 | 想定使用頻度 (現状/将来) |
+|---|---|---|---|
+| `self` | 自身 | `--target-self` | 多 / 多 |
+| `ally.front` | 味方前 | `--target-ally` | 0 / 中 |
+| `ally.mid` | 味方中 | `--target-ally` | 0 / 中 |
+| `ally.back` | 味方後 | `--target-ally` | 0 / 中 |
+| `ally.foremost` | 味方先 | `--target-ally` | 0 / 中 |
+| `ally.rearmost` | 味方尾 | `--target-ally` | 0 / 低 |
+| `ally.all` | 味方全 | `--target-ally` | 0 / 多 |
+| `ally.random` | 味方ランダム | `--target-ally` | 0 / 低 |
+| `ally.highest_phy` | 味PHY↑ | `--target-ally` | 0 / 低 |
+| `ally.lowest_phy` | 味PHY↓ | `--target-ally` | 0 / 低 |
+| `ally.highest_int` | 味INT↑ | `--target-ally` | 0 / 低 |
+| `ally.lowest_int` | 味INT↓ | `--target-ally` | 0 / 低 |
+| `ally.highest_hp` | 味HP↑ | `--target-ally` | 0 / 低 |
+| `ally.lowest_hp` | 味HP↓ | `--target-ally` | 0 / 中 |
+| `enemy.front` | 敵前 | `--target-enemy` | 0 / 中 |
+| `enemy.mid` | 敵中 | `--target-enemy` | 0 / 中 |
+| `enemy.back` | 敵後 | `--target-enemy` | 0 / 中 |
+| `enemy.foremost` | 敵先頭 | `--target-enemy` | **多 (392 / 924)** / 多 |
+| `enemy.rearmost` | 敵最後尾 | `--target-enemy` | 0 / 中 |
+| `enemy.all` | 敵全 | `--target-enemy` | 0 / 多 |
+| `enemy.random` | 敵ランダム | `--target-enemy` | 0 / 低 |
+| `enemy.highest_phy` | 敵PHY↑ | `--target-enemy` | 0 / 低 |
+| `enemy.lowest_phy` | 敵PHY↓ | `--target-enemy` | 0 / 低 |
+| `enemy.highest_int` | 敵INT↑ | `--target-enemy` | 0 / 低 |
+| `enemy.lowest_int` | 敵INT↓ | `--target-enemy` | 0 / 低 |
+| `enemy.highest_hp` | 敵HP↑ | `--target-enemy` | 0 / 低 |
+| `enemy.lowest_hp` | 敵HP↓ | `--target-enemy` | 0 / 中 |
+| `all` | 全体 | `--target-all` | 0 / 低 |
+| `all.random` | 全体ランダム | `--target-all` | 0 / 低 |
+
+**設計根拠**:
+
+1. **「自身」を独立色 (シアン)**: SPEC-006 §5.2 で `self` = caster と同一視するため、味方緑とは概念的に別カテゴリ。`--energy` (#5ab4c4) と同色にして「自分のリソース／状態」というニュアンスを統一
+2. **位置指定 (前/中/後) は 3 文字**: 「味方前」「敵前」で 3-2 文字、視認性と幅両立
+3. **foremost / rearmost も 3 文字維持**: 「味方先」「敵先頭」と「味方尾」「敵最後尾」(敵側のみ 3-4 文字、味方側は 3 文字に圧縮)。**敵側を優先して文字数増やしたのは現状 392 件全てが `enemy.foremost` であり実装初期の視認性優先**。味方側の使用例が増えたら統一する
+4. **stat 系は記号化**: 「味PHY↑」「敵INT↓」など `味/敵 + ステータス略号 (PHY/INT/HP/AGI) + ↑↓` の 5 文字パターン。陣営アイコン (🛡/⚔) 案も検討したが Unicode 絵文字は環境依存 (Windows 11 / iOS / Android で見え方異なる) のため文字ベースに統一
+5. **ランダム表記**: 「敵ランダム」「味方ランダム」で確定 (`?` よりも明示的、4-5 文字、左カラム 60-80px に収まる)
+
+**論点への回答**:
+
+- (1) ラベル文字数: 最長 6 文字 (「敵最後尾」「味方ランダム」「全体ランダム」)。フォントサイズ調整で 60-80px に収める。長すぎる場合は CSS で `font-size: 0.7em` 等で縮小可
+- (2) 色定義: `--accent` (金) との被りを避けるため、全体系を **紫 (#c47ed9)** に。CSS 変数化済み
+- (3) `self` セマンティクス: シアン色で独立。caster ロール併記は不要 (caster 表示エリアが別途存在するため重複表示にならない)
+- (4) 未使用 TargetSpec の deprecate: **ranking 系 (`*.highest_phy` 等) は使用頻度が低そうだが、SPEC-005 §6 から外す判断はまだ早い**。Epic / Legendary 実装後に再評価。とりあえず仕様としては全網羅
+- (5) ランダム系の表記: `敵?` → `敵ランダム` に変更 (明示性優先)。略号が必要なら後日 CSS で省略表示 (`text-overflow: ellipsis`)
+
+**データソース**:
+
+実装側はラベル文字列を [prototype/data/target-labels.json](../../prototype/data/target-labels.json) から読み込む。将来の i18n 対応の素地として JSON 形式で持つ。
 
 ### 7.2 カード券面（バトル外: デッキ / ショップ / クラフト）
 
