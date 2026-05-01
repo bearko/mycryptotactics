@@ -17,43 +17,45 @@ const CSS_VARIABLES = {
 };
 
 // ─── ラベルマップ (sync) ────────────────────────────────────────
+// 味方/敵 の区別は pill の色で表現するため、ラベルからは陣営プレフィックスを省略する
+// (UX 改善 2026-05-02: 3 文字以内優先 + auto-fit fallback)
 const LABELS = {
   // 自身
-  "self":               { label: "自身",         color: "--target-self"  },
+  "self":               { label: "自身",     color: "--target-self"  },
 
-  // 味方
-  "ally.front":         { label: "味方前",       color: "--target-ally"  },
-  "ally.mid":           { label: "味方中",       color: "--target-ally"  },
-  "ally.back":          { label: "味方後",       color: "--target-ally"  },
-  "ally.foremost":      { label: "味方先頭",     color: "--target-ally"  },
-  "ally.rearmost":      { label: "味方最後尾",   color: "--target-ally"  },
-  "ally.all":           { label: "味方全",       color: "--target-ally"  },
-  "ally.random":        { label: "味方ランダム", color: "--target-ally"  },
-  "ally.highest_phy":   { label: "味PHY↑",      color: "--target-ally"  },
-  "ally.lowest_phy":    { label: "味PHY↓",      color: "--target-ally"  },
-  "ally.highest_int":   { label: "味INT↑",      color: "--target-ally"  },
-  "ally.lowest_int":    { label: "味INT↓",      color: "--target-ally"  },
-  "ally.highest_hp":    { label: "味HP↑",       color: "--target-ally"  },
-  "ally.lowest_hp":     { label: "味HP↓",       color: "--target-ally"  },
+  // 味方 (緑) — 陣営は色で識別、ラベルは選択ルールのみ
+  "ally.front":         { label: "前衛",     color: "--target-ally"  },
+  "ally.mid":           { label: "中衛",     color: "--target-ally"  },
+  "ally.back":          { label: "後衛",     color: "--target-ally"  },
+  "ally.foremost":      { label: "先頭",     color: "--target-ally"  },
+  "ally.rearmost":      { label: "最後尾",   color: "--target-ally"  },
+  "ally.all":           { label: "全",       color: "--target-ally"  },
+  "ally.random":        { label: "ランダム", color: "--target-ally"  },
+  "ally.highest_phy":   { label: "PHY↑",   color: "--target-ally"  },
+  "ally.lowest_phy":    { label: "PHY↓",   color: "--target-ally"  },
+  "ally.highest_int":   { label: "INT↑",   color: "--target-ally"  },
+  "ally.lowest_int":    { label: "INT↓",   color: "--target-ally"  },
+  "ally.highest_hp":    { label: "HP↑",    color: "--target-ally"  },
+  "ally.lowest_hp":     { label: "HP↓",    color: "--target-ally"  },
 
-  // 敵
-  "enemy.front":        { label: "敵前",         color: "--target-enemy" },
-  "enemy.mid":          { label: "敵中",         color: "--target-enemy" },
-  "enemy.back":         { label: "敵後",         color: "--target-enemy" },
-  "enemy.foremost":     { label: "敵先頭",       color: "--target-enemy" },
-  "enemy.rearmost":     { label: "敵最後尾",     color: "--target-enemy" },
-  "enemy.all":          { label: "敵全",         color: "--target-enemy" },
-  "enemy.random":       { label: "敵ランダム",   color: "--target-enemy" },
-  "enemy.highest_phy":  { label: "敵PHY↑",      color: "--target-enemy" },
-  "enemy.lowest_phy":   { label: "敵PHY↓",      color: "--target-enemy" },
-  "enemy.highest_int":  { label: "敵INT↑",      color: "--target-enemy" },
-  "enemy.lowest_int":   { label: "敵INT↓",      color: "--target-enemy" },
-  "enemy.highest_hp":   { label: "敵HP↑",       color: "--target-enemy" },
-  "enemy.lowest_hp":    { label: "敵HP↓",       color: "--target-enemy" },
+  // 敵 (赤) — 陣営は色で識別
+  "enemy.front":        { label: "前衛",     color: "--target-enemy" },
+  "enemy.mid":          { label: "中衛",     color: "--target-enemy" },
+  "enemy.back":         { label: "後衛",     color: "--target-enemy" },
+  "enemy.foremost":     { label: "先頭",     color: "--target-enemy" },
+  "enemy.rearmost":     { label: "最後尾",   color: "--target-enemy" },
+  "enemy.all":          { label: "全",       color: "--target-enemy" },
+  "enemy.random":       { label: "ランダム", color: "--target-enemy" },
+  "enemy.highest_phy":  { label: "PHY↑",   color: "--target-enemy" },
+  "enemy.lowest_phy":   { label: "PHY↓",   color: "--target-enemy" },
+  "enemy.highest_int":  { label: "INT↑",   color: "--target-enemy" },
+  "enemy.lowest_int":   { label: "INT↓",   color: "--target-enemy" },
+  "enemy.highest_hp":   { label: "HP↑",    color: "--target-enemy" },
+  "enemy.lowest_hp":    { label: "HP↓",    color: "--target-enemy" },
 
-  // 全体
-  "all":                { label: "全体",         color: "--target-all"   },
-  "all.random":         { label: "全体ランダム", color: "--target-all"   },
+  // 全体 (黒) — クロス陣営、明示的に「全体」と表示
+  "all":                { label: "全体",     color: "--target-all"   },
+  "all.random":         { label: "全ラン",   color: "--target-all"   },
 };
 
 const PATH = "./data/target-labels.json";

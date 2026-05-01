@@ -1797,6 +1797,25 @@ function escapeHtml(s) {
   return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
+/** SPEC-006 Phase 4e: 効果テキストから冗長なプレフィックスを除去
+ *  - "PHYダメ X-Y%" → "X-Y% ダメ"
+ *  - "INTダメ X-Y%" → "X-Y% ダメ"
+ *  - "HP回復 INTX%" → "X% 回復"
+ *  - "HP回復 (INT+PHY)÷2" → "(INT+PHY)÷2 回復"
+ *  カード左上の skill icon が PHY/INT/HP の種別を示すため、テキスト側の
+ *  type プレフィックスは省略して数値部分を強調する。 */
+function simplifyEffectText(text) {
+  if (!text) return "";
+  let t = String(text);
+  // ダメ系: "PHYダメ 50-60%" / "INTダメ 25%" → "50-60% ダメ" / "25% ダメ"
+  t = t.replace(/^(?:PHY|INT)ダメ\s*(.+?)\s*$/, "$1 ダメ");
+  // 回復系 (INT prefix あり): "HP回復 INT30%" → "30% 回復"
+  t = t.replace(/^HP回復\s*INT(.+?)\s*$/, "$1 回復");
+  // 回復系 (一般): "HP回復 (INT+PHY)÷2" → "(INT+PHY)÷2 回復"
+  t = t.replace(/^HP回復\s+(.+?)\s*$/, "$1 回復");
+  return t;
+}
+
 const PEEK_HELP_SNIPPETS = {
   guard:  "<strong>ガード</strong> — ターン中、PHY/INT ダメージを数値分だけ先に吸収（味方はターン開始で 0）。",
   shield: "<strong>シールド</strong> — 特殊ダメージ（最大 HP 割合など）のみ吸収。PHY/INT 通常攻撃には無効。",
@@ -2145,9 +2164,10 @@ function renderCombat() {
       ? card.effects.map(e => {
           const lbl = targetLabelText(e.target) || e.target || "";
           const colorVar = targetColorVar(e.target) || "--text";
+          const simplified = simplifyEffectText(e.text || "");
           return `<div class="card-effect-row">` +
             `<span class="card-effect-target" style="--target-pill-color: var(${colorVar})">${escapeHtml(lbl)}</span>` +
-            `<span class="card-effect-text">${escapeHtml(e.text || "")}</span>` +
+            `<span class="card-effect-text">${escapeHtml(simplified)}</span>` +
           `</div>`;
         }).join("")
       : summaryBody;
