@@ -1560,6 +1560,7 @@ function startCombatFromMapNode(node) {
   if (isBoss && (enemyDef.initialShield || 0) > 0) {
     clog(`ボスはシールド ${enemyDef.initialShield} を持ちます！`);
   }
+  applyHeroPassiveOnCombatStart(combat);
   syncLlExtSlots();
   startPlayerTurn();
 }
@@ -2147,6 +2148,694 @@ async function applyZhangPassive(s) {
   renderCombat();
 }
 
+// ─── 新規 Common ヒーロー (1004-1010) パッシブ ─────────────────────
+// onCombatStart: 戦闘開始時に 1 回発動（startCombatFromMapNode から呼ばれる）
+function applyHeroPassiveOnCombatStart(s) {
+  switch (LEADER.passiveKey) {
+    case "seton":      applySetonPassive(s);      break;
+    case "inoh":       applyInohPassive(s);       break;
+    case "pythagoras": applyPythagorasPassive(s); break;
+    case "sullivan":   applySullivanPassive(s);   break;
+    case "hercules":   applyHerculesPassive(s);   break;
+    case "giraffa":    applyGiraffaPassive(s);    break;
+    // ─── Uncommon (heroId 2001-2053) onCombatStart cases ───
+    case "wright_brothers": applyWrightBrothersPassive(s); break;
+    case "spartacus": applySpartacusPassive(s); break;
+    case "schubert": applySchubertPassive(s); break;
+    case "archimedes": applyArchimedesPassive(s); break;
+    case "schrodinger": applySchrodingerPassive(s); break;
+    case "kafka": applyKafkaPassive(s); break;
+    case "sunzi": applySunziPassive(s); break;
+    case "mitsunari": applyMitsunariPassive(s); break;
+    case "montesquieu": applyMontesquieuPassive(s); break;
+    case "anastasia": applyAnastasiaPassive(s); break;
+    case "geronimo": applyGeronimoPassive(s); break;
+    case "chacha": applyChachaPassive(s); break;
+    case "mitsuhide": applyMitsuhidePassive(s); break;
+    case "shinsaku": applyShinsakuPassive(s); break;
+    case "andersen": applyAndersenPassive(s); break;
+    case "michelangelo": applyMichelangeloPassive(s); break;
+    case "salome": applySalomePassive(s); break;
+    case "hideyoshi": applyHideyoshiPassive(s); break;
+    case "aesop": applyAesopPassive(s); break;
+    case "ikkyu": applyIkkyuPassive(s); break;
+    case "izumo": applyIzumoPassive(s); break;
+    case "goethe": applyGoethePassive(s); break;
+    case "plato": applyPlatoPassive(s); break;
+    case "ichiyo": applyIchiyoPassive(s); break;
+    case "sunce": applySuncePassive(s); break;
+    case "kiyomori": applyKiyomoriPassive(s); break;
+    case "dostoevsky": applyDostoevskyPassive(s); break;
+    case "mulan": applyMulanPassive(s); break;
+    case "franklin": applyFranklinPassive(s); break;
+    case "saizo": applySaizoPassive(s); break;
+    case "socrates": applySocratesPassive(s); break;
+    case "daruma": applyDarumaPassive(s); break;
+    case "aristotle": applyAristotlePassive(s); break;
+    case "chopin": applyChopinPassive(s); break;
+    case "ippatsuman": applyIppatsumanPassive(s); break;
+    case "ramon": applyRamonPassive(s); break;
+    default: return;
+  }
+  renderStatusBadges();
+  renderCombat();
+}
+
+// onCardUse: カード使用後に発動（playCard から呼ばれる）
+async function applyHeroPassiveOnCardUse(s) {
+  switch (LEADER.passiveKey) {
+    case "daejanggeum": await applyDaejanggeumPassive(s); break;
+    // ─── Uncommon (heroId 2001-2053) onCardUse cases ───
+    case "jack_ripper": await applyJackRipperPassive(s); break;
+    case "santa": await applySantaPassive(s); break;
+    case "ranmaru": await applyRanmaruPassive(s); break;
+    case "xuchu": await applyXuchuPassive(s); break;
+    case "yoshinobu": await applyYoshinobuPassive(s); break;
+    case "kintaro": await applyKintaroPassive(s); break;
+    case "satoshi": await applySatoshiPassive(s); break;
+    case "chun_sisters": await applyChunSistersPassive(s); break;
+    case "bismarck": await applyBismarckPassive(s); break;
+    case "montgomery": await applyMontgomeryPassive(s); break;
+    case "sarutahiko": await applySarutahikoPassive(s); break;
+    case "gama": await applyGamaPassive(s); break;
+    case "masako": await applyMasakoPassive(s); break;
+    case "renoir": await applyRenoirPassive(s); break;
+    case "armaroid": await applyArmaroidPassive(s); break;
+    case "uka": await applyUkaPassive(s); break;
+    default: return;
+  }
+}
+
+// シートン「狼王ロボ」: 戦闘開始時、敵にINTの40%ダメージ＋出血1スタック付与
+function applySetonPassive(s) {
+  if (areAllEnemiesDefeated(s)) return;
+  const target = getPlayerAttackTargetEnemy(s);
+  if (!target) return;
+  const dmg = Math.max(1, Math.floor(s.playerInt * 0.4));
+  applyHpDeltaToEnemy(s, target, -dmg);
+  s.enemyBleed = (s.enemyBleed || 0) + 1;
+  playPortraitEffect("enemy", "hit", target);
+  playBattleSe("hit");
+  clog(`【狼王ロボ】発動！ INT ${dmg} ダメージ＋出血 ×1 付与`);
+}
+
+// 伊能忠敬「大日本沿海輿地全図」: 戦闘開始時、自身のINTを最大AGIの30%アップ
+function applyInohPassive(s) {
+  const buff = Math.max(1, Math.floor(s.playerAgi * 0.3));
+  s.playerInt += buff;
+  playPortraitEffect("player", "buff", s.heroes?.[0]);
+  playBattleSe("buff");
+  clog(`【大日本沿海輿地全図】発動！ INT +${buff}`);
+}
+
+// ピタゴラス「テトラクテュス」: 戦闘開始時、PHYとINTを互いの値の20%アップ
+function applyPythagorasPassive(s) {
+  const phyOrig = s.playerPhy;
+  const intOrig = s.playerInt;
+  const phyBuff = Math.max(1, Math.floor(intOrig * 0.2));
+  const intBuff = Math.max(1, Math.floor(phyOrig * 0.2));
+  s.playerPhy += phyBuff;
+  s.playerInt += intBuff;
+  playPortraitEffect("player", "buff", s.heroes?.[0]);
+  playBattleSe("buff");
+  clog(`【テトラクテュス】発動！ PHY +${phyBuff} / INT +${intBuff}`);
+}
+
+// 大長今「李氏朝鮮、宮廷医女」: カード使用後30%でHP +最大HPの10%
+async function applyDaejanggeumPassive(s) {
+  if (isPartyWipedOut(s)) return;
+  const heroSelf = s.heroes?.[0];
+  if (!heroSelf) return;
+  if (s.playerHp >= s.playerHpMax) return;
+  if (Math.random() >= 0.3) return;
+  const heal = Math.max(1, Math.floor(s.playerHpMax * 0.1));
+  combatInputLocked = true;
+  await showPassiveCutin("李氏朝鮮、宮廷医女", typeof LEADER.img === "function" ? LEADER.img() : (LEADER.img || ""));
+  combatInputLocked = false;
+  if (!combat || isPartyWipedOut(s)) return;
+  applyHpDeltaToHero(s, heroSelf, +heal);
+  playPortraitEffect("player", "heal", heroSelf);
+  playBattleSe("heal");
+  clog(`【李氏朝鮮、宮廷医女】発動！ HP +${heal}`);
+  renderCombat();
+}
+
+// ジョン・L・サリバン「ボストン・ストロング・ボーイ」: 戦闘開始時、PHY+5
+function applySullivanPassive(s) {
+  s.playerPhy += 5;
+  playPortraitEffect("player", "buff", s.heroes?.[0]);
+  playBattleSe("buff");
+  clog(`【ボストン・ストロング・ボーイ】発動！ PHY +5`);
+}
+
+// ヘルクレスオオカブト「ローリングドライバー」: 戦闘開始時、敵INT-30%
+function applyHerculesPassive(s) {
+  if (areAllEnemiesDefeated(s)) return;
+  const target = getPlayerAttackTargetEnemy(s);
+  const debuff = Math.max(1, Math.floor(s.enemyInt * 0.3));
+  s.enemyInt = Math.max(0, s.enemyInt - debuff);
+  playPortraitEffect("enemy", "debuff", target);
+  playBattleSe("debuff");
+  clog(`【ローリングドライバー】発動！ 敵 INT -${debuff}`);
+}
+
+// ギラファノコギリクワガタ「ブルロック」: 戦闘開始時、敵にPHYの40%ダメージ
+function applyGiraffaPassive(s) {
+  if (areAllEnemiesDefeated(s)) return;
+  const target = getPlayerAttackTargetEnemy(s);
+  if (!target) return;
+  const dmg = Math.max(1, Math.floor(s.playerPhy * 0.4));
+  applyHpDeltaToEnemy(s, target, -dmg);
+  playPortraitEffect("enemy", "hit", target);
+  playBattleSe("hit");
+  clog(`【ブルロック】発動！ PHY ${dmg} ダメージ`);
+}
+
+// ─── Uncommon ヒーロー (heroId 2001-2053) パッシブ ───────────────
+// 2001 ライト兄弟「ライトフライヤー号」 hook=onCombatStart
+function applyWrightBrothersPassive(s) {
+  s.playerAgi += 1; playBattleSe("buff"); clog(`【ライトフライヤー号】AGI +1`);
+}
+
+// 2002 スパルタクス「剣闘士の反乱」 hook=onCombatStart
+function applySpartacusPassive(s) {
+  const target = getPlayerAttackTargetEnemy(s);
+  for (let i = 0; i < 2 && !areAllEnemiesDefeated(s); i++) {
+    const dmg = Math.max(1, Math.floor(s.playerPhy * 0.4));
+    applyHpDeltaToEnemy(s, target, -dmg);
+    playPortraitEffect("enemy", "hit", target); playBattleSe("hit");
+    clog(`【剣闘士の反乱】PHY ${dmg} ダメージ`);
+  }
+  s.playerPhy += 5; playBattleSe("buff"); clog(`【剣闘士の反乱】PHY +5`);
+}
+
+// 2003 ジャックザリッパー「ランゲルライン」 hook=onCardUse
+async function applyJackRipperPassive(s) {
+  const target = getPlayerAttackTargetEnemy(s);
+  const hero = s.heroes?.[0];
+  if (isPartyWipedOut(s) || areAllEnemiesDefeated(s)) return;
+  if (Math.random() >= 0.4) return;
+  combatInputLocked = true;
+  await showPassiveCutin("ランゲルライン", typeof LEADER.img === "function" ? LEADER.img() : (LEADER.img || ""));
+  combatInputLocked = false;
+  if (!combat || isPartyWipedOut(s) || areAllEnemiesDefeated(s)) return;
+  { const dmg = Math.max(1, Math.floor(s.playerPhy * 0.2));
+    applyHpDeltaToEnemy(s, target, -dmg);
+    playPortraitEffect("enemy", "hit", target); playBattleSe("hit");
+    clog(`【ランゲルライン】発動！ PHY ${dmg} ダメージ`); }
+  s.playerAgi += 1; playBattleSe("buff"); clog(`【ランゲルライン】AGI +1`);
+  renderCombat();
+}
+
+// 2004 シューベルト「魔王」 hook=onCombatStart
+function applySchubertPassive(s) {
+  s.enemyBleed = (s.enemyBleed || 0) + 1; playBattleSe("debuff"); clog(`【魔王】出血 ×1 付与`);
+  s.hasResurrection = true;
+  const heroForRevive = s.heroes?.[0]; if (heroForRevive) heroForRevive.alive = true; playBattleSe("buff"); clog(`【魔王】リザレクション付与`);
+}
+
+// 2005 グリム兄弟「ブレーメンの音楽隊」 hook=onCombatStart
+function applyGrimmPassive(s) {
+  const hero = s.heroes?.[0];
+  { const heal = Math.max(1, Math.floor(s.playerHpMax * 0.1));
+    applyHpDeltaToHero(s, hero, +heal);
+    playPortraitEffect("player", "heal", hero); playBattleSe("heal");
+    clog(`【ブレーメンの音楽隊】HP +${heal}`); }
+  s.enemyPoison = (s.enemyPoison || 0) + 1; playBattleSe("debuff"); clog(`【ブレーメンの音楽隊】毒 ×1 付与`);
+}
+
+// 2006 アルキメデス「ヘウレーカ！ヘウレーカ！」 hook=onCombatStart
+function applyArchimedesPassive(s) {
+  s.playerShield = (s.playerShield || 0) + 8; playBattleSe("buff"); clog(`【ヘウレーカ！ヘウレーカ！】シールド +8`);
+}
+
+// 2007 サンタクロース「プレゼント・フォー・ユー」 hook=onCardUse
+async function applySantaPassive(s) {
+  const target = getPlayerAttackTargetEnemy(s);
+  const hero = s.heroes?.[0];
+  if (isPartyWipedOut(s) || areAllEnemiesDefeated(s)) return;
+  if (Math.random() >= 0.4) return;
+  combatInputLocked = true;
+  await showPassiveCutin("プレゼント・フォー・ユー", typeof LEADER.img === "function" ? LEADER.img() : (LEADER.img || ""));
+  combatInputLocked = false;
+  if (!combat || isPartyWipedOut(s) || areAllEnemiesDefeated(s)) return;
+  { const heal = Math.max(1, Math.floor(s.playerHpMax * 0.18));
+    applyHpDeltaToHero(s, hero, +heal);
+    playPortraitEffect("player", "heal", hero); playBattleSe("heal");
+    clog(`【プレゼント・フォー・ユー】HP +${heal}`); }
+  renderCombat();
+}
+
+// 2008 シュレディンガー「シュレディンガーの猫」 hook=onCombatStart
+function applySchrodingerPassive(s) {
+  s.playerInt += 2; playBattleSe("buff"); clog(`【シュレディンガーの猫】INT +2`);
+  s.playerAgi += 2; playBattleSe("buff"); clog(`【シュレディンガーの猫】AGI +2`);
+  s.hasResurrection = true;
+  const heroForRevive = s.heroes?.[0]; if (heroForRevive) heroForRevive.alive = true; playBattleSe("buff"); clog(`【シュレディンガーの猫】リザレクション付与`);
+}
+
+// 2009 森蘭丸「天下人の使者」 hook=onCardUse
+async function applyRanmaruPassive(s) {
+  const target = getPlayerAttackTargetEnemy(s);
+  const hero = s.heroes?.[0];
+  if (isPartyWipedOut(s) || areAllEnemiesDefeated(s)) return;
+  if (Math.random() >= 0.4) return;
+  combatInputLocked = true;
+  await showPassiveCutin("天下人の使者", typeof LEADER.img === "function" ? LEADER.img() : (LEADER.img || ""));
+  combatInputLocked = false;
+  if (!combat || isPartyWipedOut(s) || areAllEnemiesDefeated(s)) return;
+  s.enemyAgi = Math.max(1, s.enemyAgi + (-4)); playBattleSe("debuff"); clog(`【天下人の使者】敵 AGI -4`);
+  s.enemyPoison = (s.enemyPoison || 0) + 1; playBattleSe("debuff"); clog(`【天下人の使者】毒 ×1 付与`);
+  renderCombat();
+}
+
+// 2010 カフカ「変身」 hook=onCombatStart
+function applyKafkaPassive(s) {
+  const hero = s.heroes?.[0];
+  { const heal = Math.max(1, Math.floor(s.playerHpMax * 0.3));
+    applyHpDeltaToHero(s, hero, +heal);
+    playPortraitEffect("player", "heal", hero); playBattleSe("heal");
+    clog(`【変身】HP +${heal}`); }
+  s.playerAgi += 1; playBattleSe("buff"); clog(`【変身】AGI +1`);
+}
+
+// 2011 孫子「兵は詭道なり」 hook=onCombatStart
+function applySunziPassive(s) {
+  s.enemyAgi = Math.max(1, s.enemyAgi + (-2)); playBattleSe("debuff"); clog(`【兵は詭道なり】敵 AGI -2`);
+}
+
+// 2012 石田三成「大一大万大吉」 hook=onCombatStart
+function applyMitsunariPassive(s) {
+  s.playerPhy += 2; playBattleSe("buff"); clog(`【大一大万大吉】PHY +2`);
+  s.enemyInt = Math.max(1, s.enemyInt + (-4)); playBattleSe("debuff"); clog(`【大一大万大吉】敵 INT -4`);
+}
+
+// 2013 許褚「虎痴」 hook=onCardUse
+async function applyXuchuPassive(s) {
+  const target = getPlayerAttackTargetEnemy(s);
+  const hero = s.heroes?.[0];
+  if (isPartyWipedOut(s) || areAllEnemiesDefeated(s)) return;
+  if (Math.random() >= 0.4) return;
+  combatInputLocked = true;
+  await showPassiveCutin("虎痴", typeof LEADER.img === "function" ? LEADER.img() : (LEADER.img || ""));
+  combatInputLocked = false;
+  if (!combat || isPartyWipedOut(s) || areAllEnemiesDefeated(s)) return;
+  s.playerPhy += 5; playBattleSe("buff"); clog(`【虎痴】PHY +5`);
+  s.playerInt += 4; playBattleSe("buff"); clog(`【虎痴】INT +4`);
+  s.playerAgi += 5; playBattleSe("buff"); clog(`【虎痴】AGI +5`);
+  renderCombat();
+}
+
+// 2014 徳川慶喜「大政奉還」 hook=onCardUse
+async function applyYoshinobuPassive(s) {
+  const target = getPlayerAttackTargetEnemy(s);
+  const hero = s.heroes?.[0];
+  if (isPartyWipedOut(s) || areAllEnemiesDefeated(s)) return;
+  if (Math.random() >= 0.4) return;
+  combatInputLocked = true;
+  await showPassiveCutin("大政奉還", typeof LEADER.img === "function" ? LEADER.img() : (LEADER.img || ""));
+  combatInputLocked = false;
+  if (!combat || isPartyWipedOut(s) || areAllEnemiesDefeated(s)) return;
+  s.playerInt += 3; playBattleSe("buff"); clog(`【大政奉還】INT +3`);
+  s.enemyPhy = Math.max(1, s.enemyPhy + (-1)); playBattleSe("debuff"); clog(`【大政奉還】敵 PHY -1`);
+  s.enemyInt = Math.max(1, s.enemyInt + (-1)); playBattleSe("debuff"); clog(`【大政奉還】敵 INT -1`);
+  renderCombat();
+}
+
+// 2015 モンテスキュー「法の精神」 hook=onCombatStart
+function applyMontesquieuPassive(s) {
+  s.playerInt += 1; playBattleSe("buff"); clog(`【法の精神】INT +1`);
+  s.playerAgi += 1; playBattleSe("buff"); clog(`【法の精神】AGI +1`);
+  s.enemyInt = Math.max(1, s.enemyInt + (-3)); playBattleSe("debuff"); clog(`【法の精神】敵 INT -3`);
+}
+
+// 2016 アナスタシア「幻の生存者」 hook=onCombatStart
+function applyAnastasiaPassive(s) {
+  const target = getPlayerAttackTargetEnemy(s);
+  { const dmg = Math.max(1, Math.floor(s.playerInt * 0.45));
+    applyHpDeltaToEnemy(s, target, -dmg);
+    playPortraitEffect("enemy", "hit", target); playBattleSe("hit");
+    clog(`【幻の生存者】発動！ INT ${dmg} ダメージ`); }
+  s.enemyInt = Math.max(1, s.enemyInt + (-4)); playBattleSe("debuff"); clog(`【幻の生存者】敵 INT -4`);
+}
+
+// 2017 ジェロニモ「荒野の復讐者」 hook=onCombatStart
+function applyGeronimoPassive(s) {
+  s.enemyInt = Math.max(1, s.enemyInt + (-1)); playBattleSe("debuff"); clog(`【荒野の復讐者】敵 INT -1`);
+}
+
+// 2018 茶々「錦城の女主」 hook=onCombatStart
+function applyChachaPassive(s) {
+  s.playerPhy += 3; playBattleSe("buff"); clog(`【錦城の女主】PHY +3`);
+  s.playerShield = (s.playerShield || 0) + 8; playBattleSe("buff"); clog(`【錦城の女主】シールド +8`);
+}
+
+// 2019 金太郎「けだものあつめて すもうのけいこ」 hook=onCardUse
+async function applyKintaroPassive(s) {
+  const target = getPlayerAttackTargetEnemy(s);
+  const hero = s.heroes?.[0];
+  if (isPartyWipedOut(s) || areAllEnemiesDefeated(s)) return;
+  if (Math.random() >= 0.4) return;
+  combatInputLocked = true;
+  await showPassiveCutin("けだものあつめて すもうのけいこ", typeof LEADER.img === "function" ? LEADER.img() : (LEADER.img || ""));
+  combatInputLocked = false;
+  if (!combat || isPartyWipedOut(s) || areAllEnemiesDefeated(s)) return;
+  s.playerPhy += 4; playBattleSe("buff"); clog(`【けだものあつめて すもうのけいこ】PHY +4`);
+  renderCombat();
+}
+
+// 2020 明智光秀「本能寺の変」 hook=onCombatStart
+function applyMitsuhidePassive(s) {
+  const target = getPlayerAttackTargetEnemy(s);
+  { const dmg = Math.max(1, Math.floor(s.playerInt * 0.8));
+    applyHpDeltaToEnemy(s, target, -dmg);
+    playPortraitEffect("enemy", "hit", target); playBattleSe("hit");
+    clog(`【本能寺の変】発動！ INT ${dmg} ダメージ`); }
+  s.enemyPoison = (s.enemyPoison || 0) + 1; playBattleSe("debuff"); clog(`【本能寺の変】毒 ×1 付与`);
+}
+
+// 2021 高杉晋作「奇兵隊」 hook=onCombatStart
+function applyShinsakuPassive(s) {
+  s.playerGuard = (s.playerGuard || 0) + 6; playBattleSe("buff"); clog(`【奇兵隊】ガード +6`);
+}
+
+// 2022 アンデルセン「マッチ売りの少女」 hook=onCombatStart
+function applyAndersenPassive(s) {
+  const target = getPlayerAttackTargetEnemy(s);
+  { const dmg = Math.max(1, Math.floor(s.playerInt * 0.45));
+    applyHpDeltaToEnemy(s, target, -dmg);
+    playPortraitEffect("enemy", "hit", target); playBattleSe("hit");
+    clog(`【マッチ売りの少女】発動！ INT ${dmg} ダメージ`); }
+}
+
+// 2023 ミケランジェロ「ダビデの覚醒」 hook=onCombatStart
+function applyMichelangeloPassive(s) {
+  s.playerInt += 5; playBattleSe("buff"); clog(`【ダビデの覚醒】INT +5`);
+}
+
+// 2024 サロメ「ヘロディアの娘」 hook=onCombatStart
+function applySalomePassive(s) {
+  s.playerPhy += 1; playBattleSe("buff"); clog(`【ヘロディアの娘】PHY +1`);
+  s.enemyPoison = (s.enemyPoison || 0) + 1; playBattleSe("debuff"); clog(`【ヘロディアの娘】毒 ×1 付与`);
+}
+
+// 2025 サトシ・ナカモト ALPHA CC「マイニング ALPHA CC」 hook=onCardUse
+async function applySatoshiPassive(s) {
+  const target = getPlayerAttackTargetEnemy(s);
+  const hero = s.heroes?.[0];
+  if (isPartyWipedOut(s) || areAllEnemiesDefeated(s)) return;
+  if (Math.random() >= 0.4) return;
+  combatInputLocked = true;
+  await showPassiveCutin("マイニング ALPHA CC", typeof LEADER.img === "function" ? LEADER.img() : (LEADER.img || ""));
+  combatInputLocked = false;
+  if (!combat || isPartyWipedOut(s) || areAllEnemiesDefeated(s)) return;
+  s.playerPhy += 1; playBattleSe("buff"); clog(`【マイニング ALPHA CC】PHY +1`);
+  s.playerAgi += 1; playBattleSe("buff"); clog(`【マイニング ALPHA CC】AGI +1`);
+  renderCombat();
+}
+
+// 2026 豊臣秀吉「功名立志伝」 hook=onCombatStart
+function applyHideyoshiPassive(s) {
+  s.playerAgi += 2; playBattleSe("buff"); clog(`【功名立志伝】AGI +2`);
+}
+
+// 2027 イソップ「うさぎとかめ」 hook=onCombatStart
+function applyAesopPassive(s) {
+  s.enemyAgi = Math.max(1, s.enemyAgi + (-4)); playBattleSe("debuff"); clog(`【うさぎとかめ】敵 AGI -4`);
+}
+
+// 2028 チュン姉妹「姉妹の反乱」 hook=onCardUse
+async function applyChunSistersPassive(s) {
+  const target = getPlayerAttackTargetEnemy(s);
+  const hero = s.heroes?.[0];
+  if (isPartyWipedOut(s) || areAllEnemiesDefeated(s)) return;
+  if (Math.random() >= 0.4) return;
+  combatInputLocked = true;
+  await showPassiveCutin("姉妹の反乱", typeof LEADER.img === "function" ? LEADER.img() : (LEADER.img || ""));
+  combatInputLocked = false;
+  if (!combat || isPartyWipedOut(s) || areAllEnemiesDefeated(s)) return;
+  { const dmg = Math.max(1, Math.floor(s.playerPhy * 0.45));
+    applyHpDeltaToEnemy(s, target, -dmg);
+    playPortraitEffect("enemy", "hit", target); playBattleSe("hit");
+    clog(`【姉妹の反乱】発動！ PHY ${dmg} ダメージ`); }
+  { const dmg = Math.max(1, Math.floor(s.playerInt * 0.45));
+    applyHpDeltaToEnemy(s, target, -dmg);
+    playPortraitEffect("enemy", "hit", target); playBattleSe("hit");
+    clog(`【姉妹の反乱】発動！ INT ${dmg} ダメージ`); }
+  renderCombat();
+}
+
+// 2029 一休「めでたくもあり・めでたくもなし」 hook=onCombatStart
+function applyIkkyuPassive(s) {
+  const target = getPlayerAttackTargetEnemy(s);
+  { const dmg = Math.max(1, Math.floor(s.playerInt * 0.4));
+    applyHpDeltaToEnemy(s, target, -dmg);
+    playPortraitEffect("enemy", "hit", target); playBattleSe("hit");
+    clog(`【めでたくもあり・めでたくもなし】発動！ INT ${dmg} ダメージ`); }
+  s.hasResurrection = true;
+  const heroForRevive = s.heroes?.[0]; if (heroForRevive) heroForRevive.alive = true; playBattleSe("buff"); clog(`【めでたくもあり・めでたくもなし】リザレクション付与`);
+}
+
+// 2030 出雲阿国「ややこ踊り」 hook=onCombatStart
+function applyIzumoPassive(s) {
+  const target = getPlayerAttackTargetEnemy(s);
+  { const dmg = Math.max(1, Math.floor(s.playerPhy * 0.45));
+    applyHpDeltaToEnemy(s, target, -dmg);
+    playPortraitEffect("enemy", "hit", target); playBattleSe("hit");
+    clog(`【ややこ踊り】発動！ PHY ${dmg} ダメージ`); }
+}
+
+// 2031 ビスマルク「鉄血演説」 hook=onCardUse
+async function applyBismarckPassive(s) {
+  const target = getPlayerAttackTargetEnemy(s);
+  const hero = s.heroes?.[0];
+  if (isPartyWipedOut(s) || areAllEnemiesDefeated(s)) return;
+  if (Math.random() >= 0.4) return;
+  combatInputLocked = true;
+  await showPassiveCutin("鉄血演説", typeof LEADER.img === "function" ? LEADER.img() : (LEADER.img || ""));
+  combatInputLocked = false;
+  if (!combat || isPartyWipedOut(s) || areAllEnemiesDefeated(s)) return;
+  s.enemyPoison = (s.enemyPoison || 0) + 1; playBattleSe("debuff"); clog(`【鉄血演説】毒 ×1 付与`);
+  renderCombat();
+}
+
+// 2032 モンゴメリ「グリーンゲイブルズ」 hook=onCardUse
+async function applyMontgomeryPassive(s) {
+  const target = getPlayerAttackTargetEnemy(s);
+  const hero = s.heroes?.[0];
+  if (isPartyWipedOut(s) || areAllEnemiesDefeated(s)) return;
+  if (Math.random() >= 0.4) return;
+  combatInputLocked = true;
+  await showPassiveCutin("グリーンゲイブルズ", typeof LEADER.img === "function" ? LEADER.img() : (LEADER.img || ""));
+  combatInputLocked = false;
+  if (!combat || isPartyWipedOut(s) || areAllEnemiesDefeated(s)) return;
+  { const dmg = Math.max(1, Math.floor(s.playerInt * 0.3));
+    applyHpDeltaToEnemy(s, target, -dmg);
+    playPortraitEffect("enemy", "hit", target); playBattleSe("hit");
+    clog(`【グリーンゲイブルズ】発動！ INT ${dmg} ダメージ`); }
+  renderCombat();
+}
+
+// 2033 ゲーテ「若きウェルテルの悩み」 hook=onCombatStart
+function applyGoethePassive(s) {
+  s.enemyPhy = Math.max(1, s.enemyPhy + (-4)); playBattleSe("debuff"); clog(`【若きウェルテルの悩み】敵 PHY -4`);
+  s.enemyPoison = (s.enemyPoison || 0) + 1; playBattleSe("debuff"); clog(`【若きウェルテルの悩み】毒 ×1 付与`);
+}
+
+// 2034 プラトン「イデア論」 hook=onCombatStart
+function applyPlatoPassive(s) {
+  s.playerPhy += 1; playBattleSe("buff"); clog(`【イデア論】PHY +1`);
+  s.playerAgi += 1; playBattleSe("buff"); clog(`【イデア論】AGI +1`);
+  s.enemyPhy = Math.max(1, s.enemyPhy + (-3)); playBattleSe("debuff"); clog(`【イデア論】敵 PHY -3`);
+}
+
+// 2035 猿田彦「西暦3344年」 hook=onCardUse
+async function applySarutahikoPassive(s) {
+  const target = getPlayerAttackTargetEnemy(s);
+  const hero = s.heroes?.[0];
+  if (isPartyWipedOut(s) || areAllEnemiesDefeated(s)) return;
+  if (Math.random() >= 0.4) return;
+  combatInputLocked = true;
+  await showPassiveCutin("西暦3344年", typeof LEADER.img === "function" ? LEADER.img() : (LEADER.img || ""));
+  combatInputLocked = false;
+  if (!combat || isPartyWipedOut(s) || areAllEnemiesDefeated(s)) return;
+  s.playerInt += 3; playBattleSe("buff"); clog(`【西暦3344年】INT +3`);
+  renderCombat();
+}
+
+// 2036 樋口一葉「たけくらべ」 hook=onCombatStart
+function applyIchiyoPassive(s) {
+  s.playerInt += 5; playBattleSe("buff"); clog(`【たけくらべ】INT +5`);
+  s.enemyAgi = Math.max(1, s.enemyAgi + (-3)); playBattleSe("debuff"); clog(`【たけくらべ】敵 AGI -3`);
+}
+
+// 2037 孫策「長沙桓王」 hook=onCombatStart
+function applySuncePassive(s) {
+  const target = getPlayerAttackTargetEnemy(s);
+  for (let i = 0; i < 5 && !areAllEnemiesDefeated(s); i++) {
+    const dmg = Math.max(1, Math.floor(s.playerPhy * 0.15));
+    applyHpDeltaToEnemy(s, target, -dmg);
+    playPortraitEffect("enemy", "hit", target); playBattleSe("hit");
+    clog(`【長沙桓王】PHY ${dmg} ダメージ`);
+  }
+  s.playerPhy += 2; playBattleSe("buff"); clog(`【長沙桓王】PHY +2`);
+}
+
+// 2038 平清盛「治承三年の政変」 hook=onCombatStart
+function applyKiyomoriPassive(s) {
+  const target = getPlayerAttackTargetEnemy(s);
+  { const dmg = Math.max(1, Math.floor(s.playerPhy * 0.45));
+    applyHpDeltaToEnemy(s, target, -dmg);
+    playPortraitEffect("enemy", "hit", target); playBattleSe("hit");
+    clog(`【治承三年の政変】発動！ PHY ${dmg} ダメージ`); }
+  s.enemyPhy = Math.max(1, s.enemyPhy + (-4)); playBattleSe("debuff"); clog(`【治承三年の政変】敵 PHY -4`);
+}
+
+// 2039 ドストエフスキー「カラマーゾフの兄弟」 hook=onCombatStart
+function applyDostoevskyPassive(s) {
+  s.playerInt += 5; playBattleSe("buff"); clog(`【カラマーゾフの兄弟】INT +5`);
+  s.playerAgi += 3; playBattleSe("buff"); clog(`【カラマーゾフの兄弟】AGI +3`);
+}
+
+// 2040 花木蘭「三綱五常」 hook=onCombatStart
+function applyMulanPassive(s) {
+  s.playerGuard = (s.playerGuard || 0) + 6; playBattleSe("buff"); clog(`【三綱五常】ガード +6`);
+}
+
+// 2041 ベンジャミン・フランクリン「凧とライデン瓶の雷実験」 hook=onCombatStart
+function applyFranklinPassive(s) {
+  s.playerPhy += 5; playBattleSe("buff"); clog(`【凧とライデン瓶の雷実験】PHY +5`);
+  s.playerInt += 5; playBattleSe("buff"); clog(`【凧とライデン瓶の雷実験】INT +5`);
+}
+
+// 2042 ヴァスコ・ダ・ガマ「サン・ガブリエル」 hook=onCardUse
+async function applyGamaPassive(s) {
+  const target = getPlayerAttackTargetEnemy(s);
+  const hero = s.heroes?.[0];
+  if (isPartyWipedOut(s) || areAllEnemiesDefeated(s)) return;
+  if (Math.random() >= 0.4) return;
+  combatInputLocked = true;
+  await showPassiveCutin("サン・ガブリエル", typeof LEADER.img === "function" ? LEADER.img() : (LEADER.img || ""));
+  combatInputLocked = false;
+  if (!combat || isPartyWipedOut(s) || areAllEnemiesDefeated(s)) return;
+  s.playerAgi += 1; playBattleSe("buff"); clog(`【サン・ガブリエル】AGI +1`);
+  s.playerGuard = (s.playerGuard || 0) + 6; playBattleSe("buff"); clog(`【サン・ガブリエル】ガード +6`);
+  renderCombat();
+}
+
+// 2043 霧隠才蔵「忍術・毒霧」 hook=onCombatStart
+function applySaizoPassive(s) {
+  s.playerInt += 5; playBattleSe("buff"); clog(`【忍術・毒霧】INT +5`);
+  s.enemyPhy = Math.max(1, s.enemyPhy + (-1)); playBattleSe("debuff"); clog(`【忍術・毒霧】敵 PHY -1`);
+  s.enemyPoison = (s.enemyPoison || 0) + 1; playBattleSe("debuff"); clog(`【忍術・毒霧】毒 ×1 付与`);
+}
+
+// 2044 ソクラテス「アレテー」 hook=onCombatStart
+function applySocratesPassive(s) {
+  s.playerInt += 3; playBattleSe("buff"); clog(`【アレテー】INT +3`);
+  s.enemyInt = Math.max(1, s.enemyInt + (-4)); playBattleSe("debuff"); clog(`【アレテー】敵 INT -4`);
+}
+
+// 2045 達磨「二入四行論」 hook=onCombatStart
+function applyDarumaPassive(s) {
+  s.enemyAgi = Math.max(1, s.enemyAgi + (-2)); playBattleSe("debuff"); clog(`【二入四行論】敵 AGI -2`);
+}
+
+// 2046 北条政子「尼将軍」 hook=onCardUse
+async function applyMasakoPassive(s) {
+  const target = getPlayerAttackTargetEnemy(s);
+  const hero = s.heroes?.[0];
+  if (isPartyWipedOut(s) || areAllEnemiesDefeated(s)) return;
+  if (Math.random() >= 0.4) return;
+  combatInputLocked = true;
+  await showPassiveCutin("尼将軍", typeof LEADER.img === "function" ? LEADER.img() : (LEADER.img || ""));
+  combatInputLocked = false;
+  if (!combat || isPartyWipedOut(s) || areAllEnemiesDefeated(s)) return;
+  // Fallback: 元 DB の効果が解析不能 → 控えめな PHY+1 を付与
+  s.playerPhy += 1; playBattleSe("buff"); clog(`【尼将軍】PHY +1`);
+  renderCombat();
+}
+
+// 2047 アリストテレス「アイテール」 hook=onCombatStart
+function applyAristotlePassive(s) {
+  const target = getPlayerAttackTargetEnemy(s);
+  { const dmg = Math.max(1, Math.floor(s.playerInt * 0.45));
+    applyHpDeltaToEnemy(s, target, -dmg);
+    playPortraitEffect("enemy", "hit", target); playBattleSe("hit");
+    clog(`【アイテール】発動！ INT ${dmg} ダメージ`); }
+}
+
+// 2048 ルノワール「ムーラン・ド・ラ・ギャレットの舞踏会」 hook=onCardUse
+async function applyRenoirPassive(s) {
+  const target = getPlayerAttackTargetEnemy(s);
+  const hero = s.heroes?.[0];
+  if (isPartyWipedOut(s) || areAllEnemiesDefeated(s)) return;
+  if (Math.random() >= 0.4) return;
+  combatInputLocked = true;
+  await showPassiveCutin("ムーラン・ド・ラ・ギャレットの舞踏会", typeof LEADER.img === "function" ? LEADER.img() : (LEADER.img || ""));
+  combatInputLocked = false;
+  if (!combat || isPartyWipedOut(s) || areAllEnemiesDefeated(s)) return;
+  { const dmg = Math.max(1, Math.floor(s.playerInt * 0.2));
+    applyHpDeltaToEnemy(s, target, -dmg);
+    playPortraitEffect("enemy", "hit", target); playBattleSe("hit");
+    clog(`【ムーラン・ド・ラ・ギャレットの舞踏会】発動！ INT ${dmg} ダメージ`); }
+  renderCombat();
+}
+
+// 2049 ショパン「ワルツ9番 告別」 hook=onCombatStart
+function applyChopinPassive(s) {
+  s.enemyAgi = Math.max(1, s.enemyAgi + (-1)); playBattleSe("debuff"); clog(`【ワルツ9番 告別】敵 AGI -1`);
+  s.enemyBleed = (s.enemyBleed || 0) + 1; playBattleSe("debuff"); clog(`【ワルツ9番 告別】出血 ×1 付与`);
+}
+
+// 2050 イッパツマン & 逆転王「逆転王、見参!!」 hook=onCombatStart
+function applyIppatsumanPassive(s) {
+  s.playerPhy += 5; playBattleSe("buff"); clog(`【逆転王、見参!!】PHY +5`);
+  s.playerGuard = (s.playerGuard || 0) + 6; playBattleSe("buff"); clog(`【逆転王、見参!!】ガード +6`);
+}
+
+// 2051 アーマロイド・レディ「ライブ・メタル」 hook=onCardUse
+async function applyArmaroidPassive(s) {
+  const target = getPlayerAttackTargetEnemy(s);
+  const hero = s.heroes?.[0];
+  if (isPartyWipedOut(s) || areAllEnemiesDefeated(s)) return;
+  if (Math.random() >= 0.4) return;
+  combatInputLocked = true;
+  await showPassiveCutin("ライブ・メタル", typeof LEADER.img === "function" ? LEADER.img() : (LEADER.img || ""));
+  combatInputLocked = false;
+  if (!combat || isPartyWipedOut(s) || areAllEnemiesDefeated(s)) return;
+  s.playerInt += 2; playBattleSe("buff"); clog(`【ライブ・メタル】INT +2`);
+  s.enemyBleed = (s.enemyBleed || 0) + 1; playBattleSe("debuff"); clog(`【ライブ・メタル】出血 ×1 付与`);
+  renderCombat();
+}
+
+// 2052 UKA「遮二無二」 hook=onCardUse
+async function applyUkaPassive(s) {
+  const target = getPlayerAttackTargetEnemy(s);
+  const hero = s.heroes?.[0];
+  if (isPartyWipedOut(s) || areAllEnemiesDefeated(s)) return;
+  if (Math.random() >= 0.4) return;
+  combatInputLocked = true;
+  await showPassiveCutin("遮二無二", typeof LEADER.img === "function" ? LEADER.img() : (LEADER.img || ""));
+  combatInputLocked = false;
+  if (!combat || isPartyWipedOut(s) || areAllEnemiesDefeated(s)) return;
+  { const dmg = Math.max(1, Math.floor(s.playerInt * 0.33));
+    applyHpDeltaToEnemy(s, target, -dmg);
+    playPortraitEffect("enemy", "hit", target); playBattleSe("hit");
+    clog(`【遮二無二】発動！ INT ${dmg} ダメージ`); }
+  renderCombat();
+}
+
+// 2053 RAMON「タイマン」 hook=onCombatStart
+function applyRamonPassive(s) {
+  const target = getPlayerAttackTargetEnemy(s);
+  { const dmg = Math.max(1, Math.floor(s.playerPhy * 0.55));
+    applyHpDeltaToEnemy(s, target, -dmg);
+    playPortraitEffect("enemy", "hit", target); playBattleSe("hit");
+    clog(`【タイマン】発動！ PHY ${dmg} ダメージ`); }
+  s.playerPhy += 5; playBattleSe("buff"); clog(`【タイマン】PHY +5`);
+}
+
 // ─── カードプレイ ─────────────────────────────────────────────────
 async function playCard(idx) {
   if (combatInputLocked) return;
@@ -2172,6 +2861,9 @@ async function playCard(idx) {
   if (areAllEnemiesDefeated(combat)) { endCombatWin(); return; }
   // 甲斐姫「浪切」: スキルカード使用後に50%の確率で追加ダメージ（カットイン付き）
   await applyKaihimePassive(combat);
+  if (!combat) return;
+  if (areAllEnemiesDefeated(combat)) { endCombatWin(); return; }
+  await applyHeroPassiveOnCardUse(combat);
   if (!combat) return;
   if (areAllEnemiesDefeated(combat)) { endCombatWin(); return; }
   renderCombat();
