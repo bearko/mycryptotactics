@@ -1560,6 +1560,7 @@ function startCombatFromMapNode(node) {
   if (isBoss && (enemyDef.initialShield || 0) > 0) {
     clog(`ボスはシールド ${enemyDef.initialShield} を持ちます！`);
   }
+  applyHeroPassiveOnCombatStart(combat);
   syncLlExtSlots();
   startPlayerTurn();
 }
@@ -2147,6 +2148,98 @@ async function applyZhangPassive(s) {
   renderCombat();
 }
 
+// ─── 新規 Common ヒーロー (1004-1010) パッシブ ─────────────────────
+// onCombatStart: 戦闘開始時に 1 回発動（startCombatFromMapNode から呼ばれる）
+function applyHeroPassiveOnCombatStart(s) {
+  switch (LEADER.passiveKey) {
+    case "seton":      applySetonPassive(s);      break;
+    case "inoh":       applyInohPassive(s);       break;
+    case "pythagoras": applyPythagorasPassive(s); break;
+    case "sullivan":   applySullivanPassive(s);   break;
+    case "hercules":   applyHerculesPassive(s);   break;
+    case "giraffa":    applyGiraffaPassive(s);    break;
+    default: return;
+  }
+  renderStatusBadges();
+  renderCombat();
+}
+
+// onCardUse: カード使用後に発動（playCard から呼ばれる）
+async function applyHeroPassiveOnCardUse(s) {
+  if (LEADER.passiveKey === "daejanggeum") {
+    await applyDaejanggeumPassive(s);
+  }
+}
+
+// シートン「狼王ロボ」: 戦闘開始時、敵にINTの40%ダメージ＋出血1スタック付与
+function applySetonPassive(s) {
+  const dmg = Math.max(1, Math.floor(s.playerInt * 0.4));
+  s.enemyHp = Math.max(0, s.enemyHp - dmg);
+  s.enemyBleed = (s.enemyBleed || 0) + 1;
+  playBattleSe("hit");
+  clog(`【狼王ロボ】発動！ INT ${dmg} ダメージ＋出血 ×1 付与`);
+}
+
+// 伊能忠敬「大日本沿海輿地全図」: 戦闘開始時、自身のINTを最大AGIの30%アップ
+function applyInohPassive(s) {
+  const buff = Math.max(1, Math.floor(s.playerAgi * 0.3));
+  s.playerInt += buff;
+  playBattleSe("buff");
+  clog(`【大日本沿海輿地全図】発動！ INT +${buff}`);
+}
+
+// ピタゴラス「テトラクテュス」: 戦闘開始時、PHYとINTを互いの値の20%アップ
+function applyPythagorasPassive(s) {
+  const phyOrig = s.playerPhy;
+  const intOrig = s.playerInt;
+  const phyBuff = Math.max(1, Math.floor(intOrig * 0.2));
+  const intBuff = Math.max(1, Math.floor(phyOrig * 0.2));
+  s.playerPhy += phyBuff;
+  s.playerInt += intBuff;
+  playBattleSe("buff");
+  clog(`【テトラクテュス】発動！ PHY +${phyBuff} / INT +${intBuff}`);
+}
+
+// 大長今「李氏朝鮮、宮廷医女」: カード使用後30%でHP +最大HPの10%
+async function applyDaejanggeumPassive(s) {
+  if (s.playerHp <= 0) return;
+  if (s.playerHp >= s.playerHpMax) return;
+  if (Math.random() >= 0.3) return;
+  const heal = Math.max(1, Math.floor(s.playerHpMax * 0.1));
+  combatInputLocked = true;
+  await showPassiveCutin("李氏朝鮮、宮廷医女", typeof LEADER.img === "function" ? LEADER.img() : (LEADER.img || ""));
+  combatInputLocked = false;
+  if (!combat || s.playerHp <= 0) return;
+  s.playerHp = Math.min(s.playerHpMax, s.playerHp + heal);
+  playPortraitEffect("player", "heal");
+  playBattleSe("heal");
+  clog(`【李氏朝鮮、宮廷医女】発動！ HP +${heal}`);
+  renderCombat();
+}
+
+// ジョン・L・サリバン「ボストン・ストロング・ボーイ」: 戦闘開始時、PHY+5
+function applySullivanPassive(s) {
+  s.playerPhy += 5;
+  playBattleSe("buff");
+  clog(`【ボストン・ストロング・ボーイ】発動！ PHY +5`);
+}
+
+// ヘルクレスオオカブト「ローリングドライバー」: 戦闘開始時、敵INT-30%
+function applyHerculesPassive(s) {
+  const debuff = Math.max(1, Math.floor(s.enemyInt * 0.3));
+  s.enemyInt = Math.max(0, s.enemyInt - debuff);
+  playBattleSe("debuff");
+  clog(`【ローリングドライバー】発動！ 敵 INT -${debuff}`);
+}
+
+// ギラファノコギリクワガタ「ブルロック」: 戦闘開始時、敵にPHYの40%ダメージ
+function applyGiraffaPassive(s) {
+  const dmg = Math.max(1, Math.floor(s.playerPhy * 0.4));
+  s.enemyHp = Math.max(0, s.enemyHp - dmg);
+  playBattleSe("hit");
+  clog(`【ブルロック】発動！ PHY ${dmg} ダメージ`);
+}
+
 // ─── カードプレイ ─────────────────────────────────────────────────
 async function playCard(idx) {
   if (combatInputLocked) return;
@@ -2172,6 +2265,9 @@ async function playCard(idx) {
   if (areAllEnemiesDefeated(combat)) { endCombatWin(); return; }
   // 甲斐姫「浪切」: スキルカード使用後に50%の確率で追加ダメージ（カットイン付き）
   await applyKaihimePassive(combat);
+  if (!combat) return;
+  if (areAllEnemiesDefeated(combat)) { endCombatWin(); return; }
+  await applyHeroPassiveOnCardUse(combat);
   if (!combat) return;
   if (areAllEnemiesDefeated(combat)) { endCombatWin(); return; }
   renderCombat();
