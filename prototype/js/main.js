@@ -532,8 +532,8 @@ function useLlExt(slotIdx) {
   if (!ext) return;
   runState.llExtSlots[slotIdx] = null;
   applyLlExtEffect(ext);
-  if (combat.enemyHp <= 0 || areAllEnemiesDefeated(combat)) { endCombatWin(); return; }
-  if (combat.playerHp <= 0 || isPartyWipedOut(combat)) { endCombatLoss(); return; }
+  if (areAllEnemiesDefeated(combat)) { endCombatWin(); return; }
+  if (isPartyWipedOut(combat)) { endCombatLoss(); return; }
   syncLlExtSlots();
   renderCombat();
 }
@@ -598,10 +598,15 @@ function lungePortrait(who) {
 }
 
 // ─── ダメージ計算補助 ─────────────────────────────────────────────
-/** リザレクション発動チェック（致死ダメージ後に HP を 1 に戻す） */
+/** リザレクション発動チェック（致死ダメージ後に HP を 1 に戻す）
+ *  SPEC-005 Phase 3: heroes[0] (前衛) も連動更新 */
 function checkResurrection(s) {
   if (s.playerHp <= 0 && s.hasResurrection) {
     s.playerHp = 1;
+    if (s.heroes && s.heroes[0]) {
+      s.heroes[0].hp = 1;
+      s.heroes[0].alive = true;
+    }
     s.hasResurrection = false;
     playBattleSe("buff"); playPortraitEffect("player", "buff");
     clog("【リザレクション】致死ダメージを耐えた！HP 1 で生存！");
@@ -1564,7 +1569,7 @@ function startPlayerTurn() {
     flashPortrait("player"); playPortraitEffect("player", "debuff");
     clog(`毒ダメージ（自分）${dmg}`);
     checkResurrection(combat);
-    if (combat.playerHp <= 0 || isPartyWipedOut(combat)) { endCombatLoss(); return; }
+    if (isPartyWipedOut(combat)) { endCombatLoss(); return; }
   }
   // 毒ティック（敵）
   if ((combat.enemyPoison || 0) > 0) {
@@ -1572,7 +1577,7 @@ function startPlayerTurn() {
     combat.enemyHp = Math.max(0, combat.enemyHp - dmg);
     flashPortrait("enemy"); playPortraitEffect("enemy", "debuff");
     clog(`毒ダメージ（敵）${dmg}`);
-    if (combat.enemyHp <= 0 || areAllEnemiesDefeated(combat)) { endCombatWin(); return; }
+    if (areAllEnemiesDefeated(combat)) { endCombatWin(); return; }
   }
 
   // 突撃ペナルティ
@@ -1970,7 +1975,7 @@ function renderCombat() {
 // ─── 甲斐姫パッシブ（浪切）非同期ヘルパー ────────────────────────
 async function applyKaihimePassive(s) {
   if (LEADER.passiveKey !== 'kaihime') return;
-  if (s.enemyHp <= 0) return;
+  if (areAllEnemiesDefeated(s)) return;
   if (Math.random() >= 0.5) return;
 
   const bonusDmg = Math.max(1, Math.floor(s.playerPhy * 0.5));
@@ -1979,8 +1984,10 @@ async function applyKaihimePassive(s) {
   await showPassiveCutin("浪切", typeof LEADER.img === "function" ? LEADER.img() : (LEADER.img || ""));
   combatInputLocked = false;
 
-  if (!combat || s.enemyHp <= 0) return;
-  s.enemyHp = Math.max(0, s.enemyHp - bonusDmg);
+  if (!combat || areAllEnemiesDefeated(s)) return;
+  // SPEC-005 Phase 3: foremost living enemy へ
+  const target = getPlayerAttackTargetEnemy(s);
+  applyHpDeltaToEnemy(s, target, -bonusDmg);
   playPortraitEffect("enemy", "hit");
   playBattleSe("hit");
   clog(`【浪切】発動！ 追加ダメージ ${bonusDmg}`);
@@ -1991,7 +1998,7 @@ async function applyKaihimePassive(s) {
 async function applyZhangPassive(s) {
   if (!s._zhangCounterPending) return;
   s._zhangCounterPending = false;
-  if (s.playerHp <= 0 || s.enemyHp <= 0) return;
+  if (isPartyWipedOut(s) || areAllEnemiesDefeated(s)) return;
 
   const counterDmg = Math.max(1, Math.floor(s.playerPhy * 0.2));
   // カットイン表示（待機）
@@ -1999,8 +2006,10 @@ async function applyZhangPassive(s) {
   await showPassiveCutin("遼来遼来", typeof LEADER.img === "function" ? LEADER.img() : (LEADER.img || ""));
   combatInputLocked = false;
 
-  if (!combat || s.enemyHp <= 0) return;
-  s.enemyHp = Math.max(0, s.enemyHp - counterDmg);
+  if (!combat || areAllEnemiesDefeated(s)) return;
+  // SPEC-005 Phase 3: foremost living enemy へ
+  const target = getPlayerAttackTargetEnemy(s);
+  applyHpDeltaToEnemy(s, target, -counterDmg);
   playPortraitEffect("enemy", "hit");
   playBattleSe("hit");
   clog(`【遼来遼来】発動！ 反撃 ${counterDmg} ダメージ`);
@@ -2024,11 +2033,11 @@ async function playCard(idx) {
   card.play(combat);
   // カード効果を UI に反映してからパッシブへ
   renderCombat();
-  if (combat.enemyHp <= 0 || areAllEnemiesDefeated(combat)) { endCombatWin(); return; }
+  if (areAllEnemiesDefeated(combat)) { endCombatWin(); return; }
   // 甲斐姫「浪切」: スキルカード使用後に50%の確率で追加ダメージ（カットイン付き）
   await applyKaihimePassive(combat);
   if (!combat) return;
-  if (combat.enemyHp <= 0 || areAllEnemiesDefeated(combat)) { endCombatWin(); return; }
+  if (areAllEnemiesDefeated(combat)) { endCombatWin(); return; }
   renderCombat();
 }
 
@@ -2112,7 +2121,7 @@ async function enemyTurn() {
     renderStatusBadges();
   }
 
-  if (combat.playerHp <= 0 || isPartyWipedOut(combat)) { endCombatLoss(); return; }
+  if (isPartyWipedOut(combat)) { endCombatLoss(); return; }
 
   // SPEC-005 Phase 3d: サブエネミー (enemies[1..]) も独立に行動。
   // 各サブエネミーは intentRota を順に消化、攻撃系のみ自分のステで実行。
@@ -2166,7 +2175,7 @@ async function enemyTurn() {
   renderCombat();
   await applyZhangPassive(combat);
   if (!combat) return;
-  if (combat.enemyHp <= 0 || areAllEnemiesDefeated(combat)) { endCombatWin(); return; }
+  if (areAllEnemiesDefeated(combat)) { endCombatWin(); return; }
 
   combat.turn++;
   startPlayerTurn();
