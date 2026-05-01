@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>MyCryptoTactics — アルファ版</title>
+  <title>MyCryptoTactics — ベータ１版</title>
   <meta name="description" content="My Crypto Heroes の偉人たち × ローグライク × カードバトルのファンメイドブラウザゲーム。" />
 
   <!-- favicon -->
@@ -11,7 +11,7 @@
 
   <!-- Open Graph / Twitter Card (X リンクプレビュー用) -->
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="MyCryptoTactics — アルファ版" />
+  <meta property="og:title" content="MyCryptoTactics — ベータ１版" />
   <meta property="og:description" content="My Crypto Heroes の偉人たち × ローグライク × カードバトル。スマホ・PC で遊べるブラウザゲーム。" />
   <meta property="og:url" content="https://mycryptotactics.vercel.app/" />
   <meta property="og:image" content="https://mycryptotactics.vercel.app/og-image.png" />
@@ -19,7 +19,7 @@
   <meta property="og:image:height" content="1536" />
   <meta property="og:site_name" content="MyCryptoTactics" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="MyCryptoTactics — アルファ版" />
+  <meta name="twitter:title" content="MyCryptoTactics — ベータ１版" />
   <meta name="twitter:description" content="My Crypto Heroes 偉人 × ローグライク × カードバトル。" />
   <meta name="twitter:image" content="https://mycryptotactics.vercel.app/og-image.png" />
 
@@ -298,18 +298,45 @@
     .arena-inner {
       position: relative; z-index: 1;
       display: flex; align-items: flex-end; justify-content: space-between;
-      padding: 0.6rem 0.5rem 0.75rem;
+      padding: 0.6rem 0.3rem 0.75rem;
       min-height: 240px;
     }
+    /* SPEC-005 Phase 3h: 3 スロット同サイズ + V 字配置 (front=中央寄り・低い / back=外側・高い) */
     .party-side {
-      display: flex; gap: 0.2rem; align-items: flex-end;
-      flex: 1; max-width: 44%;
+      display: flex; gap: 0.25rem; align-items: flex-end;
+      flex: 1; max-width: 47%;
     }
-    .party-side--player { justify-content: flex-start; }
-    .party-side--enemy  { justify-content: flex-end; flex-direction: row-reverse; }
-    .party-slot { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; }
-    .party-slot--ghost { opacity: 0; pointer-events: none; min-height: 100px; }
-    .party-slot--center { flex: 0 0 auto; }
+    .party-side--player { justify-content: flex-end; }
+    .party-side--enemy  { justify-content: flex-start; }
+    .party-slot {
+      flex: 0 0 auto; min-width: 0;
+      display: flex; flex-direction: column; align-items: center;
+    }
+    /* V 字段差: front は最も低く、back は最も高い (画面では下向きの V) */
+    .party-slot--front { margin-bottom: 0; }
+    .party-slot--mid   { margin-bottom: 26px; }
+    .party-slot--back  { margin-bottom: 52px; }
+    /* 空スロット (パーティ未充足) は非表示 */
+    .party-slot--mid:empty,
+    .party-slot--back:empty { display: none; }
+    /* 死亡ユニット (前衛・サブ共通) はグレースケール + intent 非表示 */
+    .combatant--dead .combatant-portrait { filter: grayscale(1) brightness(0.55); }
+    .combatant--dead .intent-bubble { display: none; }
+    /* SPEC-005 Phase 3j: アクティブキャスター強調 */
+    .party-slot[data-side="player"] .combatant { cursor: pointer; transition: transform 0.15s; }
+    .party-slot[data-side="player"] .combatant.combatant--dead { cursor: default; }
+    .party-slot[data-side="player"] .combatant:not(.combatant--dead):hover { transform: translateY(-2px); }
+    .combatant--active .combatant-portrait-wrap {
+      box-shadow: 0 0 0 2px var(--accent), 0 0 12px #c4a35aaa;
+      border-radius: 8px;
+    }
+    .combatant--active .combatant-portrait-wrap::before {
+      content: "▶ ACTIVE"; position: absolute;
+      top: -14px; left: 50%; transform: translateX(-50%);
+      font-size: 0.5rem; color: var(--accent); font-weight: 800;
+      letter-spacing: 0.1em; text-shadow: 0 1px 0 #000;
+      white-space: nowrap;
+    }
 
     .combatant { display: flex; flex-direction: column; align-items: center; gap: 0.18rem; }
 
@@ -338,7 +365,7 @@
     }
 
     /* Combatant info */
-    .combatant-info { width: 148px; display: flex; flex-direction: column; gap: 0.14rem; }
+    .combatant-info { width: 110px; display: flex; flex-direction: column; gap: 0.14rem; }
     .combatant-name {
       font-size: 0.68rem; font-weight: 700; text-align: center; color: var(--text);
       overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -403,10 +430,11 @@
       100% { opacity: 0; transform: translateX(-50%) translateY(-22px) scale(1); }
     }
 
-    /* VS col */
+    /* VS col — arena 全体の縦中央に揃える */
     .vs-col {
       flex: 0 0 auto; min-width: 2.5rem;
       display: flex; align-items: center; justify-content: center;
+      align-self: center;
     }
     .vs-mark {
       font-size: 1.2rem; font-weight: 800; color: var(--accent);
@@ -1399,6 +1427,40 @@
       transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
     }
     .hs-card:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: 0 8px 24px #000a; }
+    /* SPEC-005 Phase 3a: パーティ編成画面 */
+    .hs-card--in-party { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(253,203,110,0.18); }
+    .hs-in-party-mark { color: var(--accent); font-size: 0.7rem; font-weight: 700; }
+    .ps-current {
+      display: flex; gap: 0.55rem; justify-content: center; flex-wrap: wrap;
+      margin: 0.6rem auto 1.1rem;
+      padding: 0.55rem 0.5rem;
+      background: #0e0a18; border: 1px solid var(--border);
+      border-radius: 10px; max-width: 520px;
+    }
+    .ps-slot {
+      flex: 1 1 110px; max-width: 150px;
+      background: #15121c; border: 1px dashed var(--border);
+      border-radius: 8px; padding: 0.45rem 0.4rem 0.55rem;
+      display: flex; flex-direction: column; align-items: center; gap: 0.25rem;
+      position: relative; min-height: 110px;
+    }
+    .ps-slot-pos { font-size: 0.65rem; color: var(--accent); font-weight: 800; letter-spacing: 0.06em; }
+    .ps-slot-img { width: 60px; height: 60px; object-fit: contain; image-rendering: pixelated; }
+    .ps-slot-name { font-size: 0.7rem; font-weight: 700; color: var(--text); line-height: 1.2; text-align: center; }
+    .ps-slot-empty { font-size: 0.7rem; color: var(--muted); padding: 1.4rem 0 0; }
+    .ps-slot-remove {
+      position: absolute; top: 4px; right: 4px;
+      width: 22px; height: 22px; border-radius: 999px;
+      background: #2a1a20; border: 1px solid var(--danger); color: #ff8090;
+      font-size: 0.7rem; cursor: pointer; line-height: 1;
+    }
+    .ps-confirm-row {
+      display: flex; justify-content: center;
+      margin: 1.2rem 0 0.6rem;
+    }
+    .ps-confirm-btn {
+      font-size: 0.95rem; padding: 0.6rem 1.4rem;
+    }
     .hs-hero-img {
       width: 100%; height: 160px;
       object-fit: contain; image-rendering: pixelated;
@@ -2124,7 +2186,7 @@
   <!-- ── Title Screen ── -->
   <div id="titleView" class="title-screen" role="button" aria-label="ゲームを始める" tabindex="0">
     <img class="title-logo" src="./MCT_logo.jpg" alt="MyCryptoTactics" />
-    <p class="title-alpha">アルファ版</p>
+    <p class="title-alpha">ベータ１版</p>
     <p class="title-press">Press to Start</p>
   </div>
 
@@ -2197,10 +2259,14 @@
         </div>
         <div class="arena-inner">
 
-          <!-- Player party (3 slots, center active now) -->
+          <!-- Player party (3 slots; front=heroes[0]=closest to VS center) -->
           <div class="party-side party-side--player">
-            <div class="party-slot party-slot--ghost" aria-hidden="true"></div>
-            <div class="party-slot party-slot--center">
+            <!-- 後衛 (heroes[2]) -->
+            <div class="party-slot party-slot--back" data-pos="2" data-side="player" aria-hidden="true"></div>
+            <!-- 中衛 (heroes[1]) -->
+            <div class="party-slot party-slot--mid" data-pos="1" data-side="player" aria-hidden="true"></div>
+            <!-- 前衛 (heroes[0]) -->
+            <div class="party-slot party-slot--front" data-pos="0" data-side="player">
               <div class="combatant hero-combatant">
                 <div class="combatant-portrait-wrap" id="playerPortraitWrap">
                   <img id="leaderImg" class="combatant-portrait" alt="" />
@@ -2226,16 +2292,15 @@
                 </div>
               </div>
             </div>
-            <div class="party-slot party-slot--ghost" aria-hidden="true"></div>
           </div>
 
           <!-- VS -->
           <div class="vs-col"><span class="vs-mark">VS</span></div>
 
-          <!-- Enemy party (3 slots, center active now) -->
+          <!-- Enemy party (3 slots; front=enemies[0]=closest to VS center) -->
           <div class="party-side party-side--enemy">
-            <div class="party-slot party-slot--ghost" aria-hidden="true"></div>
-            <div class="party-slot party-slot--center">
+            <!-- 前衛 (enemies[0]) -->
+            <div class="party-slot party-slot--front" data-pos="0" data-side="enemy">
               <div class="combatant enemy-combatant">
                 <div class="intent-bubble" id="enemyIntentWrap" aria-live="polite">
                   <span class="intent-label">NEXT ACTION</span>
@@ -2265,7 +2330,10 @@
                 </div>
               </div>
             </div>
-            <div class="party-slot party-slot--ghost" aria-hidden="true"></div>
+            <!-- 中衛 (enemies[1]) -->
+            <div class="party-slot party-slot--mid" data-pos="1" data-side="enemy" aria-hidden="true"></div>
+            <!-- 後衛 (enemies[2]) -->
+            <div class="party-slot party-slot--back" data-pos="2" data-side="enemy" aria-hidden="true"></div>
           </div>
 
         </div>
@@ -2417,7 +2485,7 @@
   </div>
 
   <footer>
-    <span class="footer-meta">MyCryptoTactics アルファ版 · 非営利のファン制作</span>
+    <span class="footer-meta">MyCryptoTactics ベータ１版 · 非営利のファン制作</span>
     <span class="footer-credit">
       キャラクター画像 / BGM / SE は <strong>My Crypto Heroes (MCH Co., Ltd.)</strong> に帰属します。
       利用条件・権利表記・二次創作ガイドラインは
@@ -2507,7 +2575,7 @@
             <li><strong>?</strong> — ランダム（その時点の生存者から無作為に選択）。</li>
             <li><strong>PHY↑ / HP↓</strong> 等 — そのステータスが<strong>最も高い / 低い</strong>対象を選択。</li>
           </ul>
-          <p style="font-size:0.78rem;color:var(--muted)">※ パーティ編成（3 人 vs 3 人）はベータ版で実装予定。アルファ版では実質 1 体ずつのため、上記ラベルは <strong>誰に効くか</strong>の予告として機能します。</p>
+          <p style="font-size:0.78rem;color:var(--muted)">※ パーティ編成（3 人 vs 3 人）はベータ１版から有効です。前衛・中衛・後衛の並びはタイトルから入って編成画面で確認できます。</p>
         </section>
         <section class="help-page" data-help-page="battle">
           <h3>バトルロジック（概要）</h3>

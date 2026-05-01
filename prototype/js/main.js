@@ -504,21 +504,21 @@ function applyLlExtEffect(ext) {
       const boost = Math.floor(s.playerPhy * 0.5);
       s.playerPhy += boost;
       s.playerGuard = (s.playerGuard || 0) + 20;
-      playBattleSe("buff"); playPortraitEffect("player", "buff");
+      playBattleSe("buff"); playPortraitEffect("player", "buff", s.heroes?.[0]);
       clog(`PHY+${boost} GRD+20`);
       break;
     }
     case "blue":
       healPlayerFromIntSkill(s, 200, 250);
       s.playerInt += 4;
-      playBattleSe("buff"); playPortraitEffect("player", "buff");
+      playBattleSe("buff"); playPortraitEffect("player", "buff", s.heroes?.[0]);
       clog("INT+4");
       break;
     case "fish":
       healPlayerFromIntSkill(s, 150, 200);
       s.playerPhy += 3;
       s.hasResurrection = true;
-      playBattleSe("buff"); playPortraitEffect("player", "buff");
+      playBattleSe("buff"); playPortraitEffect("player", "buff", s.heroes?.[0]);
       clog("PHY+3 リザレクション付与");
       break;
     default:
@@ -532,8 +532,8 @@ function useLlExt(slotIdx) {
   if (!ext) return;
   runState.llExtSlots[slotIdx] = null;
   applyLlExtEffect(ext);
-  if (combat.enemyHp <= 0) { endCombatWin(); return; }
-  if (combat.playerHp <= 0) { endCombatLoss(); return; }
+  if (areAllEnemiesDefeated(combat)) { endCombatWin(); return; }
+  if (isPartyWipedOut(combat)) { endCombatLoss(); return; }
   syncLlExtSlots();
   renderCombat();
 }
@@ -546,10 +546,32 @@ function clog(msg) {
   el.insertBefore(p, el.firstChild);
 }
 
-/** @param {'player'|'enemy'} who @param {'hit'|'heal'|'buff'|'debuff'|'area'} kind */
-function playPortraitEffect(who, kind) {
+/** Phase 3g: 敵ターンの間隔調整に使う sleep。lunge=350ms / flash=380ms / portrait-fx=900ms に合わせる。 */
+function sleep(ms) { return new Promise(res => setTimeout(res, ms)); }
+const ENEMY_ACTION_GAP_MS = 850;
+
+/** SPEC-005 Phase 3h: data-pos スロット内の combatant-portrait-wrap を解決
+ *  - heroes[0] / enemies[0] (前衛) → 静的 ID (#playerPortraitWrap / #enemyPortraitWrap)
+ *  - heroes[1+] / enemies[1+] → .party-slot[data-pos="N"] .combatant-portrait-wrap
+ *  unit 未指定の場合は legacy 前衛スロットへフォールバック */
+function resolveUnitPortraitWrap(who, unit) {
+  if (unit && combat) {
+    const arr = who === "enemy" ? combat.enemies : combat.heroes;
+    const idx = Array.isArray(arr) ? arr.indexOf(unit) : -1;
+    if (idx > 0) {
+      const side = who === "enemy" ? "enemy" : "player";
+      const sel = `.party-slot[data-side="${side}"][data-pos="${idx}"] .combatant-portrait-wrap`;
+      const wrap = document.querySelector(sel);
+      if (wrap) return wrap;
+    }
+  }
   const wrapId = who === "enemy" ? "enemyPortraitWrap" : "playerPortraitWrap";
-  const wrap = document.getElementById(wrapId);
+  return document.getElementById(wrapId);
+}
+
+/** @param {'player'|'enemy'} who @param {'hit'|'heal'|'buff'|'debuff'|'area'} kind @param {object} [unit] 被弾/対象ユニット (省略時は中央スロット) */
+function playPortraitEffect(who, kind, unit) {
+  const wrap = resolveUnitPortraitWrap(who, unit);
   if (!wrap) return;
   const sheet =
     kind === "heal"   ? BATTLE_EFFECT_SPRITE.heal() :
@@ -577,18 +599,16 @@ function spawnStatFloat(anchorId, delta) {
   setTimeout(() => el.remove(), 900);
 }
 
-function flashPortrait(which) {
-  const id = which === "enemy" ? "enemyPortraitWrap" : "playerPortraitWrap";
-  const wrap = document.getElementById(id);
+function flashPortrait(which, unit) {
+  const wrap = resolveUnitPortraitWrap(which, unit);
   if (!wrap) return;
   wrap.classList.add("portrait-hit");
   setTimeout(() => wrap.classList.remove("portrait-hit"), 380);
 }
 
 /** 攻撃側のポートレートを突進アニメで動かす（player = 右へ, enemy = 左へ） */
-function lungePortrait(who) {
-  const id = who === "enemy" ? "enemyPortraitWrap" : "playerPortraitWrap";
-  const wrap = document.getElementById(id);
+function lungePortrait(who, unit) {
+  const wrap = resolveUnitPortraitWrap(who, unit);
   if (!wrap) return;
   const cls = who === "player" ? "portrait-lunge--player" : "portrait-lunge--enemy";
   wrap.classList.remove(cls);   // reset if still running
@@ -598,12 +618,17 @@ function lungePortrait(who) {
 }
 
 // ─── ダメージ計算補助 ─────────────────────────────────────────────
-/** リザレクション発動チェック（致死ダメージ後に HP を 1 に戻す） */
+/** リザレクション発動チェック（致死ダメージ後に HP を 1 に戻す）
+ *  SPEC-005 Phase 3: heroes[0] (前衛) も連動更新 */
 function checkResurrection(s) {
   if (s.playerHp <= 0 && s.hasResurrection) {
     s.playerHp = 1;
+    if (s.heroes && s.heroes[0]) {
+      s.heroes[0].hp = 1;
+      s.heroes[0].alive = true;
+    }
     s.hasResurrection = false;
-    playBattleSe("buff"); playPortraitEffect("player", "buff");
+    playBattleSe("buff"); playPortraitEffect("player", "buff", s.heroes?.[0]);
     clog("【リザレクション】致死ダメージを耐えた！HP 1 で生存！");
     return true;
   }
@@ -633,7 +658,32 @@ function drawCards(s, n) {
 }
 
 // ─── プレイヤー攻撃 ───────────────────────────────────────────────
+/** SPEC-005 Phase 3c: プレイヤー攻撃の対象 = foremost living enemy */
+function getPlayerAttackTargetEnemy(s) {
+  if (!s || !Array.isArray(s.enemies)) return null;
+  return foremostAlive(s.enemies) || s.enemies[0] || null;
+}
+
+/** 敵 HP を更新し、必要に応じて legacy フィールドを同期 */
+function applyHpDeltaToEnemy(s, enemy, delta) {
+  if (!enemy) return;
+  enemy.hp = Math.max(0, (enemy.hp ?? 0) + delta);
+  if (enemy.hp <= 0) enemy.alive = false;
+  if (s.enemies && enemy === s.enemies[0]) {
+    s.enemyHp = enemy.hp;
+  }
+}
+
+/** 全エネミー死亡判定 */
+function areAllEnemiesDefeated(s) {
+  if (!s || !Array.isArray(s.enemies) || s.enemies.length === 0) {
+    return (s?.enemyHp ?? 0) <= 0;
+  }
+  return s.enemies.every(e => !e || e.alive === false || (e.hp ?? 0) <= 0);
+}
+
 function dealPhySkillToEnemy(s, skillPct) {
+  const target = getPlayerAttackTargetEnemy(s);
   const cut = cutRateFromPhy(s.enemyPhy);
   let base = phyIntDamageAfterCut(s.playerPhy, skillPct, cut);
   let critBonus = 0;
@@ -649,11 +699,14 @@ function dealPhySkillToEnemy(s, skillPct) {
     total += s.enemyBleed;
     clog(`出血 ×${s.enemyBleed} 追加`);
   }
-  total = applyGuardToDamage("enemy", total);
-  s.enemyHp = Math.max(0, s.enemyHp - total);
-  lungePortrait("player");
-  flashPortrait("enemy");
-  playPortraitEffect("enemy", "hit");
+  // ガードは前衛 (enemies[0]) のみ
+  if (target === s.enemies?.[0]) {
+    total = applyGuardToDamage("enemy", total);
+  }
+  applyHpDeltaToEnemy(s, target, -total);
+  lungePortrait("player", getActiveHero(s));
+  flashPortrait("enemy", target);
+  playPortraitEffect("enemy", "hit", target);
   if (total > 0) playBattleSe("hit");
   if (critBonus > 0) spawnCritDisplay("enemy", total);
   clog(
@@ -669,6 +722,7 @@ function dealPhySkillToEnemyRange(s, minPct, maxPct) {
 }
 
 function dealIntSkillToEnemy(s, minPct, maxPct, forceCrit = false) {
+  const target = getPlayerAttackTargetEnemy(s);
   const skillPct = randomSkillRatePct(minPct, maxPct);
   const cut = cutRateFromInt(s.enemyInt);
   let base = phyIntDamageAfterCut(s.playerInt, skillPct, cut);
@@ -678,11 +732,13 @@ function dealIntSkillToEnemy(s, minPct, maxPct, forceCrit = false) {
     clog("クリティカル（INT）");
   }
   let total = base + critBonus;
-  total = applyGuardToDamage("enemy", total);
-  s.enemyHp = Math.max(0, s.enemyHp - total);
-  lungePortrait("player");
-  flashPortrait("enemy");
-  playPortraitEffect("enemy", "hit");
+  if (target === s.enemies?.[0]) {
+    total = applyGuardToDamage("enemy", total);
+  }
+  applyHpDeltaToEnemy(s, target, -total);
+  lungePortrait("player", getActiveHero(s));
+  flashPortrait("enemy", target);
+  playPortraitEffect("enemy", "hit", target);
   if (total > 0) playBattleSe("hit");
   if (critBonus > 0) spawnCritDisplay("enemy", total);
   clog(
@@ -698,12 +754,105 @@ function healPlayerFromIntSkill(s, minPct, maxPct) {
   const heal = Math.max(0, Math.floor((coef * pct) / 100));
   const before = s.playerHp;
   s.playerHp = Math.min(s.playerHpMax, s.playerHp + heal);
-  if (s.playerHp > before) { playBattleSe("heal"); playPortraitEffect("player", "heal"); }
+  if (s.playerHp > before) { playBattleSe("heal"); playPortraitEffect("player", "heal", s.heroes?.[0]); }
   clog(`リカバリー: 係数${coef.toFixed(1)}×${pct}% → HP+${s.playerHp - before}`);
 }
 
 // ─── 敵攻撃 ───────────────────────────────────────────────────────
-function dealPhySkillFromEnemyToPlayer(s, skillPct) {
+/** SPEC-005 Phase 3b: 敵攻撃の対象となる foremost living hero を返す。
+ *  全員死亡時は heroes[0] にフォールバック（保険）。 */
+function getEnemyAttackTargetHero(s) {
+  if (!s || !Array.isArray(s.heroes)) return null;
+  const tgt = foremostAlive(s.heroes);
+  return tgt || s.heroes[0] || null;
+}
+
+/** ヒーローユニットの hp / alive を更新し、必要に応じて legacy フィールドを同期する。 */
+function applyHpDeltaToHero(s, hero, delta) {
+  if (!hero) return;
+  hero.hp = Math.max(0, (hero.hp ?? 0) + delta);
+  if (hero.hp <= 0) hero.alive = false;
+  // heroes[0] (前衛) なら legacy combat.playerHp と同期
+  if (s.heroes && hero === s.heroes[0]) {
+    s.playerHp = hero.hp;
+  }
+  // SPEC-005 Phase 3j: アクティブキャスターが死亡したら次の生存ヒーローへ切替
+  if (hero.alive === false && s.heroes && hero === s.heroes[s.activeHeroIdx ?? 0]) {
+    ensureActiveHeroAlive(s);
+  }
+}
+
+/** 全ヒーロー死亡判定 */
+function isPartyWipedOut(s) {
+  if (!s || !Array.isArray(s.heroes) || s.heroes.length === 0) {
+    return (s?.playerHp ?? 0) <= 0;
+  }
+  return s.heroes.every(h => !h || h.alive === false || (h.hp ?? 0) <= 0);
+}
+
+// ─── SPEC-005 Phase 3j: アクティブキャスター切替 ─────────────────────
+/** 現在の active hero (生存している前提) */
+function getActiveHero(s) {
+  if (!s || !Array.isArray(s.heroes)) return null;
+  return s.heroes[s.activeHeroIdx ?? 0] || null;
+}
+
+/** activeHeroIdx が死亡 / 範囲外なら、生存ヒーロー (前衛優先) へ切り替える */
+function ensureActiveHeroAlive(s) {
+  if (!s || !Array.isArray(s.heroes) || s.heroes.length === 0) return;
+  const cur = s.heroes[s.activeHeroIdx ?? -1];
+  if (cur && cur.alive !== false && (cur.hp ?? 0) > 0) return;
+  // 前衛 → 中衛 → 後衛 の順で生存している最初のヒーローへ
+  for (let i = 0; i < s.heroes.length; i++) {
+    const h = s.heroes[i];
+    if (h && h.alive !== false && (h.hp ?? 0) > 0) {
+      s.activeHeroIdx = i;
+      loadActiveHeroStatsToLegacy(s);
+      return;
+    }
+  }
+}
+
+/** active hero のステを legacy combat.player* に流し込む（card.play() が読む側） */
+function loadActiveHeroStatsToLegacy(s) {
+  const h = getActiveHero(s);
+  if (!h) return;
+  s.playerPhy = h.phy;
+  s.playerInt = h.int;
+  s.playerAgi = h.agi;
+  s.playerPhyBase = h.phyBase ?? h.phy;
+  s.playerIntBase = h.intBase ?? h.int;
+  s.playerAgiBase = h.agiBase ?? h.agi;
+}
+
+/** card.play() が legacy を変更した分を active hero に書き戻す（バフ/デバフ反映） */
+function syncLegacyStatsToActiveHero(s) {
+  const h = getActiveHero(s);
+  if (!h) return;
+  h.phy = s.playerPhy;
+  h.int = s.playerInt;
+  h.agi = s.playerAgi;
+}
+
+/** ユーザー操作: ヒーロー portrait をクリックして交代 */
+function setActiveHero(idx) {
+  if (!combat || !Array.isArray(combat.heroes)) return;
+  if (idx === (combat.activeHeroIdx ?? 0)) return;
+  const target = combat.heroes[idx];
+  if (!target || target.alive === false || (target.hp ?? 0) <= 0) return;
+  // 現キャスターのバフ等を書き戻してから切替
+  syncLegacyStatsToActiveHero(combat);
+  combat.activeHeroIdx = idx;
+  loadActiveHeroStatsToLegacy(combat);
+  clog(`【交代】${target.name || "ヒーロー"} に切替`);
+  renderCombat();
+}
+
+function dealPhySkillFromEnemyToPlayer(s, skillPct, caster) {
+  // Phase 3b: 敵攻撃は foremost living hero を対象に
+  const target = getEnemyAttackTargetHero(s);
+  // ダメージ計算は legacy stats (heroes[0] 前衛) を使う - 簡略化のため
+  // (Phase 3c 以降で target.phy / guard / shield 個別管理に拡張予定)
   const cut = cutRateFromPhy(s.playerPhy);
   let base = phyIntDamageAfterCut(s.enemyPhy, skillPct, cut);
   let critBonus = 0;
@@ -722,12 +871,18 @@ function dealPhySkillFromEnemyToPlayer(s, skillPct) {
     total = Math.ceil(total / 2);
     clog("不屈: ダメージ半減");
   }
-  total = applyGuardToDamage("player", total);
-  s.playerHp = Math.max(0, s.playerHp - total);
+  // ガード/シールドは前衛 (heroes[0]) のみ。foremost が前衛以外ならそのまま透過。
+  if (target === s.heroes?.[0]) {
+    total = applyGuardToDamage("player", total);
+  }
+  // 対象ヒーローへ HP 反映
+  applyHpDeltaToHero(s, target, -total);
   checkResurrection(s);
-  lungePortrait("enemy");
-  flashPortrait("player");
-  playPortraitEffect("player", "hit");
+  // SPEC-005 Phase 3f: エフェクトを実際の被弾ヒーローに向ける
+  // Phase 3g: 攻撃側 (caster) が指定されていればその portrait を lunge させる
+  lungePortrait("enemy", caster);
+  flashPortrait("player", target);
+  playPortraitEffect("player", "hit", target);
   if (total > 0) playBattleSe("hit");
   if (critBonus > 0) spawnCritDisplay("player", total);
   clog(
@@ -740,7 +895,8 @@ function dealPhySkillFromEnemyToPlayer(s, skillPct) {
   }
 }
 
-function dealIntSkillFromEnemyToPlayer(s, skillPct) {
+function dealIntSkillFromEnemyToPlayer(s, skillPct, caster) {
+  const target = getEnemyAttackTargetHero(s);
   const cut = cutRateFromInt(s.playerInt);
   let base = phyIntDamageAfterCut(s.enemyInt, skillPct, cut);
   let critBonus = 0;
@@ -753,12 +909,14 @@ function dealIntSkillFromEnemyToPlayer(s, skillPct) {
     total = Math.ceil(total / 2);
     clog("不屈: ダメージ半減");
   }
-  total = applyGuardToDamage("player", total);
-  s.playerHp = Math.max(0, s.playerHp - total);
+  if (target === s.heroes?.[0]) {
+    total = applyGuardToDamage("player", total);
+  }
+  applyHpDeltaToHero(s, target, -total);
   checkResurrection(s);
-  lungePortrait("enemy");
-  flashPortrait("player");
-  playPortraitEffect("player", "hit");
+  lungePortrait("enemy", caster);
+  flashPortrait("player", target);
+  playPortraitEffect("player", "hit", target);
   if (total > 0) playBattleSe("hit");
   if (critBonus > 0) spawnCritDisplay("player", total);
   clog(
@@ -772,15 +930,21 @@ function dealIntSkillFromEnemyToPlayer(s, skillPct) {
 }
 
 /** 最大 HP 割合の特殊ダメージ（シールドのみ有効） */
-function dealSpecialMaxHpPercentToPlayer(s, pct) {
-  let raw = Math.max(0, Math.floor((s.playerHpMax * pct) / 100));
+function dealSpecialMaxHpPercentToPlayer(s, pct, caster) {
+  const target = getEnemyAttackTargetHero(s);
+  // 特殊ダメージは対象 hero の最大 HP 基準
+  const refMaxHp = (target?.hpMax ?? s.playerHpMax) || s.playerHpMax;
+  let raw = Math.max(0, Math.floor((refMaxHp * pct) / 100));
   if (s.damageReducedThisTurn) raw = Math.ceil(raw / 2);
-  raw = applyDamageThroughShield(s, "player", raw);
-  s.playerHp = Math.max(0, s.playerHp - raw);
+  // シールドは前衛 (heroes[0]) のみ
+  if (target === s.heroes?.[0]) {
+    raw = applyDamageThroughShield(s, "player", raw);
+  }
+  applyHpDeltaToHero(s, target, -raw);
   checkResurrection(s);
-  lungePortrait("enemy");
-  flashPortrait("player");
-  playPortraitEffect("player", "area");
+  lungePortrait("enemy", caster);
+  flashPortrait("player", target);
+  playPortraitEffect("player", "area", target);
   if (raw > 0) playBattleSe("area");
   clog(`特殊ダメージ（最大HP ${pct}%）→ HP-${raw}`);
 }
@@ -797,13 +961,15 @@ const battleApi = {
   // 章 2-3 カード用
   addPoisonToEnemy(s, stacks) {
     s.enemyPoison = (s.enemyPoison || 0) + stacks;
-    playBattleSe("debuff"); playPortraitEffect("enemy", "debuff");
+    const tgt = getPlayerAttackTargetEnemy(s) || s.enemies?.[0];
+    playBattleSe("debuff"); playPortraitEffect("enemy", "debuff", tgt);
     clog(`毒 ×${stacks} 付与（敵）`);
     renderStatusBadges();
   },
   addBleedToEnemy(s, stacks) {
     s.enemyBleed = (s.enemyBleed || 0) + stacks;
-    playBattleSe("debuff"); playPortraitEffect("enemy", "debuff");
+    const tgt = getPlayerAttackTargetEnemy(s) || s.enemies?.[0];
+    playBattleSe("debuff"); playPortraitEffect("enemy", "debuff", tgt);
     clog(`出血 ×${stacks} 付与（敵）`);
     renderStatusBadges();
   },
@@ -811,14 +977,14 @@ const battleApi = {
     const had = (s.playerPoison || 0) + (s.playerBleed || 0);
     s.playerPoison = 0; s.playerBleed = 0;
     if (had > 0) {
-      playBattleSe("heal"); playPortraitEffect("player", "heal");
+      playBattleSe("heal"); playPortraitEffect("player", "heal", s.heroes?.[0]);
       clog("状態異常解除（自分）");
     }
     renderStatusBadges();
   },
   addPlayerShield(s, amount) {
     s.playerShield = (s.playerShield || 0) + amount;
-    playBattleSe("buff"); playPortraitEffect("player", "buff");
+    playBattleSe("buff"); playPortraitEffect("player", "buff", s.heroes?.[0]);
     clog(`シールド +${amount}`);
   },
   addGold(amount) {
@@ -828,7 +994,7 @@ const battleApi = {
   },
   setDamageReducedThisTurn(s) {
     s.damageReducedThisTurn = true;
-    playBattleSe("buff"); playPortraitEffect("player", "buff");
+    playBattleSe("buff"); playPortraitEffect("player", "buff", s.heroes?.[0]);
     clog("不屈：このターン被ダメ半減");
   },
 };
@@ -841,11 +1007,18 @@ function ensureRunState() {
     const chapter = CHAPTERS[0];
     const { nodes, edges, viewH, startY } = generateChapterMap(chapter, ENEMY_DEFS);
     setActiveMap(nodes, edges, viewH, startY);
+    // SPEC-005 Phase 3: party 初期化（最大 3 ヒーロー）
+    const partyIds = pendingPartyConfirmed && pendingPartyConfirmed.length > 0
+      ? pendingPartyConfirmed
+      : [LEADER.heroId];
+    const party = buildPartyLoadout(partyIds);
     runState = {
       chapterIdx: 0,
       deck: makeStarterDeck(),
-      playerHp: LEADER.hpMax,
-      playerHpMax: LEADER.hpMax,
+      party,
+      // 旧フィールドは前衛 (party[0]) と同期。既存コードの互換用。
+      playerHp: party[0].hpCurrent,
+      playerHpMax: party[0].hpMax,
       lastMapNodeId: null,
       pathNodeIds: [],
       runComplete: false,
@@ -1306,17 +1479,21 @@ function startCombatFromMapNode(node) {
     _lastUi: null,
   };
 
-  // SPEC-005 Phase 2: heroes[] / enemies[] を並行で初期化（Phase 3 で正式に使用、現状は表示・解決用の参照のみ）
-  combat.heroes = [makeHeroUnit({
-    position: 0,
-    defId: LEADER.heroId,
-    name: LEADER.nameJa,
-    imgUrl: typeof LEADER.img === "function" ? LEADER.img() : null,
-    hp: combat.playerHp, hpMax: combat.playerHpMax,
-    phy: pPhy, int: pInt, agi: pAgi,
-    phyBase: pPhy, intBase: pInt, agiBase: pAgi,
-    passiveKey: LEADER.passiveKey || null,
-  })];
+  // SPEC-005 Phase 3: party から combat.heroes (1〜3 体) を構築
+  const partyArr = (runState.party && runState.party.length > 0) ? runState.party : [{ heroId: LEADER.heroId, hpCurrent: LEADER.hpMax, hpMax: LEADER.hpMax }];
+  combat.heroes = partyArr.map((loadout, idx) => {
+    const heroDef = HERO_ROSTER.find(h => h.heroId === loadout.heroId) || LEADER;
+    return makeHeroUnit({
+      position: idx,
+      defId: heroDef.heroId,
+      name: heroDef.nameJa,
+      imgUrl: typeof heroDef.img === "function" ? heroDef.img() : null,
+      hp: loadout.hpCurrent, hpMax: loadout.hpMax,
+      phy: heroDef.basePhy, int: heroDef.baseInt, agi: heroDef.baseAgi,
+      phyBase: heroDef.basePhy, intBase: heroDef.baseInt, agiBase: heroDef.baseAgi,
+      passiveKey: heroDef.passiveKey || null,
+    });
+  });
   combat.enemies = [makeEnemyUnit({
     position: 0,
     defId: enemyDef.id,
@@ -1331,6 +1508,35 @@ function startCombatFromMapNode(node) {
     isBoss,
   })];
   combat.activeHeroIdx = 0;
+
+  // SPEC-005 Phase 3c: 多エネミースポーン (fight ノードのみ。boss / elite は 1 体維持)
+  // 単純化のため fight 時は party.length と同数 (最大 3) のエネミーを章プールから補充
+  if (!isBoss && !node.elite && partyArr.length > 1) {
+    const desiredCount = Math.min(3, partyArr.length);
+    const pool = (chapter.enemyPool || []).filter(id => id && id !== enemyDef.id);
+    for (let i = 1; i < desiredCount; i++) {
+      if (pool.length === 0) break;
+      const pick = pool[Math.floor(Math.random() * pool.length)];
+      const def = ENEMY_DEFS[pick];
+      if (!def) continue;
+      const subHp = Math.max(1, Math.round(def.hp * reg.effects.hpFactor));
+      const subPhy = Math.max(1, Math.round(def.phy * reg.effects.atkFactor));
+      const subInt = Math.max(1, Math.round(def.int * reg.effects.atkFactor));
+      combat.enemies.push(makeEnemyUnit({
+        position: i,
+        defId: def.id,
+        name: def.name,
+        imgId: def.imgId,
+        hp: subHp, hpMax: subHp,
+        phy: subPhy, int: subInt, agi: def.agi,
+        phyBase: subPhy, intBase: subInt, agiBase: def.agi,
+        shield: def.initialShield || 0,
+        intentRota: def.intentRota,
+        bossPhase: -1,
+        isBoss: false,
+      }));
+    }
+  }
 
   combat.drawPile = shuffle(combat.deck.map((c) => copyCard(c.libraryKey)));
   showView("combat");
@@ -1435,6 +1641,21 @@ function advanceEnemyIntent() {
   }
   combat.enemyIntent = combat.intentRota[combat.intentRotaIdx % combat.intentRota.length];
   combat.intentRotaIdx++;
+  // 旧コード互換: enemies[0] の intent も同期
+  if (combat.enemies && combat.enemies[0]) {
+    combat.enemies[0].enemyIntent = combat.enemyIntent;
+  }
+  // SPEC-005 Phase 3d: サブエネミーも次の intent を表示用に設定（インクリメントもここで）
+  if (combat.enemies && combat.enemies.length > 1) {
+    for (let i = 1; i < combat.enemies.length; i++) {
+      const sub = combat.enemies[i];
+      if (!sub || sub.alive === false || (sub.hp ?? 0) <= 0) { if (sub) sub.enemyIntent = null; continue; }
+      const rota = sub.intentRota || [];
+      if (rota.length === 0) { sub.enemyIntent = null; continue; }
+      sub.enemyIntent = rota[(sub.intentRotaIdx ?? 0) % rota.length];
+      sub.intentRotaIdx = (sub.intentRotaIdx ?? 0) + 1;
+    }
+  }
 }
 
 // ─── プレイヤーターン開始 ─────────────────────────────────────────
@@ -1446,18 +1667,28 @@ function startPlayerTurn() {
   if ((combat.playerPoison || 0) > 0) {
     const dmg = combat.playerPoison;
     combat.playerHp = Math.max(0, combat.playerHp - dmg);
-    flashPortrait("player"); playPortraitEffect("player", "debuff");
+    if (combat.heroes?.[0]) {
+      combat.heroes[0].hp = combat.playerHp;
+      if (combat.heroes[0].hp <= 0) combat.heroes[0].alive = false;
+    }
+    flashPortrait("player", combat.heroes?.[0]);
+    playPortraitEffect("player", "debuff", combat.heroes?.[0]);
     clog(`毒ダメージ（自分）${dmg}`);
     checkResurrection(combat);
-    if (combat.playerHp <= 0) { endCombatLoss(); return; }
+    if (isPartyWipedOut(combat)) { endCombatLoss(); return; }
   }
-  // 毒ティック（敵）
+  // 毒ティック（敵 - 前衛のみ。combat.enemyPoison は従来仕様の単一インスタンス）
   if ((combat.enemyPoison || 0) > 0) {
     const dmg = combat.enemyPoison;
     combat.enemyHp = Math.max(0, combat.enemyHp - dmg);
-    flashPortrait("enemy"); playPortraitEffect("enemy", "debuff");
+    if (combat.enemies?.[0]) {
+      combat.enemies[0].hp = combat.enemyHp;
+      if (combat.enemies[0].hp <= 0) combat.enemies[0].alive = false;
+    }
+    flashPortrait("enemy", combat.enemies?.[0]);
+    playPortraitEffect("enemy", "debuff", combat.enemies?.[0]);
     clog(`毒ダメージ（敵）${dmg}`);
-    if (combat.enemyHp <= 0) { endCombatWin(); return; }
+    if (areAllEnemiesDefeated(combat)) { endCombatWin(); return; }
   }
 
   // 突撃ペナルティ
@@ -1475,7 +1706,7 @@ function startPlayerTurn() {
     if (combat.playerHp < combat.playerHpMax * 0.7) {
       combat.playerInt += 3;
       combat.doylePassiveTriggered = true;
-      playPortraitEffect("player", "buff");
+      playPortraitEffect("player", "buff", combat.heroes?.[0]);
       playBattleSe("buff");
       clog('【シャーロック・ホームズ】発動！ INT +3');
     }
@@ -1778,6 +2009,30 @@ function renderCombat() {
 
   renderStatusBadges();
   diffUiFloats();
+  // SPEC-005 Phase 3a: party.length > 1 ならサブヒーローを ghost slot に表示
+  renderPartySubHeroes();
+  // SPEC-005 Phase 3c: enemies.length > 1 ならサブエネミーも ghost slot に表示
+  renderEnemySubUnits();
+  // SPEC-005 Phase 3h: 前衛 (heroes[0] / enemies[0]) の死亡時グレーアウト
+  const heroFrontEl = document.querySelector('.party-slot--front[data-side="player"] .combatant');
+  if (heroFrontEl) {
+    const h0 = combat.heroes?.[0];
+    const dead = !h0 || h0.alive === false || (h0.hp ?? combat.playerHp) <= 0;
+    heroFrontEl.classList.toggle("combatant--dead", dead);
+  }
+  const enemyFrontEl = document.querySelector('.party-slot--front[data-side="enemy"] .combatant');
+  if (enemyFrontEl) {
+    const e0 = combat.enemies?.[0];
+    const dead = !e0 || e0.alive === false || (e0.hp ?? combat.enemyHp) <= 0;
+    enemyFrontEl.classList.toggle("combatant--dead", dead);
+  }
+  // SPEC-005 Phase 3j: アクティブキャスター highlight
+  const activeIdx = combat.activeHeroIdx ?? 0;
+  document.querySelectorAll('.party-slot[data-side="player"] .combatant').forEach((el) => {
+    el.classList.remove("combatant--active");
+  });
+  const activeSlot = document.querySelector(`.party-slot[data-side="player"][data-pos="${activeIdx}"] .combatant`);
+  if (activeSlot && combat.heroes && combat.heroes.length > 1) activeSlot.classList.add("combatant--active");
 
   const handEl = document.getElementById("hand");
   handEl.innerHTML = "";
@@ -1851,7 +2106,7 @@ function renderCombat() {
 // ─── 甲斐姫パッシブ（浪切）非同期ヘルパー ────────────────────────
 async function applyKaihimePassive(s) {
   if (LEADER.passiveKey !== 'kaihime') return;
-  if (s.enemyHp <= 0) return;
+  if (areAllEnemiesDefeated(s)) return;
   if (Math.random() >= 0.5) return;
 
   const bonusDmg = Math.max(1, Math.floor(s.playerPhy * 0.5));
@@ -1860,9 +2115,11 @@ async function applyKaihimePassive(s) {
   await showPassiveCutin("浪切", typeof LEADER.img === "function" ? LEADER.img() : (LEADER.img || ""));
   combatInputLocked = false;
 
-  if (!combat || s.enemyHp <= 0) return;
-  s.enemyHp = Math.max(0, s.enemyHp - bonusDmg);
-  playPortraitEffect("enemy", "hit");
+  if (!combat || areAllEnemiesDefeated(s)) return;
+  // SPEC-005 Phase 3: foremost living enemy へ
+  const target = getPlayerAttackTargetEnemy(s);
+  applyHpDeltaToEnemy(s, target, -bonusDmg);
+  playPortraitEffect("enemy", "hit", target);
   playBattleSe("hit");
   clog(`【浪切】発動！ 追加ダメージ ${bonusDmg}`);
   renderCombat();
@@ -1872,7 +2129,7 @@ async function applyKaihimePassive(s) {
 async function applyZhangPassive(s) {
   if (!s._zhangCounterPending) return;
   s._zhangCounterPending = false;
-  if (s.playerHp <= 0 || s.enemyHp <= 0) return;
+  if (isPartyWipedOut(s) || areAllEnemiesDefeated(s)) return;
 
   const counterDmg = Math.max(1, Math.floor(s.playerPhy * 0.2));
   // カットイン表示（待機）
@@ -1880,9 +2137,11 @@ async function applyZhangPassive(s) {
   await showPassiveCutin("遼来遼来", typeof LEADER.img === "function" ? LEADER.img() : (LEADER.img || ""));
   combatInputLocked = false;
 
-  if (!combat || s.enemyHp <= 0) return;
-  s.enemyHp = Math.max(0, s.enemyHp - counterDmg);
-  playPortraitEffect("enemy", "hit");
+  if (!combat || areAllEnemiesDefeated(s)) return;
+  // SPEC-005 Phase 3: foremost living enemy へ
+  const target = getPlayerAttackTargetEnemy(s);
+  applyHpDeltaToEnemy(s, target, -counterDmg);
+  playPortraitEffect("enemy", "hit", target);
   playBattleSe("hit");
   clog(`【遼来遼来】発動！ 反撃 ${counterDmg} ダメージ`);
   renderCombat();
@@ -1893,6 +2152,9 @@ async function playCard(idx) {
   if (combatInputLocked) return;
   const card = combat.hand[idx];
   if (!card || card.cost > combat.energy) return;
+  // SPEC-005 Phase 3j: アクティブキャスターを生存させ、stats を legacy にロードしてから play
+  ensureActiveHeroAlive(combat);
+  loadActiveHeroStatsToLegacy(combat);
   combat.energy -= card.cost;
   combat.hand.splice(idx, 1);
   // 消耗カードは exhaustPile へ、通常カードは捨て札へ
@@ -1903,13 +2165,15 @@ async function playCard(idx) {
     combat.discardPile.push(card);
   }
   card.play(combat);
+  // Phase 3j: card 効果で変化した legacy stats を active hero へ書き戻し
+  syncLegacyStatsToActiveHero(combat);
   // カード効果を UI に反映してからパッシブへ
   renderCombat();
-  if (combat.enemyHp <= 0) { endCombatWin(); return; }
+  if (areAllEnemiesDefeated(combat)) { endCombatWin(); return; }
   // 甲斐姫「浪切」: スキルカード使用後に50%の確率で追加ダメージ（カットイン付き）
   await applyKaihimePassive(combat);
   if (!combat) return;
-  if (combat.enemyHp <= 0) { endCombatWin(); return; }
+  if (areAllEnemiesDefeated(combat)) { endCombatWin(); return; }
   renderCombat();
 }
 
@@ -1929,77 +2193,169 @@ async function enemyTurn() {
   const isAttackKind = it.kind && it.kind.startsWith && it.kind.startsWith("attack");
   const regBleedStacks = reg.effects.bleedOnAttack || 0;
 
-  switch (it.kind) {
-    case "attack":
-      dealPhySkillFromEnemyToPlayer(combat, it.phyPct);
-      break;
-    case "attackPoison":
-      dealPhySkillFromEnemyToPlayer(combat, it.phyPct);
-      if (combat.playerHp > 0 && (it.poisonStacks || 0) > 0) {
-        combat.playerPoison = (combat.playerPoison || 0) + it.poisonStacks;
-        playBattleSe("debuff"); clog(`毒 ×${it.poisonStacks} 付与（自分）`);
-        renderStatusBadges();
+  // Phase 3g: 行動した直後だけ次のアクションとの間に sleep を挟む
+  let actorActed = false;
+
+  // 前衛 (enemies[0]) — 死亡している場合はスキップ
+  const front = combat.enemies?.[0];
+  const frontAlive = front && front.alive !== false && (front.hp ?? combat.enemyHp ?? 0) > 0;
+  if (frontAlive) {
+    switch (it.kind) {
+      case "attack":
+        dealPhySkillFromEnemyToPlayer(combat, it.phyPct);
+        break;
+      case "attackPoison":
+        dealPhySkillFromEnemyToPlayer(combat, it.phyPct);
+        if (combat.playerHp > 0 && (it.poisonStacks || 0) > 0) {
+          combat.playerPoison = (combat.playerPoison || 0) + it.poisonStacks;
+          playBattleSe("debuff"); clog(`毒 ×${it.poisonStacks} 付与（自分）`);
+          renderStatusBadges();
+        }
+        break;
+      case "attackBleed":
+        dealPhySkillFromEnemyToPlayer(combat, it.phyPct);
+        if (combat.playerHp > 0 && (it.bleedStacks || 0) > 0) {
+          combat.playerBleed = (combat.playerBleed || 0) + it.bleedStacks;
+          playBattleSe("debuff"); clog(`出血 ×${it.bleedStacks} 付与（自分）`);
+          renderStatusBadges();
+        }
+        break;
+      case "attackDouble":
+        dealPhySkillFromEnemyToPlayer(combat, it.phyPct);
+        if (combat.playerHp > 0) dealPhySkillFromEnemyToPlayer(combat, it.phyPct);
+        break;
+      case "attackInt":
+        dealIntSkillFromEnemyToPlayer(combat, it.intPct);
+        break;
+      case "attackIntDouble":
+        dealIntSkillFromEnemyToPlayer(combat, it.intPct);
+        if (combat.playerHp > 0) dealIntSkillFromEnemyToPlayer(combat, it.intPct);
+        break;
+      case "healSelf": {
+        const heal = Math.max(1, Math.floor((combat.enemyHpMax * it.pct) / 100));
+        combat.enemyHp = Math.min(combat.enemyHpMax, combat.enemyHp + heal);
+        if (combat.enemies?.[0]) combat.enemies[0].hp = combat.enemyHp;
+        playBattleSe("heal"); playPortraitEffect("enemy", "heal", combat.enemies?.[0]);
+        clog(`敵 HP+${heal}（自己回復）`);
+        break;
       }
-      break;
-    case "attackBleed":
-      dealPhySkillFromEnemyToPlayer(combat, it.phyPct);
-      if (combat.playerHp > 0 && (it.bleedStacks || 0) > 0) {
-        combat.playerBleed = (combat.playerBleed || 0) + it.bleedStacks;
-        playBattleSe("debuff"); clog(`出血 ×${it.bleedStacks} 付与（自分）`);
-        renderStatusBadges();
-      }
-      break;
-    case "attackDouble":
-      dealPhySkillFromEnemyToPlayer(combat, it.phyPct);
-      if (combat.playerHp > 0) dealPhySkillFromEnemyToPlayer(combat, it.phyPct);
-      break;
-    case "attackInt":
-      dealIntSkillFromEnemyToPlayer(combat, it.intPct);
-      break;
-    case "attackIntDouble":
-      dealIntSkillFromEnemyToPlayer(combat, it.intPct);
-      if (combat.playerHp > 0) dealIntSkillFromEnemyToPlayer(combat, it.intPct);
-      break;
-    case "healSelf": {
-      const heal = Math.max(1, Math.floor((combat.enemyHpMax * it.pct) / 100));
-      combat.enemyHp = Math.min(combat.enemyHpMax, combat.enemyHp + heal);
-      playBattleSe("heal"); playPortraitEffect("enemy", "heal");
-      clog(`敵 HP+${heal}（自己回復）`);
-      break;
+      case "buffSelf":
+        if (it.phyAdd) combat.enemyPhy += it.phyAdd;
+        if (it.intAdd) combat.enemyInt += it.intAdd;
+        playBattleSe("buff"); playPortraitEffect("enemy", "buff", combat.enemies?.[0]);
+        clog(`敵強化: ${it.phyAdd ? "PHY+" + it.phyAdd : ""}${it.intAdd ? " INT+" + it.intAdd : ""}`);
+        break;
+      case "guard":
+        combat.enemyGuard += it.value;
+        playBattleSe("buff"); playPortraitEffect("enemy", "buff", combat.enemies?.[0]);
+        clog(`敵 GUARD +${it.value}`);
+        break;
+      case "special":
+        dealSpecialMaxHpPercentToPlayer(combat, it.pct);
+        break;
+      default:
+        clog(`不明な意図: ${it.kind}`);
     }
-    case "buffSelf":
-      if (it.phyAdd) combat.enemyPhy += it.phyAdd;
-      if (it.intAdd) combat.enemyInt += it.intAdd;
-      playBattleSe("buff"); playPortraitEffect("enemy", "buff");
-      clog(`敵強化: ${it.phyAdd ? "PHY+" + it.phyAdd : ""}${it.intAdd ? " INT+" + it.intAdd : ""}`);
-      break;
-    case "guard":
-      combat.enemyGuard += it.value;
-      playBattleSe("buff"); playPortraitEffect("enemy", "buff");
-      clog(`敵 GUARD +${it.value}`);
-      break;
-    case "special":
-      dealSpecialMaxHpPercentToPlayer(combat, it.pct);
-      break;
-    default:
-      clog(`不明な意図: ${it.kind}`);
+
+    // レギュレーション効果: 攻撃に出血付与（Red+） (#37)
+    if (isAttackKind && regBleedStacks > 0 && combat.playerHp > 0) {
+      combat.playerBleed = (combat.playerBleed || 0) + regBleedStacks;
+      playBattleSe("debuff");
+      clog(`出血 ×${regBleedStacks} 付与（自分・${reg.nameJa} 効果）`);
+      renderStatusBadges();
+    }
+
+    actorActed = true;
   }
 
-  // レギュレーション効果: 攻撃に出血付与（Red+） (#37)
-  if (isAttackKind && regBleedStacks > 0 && combat.playerHp > 0) {
-    combat.playerBleed = (combat.playerBleed || 0) + regBleedStacks;
-    playBattleSe("debuff");
-    clog(`出血 ×${regBleedStacks} 付与（自分・${reg.nameJa} 効果）`);
-    renderStatusBadges();
-  }
+  if (isPartyWipedOut(combat)) { endCombatLoss(); return; }
 
-  if (combat.playerHp <= 0) { endCombatLoss(); return; }
+  // SPEC-005 Phase 3d: サブエネミー (enemies[1..]) も独立に行動。
+  // Phase 3g: 前衛 → 中衛 → 後衛 の順で 1 体ずつ演出を完走させる
+  // Phase 3i: 死亡しているユニットは丸ごとスキップ (sleep も走らせない)
+  if (Array.isArray(combat.enemies) && combat.enemies.length > 1) {
+    for (let i = 1; i < combat.enemies.length; i++) {
+      const sub = combat.enemies[i];
+      if (!sub || sub.alive === false || (sub.hp ?? 0) <= 0) continue;
+      // SPEC-005 Phase 3d: advanceEnemyIntent で割り当て済みの sub.enemyIntent を使う
+      // (idx 進行も advanceEnemyIntent でしているため二重インクリメントしない)
+      const subIt = sub.enemyIntent;
+      if (!subIt) continue;
+      // 直前の生存ユニットが行動済みなら、その演出が終わるまで待つ
+      if (actorActed) await sleep(ENEMY_ACTION_GAP_MS);
+      // 攻撃系以外 (guard/buffSelf/healSelf 等): 攻撃ヘルパは流用できないので
+      // 自身の HP/portrait に最低限の演出だけ反映し、データには触らない。
+      const isAttack = subIt.kind && (subIt.kind.startsWith("attack") || subIt.kind === "special");
+      if (!isAttack) {
+        if (subIt.kind === "healSelf" && (subIt.pct || 0) > 0) {
+          const heal = Math.max(1, Math.floor(((sub.hpMax || 0) * subIt.pct) / 100));
+          sub.hp = Math.min(sub.hpMax || sub.hp, (sub.hp || 0) + heal);
+          playBattleSe("heal"); playPortraitEffect("enemy", "heal", sub);
+          clog(`${sub.name || "敵"} HP+${heal}（自己回復）`);
+        } else if (subIt.kind === "buffSelf" || subIt.kind === "guard") {
+          playBattleSe("buff"); playPortraitEffect("enemy", "buff", sub);
+          clog(`${sub.name || "敵"} 行動: ${subIt.kind}`);
+        }
+        actorActed = true;
+        continue;
+      }
+      // 一時的に combat.enemyXxx を sub のステに差し替えて既存ヘルパを再利用
+      const saved = {
+        enemyPhy: combat.enemyPhy, enemyInt: combat.enemyInt, enemyAgi: combat.enemyAgi,
+        enemyPhyBase: combat.enemyPhyBase, enemyIntBase: combat.enemyIntBase, enemyAgiBase: combat.enemyAgiBase,
+        enemyHp: combat.enemyHp, enemyHpMax: combat.enemyHpMax,
+      };
+      combat.enemyPhy = sub.phy; combat.enemyInt = sub.int; combat.enemyAgi = sub.agi;
+      combat.enemyPhyBase = sub.phyBase; combat.enemyIntBase = sub.intBase; combat.enemyAgiBase = sub.agiBase;
+      combat.enemyHp = sub.hp; combat.enemyHpMax = sub.hpMax;
+      try {
+        // Phase 3g: caster=sub を渡し、sub の portrait が lunge するように
+        switch (subIt.kind) {
+          case "attack":         dealPhySkillFromEnemyToPlayer(combat, subIt.phyPct, sub); break;
+          case "attackPoison":
+            dealPhySkillFromEnemyToPlayer(combat, subIt.phyPct, sub);
+            if (!isPartyWipedOut(combat) && (subIt.poisonStacks || 0) > 0) {
+              combat.playerPoison = (combat.playerPoison || 0) + subIt.poisonStacks;
+              playBattleSe("debuff");
+              clog(`毒 ×${subIt.poisonStacks} 付与（自分）`);
+              renderStatusBadges();
+            }
+            break;
+          case "attackBleed":
+            dealPhySkillFromEnemyToPlayer(combat, subIt.phyPct, sub);
+            if (!isPartyWipedOut(combat) && (subIt.bleedStacks || 0) > 0) {
+              combat.playerBleed = (combat.playerBleed || 0) + subIt.bleedStacks;
+              playBattleSe("debuff");
+              clog(`出血 ×${subIt.bleedStacks} 付与（自分）`);
+              renderStatusBadges();
+            }
+            break;
+          case "attackDouble":
+            dealPhySkillFromEnemyToPlayer(combat, subIt.phyPct, sub);
+            if (!isPartyWipedOut(combat)) dealPhySkillFromEnemyToPlayer(combat, subIt.phyPct, sub);
+            break;
+          case "attackInt":      dealIntSkillFromEnemyToPlayer(combat, subIt.intPct, sub); break;
+          case "attackIntDouble":
+            dealIntSkillFromEnemyToPlayer(combat, subIt.intPct, sub);
+            if (!isPartyWipedOut(combat)) dealIntSkillFromEnemyToPlayer(combat, subIt.intPct, sub);
+            break;
+          case "special":        dealSpecialMaxHpPercentToPlayer(combat, subIt.pct, sub); break;
+        }
+      } finally {
+        // 戻す (heal/buff があった場合の HP 等変更は sub 反映済みなのでこれで問題なし)
+        Object.assign(combat, saved);
+      }
+      if (isPartyWipedOut(combat)) { endCombatLoss(); return; }
+      // Phase 3i: このサブが行動した。次の生存サブが来た時に sleep が入る
+      actorActed = true;
+    }
+  }
 
   // 張遼「遼来遼来」: 被ダメージ後に反撃（カットイン付き、非同期）
   renderCombat();
   await applyZhangPassive(combat);
   if (!combat) return;
-  if (combat.enemyHp <= 0) { endCombatWin(); return; }
+  if (areAllEnemiesDefeated(combat)) { endCombatWin(); return; }
 
   combat.turn++;
   startPlayerTurn();
@@ -2821,11 +3177,17 @@ function startRunFromChapter(chapterIdx) {
   const chapter = CHAPTERS[chapterIdx];
   const { nodes, edges, viewH, startY } = generateChapterMap(chapter, ENEMY_DEFS);
   setActiveMap(nodes, edges, viewH, startY);
+  // SPEC-005 Phase 3: party
+  const partyIds = pendingPartyConfirmed && pendingPartyConfirmed.length > 0
+    ? pendingPartyConfirmed
+    : [LEADER.heroId];
+  const party = buildPartyLoadout(partyIds);
   runState = {
     chapterIdx,
     deck: makeStarterDeck(),
-    playerHp: LEADER.hpMax,
-    playerHpMax: LEADER.hpMax,
+    party,
+    playerHp: party[0].hpCurrent,
+    playerHpMax: party[0].hpMax,
     lastMapNodeId: null,
     pathNodeIds: [],
     runComplete: false,
@@ -3018,40 +3380,243 @@ function updateHeaderRegulationIcons() {
   });
 }
 
-// ─── ヒーロー選択画面 ────────────────────────────────────────────────
+// ─── 戦闘中: サブヒーロー（heroes[1]/heroes[2]）を data-pos スロットに表示 ────
+// SPEC-005 Phase 3h: 前衛と同じ combatant markup (portrait + HP bar + stats) を流し込む
+function renderPartySubHeroes() {
+  const playerSide = document.querySelector(".party-side--player");
+  if (!playerSide || !combat || !Array.isArray(combat.heroes)) return;
+  for (let pos = 1; pos < 3; pos++) {
+    const slot = playerSide.querySelector(`.party-slot[data-pos="${pos}"]`);
+    if (!slot) continue;
+    const hero = combat.heroes[pos];
+    if (!hero) { slot.innerHTML = ""; continue; }
+    const isDead = hero.alive === false || (hero.hp != null && hero.hp <= 0);
+    const portraitImg = hero.imgUrl || "";
+    const hpPct = hero.hpMax ? Math.max(0, Math.min(100, Math.round((hero.hp / hero.hpMax) * 100))) : 0;
+    slot.innerHTML =
+      `<div class="combatant hero-combatant${isDead ? " combatant--dead" : ""}">` +
+        `<div class="combatant-portrait-wrap">` +
+          `<img class="combatant-portrait" src="${portraitImg}" alt="${escapeHtml(hero.name || "")}" onerror="this.style.opacity='0.2'" />` +
+        `</div>` +
+        `<div class="combatant-info">` +
+          `<div class="combatant-name">${escapeHtml(hero.name || "")}</div>` +
+          `<div class="hp-bar-row">` +
+            `<div class="hp-bar-track"><div class="hp-bar-fill" style="width:${hpPct}%"></div></div>` +
+            `<span class="hp-bar-nums">${hero.hp ?? "?"}/${hero.hpMax ?? "?"}</span>` +
+          `</div>` +
+          `<div class="stat-row-badges">` +
+            `<span class="sbadge sbadge-phy" data-label="PHY">${hero.phy ?? "-"}</span>` +
+            `<span class="sbadge sbadge-int" data-label="INT">${hero.int ?? "-"}</span>` +
+            `<span class="sbadge sbadge-agi" data-label="AGI">${hero.agi ?? "-"}</span>` +
+            `<span class="sbadge sbadge-grd" data-label="GRD">🛡${hero.guard ?? 0}</span>` +
+            `<span class="sbadge sbadge-shd" data-label="SHD">✦${hero.shield ?? 0}</span>` +
+          `</div>` +
+        `</div>` +
+      `</div>`;
+  }
+}
+
+/** SPEC-005 Phase 3d: 個別ユニットの intent からプレイヤー向け表示テキスト */
+function intentTextForUnit(unit) {
+  if (!unit || !unit.enemyIntent) return "";
+  const it = unit.enemyIntent;
+  // ダメージ概算は legacy のヘルパが combat.playerXxx を読むため、unit のステを一時参照
+  const phy = unit.phy ?? 0;
+  const int = unit.int ?? 0;
+  const playerPhy = combat?.playerPhy ?? 0;
+  const playerInt = combat?.playerInt ?? 0;
+  const playerHpMax = combat?.playerHpMax ?? 0;
+  const cutPhy = Math.min(40, Math.floor(playerPhy / 2));
+  const cutInt = Math.min(40, Math.floor(playerInt / 2));
+  const phyDmg = (pct) => Math.max(0, Math.floor(phy * pct / 100 * (100 - cutPhy) / 100));
+  const intDmg = (pct) => Math.max(0, Math.floor(int * pct / 100 * (100 - cutInt) / 100));
+  switch (it.kind) {
+    case "attack":         return `先頭：${phyDmg(it.phyPct)}`;
+    case "attackPoison":   return `先頭：${phyDmg(it.phyPct)}＋毒×${it.poisonStacks}`;
+    case "attackBleed":    return `先頭：${phyDmg(it.phyPct)}＋出血×${it.bleedStacks}`;
+    case "attackDouble":   return `先頭：${phyDmg(it.phyPct)}×2`;
+    case "attackInt":      return `先頭：${intDmg(it.intPct)}（INT）`;
+    case "attackIntDouble":return `先頭：${intDmg(it.intPct)}（INT）×2`;
+    case "healSelf":       return `回復`;
+    case "buffSelf":       return `強化`;
+    case "guard":          return `防御 +${it.value}`;
+    case "special":        return `特殊：${Math.max(1, Math.floor(playerHpMax * it.pct / 100))}`;
+    default: return "";
+  }
+}
+
+// ─── 戦闘中: サブエネミー（enemies[1]/enemies[2]）を data-pos スロットに表示 ────
+// SPEC-005 Phase 3h: 前衛と同じ combatant markup + intent-bubble
+function renderEnemySubUnits() {
+  const enemySide = document.querySelector(".party-side--enemy");
+  if (!enemySide || !combat || !Array.isArray(combat.enemies)) return;
+  for (let pos = 1; pos < 3; pos++) {
+    const slot = enemySide.querySelector(`.party-slot[data-pos="${pos}"]`);
+    if (!slot) continue;
+    const en = combat.enemies[pos];
+    if (!en) { slot.innerHTML = ""; continue; }
+    const isDead = en.alive === false || (en.hp != null && en.hp <= 0);
+    const portraitImg = en.imgId ? ENEMY_IMG(en.imgId) : "";
+    const intentTxt = isDead ? "" : intentTextForUnit(en);
+    const hpPct = en.hpMax ? Math.max(0, Math.min(100, Math.round((en.hp / en.hpMax) * 100))) : 0;
+    slot.innerHTML =
+      `<div class="combatant enemy-combatant${isDead ? " combatant--dead" : ""}">` +
+        (intentTxt ? `<div class="intent-bubble"><span class="intent-label">NEXT ACTION</span><span>${escapeHtml(intentTxt)}</span></div>` : "") +
+        `<div class="combatant-portrait-wrap">` +
+          `<img class="combatant-portrait combatant-portrait--enemy" src="${portraitImg}" alt="${escapeHtml(en.name || "")}" onerror="this.style.opacity='0.2'" />` +
+        `</div>` +
+        `<div class="combatant-info">` +
+          `<div class="combatant-name">${escapeHtml(en.name || "")}</div>` +
+          `<div class="hp-bar-row">` +
+            `<div class="hp-bar-track"><div class="hp-bar-fill hp-bar-fill--enemy" style="width:${hpPct}%"></div></div>` +
+            `<span class="hp-bar-nums">${en.hp ?? "?"}/${en.hpMax ?? "?"}</span>` +
+          `</div>` +
+          `<div class="stat-row-badges">` +
+            `<span class="sbadge sbadge-phy" data-label="PHY">${en.phy ?? "-"}</span>` +
+            `<span class="sbadge sbadge-int" data-label="INT">${en.int ?? "-"}</span>` +
+            `<span class="sbadge sbadge-agi" data-label="AGI">${en.agi ?? "-"}</span>` +
+            `<span class="sbadge sbadge-grd" data-label="GRD">🛡${en.guard ?? 0}</span>` +
+            `<span class="sbadge sbadge-shd" data-label="SHD">✦${en.shield ?? 0}</span>` +
+          `</div>` +
+        `</div>` +
+      `</div>`;
+  }
+}
+
+// ─── パーティ編成画面（旧ヒーロー選択を拡張） SPEC-005 Phase 3 ──────
+let pendingPartyHeroIds = []; // ユーザーが選択中のヒーロー id 配列（最大 3）
+const PARTY_MAX = 3;
+
 function renderHeroSelect() {
+  // SPEC-005 Phase 3: ヒーロー選択 → パーティ選択 (1〜3 体)
+  // 関数名は既存呼び出しとの互換のため維持。中身はパーティ編成。
   const el = document.getElementById("heroSelectView");
   if (!el) return;
 
-  let html = '<div class="hs-header"><h2>ヒーローを選んでください</h2><p class="hs-sub">パッシブスキルを持つ英雄があなたの旅を導きます</p></div>';
-  html += '<div class="hs-roster">';
+  // 初期化: 前回の選択を保持しつつ、空なら先頭ヒーロー 1 体を入れておく
+  if (pendingPartyHeroIds.length === 0) {
+    pendingPartyHeroIds = [HERO_ROSTER[0].heroId];
+  }
 
-  HERO_ROSTER.forEach((hero, idx) => {
-    html += `<div class="hs-card" data-idx="${idx}" role="button" tabindex="0">`;
-    html += `<img class="hs-hero-img" src="${hero.img()}" alt="${hero.nameJa}" />`;
-    html += `<div class="hs-hero-body">`;
-    html += `<div class="hs-hero-name">${hero.nameJa}</div>`;
-    html += `<div class="hs-hero-stats">`;
-    html += `<span>HP ${hero.hpMax}</span>`;
-    html += `<span>PHY ${hero.basePhy}</span>`;
-    html += `<span>INT ${hero.baseInt}</span>`;
-    html += `<span>AGI ${hero.baseAgi}</span>`;
-    html += `</div>`;
-    html += `<div class="hs-passive"><span class="hs-passive-name">【${hero.passiveName || '—'}】</span>${hero.passiveDesc}</div>`;
-    html += `<button class="hs-select-btn action">このヒーローで始める</button>`;
-    html += `</div>`;
-    html += `</div>`;
-  });
+  const renderInner = () => {
+    let html = '<div class="hs-header">';
+    html += '<h2>パーティを編成</h2>';
+    html += '<p class="hs-sub">最大 3 体まで選べます。先に選んだヒーローほど前衛 (画面中央寄り) に配置されます</p>';
+    html += '</div>';
 
-  html += '</div>';
-  el.innerHTML = html;
+    // 現在のパーティ表示 (3 スロット)
+    html += '<div class="ps-current">';
+    for (let pos = 0; pos < PARTY_MAX; pos++) {
+      const hid = pendingPartyHeroIds[pos];
+      const h = hid ? HERO_ROSTER.find(x => x.heroId === hid) : null;
+      const posLabel = ["前衛", "中衛", "後衛"][pos];
+      html += `<div class="ps-slot ps-slot--${pos}" data-pos="${pos}">`;
+      html += `<div class="ps-slot-pos">${posLabel}</div>`;
+      if (h) {
+        html += `<img class="ps-slot-img" src="${h.img()}" alt="${h.nameJa}" />`;
+        html += `<div class="ps-slot-name">${h.nameJa}</div>`;
+        html += `<button class="ps-slot-remove" data-remove-pos="${pos}" type="button" aria-label="外す">✕</button>`;
+      } else {
+        html += '<div class="ps-slot-empty">（空き）</div>';
+      }
+      html += '</div>';
+    }
+    html += '</div>';
 
-  el.querySelectorAll('.hs-select-btn').forEach((btn, idx) => {
-    btn.addEventListener('click', () => {
-      setLeader(HERO_ROSTER[idx]);
+    // 選択可能なヒーロー一覧
+    html += '<div class="hs-header" style="margin-top:1.2rem;"><h3 style="font-size:1rem;color:var(--accent);margin:0;">編成可能なヒーロー</h3></div>';
+    html += '<div class="hs-roster">';
+    HERO_ROSTER.forEach((hero) => {
+      const inParty = pendingPartyHeroIds.includes(hero.heroId);
+      const partyFull = pendingPartyHeroIds.length >= PARTY_MAX;
+      const cls = ['hs-card'];
+      if (inParty) cls.push('hs-card--in-party');
+      html += `<div class="${cls.join(' ')}" data-hid="${hero.heroId}" role="button" tabindex="0">`;
+      html += `<img class="hs-hero-img" src="${hero.img()}" alt="${hero.nameJa}" />`;
+      html += `<div class="hs-hero-body">`;
+      html += `<div class="hs-hero-name">${hero.nameJa}${inParty ? ' <span class="hs-in-party-mark">(編成中)</span>' : ''}</div>`;
+      html += `<div class="hs-hero-stats">`;
+      html += `<span>HP ${hero.hpMax}</span>`;
+      html += `<span>PHY ${hero.basePhy}</span>`;
+      html += `<span>INT ${hero.baseInt}</span>`;
+      html += `<span>AGI ${hero.baseAgi}</span>`;
+      html += `</div>`;
+      html += `<div class="hs-passive"><span class="hs-passive-name">【${hero.passiveName || '—'}】</span>${hero.passiveDesc}</div>`;
+      if (inParty) {
+        html += `<button class="hs-select-btn action" data-action="remove" data-hid="${hero.heroId}">パーティから外す</button>`;
+      } else if (partyFull) {
+        html += `<button class="hs-select-btn action" disabled>パーティ満員</button>`;
+      } else {
+        html += `<button class="hs-select-btn action" data-action="add" data-hid="${hero.heroId}">パーティに加える</button>`;
+      }
+      html += `</div></div>`;
+    });
+    html += '</div>';
+
+    // 確定ボタン
+    html += '<div class="ps-confirm-row">';
+    const partyCount = pendingPartyHeroIds.length;
+    const canStart = partyCount >= 1;
+    html += `<button class="action primary ps-confirm-btn" ${canStart ? '' : 'disabled'}>`;
+    html += `編成を確定（${partyCount}/${PARTY_MAX} 体）→ 出撃</button>`;
+    html += '</div>';
+
+    el.innerHTML = html;
+
+    // イベント
+    el.querySelectorAll('[data-action="add"]').forEach(btn => {
+      btn.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        const hid = parseInt(btn.dataset.hid, 10);
+        if (pendingPartyHeroIds.length < PARTY_MAX && !pendingPartyHeroIds.includes(hid)) {
+          pendingPartyHeroIds.push(hid);
+          renderInner();
+        }
+      });
+    });
+    el.querySelectorAll('[data-action="remove"]').forEach(btn => {
+      btn.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        const hid = parseInt(btn.dataset.hid, 10);
+        pendingPartyHeroIds = pendingPartyHeroIds.filter(id => id !== hid);
+        renderInner();
+      });
+    });
+    el.querySelectorAll('[data-remove-pos]').forEach(btn => {
+      btn.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        const pos = parseInt(btn.dataset.removePos, 10);
+        pendingPartyHeroIds.splice(pos, 1);
+        renderInner();
+      });
+    });
+    el.querySelector('.ps-confirm-btn')?.addEventListener('click', () => {
+      if (pendingPartyHeroIds.length < 1) return;
+      // パーティ確定 → setLeader は前衛 (party[0]) を従来通り反映
+      const leader = HERO_ROSTER.find(h => h.heroId === pendingPartyHeroIds[0]);
+      if (leader) setLeader(leader);
+      pendingPartyConfirmed = pendingPartyHeroIds.slice(); // 後で startRunFromChapter / ensureRunState で読む
       showView("nodeSelect");
       renderNodeSelect();
     });
+  };
+
+  renderInner();
+}
+
+// 確定したパーティ (HeroLoadout 構築用の id 配列)
+let pendingPartyConfirmed = null;
+
+/** ヒーロー id 配列から HeroLoadout 配列を作る */
+function buildPartyLoadout(heroIds) {
+  const ids = (heroIds && heroIds.length > 0) ? heroIds : [HERO_ROSTER[0].heroId];
+  return ids.map((hid) => {
+    const h = HERO_ROSTER.find(x => x.heroId === hid) || HERO_ROSTER[0];
+    return {
+      heroId: h.heroId,
+      hpCurrent: h.hpMax,
+      hpMax: h.hpMax,
+    };
   });
 }
 
@@ -3262,6 +3827,17 @@ function init() {
     renderCombat();
     await enemyTurn();
   });
+  // SPEC-005 Phase 3j: 味方 portrait をクリックでアクティブキャスター切替
+  const playerSide = document.querySelector(".party-side--player");
+  if (playerSide) {
+    playerSide.addEventListener("click", (ev) => {
+      if (!combat || view !== "combat" || combatInputLocked) return;
+      const slot = ev.target.closest('.party-slot[data-side="player"]');
+      if (!slot) return;
+      const pos = parseInt(slot.dataset.pos, 10);
+      if (Number.isFinite(pos)) setActiveHero(pos);
+    });
+  }
   document.getElementById("btnDeckOpen").addEventListener("click", openDeckModal);
   document.getElementById("deckModalClose").addEventListener("click", closeDeckModal);
   document.getElementById("deckModal").addEventListener("click", (ev) => {
