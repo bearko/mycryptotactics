@@ -18,6 +18,7 @@
 | SPEC-003 | 一般公開リリース要件 | Draft | [SPEC-003-public-release.md](./SPEC-003-public-release.md) |
 | SPEC-004 | ステージコンテンツ（章 1〜章 3） | Draft | [SPEC-004-stage-content.md](./SPEC-004-stage-content.md) |
 | SPEC-005 | パーティ編成（3v3）+ ターゲット指定システム | Draft | [SPEC-005-party-3v3.md](./SPEC-005-party-3v3.md) |
+| SPEC-006 | カード単位のキャスター指定システム | Draft | [SPEC-006-card-caster.md](./SPEC-006-card-caster.md) |
 
 ## 廃止（Deprecated）
 
