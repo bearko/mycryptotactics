@@ -1,0 +1,45 @@
+{
+  "_meta": {
+    "version": 3,
+    "spec": "SPEC-006 §7.1.1",
+    "description": "TargetSpec 識別子 → カード券面左カラム用日本語ラベル + 色変数のマッピング。SPEC-005 §6 のターゲット仕様語彙を全網羅する。実 sync は target-labels.js に embed されているため、JSON は hot-reload / i18n 用の正本データ。",
+    "css_variables": {
+      "--target-ally":  "#7ed957",
+      "--target-enemy": "#e76060",
+      "--target-all":   "#1a1420",
+      "--target-self":  "#7ed957"
+    }
+  },
+  "self":               { "label": "自身",         "color": "--target-self"  },
+
+  "ally.front":         { "label": "味方前",       "color": "--target-ally"  },
+  "ally.mid":           { "label": "味方中",       "color": "--target-ally"  },
+  "ally.back":          { "label": "味方後",       "color": "--target-ally"  },
+  "ally.foremost":      { "label": "味方先頭",     "color": "--target-ally"  },
+  "ally.rearmost":      { "label": "味方最後尾",   "color": "--target-ally"  },
+  "ally.all":           { "label": "味方全",       "color": "--target-ally"  },
+  "ally.random":        { "label": "味方ランダム", "color": "--target-ally"  },
+  "ally.highest_phy":   { "label": "味PHY↑",      "color": "--target-ally"  },
+  "ally.lowest_phy":    { "label": "味PHY↓",      "color": "--target-ally"  },
+  "ally.highest_int":   { "label": "味INT↑",      "color": "--target-ally"  },
+  "ally.lowest_int":    { "label": "味INT↓",      "color": "--target-ally"  },
+  "ally.highest_hp":    { "label": "味HP↑",       "color": "--target-ally"  },
+  "ally.lowest_hp":     { "label": "味HP↓",       "color": "--target-ally"  },
+
+  "enemy.front":        { "label": "敵前",         "color": "--target-enemy" },
+  "enemy.mid":          { "label": "敵中",         "color": "--target-enemy" },
+  "enemy.back":         { "label": "敵後",         "color": "--target-enemy" },
+  "enemy.foremost":     { "label": "敵先頭",       "color": "--target-enemy" },
+  "enemy.rearmost":     { "label": "敵最後尾",     "color": "--target-enemy" },
+  "enemy.all":          { "label": "敵全",         "color": "--target-enemy" },
+  "enemy.random":       { "label": "敵ランダム",   "color": "--target-enemy" },
+  "enemy.highest_phy":  { "label": "敵PHY↑",      "color": "--target-enemy" },
+  "enemy.lowest_phy":   { "label": "敵PHY↓",      "color": "--target-enemy" },
+  "enemy.highest_int":  { "label": "敵INT↑",      "color": "--target-enemy" },
+  "enemy.lowest_int":   { "label": "敵INT↓",      "color": "--target-enemy" },
+  "enemy.highest_hp":   { "label": "敵HP↑",       "color": "--target-enemy" },
+  "enemy.lowest_hp":    { "label": "敵HP↓",       "color": "--target-enemy" },
+
+  "all":                { "label": "全体",         "color": "--target-all"   },
+  "all.random":         { "label": "全体ランダム", "color": "--target-all"   }
+}
