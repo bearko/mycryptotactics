@@ -923,28 +923,29 @@
       text-shadow: 0 1px 2px #000; z-index: 3;
     }
     .reward-card-inner .card-ext-name {
-      position: absolute; left: 0.22rem; right: 0.22rem; bottom: 35%; z-index: 7;
-      /* container query: クエリ可能なら親幅基準 (cqw)、不可なら従来 (vw) */
-      font-size: clamp(0.46rem, 8.5cqw, 0.7rem); font-weight: 700;
+      position: absolute; left: 0.22rem; right: 0.22rem; bottom: 38%; z-index: 7;
+      /* container query: 親幅基準 (cqw) で自動スケール、上限/下限を引き上げ */
+      font-size: clamp(0.6rem, 11cqw, 0.95rem); font-weight: 700;
       color: var(--text); text-shadow: 0 1px 3px #000c;
-      line-height: 1.15;
+      line-height: 1.18;
       display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
       word-break: break-word;
     }
     .reward-card-inner .card-ext-skill-sub {
-      font-size: clamp(0.42rem, 7cqw, 0.6rem) !important;
-      line-height: 1.15;
+      font-size: clamp(0.5rem, 9cqw, 0.78rem) !important;
+      line-height: 1.18;
     }
     .reward-card-inner .card-effect-summary {
-      position: absolute; left: 0; right: 0; bottom: 0; height: 35%;
+      position: absolute; left: 0; right: 0; bottom: 0; height: 38%;
       border-radius: 0 0 8px 8px; overflow: hidden;
-      background: rgba(14,10,24,0.92); color: #e6e0f0;  /* ダーク化 (旧 #d8d0e4 を撤去) */
+      background: rgba(14,10,24,0.92); color: #e6e0f0;
       border-top: 1px solid rgba(255,255,255,0.08);
-      padding: 0.22rem 0.28rem;
-      font-size: clamp(0.5rem, 7.5cqw, 0.7rem); font-weight: 600;
+      padding: 0.28rem 0.32rem;
+      /* 効果テキストは最重要なので一段大きく */
+      font-size: clamp(0.7rem, 12.5cqw, 1.0rem); font-weight: 700;
       line-height: 1.28; text-align: left; z-index: 6;
     }
-    .reward-card-inner .card-effect-summary p { margin: 0.06rem 0; }
+    .reward-card-inner .card-effect-summary p { margin: 0.08rem 0; }
     /* container query 用 */
     .reward-card-inner { container-type: inline-size; }
 
@@ -1608,13 +1609,17 @@
       height: auto; aspect-ratio: 7 / 12;
       border-width: 3px;  /* レアリティ枠線をやや太く */
     }
-    /* デッキ表示中のカード名フォントは、コンテナ幅に応じて自動縮小 */
+    /* デッキ表示は密度が高いがフォントは可能な範囲で大きく。
+       cqw 上下限を引き上げ、効果テキストを優先して読みやすく */
     .owned-deck-cell .reward-card-inner .card-ext-name {
-      font-size: clamp(0.42rem, 7.5cqw, 0.62rem);
+      font-size: clamp(0.55rem, 10.5cqw, 0.82rem);
       -webkit-line-clamp: 2;
     }
+    .owned-deck-cell .reward-card-inner .card-ext-skill-sub {
+      font-size: clamp(0.46rem, 8.5cqw, 0.7rem) !important;
+    }
     .owned-deck-cell .reward-card-inner .card-effect-summary {
-      font-size: clamp(0.46rem, 7cqw, 0.64rem);
+      font-size: clamp(0.6rem, 12cqw, 0.88rem);
     }
     .owned-deck-peek {
       position: fixed; inset: 0; z-index: 560;
