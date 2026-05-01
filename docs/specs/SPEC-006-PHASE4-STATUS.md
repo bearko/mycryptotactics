@@ -19,7 +19,7 @@
 | 4d | `play(s, ctx)` 化 + caster 個別 stats 反映 | P0 | ✅ **完了** | swap 方式: `loadCasterStatsToLegacy` で caster の phy/int/agi/hp を legacy に load → card.play() 実行 → `syncLegacyStatsToCaster` で書き戻し。card.play() 本体は無変更 (=ctx は将来用に予約)。caster=A の攻撃カードは A の PHY で計算、self-buff も caster 個人に乗る |
 | 4e | カード券面 UI 左30/右70 + キャスターアイコン + ロールラベル | P0 | ✅ **完了** | バトル中ハンド render が effects 配列 + caster icon (hero portrait + ロール名) を使用。target-labels.js を init で load し CSS 変数注入。card-effect-row はターゲット pill (色付) 30% + 効果テキスト 70% のグリッド |
 | 4f | per-hero state 化 + legacy 廃止 | P0 | ✅ **完了** (legacy 完全廃止は Phase 4g) | guard/shield/poison/bleed/vulnerable を heroes[i] 個別に。swap 拡張、damage 吸収を target hero 経由、毒 tick・guard reset を per-hero、敵攻撃の状態異常付与を target hero 個別に。Status badges UI もサブ portrait に展開 |
-| 4g | Phase 3j 撤去 | P0 | 未着手 | 4f 完了後 |
+| 4g | Phase 3j 撤去 | P0 | ✅ **完了** | setActiveHero / getActiveHero / ensureActiveHeroAlive / loadActiveHeroStatsToLegacy / syncLegacyStatsToActiveHero / activeHeroIdx を全削除。portrait click handler + ▶ ACTIVE バッジ + hover lift CSS も撤去。getActiveHero 利用箇所は transient な `combat._currentCaster` (playCard スコープ) に置換 |
 | 4h | バトル外カード券面係数表記 + 使用ヒーローログ | P1 | 未着手 | 4e 完了後 |
 | 4i | 577 カード手動 caster 再指定 | P2 | 未着手 | content PR 全マージ完了済み (PR #51/#56)、差別化したいものを手動再指定 |
 | 4j | パッシブ trigger DSL 統合 (codemod) | P0 | 未着手 | PR #55 マージ済み (Rare hero 53)、計 113 関数を codemod 対象 |
@@ -62,7 +62,16 @@
   - 全ヒーローの `guard` を per-hero リセット
   - 全ヒーローの `poison` を個別に tick (各ヒーロー portrait に FX)
 - Status badges UI もサブヒーロー portrait wrap 内に動的注入 (`☠N` / `🩸N`)
-- `combat.playerGuard / Shield / Poison / Bleed / Vulnerable` は `heroes[0]` の mirror として残る (Phase 4g で完全廃止予定)
+- `combat.playerGuard / Shield / Poison / Bleed / Vulnerable` は `heroes[0]` の mirror として残る (UI compatibility のため当面維持、別途 PR でも完全廃止可能)
+
+### Phase 4g の動作確認済み事項
+
+- 味方 portrait click → 何も起きない (handler 削除)
+- ▶ ACTIVE バッジ非表示 (CSS + render code 撤去)
+- hover lift エフェクト撤去
+- `combat.activeHeroIdx` フィールドは初期化も参照もされない
+- player attack 時 `lungePortrait("player", ...)` は `combat._currentCaster ?? heroes[0]` を使用 (transient ref。playCard で set/clear)
+- Phase 3j 関連 helper 関数 5 件 (setActiveHero / getActiveHero / ensureActiveHeroAlive / loadActiveHeroStatsToLegacy / syncLegacyStatsToActiveHero) はソースから完全削除
 
 ## 完了した事前準備物 (このブランチ)
 
