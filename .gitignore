@@ -1,3 +1,5 @@
 .claude/
 node_modules/
 .DS_Store
+# SPEC-006 Phase 4c migration preview output (never commit)
+prototype/js/cards.spec006-preview.js
