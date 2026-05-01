@@ -550,26 +550,21 @@ function clog(msg) {
 function sleep(ms) { return new Promise(res => setTimeout(res, ms)); }
 const ENEMY_ACTION_GAP_MS = 850;
 
-/** SPEC-005 Phase 3f: ユニットからエフェクト用 DOM 要素を解決
- *  - heroes[0] / enemies[0] (前衛) → 中央スロット (#playerPortraitWrap / #enemyPortraitWrap)
- *  - サブユニット → ghost slot 内の .ps-mini-img 要素
- *  unit 未指定の場合は中央スロット (legacy) */
+/** SPEC-005 Phase 3h: data-pos スロット内の combatant-portrait-wrap を解決
+ *  - heroes[0] / enemies[0] (前衛) → 静的 ID (#playerPortraitWrap / #enemyPortraitWrap)
+ *  - heroes[1+] / enemies[1+] → .party-slot[data-pos="N"] .combatant-portrait-wrap
+ *  unit 未指定の場合は legacy 前衛スロットへフォールバック */
 function resolveUnitPortraitWrap(who, unit) {
   if (unit && combat) {
     const arr = who === "enemy" ? combat.enemies : combat.heroes;
     const idx = Array.isArray(arr) ? arr.indexOf(unit) : -1;
     if (idx > 0) {
-      const sideEl = document.querySelector(who === "enemy" ? ".party-side--enemy" : ".party-side--player");
-      if (sideEl) {
-        const filled = sideEl.querySelectorAll(".party-slot--filled .ps-mini");
-        // renderEnemy/PartySubUnits の slice(1).forEach 順に対応
-        // i=0 → 上 ghost (filled[0]) / i=1 → 下 ghost (filled[1])
-        const subOrder = idx - 1;
-        if (filled[subOrder]) return filled[subOrder];
-      }
+      const side = who === "enemy" ? "enemy" : "player";
+      const sel = `.party-slot[data-side="${side}"][data-pos="${idx}"] .combatant-portrait-wrap`;
+      const wrap = document.querySelector(sel);
+      if (wrap) return wrap;
     }
   }
-  // 中央スロットフォールバック
   const wrapId = who === "enemy" ? "enemyPortraitWrap" : "playerPortraitWrap";
   return document.getElementById(wrapId);
 }
@@ -3288,32 +3283,38 @@ function updateHeaderRegulationIcons() {
   });
 }
 
-// ─── 戦闘中: サブヒーロー（heroes[1]/heroes[2]）を ghost スロットに表示 ────
-// SPEC-005 Phase 3a: 表示のみ。戦闘ロジック統合（被ダメ・キャスター切替）は Phase 3b で。
+// ─── 戦闘中: サブヒーロー（heroes[1]/heroes[2]）を data-pos スロットに表示 ────
+// SPEC-005 Phase 3h: 前衛と同じ combatant markup (portrait + HP bar + stats) を流し込む
 function renderPartySubHeroes() {
   const playerSide = document.querySelector(".party-side--player");
   if (!playerSide || !combat || !Array.isArray(combat.heroes)) return;
-  const ghosts = playerSide.querySelectorAll(".party-slot--ghost");
-  // 既存表示を一旦クリア
-  ghosts.forEach((slot) => {
-    slot.classList.remove("party-slot--filled");
-    slot.innerHTML = "";
-  });
-  // heroes[1] (中衛) → 上 ghost、heroes[2] (後衛) → 下 ghost
-  const subHeroes = combat.heroes.slice(1);
-  subHeroes.forEach((hero, i) => {
-    const slot = ghosts[i === 0 ? 0 : ghosts.length - 1];
-    if (!slot) return;
-    slot.classList.add("party-slot--filled");
+  for (let pos = 1; pos < 3; pos++) {
+    const slot = playerSide.querySelector(`.party-slot[data-pos="${pos}"]`);
+    if (!slot) continue;
+    const hero = combat.heroes[pos];
+    if (!hero) { slot.innerHTML = ""; continue; }
     const isDead = hero.alive === false || (hero.hp != null && hero.hp <= 0);
     const portraitImg = hero.imgUrl || "";
+    const hpPct = hero.hpMax ? Math.max(0, Math.min(100, Math.round((hero.hp / hero.hpMax) * 100))) : 0;
     slot.innerHTML =
-      `<div class="ps-mini${isDead ? " ps-mini--dead" : ""}" title="${escapeHtml(hero.name || "")}">` +
-      `<img class="ps-mini-img" src="${portraitImg}" alt="${escapeHtml(hero.name || "")}" onerror="this.style.opacity='0.2'" />` +
-      `<div class="ps-mini-name">${escapeHtml(hero.name || "")}</div>` +
-      `<div class="ps-mini-hp">♥${hero.hp ?? "?"}/${hero.hpMax ?? "?"}</div>` +
+      `<div class="combatant hero-combatant${isDead ? " combatant--dead" : ""}">` +
+        `<div class="combatant-portrait-wrap">` +
+          `<img class="combatant-portrait" src="${portraitImg}" alt="${escapeHtml(hero.name || "")}" onerror="this.style.opacity='0.2'" />` +
+        `</div>` +
+        `<div class="combatant-info">` +
+          `<div class="combatant-name">${escapeHtml(hero.name || "")}</div>` +
+          `<div class="hp-bar-row">` +
+            `<div class="hp-bar-track"><div class="hp-bar-fill" style="width:${hpPct}%"></div></div>` +
+            `<span class="hp-bar-nums">${hero.hp ?? "?"}/${hero.hpMax ?? "?"}</span>` +
+          `</div>` +
+          `<div class="stat-row-badges">` +
+            `<span class="sbadge sbadge-phy" data-label="PHY">${hero.phy ?? "-"}</span>` +
+            `<span class="sbadge sbadge-int" data-label="INT">${hero.int ?? "-"}</span>` +
+            `<span class="sbadge sbadge-agi" data-label="AGI">${hero.agi ?? "-"}</span>` +
+          `</div>` +
+        `</div>` +
       `</div>`;
-  });
+  }
 }
 
 /** SPEC-005 Phase 3d: 個別ユニットの intent からプレイヤー向け表示テキスト */
@@ -3345,32 +3346,40 @@ function intentTextForUnit(unit) {
   }
 }
 
-// ─── 戦闘中: サブエネミー（enemies[1]/enemies[2]）を右側 ghost スロットに表示 ────
-// SPEC-005 Phase 3c+3d: 表示 + プレイヤー攻撃の対象 + 個別 intent バルーン
+// ─── 戦闘中: サブエネミー（enemies[1]/enemies[2]）を data-pos スロットに表示 ────
+// SPEC-005 Phase 3h: 前衛と同じ combatant markup + intent-bubble
 function renderEnemySubUnits() {
   const enemySide = document.querySelector(".party-side--enemy");
   if (!enemySide || !combat || !Array.isArray(combat.enemies)) return;
-  const ghosts = enemySide.querySelectorAll(".party-slot--ghost");
-  ghosts.forEach((slot) => {
-    slot.classList.remove("party-slot--filled");
-    slot.innerHTML = "";
-  });
-  const subs = combat.enemies.slice(1);
-  subs.forEach((en, i) => {
-    const slot = ghosts[i === 0 ? 0 : ghosts.length - 1];
-    if (!slot) return;
-    slot.classList.add("party-slot--filled");
+  for (let pos = 1; pos < 3; pos++) {
+    const slot = enemySide.querySelector(`.party-slot[data-pos="${pos}"]`);
+    if (!slot) continue;
+    const en = combat.enemies[pos];
+    if (!en) { slot.innerHTML = ""; continue; }
     const isDead = en.alive === false || (en.hp != null && en.hp <= 0);
     const portraitImg = en.imgId ? ENEMY_IMG(en.imgId) : "";
     const intentTxt = isDead ? "" : intentTextForUnit(en);
+    const hpPct = en.hpMax ? Math.max(0, Math.min(100, Math.round((en.hp / en.hpMax) * 100))) : 0;
     slot.innerHTML =
-      `<div class="ps-mini${isDead ? " ps-mini--dead" : ""}" title="${escapeHtml(en.name || "")}">` +
-      (intentTxt ? `<div class="ps-mini-intent">${escapeHtml(intentTxt)}</div>` : "") +
-      `<img class="ps-mini-img" src="${portraitImg}" alt="${escapeHtml(en.name || "")}" onerror="this.style.opacity='0.2'" />` +
-      `<div class="ps-mini-name">${escapeHtml(en.name || "")}</div>` +
-      `<div class="ps-mini-hp">♥${en.hp ?? "?"}/${en.hpMax ?? "?"}</div>` +
+      `<div class="combatant enemy-combatant${isDead ? " combatant--dead" : ""}">` +
+        (intentTxt ? `<div class="intent-bubble"><span class="intent-label">NEXT ACTION</span><span>${escapeHtml(intentTxt)}</span></div>` : "") +
+        `<div class="combatant-portrait-wrap">` +
+          `<img class="combatant-portrait combatant-portrait--enemy" src="${portraitImg}" alt="${escapeHtml(en.name || "")}" onerror="this.style.opacity='0.2'" />` +
+        `</div>` +
+        `<div class="combatant-info">` +
+          `<div class="combatant-name">${escapeHtml(en.name || "")}</div>` +
+          `<div class="hp-bar-row">` +
+            `<div class="hp-bar-track"><div class="hp-bar-fill hp-bar-fill--enemy" style="width:${hpPct}%"></div></div>` +
+            `<span class="hp-bar-nums">${en.hp ?? "?"}/${en.hpMax ?? "?"}</span>` +
+          `</div>` +
+          `<div class="stat-row-badges">` +
+            `<span class="sbadge sbadge-phy" data-label="PHY">${en.phy ?? "-"}</span>` +
+            `<span class="sbadge sbadge-int" data-label="INT">${en.int ?? "-"}</span>` +
+            `<span class="sbadge sbadge-agi" data-label="AGI">${en.agi ?? "-"}</span>` +
+          `</div>` +
+        `</div>` +
       `</div>`;
-  });
+  }
 }
 
 // ─── パーティ編成画面（旧ヒーロー選択を拡張） SPEC-005 Phase 3 ──────

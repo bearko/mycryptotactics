@@ -301,46 +301,27 @@
       padding: 0.6rem 0.5rem 0.75rem;
       min-height: 240px;
     }
+    /* SPEC-005 Phase 3h: 3 スロット同サイズ + V 字配置 (front=中央寄り・低い / back=外側・高い) */
     .party-side {
-      display: flex; gap: 0.2rem; align-items: flex-end;
-      flex: 1; max-width: 44%;
+      display: flex; gap: 0.4rem; align-items: flex-end;
+      flex: 1; max-width: 50%;
     }
-    .party-side--player { justify-content: flex-start; }
-    .party-side--enemy  { justify-content: flex-end; flex-direction: row-reverse; }
-    .party-slot { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; }
-    .party-slot--ghost { opacity: 0; pointer-events: none; min-height: 100px; }
-    .party-slot--center { flex: 0 0 auto; }
-    /* SPEC-005 Phase 3a: ghost スロットに 2 体目 / 3 体目のヒーローを表示する場合 */
-    .party-slot--ghost.party-slot--filled {
-      opacity: 1; pointer-events: auto;
-    }
-    .party-slot--filled .ps-mini {
+    .party-side--player { justify-content: flex-end; }
+    .party-side--enemy  { justify-content: flex-start; }
+    .party-slot {
+      flex: 0 0 auto; min-width: 0;
       display: flex; flex-direction: column; align-items: center;
-      gap: 0.15rem; opacity: 0.92;
     }
-    .party-slot--filled .ps-mini-img {
-      width: 56px; height: 56px; object-fit: contain; image-rendering: pixelated;
-      background: rgba(20,16,32,0.6); border-radius: 8px;
-      border: 1px solid var(--border);
-    }
-    .party-slot--filled .ps-mini--dead .ps-mini-img {
-      filter: grayscale(1) brightness(0.55);
-    }
-    .party-slot--filled .ps-mini-name {
-      font-size: 0.6rem; color: var(--muted); font-weight: 700;
-      max-width: 64px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    }
-    .party-slot--filled .ps-mini-hp {
-      font-size: 0.55rem; color: #e07080; font-weight: 700;
-    }
-    .party-slot--filled .ps-mini-intent {
-      background: rgba(20,16,32,0.92); color: var(--text);
-      border: 1px solid #ff8090; border-radius: 4px;
-      padding: 1px 4px; font-size: 0.55rem; font-weight: 700;
-      max-width: 80px; line-height: 1.15; text-align: center;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    .party-slot--filled .ps-mini--dead .ps-mini-intent { display: none; }
+    /* V 字段差: front は最も低く、back は最も高い (画面では下向きの V) */
+    .party-slot--front { margin-bottom: 0; }
+    .party-slot--mid   { margin-bottom: 18px; }
+    .party-slot--back  { margin-bottom: 36px; }
+    /* 空スロット (パーティ未充足) は非表示 */
+    .party-slot--mid:empty,
+    .party-slot--back:empty { display: none; }
+    /* 死亡したサブユニットはグレースケール */
+    .combatant--dead .combatant-portrait { filter: grayscale(1) brightness(0.55); }
+    .combatant--dead .intent-bubble { display: none; }
 
     .combatant { display: flex; flex-direction: column; align-items: center; gap: 0.18rem; }
 
@@ -2262,10 +2243,14 @@
         </div>
         <div class="arena-inner">
 
-          <!-- Player party (3 slots, center active now) -->
+          <!-- Player party (3 slots; front=heroes[0]=closest to VS center) -->
           <div class="party-side party-side--player">
-            <div class="party-slot party-slot--ghost" aria-hidden="true"></div>
-            <div class="party-slot party-slot--center">
+            <!-- 後衛 (heroes[2]) -->
+            <div class="party-slot party-slot--back" data-pos="2" data-side="player" aria-hidden="true"></div>
+            <!-- 中衛 (heroes[1]) -->
+            <div class="party-slot party-slot--mid" data-pos="1" data-side="player" aria-hidden="true"></div>
+            <!-- 前衛 (heroes[0]) -->
+            <div class="party-slot party-slot--front" data-pos="0" data-side="player">
               <div class="combatant hero-combatant">
                 <div class="combatant-portrait-wrap" id="playerPortraitWrap">
                   <img id="leaderImg" class="combatant-portrait" alt="" />
@@ -2291,16 +2276,15 @@
                 </div>
               </div>
             </div>
-            <div class="party-slot party-slot--ghost" aria-hidden="true"></div>
           </div>
 
           <!-- VS -->
           <div class="vs-col"><span class="vs-mark">VS</span></div>
 
-          <!-- Enemy party (3 slots, center active now) -->
+          <!-- Enemy party (3 slots; front=enemies[0]=closest to VS center) -->
           <div class="party-side party-side--enemy">
-            <div class="party-slot party-slot--ghost" aria-hidden="true"></div>
-            <div class="party-slot party-slot--center">
+            <!-- 前衛 (enemies[0]) -->
+            <div class="party-slot party-slot--front" data-pos="0" data-side="enemy">
               <div class="combatant enemy-combatant">
                 <div class="intent-bubble" id="enemyIntentWrap" aria-live="polite">
                   <span class="intent-label">NEXT ACTION</span>
@@ -2330,7 +2314,10 @@
                 </div>
               </div>
             </div>
-            <div class="party-slot party-slot--ghost" aria-hidden="true"></div>
+            <!-- 中衛 (enemies[1]) -->
+            <div class="party-slot party-slot--mid" data-pos="1" data-side="enemy" aria-hidden="true"></div>
+            <!-- 後衛 (enemies[2]) -->
+            <div class="party-slot party-slot--back" data-pos="2" data-side="enemy" aria-hidden="true"></div>
           </div>
 
         </div>
