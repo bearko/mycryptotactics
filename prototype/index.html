@@ -1338,6 +1338,138 @@
     }
     .craft-arrow { font-size: 1.5rem; color: var(--accent); font-weight: 700; transform: rotate(90deg); }
 
+    /* ── Deck View Header Button ─────────────────────────────── */
+    .btn-deck-view {
+      display: inline-flex; align-items: center; gap: 0.25rem;
+      background: #15121c; border: 1px solid var(--border);
+      color: var(--text); border-radius: 6px;
+      padding: 0.25rem 0.55rem; font-size: 0.78rem; cursor: pointer;
+      line-height: 1; height: 28px;
+    }
+    .btn-deck-view:hover { border-color: var(--accent); }
+    .btn-deck-view:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .btn-deck-view-icon { font-size: 0.95rem; }
+    .btn-deck-view-label { font-weight: 600; letter-spacing: 0.02em; }
+    @media (max-width: 380px) {
+      .btn-deck-view-label { display: none; }
+    }
+
+    /* ── Owned Deck Overlay ──────────────────────────────────── */
+    #ownedDeckOverlay {
+      position: fixed; inset: 0; z-index: 550;
+      background: rgba(0,0,0,0.82);
+      display: flex; align-items: flex-start; justify-content: center;
+      padding: 0.6rem; overflow-y: auto;
+    }
+    .owned-deck-card {
+      width: 100%; max-width: 520px;
+      background: linear-gradient(180deg, #1c1730 0%, #110d20 100%);
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      padding: 0.8rem 0.7rem 1rem;
+      color: var(--text);
+    }
+    .owned-deck-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 0.45rem;
+    }
+    .owned-deck-header h2 {
+      margin: 0; font-size: 1rem; letter-spacing: 0.05em;
+      color: var(--accent);
+    }
+    .owned-deck-close {
+      background: transparent; border: 1px solid var(--border);
+      color: var(--text); border-radius: 6px;
+      width: 28px; height: 28px; cursor: pointer;
+      font-size: 0.85rem; line-height: 1;
+    }
+    .owned-deck-close:hover { border-color: var(--danger); color: #ff8090; }
+    .owned-deck-summary {
+      display: flex; flex-wrap: wrap; gap: 0.4rem;
+      margin-bottom: 0.6rem; padding: 0.5rem;
+      background: #0e0a18; border: 1px solid var(--border);
+      border-radius: 8px; font-size: 0.74rem;
+    }
+    .owned-deck-summary .od-total {
+      font-weight: 700; color: var(--accent);
+      font-size: 0.82rem;
+    }
+    .owned-deck-summary .od-rarity {
+      display: inline-flex; align-items: center; gap: 0.2rem;
+      padding: 0.1rem 0.4rem; border-radius: 4px;
+      border: 1px solid currentColor;
+      background: rgba(255,255,255,0.03);
+    }
+    .owned-deck-summary .od-rarity[data-rarity="common"]    { color: #4DA3F0; }
+    .owned-deck-summary .od-rarity[data-rarity="uncommon"]  { color: #00B894; }
+    .owned-deck-summary .od-rarity[data-rarity="rare"]      { color: #FDCB6E; }
+    .owned-deck-summary .od-rarity[data-rarity="epic"]      { color: #E17055; }
+    .owned-deck-summary .od-rarity[data-rarity="legendary"] { color: #D63031; }
+    .owned-deck-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0.35rem;
+    }
+    .owned-deck-cell {
+      position: relative;
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+    .owned-deck-cell:hover { transform: translateY(-2px); }
+    .owned-deck-cell:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+    .owned-deck-cell .reward-card-btn {
+      width: 100%; pointer-events: none;
+    }
+    .owned-deck-cell-stack {
+      position: absolute; bottom: 4px; right: 4px;
+      background: #000c; color: #FDCB6E;
+      font-size: 0.62rem; font-weight: 700;
+      padding: 0.05rem 0.3rem; border-radius: 4px;
+      border: 1px solid #FDCB6E;
+      pointer-events: none;
+    }
+    .owned-deck-peek {
+      position: fixed; inset: 0; z-index: 560;
+      background: rgba(0,0,0,0.78);
+      display: flex; align-items: center; justify-content: center;
+      padding: 1rem;
+    }
+    .owned-deck-peek-card {
+      max-width: 320px; width: 100%;
+      background: linear-gradient(180deg, #1c1730 0%, #110d20 100%);
+      border: 2px solid var(--accent);
+      border-radius: 12px;
+      padding: 0.9rem;
+      color: var(--text);
+    }
+    .owned-deck-peek-card h3 {
+      margin: 0 0 0.3rem; font-size: 0.95rem; color: var(--accent);
+    }
+    .owned-deck-peek-card .opc-skill {
+      font-size: 0.74rem; color: var(--muted); margin: 0 0 0.45rem;
+    }
+    .owned-deck-peek-card .opc-meta {
+      display: flex; gap: 0.4rem; flex-wrap: wrap;
+      font-size: 0.7rem; color: var(--text); margin-bottom: 0.5rem;
+    }
+    .owned-deck-peek-card .opc-meta span {
+      padding: 0.1rem 0.4rem; border-radius: 4px;
+      background: #0e0a18; border: 1px solid var(--border);
+    }
+    .owned-deck-peek-card .opc-lines p {
+      margin: 0.15rem 0; font-size: 0.78rem;
+    }
+    .owned-deck-peek-card .opc-close {
+      margin-top: 0.7rem; width: 100%;
+      background: #15121c; border: 1px solid var(--border);
+      color: var(--text); border-radius: 6px;
+      padding: 0.4rem; font-size: 0.78rem; cursor: pointer;
+    }
+    .owned-deck-peek-card .opc-close:hover { border-color: var(--accent); }
+    @media (max-width: 380px) {
+      .owned-deck-grid { grid-template-columns: repeat(4, 1fr); gap: 0.3rem; }
+    }
+
     /* ── Activity Report ──────────────────────────────────────── */
     #activityReportOverlay {
       position: fixed; inset: 0; z-index: 600;
@@ -1772,6 +1904,7 @@
         <span class="ll-ext-slot-icon" id="mapLlSlot0" title="">—</span>
         <span class="ll-ext-slot-icon" id="mapLlSlot1" title="">—</span>
       </span>
+      <button type="button" class="btn-deck-view" id="btnDeckViewMap" aria-label="保有デッキを表示" title="保有デッキを表示"><span class="btn-deck-view-icon">📚</span><span class="btn-deck-view-label">デッキ表示</span></button>
       <button type="button" class="btn-help" id="btnHelpOpen" aria-label="ヘルプを開く" title="ヘルプ">?</button>
     </div>
 
@@ -1804,6 +1937,7 @@
         </div>
         <span class="combat-header-stage" id="combatStageTitle">—</span>
         <div class="combat-header-btns">
+          <button type="button" class="btn-deck-view btn-deck-view-combat" id="btnDeckViewCombat" aria-label="保有デッキを表示" title="保有デッキを表示"><span class="btn-deck-view-icon">📚</span><span class="btn-deck-view-label">デッキ表示</span></button>
           <button type="button" class="btn-icon-hd" id="btnSettingsOpen" aria-label="設定" title="設定">⚙</button>
           <button type="button" class="btn-icon-hd" id="btnHelpOpenCombat" aria-label="ヘルプ" title="ヘルプ">?</button>
         </div>
@@ -1962,6 +2096,18 @@
       <div class="reward-picks" id="rewardPicks"></div>
       <button type="button" class="action" id="btnSkipReward" style="margin-top:0.75rem;width:100%">スキップ（報酬なし）</button>
     </div>
+  </div>
+
+  <div id="ownedDeckOverlay" class="hidden" aria-hidden="true" role="dialog" aria-labelledby="ownedDeckTitle">
+    <div class="owned-deck-card">
+      <div class="owned-deck-header">
+        <h2 id="ownedDeckTitle">保有デッキ</h2>
+        <button type="button" class="owned-deck-close" id="ownedDeckCloseBtn" aria-label="閉じる">✕</button>
+      </div>
+      <div class="owned-deck-summary" id="ownedDeckSummary"></div>
+      <div class="owned-deck-grid" id="ownedDeckGrid"></div>
+    </div>
+    <div id="ownedDeckPeek" class="owned-deck-peek hidden" aria-hidden="true"></div>
   </div>
 
   <div id="activityReportOverlay" class="hidden" aria-hidden="true" role="dialog" aria-labelledby="reportTitle">

@@ -2041,6 +2041,169 @@ function advanceAfterRewardPick(libraryKey) {
   renderMap();
 }
 
+// ─── 保有デッキ表示（#30） ───────────────────────────────────────
+/**
+ * libraryKey からシリーズキーを抽出。
+ * ext1001/ext2001 (ブレード系) → "001"
+ * cd101 (章1) → "cd1", cd201 (章2) → "cd2"
+ * その他は libraryKey そのまま（個別シリーズ）
+ */
+function deckSeriesKey(libraryKey) {
+  if (typeof libraryKey !== "string") return "zzz";
+  if (libraryKey.startsWith("ext")) {
+    // 末尾 3 桁をシリーズキーに
+    const m = libraryKey.match(/(\d+)$/);
+    if (m) {
+      const digits = m[1];
+      return digits.length >= 3 ? digits.slice(-3) : digits.padStart(3, "0");
+    }
+  }
+  if (libraryKey.startsWith("cd")) {
+    return "cd" + libraryKey.charAt(2);
+  }
+  return libraryKey;
+}
+
+const RARITY_ORDER = { common: 1, uncommon: 2, rare: 3, epic: 4, legendary: 5, ll: 6 };
+const RARITY_LABEL = { common: "コモン", uncommon: "アンコモン", rare: "レア", epic: "エピック", legendary: "レジェンド", ll: "LL" };
+
+function showOwnedDeckPeek(def) {
+  const peek = document.getElementById("ownedDeckPeek");
+  if (!peek) return;
+  const mockS = {
+    playerPhy: LEADER.basePhy,
+    playerInt: LEADER.baseInt,
+    playerAgi: LEADER.baseAgi,
+    enemyPhy: 14, enemyInt: 8,
+    playerHp: runState?.playerHp ?? LEADER.hpMax,
+    playerHpMax: runState?.playerHpMax ?? LEADER.hpMax,
+    playerGuard: 0, playerShield: 0, energyMax: 3, energy: 3,
+  };
+  const lines =
+    typeof def.previewLines === "function" ? def.previewLines(mockS) :
+    typeof def.effectSummaryLines === "function" ? def.effectSummaryLines(mockS) : [];
+  const rarity = CARD_RARITIES[def.libraryKey] || "common";
+  peek.innerHTML = `
+    <div class="owned-deck-peek-card" data-rarity="${rarity}">
+      <h3>${escapeHtml(def.extNameJa || "")}</h3>
+      ${def.skillNameJa ? `<p class="opc-skill">${escapeHtml(def.skillNameJa)}</p>` : ""}
+      <div class="opc-meta">
+        <span>⚡ ${def.cost}</span>
+        <span>${def.type === "atk" ? "攻撃" : def.type === "skl" ? "スキル" : def.type}</span>
+        <span>${RARITY_LABEL[rarity] || rarity}</span>
+      </div>
+      <div class="opc-lines">${lines.map(l => `<p>${escapeHtml(l)}</p>`).join("")}</div>
+      <button type="button" class="opc-close">閉じる</button>
+    </div>
+  `;
+  peek.classList.remove("hidden");
+  peek.removeAttribute("aria-hidden");
+  const close = () => {
+    peek.classList.add("hidden");
+    peek.setAttribute("aria-hidden", "true");
+  };
+  peek.querySelector(".opc-close").addEventListener("click", close);
+  peek.addEventListener("click", (e) => { if (e.target === peek) close(); }, { once: true });
+}
+
+function openOwnedDeckOverlay() {
+  const overlay = document.getElementById("ownedDeckOverlay");
+  if (!overlay) return;
+
+  // ソース: 戦闘中なら combat の deck（drawPile + hand + discardPile）、
+  // それ以外は runState.deck
+  let cards = [];
+  if (combat) {
+    cards = [...(combat.drawPile || []), ...(combat.hand || []), ...(combat.discardPile || []), ...(combat.exhaustPile || [])];
+  } else if (runState && runState.deck) {
+    cards = [...runState.deck];
+  }
+
+  // libraryKey ごとに枚数を集計（同一カードはスタック表示）
+  const groupMap = new Map();
+  for (const c of cards) {
+    if (!c || !c.libraryKey) continue;
+    const k = c.libraryKey;
+    if (!groupMap.has(k)) groupMap.set(k, { def: CARD_LIBRARY[k] || c, count: 0 });
+    groupMap.get(k).count++;
+  }
+  const groups = Array.from(groupMap.values());
+
+  // ソート: シリーズキー → レアリティ → libraryKey
+  groups.sort((a, b) => {
+    const sa = deckSeriesKey(a.def.libraryKey);
+    const sb = deckSeriesKey(b.def.libraryKey);
+    if (sa !== sb) return sa < sb ? -1 : 1;
+    const ra = RARITY_ORDER[CARD_RARITIES[a.def.libraryKey] || "common"] || 0;
+    const rb = RARITY_ORDER[CARD_RARITIES[b.def.libraryKey] || "common"] || 0;
+    if (ra !== rb) return ra - rb;
+    return a.def.libraryKey < b.def.libraryKey ? -1 : 1;
+  });
+
+  // 上部サマリー
+  const total = cards.length;
+  const rarityCounts = {};
+  for (const c of cards) {
+    if (!c || !c.libraryKey) continue;
+    const r = CARD_RARITIES[c.libraryKey] || "common";
+    rarityCounts[r] = (rarityCounts[r] || 0) + 1;
+  }
+  const summaryEl = document.getElementById("ownedDeckSummary");
+  const rarityChips = ["common", "uncommon", "rare", "epic", "legendary", "ll"]
+    .filter(r => rarityCounts[r])
+    .map(r => `<span class="od-rarity" data-rarity="${r}">${RARITY_LABEL[r]} ×${rarityCounts[r]}</span>`)
+    .join("");
+  summaryEl.innerHTML = `<span class="od-total">合計 ${total} 枚</span>${rarityChips}`;
+
+  // グリッド
+  const gridEl = document.getElementById("ownedDeckGrid");
+  gridEl.innerHTML = "";
+  if (groups.length === 0) {
+    gridEl.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:0.8rem;padding:1rem">デッキは空です</p>`;
+  } else {
+    const mockS = {
+      playerPhy: LEADER.basePhy,
+      playerInt: LEADER.baseInt,
+      playerAgi: LEADER.baseAgi,
+      enemyPhy: 14, enemyInt: 8,
+      playerHp: runState?.playerHp ?? LEADER.hpMax,
+      playerHpMax: runState?.playerHpMax ?? LEADER.hpMax,
+      playerGuard: 0, playerShield: 0, energyMax: 3, energy: 3,
+    };
+    for (const g of groups) {
+      const cell = document.createElement("button");
+      cell.type = "button";
+      cell.className = "owned-deck-cell";
+      cell.setAttribute("aria-label", g.def.extNameJa || g.def.libraryKey);
+      const cardBtn = buildRewardPickButton(g.def, mockS);
+      cell.appendChild(cardBtn);
+      if (g.count > 1) {
+        const stack = document.createElement("span");
+        stack.className = "owned-deck-cell-stack";
+        stack.textContent = `×${g.count}`;
+        cell.appendChild(stack);
+      }
+      cell.addEventListener("click", () => showOwnedDeckPeek(g.def));
+      gridEl.appendChild(cell);
+    }
+  }
+
+  overlay.classList.remove("hidden");
+  overlay.removeAttribute("aria-hidden");
+}
+
+function closeOwnedDeckOverlay() {
+  const overlay = document.getElementById("ownedDeckOverlay");
+  if (!overlay) return;
+  overlay.classList.add("hidden");
+  overlay.setAttribute("aria-hidden", "true");
+  const peek = document.getElementById("ownedDeckPeek");
+  if (peek) {
+    peek.classList.add("hidden");
+    peek.setAttribute("aria-hidden", "true");
+  }
+}
+
 // ─── 活動レポート（#23） ────────────────────────────────────────
 let lastReportSnapshot = null;
 const SHARE_URL = "https://mycryptotactics.vercel.app/";
@@ -2781,6 +2944,13 @@ function init() {
     renderMap();
   });
   document.getElementById("btnRestart").addEventListener("click", resetRun);
+  // 保有デッキ表示（#30）
+  document.getElementById("btnDeckViewMap")?.addEventListener("click", openOwnedDeckOverlay);
+  document.getElementById("btnDeckViewCombat")?.addEventListener("click", openOwnedDeckOverlay);
+  document.getElementById("ownedDeckCloseBtn")?.addEventListener("click", closeOwnedDeckOverlay);
+  document.getElementById("ownedDeckOverlay")?.addEventListener("click", (e) => {
+    if (e.target.id === "ownedDeckOverlay") closeOwnedDeckOverlay();
+  });
   // 活動レポート（クリア時）
   document.getElementById("btnViewReportClear")?.addEventListener("click", () => {
     if (!lastReportSnapshot && runState && runState.runComplete) {
