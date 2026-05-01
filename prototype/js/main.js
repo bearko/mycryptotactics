@@ -546,6 +546,10 @@ function clog(msg) {
   el.insertBefore(p, el.firstChild);
 }
 
+/** Phase 3g: 敵ターンの間隔調整に使う sleep。lunge=350ms / flash=380ms / portrait-fx=900ms に合わせる。 */
+function sleep(ms) { return new Promise(res => setTimeout(res, ms)); }
+const ENEMY_ACTION_GAP_MS = 850;
+
 /** SPEC-005 Phase 3f: ユニットからエフェクト用 DOM 要素を解決
  *  - heroes[0] / enemies[0] (前衛) → 中央スロット (#playerPortraitWrap / #enemyPortraitWrap)
  *  - サブユニット → ghost slot 内の .ps-mini-img 要素
@@ -2175,9 +2179,10 @@ async function enemyTurn() {
   if (isPartyWipedOut(combat)) { endCombatLoss(); return; }
 
   // SPEC-005 Phase 3d: サブエネミー (enemies[1..]) も独立に行動。
-  // 各サブエネミーは intentRota を順に消化、攻撃系のみ自分のステで実行。
-  // (heal/buff/guard 系は legacy enemies[0] 状態を変えてしまうため Phase 3d ではスキップ)
+  // Phase 3g: 前衛アクション → 中衛 → 後衛 の順で 1 体ずつ演出を完走させる
   if (Array.isArray(combat.enemies) && combat.enemies.length > 1) {
+    // 前衛アクションのアニメ完了を待ってから次に進む
+    await sleep(ENEMY_ACTION_GAP_MS);
     for (let i = 1; i < combat.enemies.length; i++) {
       const sub = combat.enemies[i];
       if (!sub || sub.alive === false || (sub.hp ?? 0) <= 0) continue;
@@ -2198,6 +2203,8 @@ async function enemyTurn() {
           playBattleSe("buff"); playPortraitEffect("enemy", "buff", sub);
           clog(`${sub.name || "敵"} 行動: ${subIt.kind}`);
         }
+        // 演出終了を待ってから次のサブへ
+        await sleep(ENEMY_ACTION_GAP_MS);
         continue;
       }
       // 一時的に combat.enemyXxx を sub のステに差し替えて既存ヘルパを再利用
@@ -2247,6 +2254,8 @@ async function enemyTurn() {
         Object.assign(combat, saved);
       }
       if (isPartyWipedOut(combat)) { endCombatLoss(); return; }
+      // Phase 3g: 攻撃アニメ (lunge 350ms / flash 380ms / fx 900ms) を待って次のサブへ
+      await sleep(ENEMY_ACTION_GAP_MS);
     }
   }
 
