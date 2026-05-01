@@ -322,6 +322,21 @@
     /* 死亡ユニット (前衛・サブ共通) はグレースケール + intent 非表示 */
     .combatant--dead .combatant-portrait { filter: grayscale(1) brightness(0.55); }
     .combatant--dead .intent-bubble { display: none; }
+    /* SPEC-005 Phase 3j: アクティブキャスター強調 */
+    .party-slot[data-side="player"] .combatant { cursor: pointer; transition: transform 0.15s; }
+    .party-slot[data-side="player"] .combatant.combatant--dead { cursor: default; }
+    .party-slot[data-side="player"] .combatant:not(.combatant--dead):hover { transform: translateY(-2px); }
+    .combatant--active .combatant-portrait-wrap {
+      box-shadow: 0 0 0 2px var(--accent), 0 0 12px #c4a35aaa;
+      border-radius: 8px;
+    }
+    .combatant--active .combatant-portrait-wrap::before {
+      content: "▶ ACTIVE"; position: absolute;
+      top: -14px; left: 50%; transform: translateX(-50%);
+      font-size: 0.5rem; color: var(--accent); font-weight: 800;
+      letter-spacing: 0.1em; text-shadow: 0 1px 0 #000;
+      white-space: nowrap;
+    }
 
     .combatant { display: flex; flex-direction: column; align-items: center; gap: 0.18rem; }
 

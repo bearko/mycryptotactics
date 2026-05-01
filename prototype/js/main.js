@@ -704,7 +704,7 @@ function dealPhySkillToEnemy(s, skillPct) {
     total = applyGuardToDamage("enemy", total);
   }
   applyHpDeltaToEnemy(s, target, -total);
-  lungePortrait("player");
+  lungePortrait("player", getActiveHero(s));
   flashPortrait("enemy", target);
   playPortraitEffect("enemy", "hit", target);
   if (total > 0) playBattleSe("hit");
@@ -736,7 +736,7 @@ function dealIntSkillToEnemy(s, minPct, maxPct, forceCrit = false) {
     total = applyGuardToDamage("enemy", total);
   }
   applyHpDeltaToEnemy(s, target, -total);
-  lungePortrait("player");
+  lungePortrait("player", getActiveHero(s));
   flashPortrait("enemy", target);
   playPortraitEffect("enemy", "hit", target);
   if (total > 0) playBattleSe("hit");
@@ -776,6 +776,10 @@ function applyHpDeltaToHero(s, hero, delta) {
   if (s.heroes && hero === s.heroes[0]) {
     s.playerHp = hero.hp;
   }
+  // SPEC-005 Phase 3j: アクティブキャスターが死亡したら次の生存ヒーローへ切替
+  if (hero.alive === false && s.heroes && hero === s.heroes[s.activeHeroIdx ?? 0]) {
+    ensureActiveHeroAlive(s);
+  }
 }
 
 /** 全ヒーロー死亡判定 */
@@ -784,6 +788,64 @@ function isPartyWipedOut(s) {
     return (s?.playerHp ?? 0) <= 0;
   }
   return s.heroes.every(h => !h || h.alive === false || (h.hp ?? 0) <= 0);
+}
+
+// ─── SPEC-005 Phase 3j: アクティブキャスター切替 ─────────────────────
+/** 現在の active hero (生存している前提) */
+function getActiveHero(s) {
+  if (!s || !Array.isArray(s.heroes)) return null;
+  return s.heroes[s.activeHeroIdx ?? 0] || null;
+}
+
+/** activeHeroIdx が死亡 / 範囲外なら、生存ヒーロー (前衛優先) へ切り替える */
+function ensureActiveHeroAlive(s) {
+  if (!s || !Array.isArray(s.heroes) || s.heroes.length === 0) return;
+  const cur = s.heroes[s.activeHeroIdx ?? -1];
+  if (cur && cur.alive !== false && (cur.hp ?? 0) > 0) return;
+  // 前衛 → 中衛 → 後衛 の順で生存している最初のヒーローへ
+  for (let i = 0; i < s.heroes.length; i++) {
+    const h = s.heroes[i];
+    if (h && h.alive !== false && (h.hp ?? 0) > 0) {
+      s.activeHeroIdx = i;
+      loadActiveHeroStatsToLegacy(s);
+      return;
+    }
+  }
+}
+
+/** active hero のステを legacy combat.player* に流し込む（card.play() が読む側） */
+function loadActiveHeroStatsToLegacy(s) {
+  const h = getActiveHero(s);
+  if (!h) return;
+  s.playerPhy = h.phy;
+  s.playerInt = h.int;
+  s.playerAgi = h.agi;
+  s.playerPhyBase = h.phyBase ?? h.phy;
+  s.playerIntBase = h.intBase ?? h.int;
+  s.playerAgiBase = h.agiBase ?? h.agi;
+}
+
+/** card.play() が legacy を変更した分を active hero に書き戻す（バフ/デバフ反映） */
+function syncLegacyStatsToActiveHero(s) {
+  const h = getActiveHero(s);
+  if (!h) return;
+  h.phy = s.playerPhy;
+  h.int = s.playerInt;
+  h.agi = s.playerAgi;
+}
+
+/** ユーザー操作: ヒーロー portrait をクリックして交代 */
+function setActiveHero(idx) {
+  if (!combat || !Array.isArray(combat.heroes)) return;
+  if (idx === (combat.activeHeroIdx ?? 0)) return;
+  const target = combat.heroes[idx];
+  if (!target || target.alive === false || (target.hp ?? 0) <= 0) return;
+  // 現キャスターのバフ等を書き戻してから切替
+  syncLegacyStatsToActiveHero(combat);
+  combat.activeHeroIdx = idx;
+  loadActiveHeroStatsToLegacy(combat);
+  clog(`【交代】${target.name || "ヒーロー"} に切替`);
+  renderCombat();
 }
 
 function dealPhySkillFromEnemyToPlayer(s, skillPct, caster) {
@@ -1964,6 +2026,13 @@ function renderCombat() {
     const dead = !e0 || e0.alive === false || (e0.hp ?? combat.enemyHp) <= 0;
     enemyFrontEl.classList.toggle("combatant--dead", dead);
   }
+  // SPEC-005 Phase 3j: アクティブキャスター highlight
+  const activeIdx = combat.activeHeroIdx ?? 0;
+  document.querySelectorAll('.party-slot[data-side="player"] .combatant').forEach((el) => {
+    el.classList.remove("combatant--active");
+  });
+  const activeSlot = document.querySelector(`.party-slot[data-side="player"][data-pos="${activeIdx}"] .combatant`);
+  if (activeSlot && combat.heroes && combat.heroes.length > 1) activeSlot.classList.add("combatant--active");
 
   const handEl = document.getElementById("hand");
   handEl.innerHTML = "";
@@ -2083,6 +2152,9 @@ async function playCard(idx) {
   if (combatInputLocked) return;
   const card = combat.hand[idx];
   if (!card || card.cost > combat.energy) return;
+  // SPEC-005 Phase 3j: アクティブキャスターを生存させ、stats を legacy にロードしてから play
+  ensureActiveHeroAlive(combat);
+  loadActiveHeroStatsToLegacy(combat);
   combat.energy -= card.cost;
   combat.hand.splice(idx, 1);
   // 消耗カードは exhaustPile へ、通常カードは捨て札へ
@@ -2093,6 +2165,8 @@ async function playCard(idx) {
     combat.discardPile.push(card);
   }
   card.play(combat);
+  // Phase 3j: card 効果で変化した legacy stats を active hero へ書き戻し
+  syncLegacyStatsToActiveHero(combat);
   // カード効果を UI に反映してからパッシブへ
   renderCombat();
   if (areAllEnemiesDefeated(combat)) { endCombatWin(); return; }
@@ -3753,6 +3827,17 @@ function init() {
     renderCombat();
     await enemyTurn();
   });
+  // SPEC-005 Phase 3j: 味方 portrait をクリックでアクティブキャスター切替
+  const playerSide = document.querySelector(".party-side--player");
+  if (playerSide) {
+    playerSide.addEventListener("click", (ev) => {
+      if (!combat || view !== "combat" || combatInputLocked) return;
+      const slot = ev.target.closest('.party-slot[data-side="player"]');
+      if (!slot) return;
+      const pos = parseInt(slot.dataset.pos, 10);
+      if (Number.isFinite(pos)) setActiveHero(pos);
+    });
+  }
   document.getElementById("btnDeckOpen").addEventListener("click", openDeckModal);
   document.getElementById("deckModalClose").addEventListener("click", closeDeckModal);
   document.getElementById("deckModal").addEventListener("click", (ev) => {
