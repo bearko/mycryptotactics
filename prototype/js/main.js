@@ -49,9 +49,20 @@ function getCurrentRegulation() {
 }
 function setCurrentRegulation(id) {
   if (!REGULATION_BY_ID[id]) return;
+  const changed = currentRegulationId !== id;
   currentRegulationId = id;
   saveCurrentRegulationId(id);
   updateHeaderRegulationIcons();
+  // レギュレーション変更時は章クリア進捗もリセット (#42)
+  // → 別レギュレーションでは必ずアバカスからやり直し
+  if (changed) {
+    clearedChapters = new Set();
+    runState = null;
+    gold = 75;
+    pendingShopNodeId = null;
+    pendingCraftNodeId = null;
+    postCombatSnapshot = null;
+  }
 }
 
 // ─── ナビゲーター「マイ」 ────────────────────────────────────────
@@ -2706,6 +2717,8 @@ function resetRun() {
   gold = 75;
   combat = null;
   runState = null;
+  // 全クリア後の「もう一度」でも章クリア進捗を確実にリセット (#42)
+  clearedChapters = new Set();
   pendingShopNodeId = null;
   pendingCraftNodeId = null;
   postCombatSnapshot = null;
