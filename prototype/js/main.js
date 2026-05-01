@@ -49,6 +49,12 @@ import {
   saveCurrentRegulationId,
   unlockNextAfterClear,
 } from "./regulations.js";
+import {
+  resolveCaster,
+  canPlayCard,
+  unplayableBadge,
+  CASTER_ROLE_LABELS,
+} from "./caster.js";
 
 // 現在選択中のレギュレーション (#37) — 全戦闘・全画面でこの値を参照
 let currentRegulationId = loadCurrentRegulationId();
@@ -2060,9 +2066,13 @@ function renderCombat() {
   combat.hand.forEach((card, idx) => {
     const slot = document.createElement("div");
     const rarity = CARD_RARITIES[card.libraryKey] || 'common';
-    slot.className = "card-slot" + (card.cost > combat.energy ? " card-slot--disabled" : "");
+    // SPEC-006 Phase 4b: コスト + キャスター不在の両方をチェック
+    const playable = canPlayCard(card, combat);
+    const reasonBadge = !playable ? unplayableBadge(card, combat) : null;
+    slot.className = "card-slot" + (!playable ? " card-slot--disabled" : "");
     slot.setAttribute("data-cost", String(card.cost));
     slot.setAttribute("data-rarity", rarity);
+    if (reasonBadge) slot.setAttribute("title", reasonBadge.title);
     slot.style.setProperty("--i", String(idx + 1));
     slot.style.setProperty("--n", String(Math.max(n - 1, 1)));
 
@@ -2072,9 +2082,13 @@ function renderCombat() {
     const helpKeys = typeof card.peekHelpKeys === "function" ? card.peekHelpKeys() : [];
     const detailBody = detailLines.map(t => "<p>" + escapeHtml(t) + "</p>").join("");
     const summaryBody = summaryLines.map(t => "<p>" + escapeHtml(t) + "</p>").join("");
+    const unplayableBadgeHtml = reasonBadge
+      ? `<div class="card-unplayable-badge" title="${escapeHtml(reasonBadge.title)}">${escapeHtml(reasonBadge.badge)}</div>`
+      : "";
 
     slot.innerHTML =
       '<div class="card-cost-above"><span class="cost-zeus" aria-hidden="true">⚡</span>' + card.cost + '</div>' +
+      unplayableBadgeHtml +
       '<div class="card ' + card.type + (card.exhaust ? ' card--exhaust' : '') + '">' +
       '<div class="card-name-hd">' + escapeHtml(card.extNameJa) + (card.exhaust ? '<span class="exhaust-badge" title="消耗：使い切り">🔥</span>' : '') +
       (card.skillNameJa ? '<span class="card-skill-sub">' + escapeHtml(card.skillNameJa) + '</span>' : '') + '</div>' +
@@ -3510,8 +3524,10 @@ function applyDouranPassive(s) {
 async function playCard(idx) {
   if (combatInputLocked) return;
   const card = combat.hand[idx];
-  if (!card || card.cost > combat.energy) return;
+  // SPEC-006 Phase 4b: コスト + キャスター不在の両方をチェック
+  if (!card || !canPlayCard(card, combat)) return;
   // SPEC-005 Phase 3j: アクティブキャスターを生存させ、stats を legacy にロードしてから play
+  // (SPEC-006 Phase 4d でカード側の caster ロールに置き換え予定)
   ensureActiveHeroAlive(combat);
   loadActiveHeroStatsToLegacy(combat);
   combat.energy -= card.cost;
