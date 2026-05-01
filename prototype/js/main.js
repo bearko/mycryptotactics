@@ -34,6 +34,14 @@ import { CHAPTERS } from "./chapters.js";
 import { generateChapterMap } from "./maps.js";
 import { LL_EXT_POOL } from "./ll-extensions.js";
 import {
+  resolveTargets,
+  makeHeroUnit,
+  makeEnemyUnit,
+  foremostAlive,
+  rearmostAlive,
+  aliveAt,
+} from "./targeting.js";
+import {
   REGULATIONS,
   REGULATION_BY_ID,
   loadUnlockedRegulations,
@@ -1297,6 +1305,32 @@ function startCombatFromMapNode(node) {
     hasResurrection: false,
     _lastUi: null,
   };
+
+  // SPEC-005 Phase 2: heroes[] / enemies[] を並行で初期化（Phase 3 で正式に使用、現状は表示・解決用の参照のみ）
+  combat.heroes = [makeHeroUnit({
+    position: 0,
+    defId: LEADER.heroId,
+    name: LEADER.nameJa,
+    imgUrl: typeof LEADER.img === "function" ? LEADER.img() : null,
+    hp: combat.playerHp, hpMax: combat.playerHpMax,
+    phy: pPhy, int: pInt, agi: pAgi,
+    phyBase: pPhy, intBase: pInt, agiBase: pAgi,
+    passiveKey: LEADER.passiveKey || null,
+  })];
+  combat.enemies = [makeEnemyUnit({
+    position: 0,
+    defId: enemyDef.id,
+    name: enemyDef.name,
+    imgId: enemyDef.imgId,
+    hp: regHp, hpMax: regHp,
+    phy: regPhy, int: regInt, agi: enemyDef.agi,
+    phyBase: regPhy, intBase: regInt, agiBase: enemyDef.agi,
+    shield: enemyDef.initialShield || 0,
+    intentRota,
+    bossPhase, bossDef: isBoss ? bossDef : null,
+    isBoss,
+  })];
+  combat.activeHeroIdx = 0;
 
   combat.drawPile = shuffle(combat.deck.map((c) => copyCard(c.libraryKey)));
   showView("combat");
