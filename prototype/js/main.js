@@ -854,6 +854,37 @@ function setActiveHero(idx) {
   renderCombat();
 }
 
+// ─── SPEC-006 Phase 4d: カード単位の caster 解決 ──────────────────────
+// Phase 3j の active hero (ユーザーが選んだヒーロー) ではなく、カード定義の
+// caster ロール (front / foremost / highest_phy 等) から解決した個別ヒーローを
+// caster とし、その stats を legacy フィールドに swap して card.play() を実行する。
+// → 違うカードを使うと違うヒーローが caster になり、バフ/HP もそのヒーロー個人に乗る。
+
+/** caster の stats を legacy combat.player* に流し込む。phy/int/agi/hp/hpMax を per-hero 化。
+ *  guard/shield/poison/bleed は Phase 4f で per-hero 化予定、現状 legacy 据え置き。 */
+function loadCasterStatsToLegacy(s, caster) {
+  if (!caster) return;
+  s.playerPhy = caster.phy;
+  s.playerInt = caster.int;
+  s.playerAgi = caster.agi;
+  s.playerPhyBase = caster.phyBase ?? caster.phy;
+  s.playerIntBase = caster.intBase ?? caster.int;
+  s.playerAgiBase = caster.agiBase ?? caster.agi;
+  s.playerHp = caster.hp;
+  s.playerHpMax = caster.hpMax;
+}
+
+/** card.play() で変化した legacy stats を caster に書き戻す。
+ *  これにより heroes[i] が個人状態の真の source-of-truth として更新される。 */
+function syncLegacyStatsToCaster(s, caster) {
+  if (!caster) return;
+  caster.phy = s.playerPhy;
+  caster.int = s.playerInt;
+  caster.agi = s.playerAgi;
+  caster.hp = s.playerHp;
+  if (caster.hp <= 0) caster.alive = false;
+}
+
 function dealPhySkillFromEnemyToPlayer(s, skillPct, caster) {
   // Phase 3b: 敵攻撃は foremost living hero を対象に
   const target = getEnemyAttackTargetHero(s);
@@ -3526,10 +3557,23 @@ async function playCard(idx) {
   const card = combat.hand[idx];
   // SPEC-006 Phase 4b: コスト + キャスター不在の両方をチェック
   if (!card || !canPlayCard(card, combat)) return;
-  // SPEC-005 Phase 3j: アクティブキャスターを生存させ、stats を legacy にロードしてから play
-  // (SPEC-006 Phase 4d でカード側の caster ロールに置き換え予定)
-  ensureActiveHeroAlive(combat);
-  loadActiveHeroStatsToLegacy(combat);
+  // SPEC-006 Phase 4d: カード定義の caster ロールから個別ヒーローを解決し、
+  // その stats を legacy combat.player* に load。card.play() は従来通り legacy を読み書きするが、
+  // 値の主体が caster になるため「caster=A の攻撃カードは A の PHY で計算」が成立する。
+  const caster = resolveCaster(card.caster, combat);
+  if (!caster) return; // canPlayCard で除外済みのはずだが念のため
+  loadCasterStatsToLegacy(combat, caster);
+  // UI 表示用に activeHeroIdx も caster に同期 (Phase 3j の "▶ ACTIVE" バッジが caster に追従)
+  if (Array.isArray(combat.heroes)) {
+    const idx2 = combat.heroes.indexOf(caster);
+    if (idx2 >= 0) combat.activeHeroIdx = idx2;
+  }
+  // SPEC-006 §8.2: ターゲット解決済み配列を ctx に同梱
+  // (現状の card.play(s) は ctx を読まないが、Phase 4d 以降で段階的に活用)
+  const effectsResolved = (card.effects || []).map(e => ({
+    target: e.target,
+    units: resolveTargets(e.target, caster, combat),
+  }));
   combat.energy -= card.cost;
   combat.hand.splice(idx, 1);
   // 消耗カードは exhaustPile へ、通常カードは捨て札へ
@@ -3539,9 +3583,13 @@ async function playCard(idx) {
   } else {
     combat.discardPile.push(card);
   }
-  card.play(combat);
-  // Phase 3j: card 効果で変化した legacy stats を active hero へ書き戻し
-  syncLegacyStatsToActiveHero(combat);
+  card.play(combat, { caster, effectsResolved });
+  // SPEC-006 Phase 4d: card.play() で変化した legacy stats を caster に書き戻す
+  syncLegacyStatsToCaster(combat, caster);
+  // SPEC-006 Q4: 使用ヒーロー明示ログ (party 2 体以上時のみ。1 体だと冗長)
+  if (combat.heroes && combat.heroes.length > 1) {
+    clog(`【${caster.name || "ヒーロー"}】が【${card.extNameJa}】を使用`);
+  }
   // カード効果を UI に反映してからパッシブへ
   renderCombat();
   if (areAllEnemiesDefeated(combat)) { endCombatWin(); return; }
