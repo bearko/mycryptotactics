@@ -20,7 +20,7 @@
 | 4e | カード券面 UI 左30/右70 + キャスターアイコン + ロールラベル | P0 | ✅ **完了** | バトル中ハンド render が effects 配列 + caster icon (hero portrait + ロール名) を使用。target-labels.js を init で load し CSS 変数注入。card-effect-row はターゲット pill (色付) 30% + 効果テキスト 70% のグリッド |
 | 4f | per-hero state 化 + legacy 廃止 | P0 | ✅ **完了** (legacy 完全廃止は Phase 4g) | guard/shield/poison/bleed/vulnerable を heroes[i] 個別に。swap 拡張、damage 吸収を target hero 経由、毒 tick・guard reset を per-hero、敵攻撃の状態異常付与を target hero 個別に。Status badges UI もサブ portrait に展開 |
 | 4g | Phase 3j 撤去 | P0 | ✅ **完了** | setActiveHero / getActiveHero / ensureActiveHeroAlive / loadActiveHeroStatsToLegacy / syncLegacyStatsToActiveHero / activeHeroIdx を全削除。portrait click handler + ▶ ACTIVE バッジ + hover lift CSS も撤去。getActiveHero 利用箇所は transient な `combat._currentCaster` (playCard スコープ) に置換 |
-| 4h | バトル外カード券面係数表記 + 使用ヒーローログ | P1 | 未着手 | 4e 完了後 |
+| 4h | バトル外カード券面 effects ベース統一 + caster ロール表示 | P1 | ✅ **完了** | buildRewardPickButton (リワード/デッキ/ショップ/クラフト共通) と showOwnedDeckPeek を effects 配列 + caster ロールラベル ベースに更新。バトル外は具体ヒーロー portrait は出さず「先頭」「前衛」等のロール pill のみ表示 |
 | 4i | 577 カード手動 caster 再指定 | P2 | 未着手 | content PR 全マージ完了済み (PR #51/#56)、差別化したいものを手動再指定 |
 | 4j | パッシブ trigger DSL 統合 (codemod) | P0 | 未着手 | PR #55 マージ済み (Rare hero 53)、計 113 関数を codemod 対象 |
 
@@ -72,6 +72,14 @@
 - `combat.activeHeroIdx` フィールドは初期化も参照もされない
 - player attack 時 `lungePortrait("player", ...)` は `combat._currentCaster ?? heroes[0]` を使用 (transient ref。playCard で set/clear)
 - Phase 3j 関連 helper 関数 5 件 (setActiveHero / getActiveHero / ensureActiveHeroAlive / loadActiveHeroStatsToLegacy / syncLegacyStatsToActiveHero) はソースから完全削除
+
+### Phase 4h の動作確認済み事項
+
+- **buildRewardPickButton** (リワード / デッキ一覧 / ショップ / クラフト で共有) が effects 配列ベースで描画
+- caster ロール pill (「先頭」「前衛」「高PHY」等) が card-caster-display--rolelabel として表示 (バトル中の hero portrait の代わり)
+- 効果テキストは effects[].text を simplifyEffectText で整形、effects 未定義時は旧 effectSummaryLines にフォールバック
+- showOwnedDeckPeek (タップ tooltip) も「使い手: 先頭」のロール表記を opc-meta に追加
+- reward-card-inner 用 CSS で effect-row のフォントサイズを container query で大きめに調整 (バトル中より見やすく)
 
 ## 完了した事前準備物 (このブランチ)
 

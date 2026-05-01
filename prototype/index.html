@@ -1055,6 +1055,22 @@
     .reward-card-inner .card-effect-summary p { margin: 0.08rem 0; }
     /* container query 用 */
     .reward-card-inner { container-type: inline-size; }
+    /* SPEC-006 Phase 4h: バトル外でも effect row グリッド (target pill 30% + text 70%)
+       reward-card は effect エリアが大きい (38% 高さ) ので pill / text とも一段大きく */
+    .reward-card-inner .card-effect-summary .card-effect-row {
+      grid-template-columns: 30% 70%;
+      gap: 0.22rem;
+      margin: 0.08rem 0;
+    }
+    .reward-card-inner .card-effect-summary .card-effect-target {
+      font-size: clamp(0.55rem, 9cqw, 0.78rem);
+      padding: 2px 4px;
+      max-height: 1.6em;
+    }
+    .reward-card-inner .card-effect-summary .card-effect-text {
+      font-size: clamp(0.65rem, 11cqw, 0.95rem);
+      color: #e6e0f0;
+    }
 
     /* Rarity border colors on reward / shop / craft cards */
     .reward-card-btn[data-rarity="common"]    .reward-card-inner { border-color: #0984E3; }
