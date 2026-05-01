@@ -618,6 +618,17 @@
       border-radius: 4px; padding: 1px 4px; color: var(--muted);
       line-height: 1.2;
     }
+    /* Target badge side colors (#44 SPEC-005 Phase 1) */
+    .card-user-br.tgt-self  { color: #FDCB6E; border-color: #FDCB6E; }
+    .card-user-br.tgt-ally  { color: #4DA3F0; border-color: #4DA3F0; }
+    .card-user-br.tgt-enemy { color: #ff8090; border-color: #d63031; }
+    .card-user-br.tgt-all   { color: #c8b6e6; border-color: #6f5fa6; }
+    /* reward-card 上での位置調整（reward-card-inner は別レイアウト） */
+    .reward-card-inner .card-user-br {
+      bottom: 6px; right: 6px;
+      z-index: 3;
+      font-size: 0.62rem; padding: 2px 6px;
+    }
     .card-effect-area {
       background: #d8d0e4; color: #1a1420;
       padding: 0.18rem 0.24rem; font-size: 0.58rem;

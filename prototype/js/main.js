@@ -1488,6 +1488,50 @@ const PEEK_HELP_SNIPPETS = {
   hp:     "<strong>HP</strong> — 0 で敗北。回復は最大値を超えない。",
 };
 
+// ─── ターゲット表示バッジ (#44 SPEC-005 Phase 1) ──────────────────
+/**
+ * カードのターゲット仕様を表示用ラベル + サイドカラーに変換。
+ * Phase 3 で 3v3 ターゲット解決が動くまでは静的ラベル表示。
+ */
+const TARGET_BADGE_DEFS = {
+  "self":              { label: "自身",     side: "self"  },
+  "ally.foremost":     { label: "味方先頭", side: "ally"  },
+  "ally.rearmost":     { label: "味方後尾", side: "ally"  },
+  "ally.front":        { label: "前衛",     side: "ally"  },
+  "ally.mid":          { label: "中衛",     side: "ally"  },
+  "ally.back":         { label: "後衛",     side: "ally"  },
+  "ally.all":          { label: "味方全",   side: "ally"  },
+  "ally.random":       { label: "味方?",    side: "ally"  },
+  "ally.highest_phy":  { label: "PHY↑",   side: "ally"  },
+  "ally.lowest_phy":   { label: "PHY↓",   side: "ally"  },
+  "ally.highest_int":  { label: "INT↑",   side: "ally"  },
+  "ally.lowest_int":   { label: "INT↓",   side: "ally"  },
+  "ally.highest_hp":   { label: "HP↑",    side: "ally"  },
+  "ally.lowest_hp":    { label: "HP↓",    side: "ally"  },
+  "enemy.foremost":    { label: "敵先頭",  side: "enemy" },
+  "enemy.rearmost":    { label: "敵後尾",  side: "enemy" },
+  "enemy.front":       { label: "敵前衛",  side: "enemy" },
+  "enemy.mid":         { label: "敵中衛",  side: "enemy" },
+  "enemy.back":        { label: "敵後衛",  side: "enemy" },
+  "enemy.all":         { label: "敵全",    side: "enemy" },
+  "enemy.random":      { label: "敵?",     side: "enemy" },
+  "enemy.highest_phy": { label: "敵PHY↑", side: "enemy" },
+  "enemy.lowest_phy":  { label: "敵PHY↓", side: "enemy" },
+  "enemy.highest_int": { label: "敵INT↑", side: "enemy" },
+  "enemy.lowest_int":  { label: "敵INT↓", side: "enemy" },
+  "enemy.highest_hp":  { label: "敵HP↑",  side: "enemy" },
+  "enemy.lowest_hp":   { label: "敵HP↓",  side: "enemy" },
+  "all":               { label: "全",      side: "all"   },
+  "all.random":        { label: "全?",     side: "all"   },
+};
+function buildTargetBadgeHtml(card) {
+  const spec = (card && card.target) || "enemy.foremost"; // 後方互換
+  const def = TARGET_BADGE_DEFS[spec] || { label: spec, side: "all" };
+  return '<span class="card-user-br tgt-' + def.side + '" data-target="' + spec +
+    '" title="ターゲット: ' + escapeHtml(def.label) + '">' +
+    escapeHtml(def.label) + "</span>";
+}
+
 function buildPeekHelpHtml(keys) {
   if (!keys || !keys.length) return "";
   const parts = keys.map((k) => PEEK_HELP_SNIPPETS[k]).filter(Boolean);
@@ -1736,7 +1780,7 @@ function renderCombat() {
       '<div class="card-icon-area">' +
       '<img class="card-ext-img-full" src="' + EXT_IMG(card.extId) + '" alt="" onerror="this.style.opacity=\'0\'" />' +
       '<img class="card-skill-icon-tl" src="' + battleIconUrl(card.skillIcon) + '" alt="" />' +
-      '<span class="card-user-br">先頭</span>' +
+      buildTargetBadgeHtml(card) +
       '</div>' +
       '<div class="card-effect-area">' + summaryBody + '</div>' +
       '</div>' +
@@ -2024,6 +2068,7 @@ function buildRewardPickButton(def, mockS) {
     '<span class="card-cost-badge"><span class="cost-zeus" aria-hidden="true">⚡</span>' + def.cost + "</span>" +
     '<img class="card-skill-corner" src="' + battleIconUrl(def.skillIcon) + '" alt="" />' +
     "</div></div>" +
+    buildTargetBadgeHtml(def) +
     '<div class="card-ext-name">' + escapeHtml(def.extNameJa) +
     (def.skillNameJa ? '<span class="card-ext-skill-sub">' + escapeHtml(def.skillNameJa) + '</span>' : '') +
     "</div>" +

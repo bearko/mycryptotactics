@@ -65,6 +65,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
+      target: "enemy.foremost",
       effectSummaryLines(s) {
         const d = estPhyHit(s.playerPhy, s.enemyPhy, 50, 60);
         return [`敵にダメージ　${d}`];
@@ -88,6 +89,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
+      target: "enemy.foremost",
       effectSummaryLines(s) {
         const d = estIntHit(s.playerInt, s.enemyInt, 25, 30);
         return [`敵にダメージ　${d}`, "INT　−2（敵）"];
@@ -115,6 +117,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "hp.png",
       cost: 1,
       type: "skl",
+      target: "self",
       effectSummaryLines(s) {
         const lo = estHealInt(s.playerInt, s.playerPhy, 30, 30);
         const hi = estHealInt(s.playerInt, s.playerPhy, 40, 40);
@@ -140,6 +143,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "BUF_phy.png",
       cost: 1,
       type: "skl",
+      target: "self",
       effectSummaryLines() {
         return ["PHY　+2", "ガード　+7"];
       },
@@ -165,6 +169,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "BUF_agi.png",
       cost: 1,
       type: "skl",
+      target: "self",
       effectSummaryLines() {
         return ["AGI　+3", "ガード　+3", "次ターン ⚡　+1"];
       },
@@ -195,6 +200,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
+      target: "enemy.foremost",
       effectSummaryLines(s) {
         const d = estPhyHit(s.playerPhy, s.enemyPhy, 45, 55);
         return [`敵にダメージ　${d}`];
@@ -218,6 +224,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "skl",
+      target: "enemy.foremost",
       effectSummaryLines(s) {
         const d = estIntHit(s.playerInt + 1, s.enemyInt, 15, 20);
         return ["INT　+1", "ドロー　2", `敵にダメージ　${d}`];
@@ -249,6 +256,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
+      target: "enemy.foremost",
       effectSummaryLines(s) {
         const d = estPhyHit(s.playerPhy, s.enemyPhy, 45, 55);
         return [`敵にダメージ　${d}`];
@@ -272,6 +280,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
+      target: "enemy.foremost",
       effectSummaryLines(s) {
         const d = estPhyHit(s.playerPhy, s.enemyPhy, 40, 40);
         const agiDown = Math.max(1, Math.floor(s.playerPhy * 0.03));
@@ -302,6 +311,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
+      target: "enemy.foremost",
       effectSummaryLines(s) {
         const d = estIntHit(s.playerInt, s.enemyInt, 15, 20);
         const intDown = Math.max(1, Math.floor(s.playerInt * 0.06));
@@ -336,6 +346,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
+      target: "enemy.foremost",
       effectSummaryLines(s) {
         const d = estPhyHit(s.playerPhy, s.enemyPhy, 30, 40);
         const selfDown = Math.max(1, Math.floor(s.playerPhy * 0.09));
@@ -370,6 +381,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
+      target: "enemy.foremost",
       effectSummaryLines(s) {
         const d = estPhyHit(s.playerPhy, s.enemyPhy, 65, 80);
         return [`敵にダメージ　${d}`];
@@ -393,6 +405,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
+      target: "enemy.foremost",
       effectSummaryLines(s) {
         const d = estIntHit(s.playerInt, s.enemyInt, 35, 45);
         return [`敵にダメージ　${d}`, "INT　−3（敵）"];
@@ -420,6 +433,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "BUF_phy.png",
       cost: 1,
       type: "skl",
+      target: "self",
       effectSummaryLines() {
         return ["PHY　+3", "ガード　+12"];
       },
@@ -445,6 +459,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
+      target: "enemy.foremost",
       effectSummaryLines(s) {
         const d = estPhyHit(s.playerPhy, s.enemyPhy, 60, 75);
         return [`敵にダメージ　${d}`];
@@ -468,6 +483,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
+      target: "enemy.foremost",
       effectSummaryLines(s) {
         const d = estPhyHit(s.playerPhy, s.enemyPhy, 60, 75);
         return [`敵にダメージ　${d}`];
@@ -491,6 +507,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
+      target: "enemy.foremost",
       effectSummaryLines(s) {
         const d = estPhyHit(s.playerPhy, s.enemyPhy, 55, 70);
         return [`敵にダメージ　${d}`];
@@ -515,6 +532,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "hp.png",
       cost: 0,
       type: "skl",
+      target: "self",
       exhaust: true,
       effectSummaryLines(s) {
         const h = Math.floor((s.playerInt + s.playerPhy) / 2);
@@ -541,6 +559,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "BUF_agi.png",
       cost: 1,
       type: "skl",
+      target: "self",
       effectSummaryLines() { return ["ガード　+8", "AGI　+2（永続）"]; },
       peekHelpKeys() { return ["guard", "agi"]; },
       previewLines() { return ["ガードを 8 得る", "AGI を +2（永続）"]; },
@@ -559,6 +578,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "skl",
+      target: "self",
       effectSummaryLines() { return ["INT　+2（永続）", "ドロー　3"]; },
       peekHelpKeys() { return ["int", "draw"]; },
       previewLines() { return ["INT を +2（永続）", "カードを 3 枚引く"]; },
@@ -581,6 +601,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
+      target: "enemy.foremost",
       effectSummaryLines(s) {
         const d = estPhyHit(s.playerPhy, s.enemyPhy, 100, 100);
         return [`敵にダメージ　${d}`];
@@ -601,6 +622,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 2,
       type: "atk",
+      target: "enemy.foremost",
       effectSummaryLines(s) {
         const d = estPhyHit(s.playerPhy, s.enemyPhy, 70, 70);
         return [`敵にダメージ　${d} ×2`];
@@ -624,6 +646,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "BUF_phy.png",
       cost: 1,
       type: "skl",
+      target: "self",
       effectSummaryLines() { return ["ガード　+6"]; },
       peekHelpKeys() { return ["guard"]; },
       previewLines() { return ["ガードを 6 得る（このターン中 PHY/INT ダメージ軽減）"]; },
@@ -642,6 +665,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "skl",
+      target: "self",
       effectSummaryLines() { return ["⚡ +1（このターン）"]; },
       peekHelpKeys() { return ["energy"]; },
       previewLines() { return ["このターンのエナジーを 1 増やす"]; },
@@ -660,6 +684,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 2,
       type: "atk",
+      target: "enemy.foremost",
       effectSummaryLines(s) {
         const d = estPhyHit(s.playerPhy, s.enemyPhy, 150, 150);
         return [`敵にダメージ　${d}`];
@@ -680,6 +705,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "BUF_phy.png",
       cost: 1,
       type: "skl",
+      target: "self",
       effectSummaryLines() { return ["PHY　+3（永続）"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines() { return ["PHY を +3（このランの残り全ての戦闘で有効）"]; },
@@ -698,6 +724,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "hp.png",
       cost: 1,
       type: "skl",
+      target: "self",
       effectSummaryLines(s) {
         const h = Math.floor((s.playerInt + s.playerPhy) / 2);
         return [`HP　+${h}`];
@@ -726,6 +753,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 0,
       type: "atk",
+      target: "enemy.foremost",
       effectSummaryLines(s) {
         const d = estPhyHit(s.playerPhy, s.enemyPhy, 60, 60);
         return [`敵にダメージ　${d}`, "次ターン PHY -3"];
@@ -753,6 +781,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
+      target: "enemy.foremost",
       exhaust: true,
       effectSummaryLines(s) {
         const d = estPhyHit(s.playerPhy, s.enemyPhy, 80, 80);
@@ -774,6 +803,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
+      target: "enemy.foremost",
       effectSummaryLines(s) {
         const d = estPhyHit(s.playerPhy, s.enemyPhy, 60, 60);
         return [`敵にダメージ　${d}`, "出血　×1（敵）"];
@@ -797,6 +827,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "BUF_agi.png",
       cost: 1,
       type: "skl",
+      target: "self",
       effectSummaryLines() { return ["ガード　+8", "AGI　+2（永続）"]; },
       peekHelpKeys() { return ["guard", "agi"]; },
       previewLines() {
@@ -818,6 +849,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "hp.png",
       cost: 0,
       type: "skl",
+      target: "self",
       exhaust: true,
       effectSummaryLines(s) {
         const h = Math.floor((s.playerInt + s.playerPhy) / 2);
@@ -845,6 +877,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
+      target: "enemy.foremost",
       effectSummaryLines(s) {
         const d = estPhyHit(s.playerPhy, s.enemyPhy, 50, 50);
         return [`敵にダメージ　${d} ×2`];
@@ -868,6 +901,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 2,
       type: "skl",
+      target: "self",
       effectSummaryLines() { return ["INT　+2（永続）", "ドロー　3"]; },
       peekHelpKeys() { return ["int", "draw"]; },
       previewLines() { return ["INT を +2（永続）", "カードを 3 枚引く"]; },
@@ -890,6 +924,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
+      target: "enemy.foremost",
       effectSummaryLines(s) {
         const d = estPhyHit(s.playerPhy, s.enemyPhy, 60, 60);
         return [`敵にダメージ　${d}`, "毒　×2（敵）"];
@@ -913,6 +948,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 2,
       type: "atk",
+      target: "enemy.foremost",
       effectSummaryLines(s) {
         const d = estPhyHit(s.playerPhy, s.enemyPhy, 90, 90);
         return [`敵にダメージ　${d}`, "出血　×2（敵）"];
@@ -936,6 +972,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "hp.png",
       cost: 0,
       type: "skl",
+      target: "self",
       effectSummaryLines() { return ["毒・出血 解除（自分）"]; },
       peekHelpKeys() { return []; },
       previewLines() { return ["自分の毒スタックと出血スタックをすべて解除する"]; },
@@ -950,6 +987,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "BUF_phy.png",
       cost: 2,
       type: "skl",
+      target: "self",
       effectSummaryLines() { return ["ガード　+12"]; },
       peekHelpKeys() { return ["guard"]; },
       previewLines() { return ["ガードを 12 得る（このターン中 PHY/INT ダメージ軽減）"]; },
@@ -968,6 +1006,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
+      target: "enemy.foremost",
       effectSummaryLines(s) {
         const d = estIntHit(s.playerInt, s.enemyInt, 50, 50);
         return [`敵にダメージ　${d} ×3`];
@@ -992,6 +1031,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 0,
       type: "skl",
+      target: "self",
       effectSummaryLines() { return ["GUM　+20"]; },
       peekHelpKeys() { return []; },
       previewLines() { return ["ゴールド（GUM）を 20 得る"]; },
@@ -1009,6 +1049,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "BUF_agi.png",
       cost: 1,
       type: "skl",
+      target: "self",
       effectSummaryLines() { return ["シールド　+10"]; },
       peekHelpKeys() { return ["shield"]; },
       previewLines() { return ["シールドを 10 得る（特殊ダメージのみ吸収）"]; },
@@ -1023,6 +1064,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 3,
       type: "atk",
+      target: "enemy.foremost",
       effectSummaryLines(s) {
         const d = estPhyHit(s.playerPhy, s.enemyPhy, 200, 200);
         return [`敵にダメージ　${d}`];
@@ -1043,6 +1085,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "BUF_phy.png",
       cost: 2,
       type: "skl",
+      target: "self",
       effectSummaryLines() { return ["PHY　+5", "INT　+5（永続）"]; },
       peekHelpKeys() { return ["phy", "int"]; },
       previewLines() { return ["PHY を +5、INT を +5（永続）"]; },
@@ -1062,6 +1105,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 2,
       type: "atk",
+      target: "enemy.foremost",
       effectSummaryLines(s) {
         const d = estIntHit(s.playerInt, s.enemyInt, 130, 130);
         return [`敵にダメージ　${d}`, "クリ確定"];
@@ -1082,6 +1126,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "BUF_agi.png",
       cost: 0,
       type: "skl",
+      target: "self",
       effectSummaryLines() { return ["被ダメージ ½（このターン）"]; },
       peekHelpKeys() { return ["guard"]; },
       previewLines() { return ["このターン（ターン終了まで）受けるダメージをすべて半減する"]; },
