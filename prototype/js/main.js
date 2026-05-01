@@ -2173,9 +2173,13 @@ async function applyHeroPassiveOnCardUse(s) {
 
 // シートン「狼王ロボ」: 戦闘開始時、敵にINTの40%ダメージ＋出血1スタック付与
 function applySetonPassive(s) {
+  if (areAllEnemiesDefeated(s)) return;
+  const target = getPlayerAttackTargetEnemy(s);
+  if (!target) return;
   const dmg = Math.max(1, Math.floor(s.playerInt * 0.4));
-  s.enemyHp = Math.max(0, s.enemyHp - dmg);
+  applyHpDeltaToEnemy(s, target, -dmg);
   s.enemyBleed = (s.enemyBleed || 0) + 1;
+  playPortraitEffect("enemy", "hit", target);
   playBattleSe("hit");
   clog(`【狼王ロボ】発動！ INT ${dmg} ダメージ＋出血 ×1 付与`);
 }
@@ -2184,6 +2188,7 @@ function applySetonPassive(s) {
 function applyInohPassive(s) {
   const buff = Math.max(1, Math.floor(s.playerAgi * 0.3));
   s.playerInt += buff;
+  playPortraitEffect("player", "buff", s.heroes?.[0]);
   playBattleSe("buff");
   clog(`【大日本沿海輿地全図】発動！ INT +${buff}`);
 }
@@ -2196,22 +2201,25 @@ function applyPythagorasPassive(s) {
   const intBuff = Math.max(1, Math.floor(phyOrig * 0.2));
   s.playerPhy += phyBuff;
   s.playerInt += intBuff;
+  playPortraitEffect("player", "buff", s.heroes?.[0]);
   playBattleSe("buff");
   clog(`【テトラクテュス】発動！ PHY +${phyBuff} / INT +${intBuff}`);
 }
 
 // 大長今「李氏朝鮮、宮廷医女」: カード使用後30%でHP +最大HPの10%
 async function applyDaejanggeumPassive(s) {
-  if (s.playerHp <= 0) return;
+  if (isPartyWipedOut(s)) return;
+  const heroSelf = s.heroes?.[0];
+  if (!heroSelf) return;
   if (s.playerHp >= s.playerHpMax) return;
   if (Math.random() >= 0.3) return;
   const heal = Math.max(1, Math.floor(s.playerHpMax * 0.1));
   combatInputLocked = true;
   await showPassiveCutin("李氏朝鮮、宮廷医女", typeof LEADER.img === "function" ? LEADER.img() : (LEADER.img || ""));
   combatInputLocked = false;
-  if (!combat || s.playerHp <= 0) return;
-  s.playerHp = Math.min(s.playerHpMax, s.playerHp + heal);
-  playPortraitEffect("player", "heal");
+  if (!combat || isPartyWipedOut(s)) return;
+  applyHpDeltaToHero(s, heroSelf, +heal);
+  playPortraitEffect("player", "heal", heroSelf);
   playBattleSe("heal");
   clog(`【李氏朝鮮、宮廷医女】発動！ HP +${heal}`);
   renderCombat();
@@ -2220,22 +2228,30 @@ async function applyDaejanggeumPassive(s) {
 // ジョン・L・サリバン「ボストン・ストロング・ボーイ」: 戦闘開始時、PHY+5
 function applySullivanPassive(s) {
   s.playerPhy += 5;
+  playPortraitEffect("player", "buff", s.heroes?.[0]);
   playBattleSe("buff");
   clog(`【ボストン・ストロング・ボーイ】発動！ PHY +5`);
 }
 
 // ヘルクレスオオカブト「ローリングドライバー」: 戦闘開始時、敵INT-30%
 function applyHerculesPassive(s) {
+  if (areAllEnemiesDefeated(s)) return;
+  const target = getPlayerAttackTargetEnemy(s);
   const debuff = Math.max(1, Math.floor(s.enemyInt * 0.3));
   s.enemyInt = Math.max(0, s.enemyInt - debuff);
+  playPortraitEffect("enemy", "debuff", target);
   playBattleSe("debuff");
   clog(`【ローリングドライバー】発動！ 敵 INT -${debuff}`);
 }
 
 // ギラファノコギリクワガタ「ブルロック」: 戦闘開始時、敵にPHYの40%ダメージ
 function applyGiraffaPassive(s) {
+  if (areAllEnemiesDefeated(s)) return;
+  const target = getPlayerAttackTargetEnemy(s);
+  if (!target) return;
   const dmg = Math.max(1, Math.floor(s.playerPhy * 0.4));
-  s.enemyHp = Math.max(0, s.enemyHp - dmg);
+  applyHpDeltaToEnemy(s, target, -dmg);
+  playPortraitEffect("enemy", "hit", target);
   playBattleSe("hit");
   clog(`【ブルロック】発動！ PHY ${dmg} ダメージ`);
 }
