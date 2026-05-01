@@ -33,6 +33,26 @@ import { BOSS_DEFS } from "./bosses.js";
 import { CHAPTERS } from "./chapters.js";
 import { generateChapterMap } from "./maps.js";
 import { LL_EXT_POOL } from "./ll-extensions.js";
+import {
+  REGULATIONS,
+  REGULATION_BY_ID,
+  loadUnlockedRegulations,
+  loadCurrentRegulationId,
+  saveCurrentRegulationId,
+  unlockNextAfterClear,
+} from "./regulations.js";
+
+// 現在選択中のレギュレーション (#37) — 全戦闘・全画面でこの値を参照
+let currentRegulationId = loadCurrentRegulationId();
+function getCurrentRegulation() {
+  return REGULATION_BY_ID[currentRegulationId] || REGULATIONS[0];
+}
+function setCurrentRegulation(id) {
+  if (!REGULATION_BY_ID[id]) return;
+  currentRegulationId = id;
+  saveCurrentRegulationId(id);
+  updateHeaderRegulationIcons();
+}
 
 // ─── ナビゲーター「マイ」 ────────────────────────────────────────
 const MAI_SD_URL = "./MAI_SD.png";
@@ -161,8 +181,9 @@ function dismissTitle() {
   titleEl.classList.add("title-out");
   setTimeout(() => {
     titleEl.classList.add("hidden");
-    showView("heroSelect");
-    renderHeroSelect();
+    // タイトル → レギュレーション選択 → ヒーロー選択 (#37)
+    showView("regulationSelect");
+    renderRegulationSelect();
   }, 380);
 }
 
@@ -823,6 +844,13 @@ function advanceToNextChapter() {
   if (nextIdx >= CHAPTERS.length) {
     runState.runComplete = true;
     playSeClear();
+    // レギュレーション解放 (#37): 全章クリア → 次のレギュレーションをアンロック
+    const newlyUnlocked = unlockNextAfterClear(currentRegulationId);
+    if (newlyUnlocked) {
+      const r = REGULATION_BY_ID[newlyUnlocked];
+      clog(`★ レギュレーション「${r.nameJa}」が解放されました！`);
+      runState.unlockedRegulationOnClear = newlyUnlocked;
+    }
     return;
   }
   runState.chapterIdx = nextIdx;
@@ -1158,14 +1186,16 @@ function showView(name) {
   if (cv) cv.classList.toggle("hidden", name !== "craft");
   const hsv = document.getElementById("heroSelectView");
   if (hsv) hsv.classList.toggle("hidden", name !== "heroSelect");
-  // Show/hide map resources bar（ヒーロー選択・戦闘中は非表示）
+  const rsv = document.getElementById("regulationSelectView");
+  if (rsv) rsv.classList.toggle("hidden", name !== "regulationSelect");
+  // Show/hide map resources bar（ヒーロー選択・レギュレーション選択・戦闘中は非表示）
   const mapRes = document.getElementById("mapResources");
-  if (mapRes) mapRes.classList.toggle("hidden", name === "combat" || name === "heroSelect");
+  if (mapRes) mapRes.classList.toggle("hidden", name === "combat" || name === "heroSelect" || name === "regulationSelect");
   // Mai navigator: マップビュー内にあるので mapView の hidden に連動
   const nav = document.getElementById("maiNavigator");
   if (nav) nav.classList.toggle("hidden", name !== "map");
-  // マップ BGM: マップ・ショップ・報酬・node選択・ヒーロー選択ではBGMを再生
-  if (name === "map" || name === "nodeSelect" || name === "heroSelect") startBgmMap();
+  // マップ BGM: マップ・ショップ・報酬・node選択・ヒーロー選択・レギュレーション選択ではBGMを再生
+  if (name === "map" || name === "nodeSelect" || name === "heroSelect" || name === "regulationSelect") startBgmMap();
 }
 
 // ─── 戦闘開始 ─────────────────────────────────────────────────────
@@ -1205,6 +1235,12 @@ function startCombatFromMapNode(node) {
     intentRota = enemyDef.intentRota;
   }
 
+  // レギュレーション効果適用 (#37)
+  const reg = getCurrentRegulation();
+  const regHp = Math.max(1, Math.round(enemyDef.hp * reg.effects.hpFactor));
+  const regPhy = Math.max(1, Math.round(enemyDef.phy * reg.effects.atkFactor));
+  const regInt = Math.max(1, Math.round(enemyDef.int * reg.effects.atkFactor));
+
   combat = {
     deck,
     drawPile: [],
@@ -1224,10 +1260,10 @@ function startCombatFromMapNode(node) {
     bonusEnergyNext: 0,
     phyPenaltyNext: 0,
     damageReducedThisTurn: false,
-    enemyHp: enemyDef.hp,
-    enemyHpMax: enemyDef.hp,
-    enemyPhy: enemyDef.phy, enemyInt: enemyDef.int, enemyAgi: enemyDef.agi,
-    enemyPhyBase: enemyDef.phy, enemyIntBase: enemyDef.int, enemyAgiBase: enemyDef.agi,
+    enemyHp: regHp,
+    enemyHpMax: regHp,
+    enemyPhy: regPhy, enemyInt: regInt, enemyAgi: enemyDef.agi,
+    enemyPhyBase: regPhy, enemyIntBase: regInt, enemyAgiBase: enemyDef.agi,
     enemyGuard: 0,
     enemyShield: enemyDef.initialShield || 0,
     enemyPoison: 0,
@@ -1793,6 +1829,17 @@ async function enemyTurn() {
   const it = combat.enemyIntent;
   if (!it) { combat.turn++; startPlayerTurn(); return; }
 
+  // レギュレーション効果: 毎ターン初期ガード付与（Blue+） (#37)
+  const reg = getCurrentRegulation();
+  if (reg.effects.guardPerTurn > 0) {
+    combat.enemyGuard += reg.effects.guardPerTurn;
+    clog(`敵 GUARD +${reg.effects.guardPerTurn}（${reg.nameJa} 効果）`);
+  }
+
+  // レギュレーション効果: 攻撃に出血付与（Red+） (#37)
+  const isAttackKind = it.kind && it.kind.startsWith && it.kind.startsWith("attack");
+  const regBleedStacks = reg.effects.bleedOnAttack || 0;
+
   switch (it.kind) {
     case "attack":
       dealPhySkillFromEnemyToPlayer(combat, it.phyPct);
@@ -1847,6 +1894,14 @@ async function enemyTurn() {
       break;
     default:
       clog(`不明な意図: ${it.kind}`);
+  }
+
+  // レギュレーション効果: 攻撃に出血付与（Red+） (#37)
+  if (isAttackKind && regBleedStacks > 0 && combat.playerHp > 0) {
+    combat.playerBleed = (combat.playerBleed || 0) + regBleedStacks;
+    playBattleSe("debuff");
+    clog(`出血 ×${regBleedStacks} 付与（自分・${reg.nameJa} 効果）`);
+    renderStatusBadges();
   }
 
   if (combat.playerHp <= 0) { endCombatLoss(); return; }
@@ -2211,16 +2266,27 @@ function captureRunSnapshot({ isCleared, defeatedBy }) {
   if (!runState || !LEADER) return null;
   const chapter = CHAPTERS[runState.chapterIdx] || null;
   const stageName = chapter ? chapter.name : "";
+  const reg = getCurrentRegulation();
+  const newlyUnlocked = isCleared && runState.unlockedRegulationOnClear
+    ? REGULATION_BY_ID[runState.unlockedRegulationOnClear]
+    : null;
   return {
     isCleared,
     when: new Date(),
     hero: { name: LEADER.nameJa, imgUrl: LEADER.img() },
+    regulation: { id: reg.id, name: reg.nameJa, iconUrl: reg.iconUrl, color: reg.color },
+    newlyUnlockedRegulation: newlyUnlocked
+      ? { id: newlyUnlocked.id, name: newlyUnlocked.nameJa, iconUrl: newlyUnlocked.iconUrl }
+      : null,
     stageName,
-    deck: (runState.deck || []).map((c) => ({
-      libraryKey: c.libraryKey,
-      extId: c.extId,
-      extNameJa: c.extNameJa,
-    })),
+    // #36 名前順ソート（同シリーズが隣同士に並ぶよう）
+    deck: (runState.deck || [])
+      .map((c) => ({
+        libraryKey: c.libraryKey,
+        extId: c.extId,
+        extNameJa: c.extNameJa,
+      }))
+      .sort((a, b) => (a.extNameJa || "").localeCompare(b.extNameJa || "", "ja")),
     llExtSlots: (runState.llExtSlots || []).filter(Boolean).map((e) => ({
       extId: e.extId,
       name: e.name,
@@ -2284,6 +2350,28 @@ function showActivityReport(snap) {
   document.getElementById("reportStage").textContent =
     (snap.isCleared ? "全ステージ制覇 / 最終: " : "到達ステージ: ") + (snap.stageName || "—");
 
+  // レギュレーション表示 (#37)
+  if (snap.regulation) {
+    const regIcon = document.getElementById("reportRegIcon");
+    const regName = document.getElementById("reportRegName");
+    if (regIcon) regIcon.src = snap.regulation.iconUrl;
+    if (regName) {
+      regName.textContent = `Regulation: ${snap.regulation.name}`;
+      if (snap.regulation.color) regName.style.color = snap.regulation.color;
+    }
+  }
+  // 新規アンロック演出
+  const unlockEl = document.getElementById("reportUnlock");
+  if (unlockEl) {
+    if (snap.newlyUnlockedRegulation) {
+      document.getElementById("reportUnlockIcon").src = snap.newlyUnlockedRegulation.iconUrl;
+      document.getElementById("reportUnlockName").textContent = `${snap.newlyUnlockedRegulation.name} 解放！`;
+      unlockEl.classList.remove("hidden");
+    } else {
+      unlockEl.classList.add("hidden");
+    }
+  }
+
   const deckList = document.getElementById("reportDeckList");
   deckList.innerHTML = "";
   snap.deck.forEach((c) => deckList.appendChild(buildExtChip(c)));
@@ -2339,14 +2427,28 @@ function endCombatLoss() {
     if (lastReportSnapshot) {
       await showActivityReport(lastReportSnapshot);
     }
-    // 全ランステートをリセットしてヒーロー選択画面へ戻る
+    // 全ランステートをリセットしてタイトル画面へ戻る (#37: タイトル → レギュレーション選択 → ヒーロー)
     combat = null;
     runState = null;
     clearedChapters = new Set();
     gold = 75;
-    showView("heroSelect");
-    renderHeroSelect();
+    backToTitle();
   });
+}
+
+/** タイトル画面へ戻る（クリア / 敗北 / 「もう一度」共通） (#37) */
+function backToTitle() {
+  // 各 view を hidden にしてタイトル表示
+  ["mapView","combatView","shopView","gameOver","rewardView","nodeSelectView","craftView","heroSelectView","regulationSelectView"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.add("hidden");
+  });
+  const titleEl = document.getElementById("titleView");
+  if (titleEl) {
+    titleEl.classList.remove("hidden", "title-out");
+  }
+  view = "title";
+  stopBgm();
 }
 
 // ─── ショップ ─────────────────────────────────────────────────────
@@ -2549,8 +2651,8 @@ function resetRun() {
   postCombatSnapshot = null;
   stopBgm();
   dismissCutin();
-  showView("nodeSelect");
-  renderNodeSelect();
+  // タイトル → レギュレーション選択 → ヒーロー選択へ (#37)
+  backToTitle();
 }
 
 // ─── Node 選択画面 ────────────────────────────────────────────────
@@ -2700,6 +2802,68 @@ function togglePassivePopup() {
     `<div class="pp-skill-name">【${skillName}】</div>` +
     `<div class="pp-skill-desc">${skillDesc}</div>`;
   popup.classList.remove("hidden");
+}
+
+// ─── レギュレーション選択画面 (#37) ──────────────────────────────────
+function renderRegulationSelect() {
+  const el = document.getElementById("regulationSelectView");
+  if (!el) return;
+
+  const unlocked = new Set(loadUnlockedRegulations());
+
+  let html = '<div class="rs-header"><h2>レギュレーションを選択</h2><p class="rs-sub">難易度を選んでください。クリアすると次の難易度が解放されます。</p></div>';
+  html += '<div class="rs-list">';
+
+  REGULATIONS.forEach((r) => {
+    const isUnlocked = unlocked.has(r.id);
+    const isCurrent = r.id === currentRegulationId;
+    const cls = ["rs-card"];
+    if (isUnlocked) cls.push("rs-card--unlocked");
+    else cls.push("rs-card--locked");
+    if (isCurrent && isUnlocked) cls.push("rs-card--current");
+
+    html += `<div class="${cls.join(' ')}" data-reg-id="${r.id}" role="button" tabindex="${isUnlocked ? 0 : -1}" aria-disabled="${!isUnlocked}">`;
+    html += `<div class="rs-card-cup">`;
+    html += `<img src="${r.iconUrl}" alt="${r.nameJa}" onerror="this.style.opacity='0.2'" />`;
+    if (!isUnlocked) html += `<span class="rs-lock">🔒</span>`;
+    html += `</div>`;
+    html += `<div class="rs-card-body">`;
+    html += `<div class="rs-card-name" style="color:${r.color}">${r.nameJa}</div>`;
+    html += `<div class="rs-card-desc">${r.descShort}</div>`;
+    if (isUnlocked) {
+      html += `<button class="rs-select-btn action${isCurrent ? ' rs-select-btn--current' : ''}">${isCurrent ? '選択中' : 'このレギュレーションで始める'}</button>`;
+    } else {
+      html += `<div class="rs-locked-hint">前の難易度をクリアで解放</div>`;
+    }
+    html += `</div>`;
+    html += `</div>`;
+  });
+
+  html += '</div>';
+  el.innerHTML = html;
+
+  el.querySelectorAll('.rs-card--unlocked .rs-select-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const card = btn.closest('.rs-card');
+      const id = card?.dataset?.regId;
+      if (!id) return;
+      setCurrentRegulation(id);
+      showView("heroSelect");
+      renderHeroSelect();
+    });
+  });
+}
+
+/** ヘッダーの右上（map / combat 両方）に現在のレギュレーションアイコンを表示 (#37) */
+function updateHeaderRegulationIcons() {
+  const r = getCurrentRegulation();
+  ["headerRegIconMap", "headerRegIconCombat"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.src = r.iconUrl;
+    el.alt = r.nameJa;
+    el.title = `レギュレーション: ${r.nameJa}`;
+  });
 }
 
 // ─── ヒーロー選択画面 ────────────────────────────────────────────────
@@ -2999,9 +3163,13 @@ function init() {
       if (ev.key === "Enter" || ev.key === " ") dismissTitle();
     });
   }
-  // heroSelect を事前にレンダリングしておく（タイトルが覆うので見えない）
-  showView("heroSelect");
+  // ヘッダーアイコン (#37) を初期化
+  updateHeaderRegulationIcons();
+  // 事前に各画面をレンダリング（タイトルが覆うので見えない）
+  renderRegulationSelect();
   renderHeroSelect();
+  // 初期 view は regulationSelect: タイトル消失時に一瞬 heroSelect が見える問題を回避
+  showView("regulationSelect");
   // BGM はタイトルクリック時に開始（ブラウザのオートプレイ制限のため init では呼ばない）
 
   // ── ヒーローポートレートタップ → パッシブスキル表示 ──────────────
