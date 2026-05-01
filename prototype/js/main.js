@@ -5284,15 +5284,41 @@ function endCombatWin() {
   });
 }
 
-// ─── 報酬画面 ─────────────────────────────────────────────────────
+// ─── 報酬画面 / デッキ表示 / ショップ / クラフト 共通カード描画 ──────────
+// SPEC-006 Phase 4h: バトル外でも effects 配列 + caster ロールラベルで表示。
+// caster は未確定 (party 不明) なのでロール名 (「先頭」「前衛」「高PHY」等) のみ表示。
+// 効果テキストは effects[].text (係数形式) を simplifyEffectText で整える。
 function buildRewardPickButton(def, mockS) {
   const b = document.createElement("button");
   b.type = "button"; b.className = "reward-card-btn";
   const rarity = CARD_RARITIES[def.libraryKey] || 'common';
   b.setAttribute("data-rarity", rarity);
-  const summaryLines =
-    typeof def.effectSummaryLines === "function" ? def.effectSummaryLines(mockS) :
-    typeof def.previewLines === "function" ? def.previewLines(mockS) : [];
+
+  // caster ロールラベル (バトル外なので具体ヒーローは未指定)
+  const roleKey = def.caster || "foremost";
+  const roleLabel = CASTER_ROLE_LABELS[roleKey] || roleKey;
+
+  // 効果行の描画 (effects 配列を「対象 pill 30% + 効果テキスト 70%」で)
+  // バトル外は実数値計算できないので effects[].text (係数) を使う。
+  // effects 未定義 / 空のカードは旧 effectSummaryLines にフォールバック。
+  let effectRowsHtml = "";
+  if (Array.isArray(def.effects) && def.effects.length > 0) {
+    effectRowsHtml = def.effects.map(e => {
+      const lbl = targetLabelText(e.target) || e.target || "";
+      const colorVar = targetColorVar(e.target) || "--text";
+      const simplified = simplifyEffectText(e.text || "");
+      return `<div class="card-effect-row">` +
+        `<span class="card-effect-target" style="--target-pill-color: var(${colorVar})">${escapeHtml(lbl)}</span>` +
+        `<span class="card-effect-text">${escapeHtml(simplified)}</span>` +
+      `</div>`;
+    }).join("");
+  } else {
+    const lines =
+      typeof def.effectSummaryLines === "function" ? def.effectSummaryLines(mockS) :
+      typeof def.previewLines === "function" ? def.previewLines(mockS) : [];
+    effectRowsHtml = lines.map(t => "<p>" + escapeHtml(simplifyEffectText(t)) + "</p>").join("");
+  }
+
   b.innerHTML =
     '<div class="reward-card-inner ' + def.type + '">' +
     '<div class="card-art-full">' +
@@ -5304,12 +5330,15 @@ function buildRewardPickButton(def, mockS) {
     '<span class="card-cost-badge"><span class="cost-zeus" aria-hidden="true">⚡</span>' + def.cost + "</span>" +
     '<img class="card-skill-corner" src="' + battleIconUrl(def.skillIcon) + '" alt="" />' +
     "</div></div>" +
-    buildTargetBadgeHtml(def) +
+    // caster ロール pill (バトル中のヒーローアイコンの代わり)
+    '<div class="card-caster-display card-caster-display--rolelabel" title="' + escapeHtml("キャスターロール: " + roleLabel) + '">' +
+    '<span class="card-caster-role">' + escapeHtml(roleLabel) + '</span>' +
+    '</div>' +
     '<div class="card-ext-name">' + escapeHtml(def.extNameJa) +
     (def.skillNameJa ? '<span class="card-ext-skill-sub">' + escapeHtml(def.skillNameJa) + '</span>' : '') +
     "</div>" +
     '<div class="card-effect-summary">' +
-    summaryLines.map((t) => "<p>" + escapeHtml(t) + "</p>").join("") +
+    effectRowsHtml +
     "</div></div></div>";
   return b;
 }
@@ -5420,6 +5449,9 @@ function showOwnedDeckPeek(def) {
     typeof def.previewLines === "function" ? def.previewLines(mockS) :
     typeof def.effectSummaryLines === "function" ? def.effectSummaryLines(mockS) : [];
   const rarity = CARD_RARITIES[def.libraryKey] || "common";
+  // SPEC-006 Phase 4h: caster ロールを peek にも表示
+  const roleKey = def.caster || "foremost";
+  const roleLabel = CASTER_ROLE_LABELS[roleKey] || roleKey;
   peek.innerHTML = `
     <div class="owned-deck-peek-card" data-rarity="${rarity}">
       <h3>${escapeHtml(def.extNameJa || "")}</h3>
@@ -5428,8 +5460,9 @@ function showOwnedDeckPeek(def) {
         <span>⚡ ${def.cost}</span>
         <span>${def.type === "atk" ? "攻撃" : def.type === "skl" ? "スキル" : def.type}</span>
         <span>${RARITY_LABEL[rarity] || rarity}</span>
+        <span class="opc-caster">使い手: ${escapeHtml(roleLabel)}</span>
       </div>
-      <div class="opc-lines">${lines.map(l => `<p>${escapeHtml(l)}</p>`).join("")}</div>
+      <div class="opc-lines">${lines.map(l => `<p>${escapeHtml(simplifyEffectText(l))}</p>`).join("")}</div>
       <button type="button" class="opc-close">閉じる</button>
     </div>
   `;
