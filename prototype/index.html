@@ -2070,6 +2070,30 @@
       50%      { box-shadow: 0 0 12px 2px rgba(253,203,110,0.35); }
     }
     .report-section { margin: 0.65rem 0; }
+    .report-section.hidden { display: none; }
+    /* SPEC-007: クリアスコア / ランキング表示 */
+    .report-score {
+      background: linear-gradient(180deg, #2a1f3e, #1a1530);
+      border: 1px solid var(--accent); border-radius: 8px; padding: 0.5rem 0.75rem;
+    }
+    .report-score-final {
+      font-size: 1.6rem; font-weight: 700; color: var(--accent);
+      text-align: center; margin: 0.25rem 0; font-variant-numeric: tabular-nums;
+    }
+    .report-score-table { width: 100%; font-size: 0.8rem; border-collapse: collapse; }
+    .report-score-table td { padding: 0.1rem 0.3rem; }
+    .report-score-table td:first-child { color: var(--muted); }
+    .report-score-table td:last-child { text-align: right; color: var(--text); font-variant-numeric: tabular-nums; }
+    .report-score-table tr.hidden { display: none; }
+    .report-rank {
+      background: #0e0a18; border: 1px solid var(--border); border-radius: 8px; padding: 0.5rem 0.75rem;
+    }
+    .report-rank-table { width: 100%; font-size: 0.78rem; border-collapse: collapse; }
+    .report-rank-table th, .report-rank-table td { padding: 0.2rem 0.3rem; border-bottom: 1px solid #2a2438; }
+    .report-rank-table th { text-align: left; color: var(--muted); font-weight: 500; }
+    .report-rank-table tr.report-rank-mine td { color: var(--accent); font-weight: 600; }
+    .report-rank-msg { color: var(--muted); padding: 0.25rem; text-align: center; font-size: 0.85rem; margin: 0; }
+    .report-rank-msg--error { color: #ff7878; }
     .report-ext-grid {
       display: flex; flex-wrap: wrap; gap: 0.3rem;
       justify-content: center;
@@ -2736,6 +2760,28 @@
       <div class="report-section">
         <p class="report-block-label">獲得 LL エクステ <span id="reportLlCount" class="report-block-count"></span></p>
         <div class="report-ext-grid" id="reportLlList"></div>
+      </div>
+
+      <!-- SPEC-007: クリア時のスコア表示 -->
+      <div class="report-section report-score hidden" id="reportScoreSection">
+        <p class="report-block-label">クリアスコア</p>
+        <p class="report-score-final" id="reportScoreFinal">0</p>
+        <table class="report-score-table">
+          <tr><td>ターン bonus</td><td id="reportScoreTurn">0</td></tr>
+          <tr><td>デッキ bonus</td><td id="reportScoreDeck">0</td></tr>
+          <tr><td>LL bonus</td><td id="reportScoreLl">0</td></tr>
+          <tr><td>レアリティ bonus</td><td id="reportScoreRarity">0</td></tr>
+          <tr><td>レギュレーション乗数</td><td id="reportScoreRegMult">×1.0</td></tr>
+          <tr id="reportScoreAbsRow" class="hidden"><td>Absolute 倍率</td><td id="reportScoreAbsMult">×1.0</td></tr>
+        </table>
+      </div>
+
+      <!-- SPEC-007: クリア時点のランキング順位表示 -->
+      <div class="report-section report-rank hidden" id="reportRankSection">
+        <p class="report-block-label">この時点のランキング</p>
+        <div id="reportRankBody">
+          <p class="report-rank-msg">取得中...</p>
+        </div>
       </div>
 
       <div class="report-actions">
