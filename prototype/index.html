@@ -1338,6 +1338,102 @@
     }
     .craft-arrow { font-size: 1.5rem; color: var(--accent); font-weight: 700; transform: rotate(90deg); }
 
+    /* ── Activity Report ──────────────────────────────────────── */
+    #activityReportOverlay {
+      position: fixed; inset: 0; z-index: 600;
+      background: radial-gradient(ellipse at center, #1a1530 0%, #07050d 75%);
+      display: flex; align-items: flex-start; justify-content: center;
+      padding: 0.75rem; overflow-y: auto;
+    }
+    .report-card {
+      width: 100%; max-width: 460px;
+      background: linear-gradient(180deg, #1c1730 0%, #110d20 100%);
+      border: 2px solid #FDCB6E;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(253,203,110,0.18), 0 0 0 1px #00000033 inset;
+      padding: 1.1rem 1rem 1.25rem;
+      color: var(--text);
+    }
+    .report-header { text-align: center; margin-bottom: 0.9rem; }
+    .report-logo {
+      max-width: 160px; height: auto; margin: 0 auto 0.3rem; display: block;
+      image-rendering: pixelated;
+    }
+    .report-title {
+      margin: 0.2rem 0 0.1rem;
+      font-size: 1.15rem; font-weight: 800;
+      background: linear-gradient(90deg, #FDCB6E, #ff8090);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+      letter-spacing: 0.06em;
+    }
+    .report-datetime { margin: 0; font-size: 0.7rem; color: var(--muted); }
+    .report-result-row {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem;
+      margin: 0.6rem 0 0.5rem;
+    }
+    .report-result-block {
+      background: #0e0a18; border: 1px solid var(--border);
+      border-radius: 10px; padding: 0.55rem 0.4rem 0.6rem;
+      text-align: center;
+    }
+    .report-block-label {
+      margin: 0 0 0.4rem; font-size: 0.7rem; color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+    .report-block-count { color: var(--accent); font-weight: 700; }
+    .report-portrait {
+      display: block; width: 84px; height: 84px;
+      object-fit: contain; margin: 0 auto;
+      background: #15121c; border-radius: 8px;
+      image-rendering: pixelated;
+    }
+    .report-portrait-name {
+      margin: 0.35rem 0 0; font-size: 0.78rem; font-weight: 700;
+      color: var(--text); line-height: 1.2;
+    }
+    .report-stage {
+      text-align: center; margin: 0.2rem 0 0.7rem;
+      font-size: 0.85rem; font-weight: 700; color: #FDCB6E;
+      letter-spacing: 0.04em;
+    }
+    .report-section { margin: 0.65rem 0; }
+    .report-ext-grid {
+      display: flex; flex-wrap: wrap; gap: 0.3rem;
+      justify-content: center;
+      background: #0e0a18; border: 1px solid var(--border);
+      border-radius: 8px; padding: 0.45rem;
+      min-height: 40px;
+    }
+    .report-ext-grid:empty::before {
+      content: "（なし）"; color: var(--muted); font-size: 0.72rem;
+    }
+    .report-ext-chip {
+      width: 36px; height: 36px;
+      background: #15121c; border: 1px solid var(--border);
+      border-radius: 6px; padding: 2px;
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+    }
+    .report-ext-chip[data-rarity="uncommon"] { border-color: #00B894; }
+    .report-ext-chip[data-rarity="rare"]     { border-color: #FDCB6E; }
+    .report-ext-chip[data-rarity="epic"]     { border-color: #E17055; }
+    .report-ext-chip[data-rarity="legendary"]{ border-color: #D63031; }
+    .report-ext-chip img {
+      max-width: 100%; max-height: 100%; object-fit: contain;
+      image-rendering: pixelated;
+    }
+    .report-ext-chip .chip-fallback {
+      font-size: 0.6rem; color: var(--muted);
+      text-align: center; line-height: 1.05;
+      word-break: break-all; padding: 1px;
+    }
+    .report-actions {
+      display: flex; gap: 0.5rem; margin-top: 0.85rem;
+      flex-wrap: wrap;
+    }
+    .report-share-btn { flex: 1 1 auto; min-width: 140px; }
+    .report-close-btn { flex: 0 1 auto; min-width: 90px; }
+
     /* ── Shop Remove ─────────────────────────────────────────────── */
     .shop-remove-section {
       border-top: 1px solid var(--border);
@@ -1856,7 +1952,8 @@
     <div id="gameOver" class="panel hidden">
       <h2 style="margin:0 0 0.5rem">ラン終了</h2>
       <p id="gameOverMsg" style="color:var(--muted)"></p>
-      <button type="button" class="action primary" id="btnRestart" style="margin-top:1rem">もう一度</button>
+      <button type="button" class="action" id="btnViewReportClear" style="margin-top:0.75rem;width:100%">活動レポートを見る</button>
+      <button type="button" class="action primary" id="btnRestart" style="margin-top:0.5rem;width:100%">もう一度</button>
     </div>
 
     <div id="rewardView" class="panel hidden">
@@ -1864,6 +1961,46 @@
       <p class="reward-intro">バトル勝利おめでとうございます。追加するカードを 1 枚選ぶか、スキップしてマップへ戻ります。</p>
       <div class="reward-picks" id="rewardPicks"></div>
       <button type="button" class="action" id="btnSkipReward" style="margin-top:0.75rem;width:100%">スキップ（報酬なし）</button>
+    </div>
+  </div>
+
+  <div id="activityReportOverlay" class="hidden" aria-hidden="true" role="dialog" aria-labelledby="reportTitle">
+    <div class="report-card">
+      <div class="report-header">
+        <img class="report-logo" alt="MyCryptoTactics" />
+        <h2 id="reportTitle" class="report-title">活動レポート</h2>
+        <p class="report-datetime" id="reportDatetime"></p>
+      </div>
+
+      <div class="report-result-row">
+        <div class="report-result-block">
+          <p class="report-block-label">ヒーロー</p>
+          <img class="report-portrait" id="reportHeroImg" alt="" onerror="this.style.opacity='0'" />
+          <p class="report-portrait-name" id="reportHeroName"></p>
+        </div>
+        <div class="report-result-block">
+          <p class="report-block-label" id="reportOpponentLabel">対戦相手</p>
+          <img class="report-portrait" id="reportOpponentImg" alt="" onerror="this.style.opacity='0'" />
+          <p class="report-portrait-name" id="reportOpponentName"></p>
+        </div>
+      </div>
+
+      <p class="report-stage" id="reportStage"></p>
+
+      <div class="report-section">
+        <p class="report-block-label">保有エクステンション <span id="reportDeckCount" class="report-block-count"></span></p>
+        <div class="report-ext-grid" id="reportDeckList"></div>
+      </div>
+
+      <div class="report-section">
+        <p class="report-block-label">獲得 LL エクステ <span id="reportLlCount" class="report-block-count"></span></p>
+        <div class="report-ext-grid" id="reportLlList"></div>
+      </div>
+
+      <div class="report-actions">
+        <button type="button" class="action primary report-share-btn" id="reportShareBtn">𝕏 で共有</button>
+        <button type="button" class="action report-close-btn" id="reportCloseBtn">閉じる</button>
+      </div>
     </div>
   </div>
 

@@ -2023,6 +2023,7 @@ function advanceAfterRewardPick(libraryKey) {
       postCombatSnapshot = null;
       if (runState.runComplete) {
         // 全章クリア → ゲームオーバー画面（クリア）
+        lastReportSnapshot = captureRunSnapshot({ isCleared: true, defeatedBy: null });
         showView("over");
         document.getElementById("gameOverMsg").textContent =
           "全 node クリアおめでとうございます！あなたは最高ですよ〜！";
@@ -2040,11 +2041,138 @@ function advanceAfterRewardPick(libraryKey) {
   renderMap();
 }
 
+// ─── 活動レポート（#23） ────────────────────────────────────────
+let lastReportSnapshot = null;
+const SHARE_URL = "https://mycryptotactics.vercel.app/";
+const SHARE_TITLE = "MyCryptoTactics";
+
+function captureRunSnapshot({ isCleared, defeatedBy }) {
+  if (!runState || !LEADER) return null;
+  const chapter = CHAPTERS[runState.chapterIdx] || null;
+  const stageName = chapter ? chapter.name : "";
+  return {
+    isCleared,
+    when: new Date(),
+    hero: { name: LEADER.nameJa, imgUrl: LEADER.img() },
+    stageName,
+    deck: (runState.deck || []).map((c) => ({
+      libraryKey: c.libraryKey,
+      extId: c.extId,
+      extNameJa: c.extNameJa,
+    })),
+    llExtSlots: (runState.llExtSlots || []).filter(Boolean).map((e) => ({
+      extId: e.extId,
+      name: e.name,
+    })),
+    opponent: defeatedBy
+      ? { name: defeatedBy.name, imgUrl: ENEMY_IMG(defeatedBy.imgId) }
+      // クリア時はディープ・ヨシュカ (boss-troy, imgId 171)
+      : { name: "ディープ・ヨシュカ", imgUrl: ENEMY_IMG(171) },
+  };
+}
+
+function fmtReportDateTime(d) {
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function buildExtChip(item) {
+  const chip = document.createElement("div");
+  chip.className = "report-ext-chip";
+  if (item.libraryKey) {
+    const rarity = CARD_RARITIES[item.libraryKey] || "common";
+    chip.setAttribute("data-rarity", rarity);
+  }
+  if (item.extId) {
+    const im = document.createElement("img");
+    im.src = EXT_IMG(item.extId);
+    im.alt = item.extNameJa || item.name || "";
+    im.onerror = () => {
+      im.remove();
+      const fb = document.createElement("span");
+      fb.className = "chip-fallback";
+      fb.textContent = item.extNameJa || item.name || "";
+      chip.appendChild(fb);
+    };
+    chip.appendChild(im);
+  } else {
+    const fb = document.createElement("span");
+    fb.className = "chip-fallback";
+    fb.textContent = item.extNameJa || item.name || "";
+    chip.appendChild(fb);
+  }
+  chip.title = item.extNameJa || item.name || "";
+  return chip;
+}
+
+function showActivityReport(snap) {
+  if (!snap) return;
+  const overlay = document.getElementById("activityReportOverlay");
+  if (!overlay) return;
+
+  document.getElementById("reportLogo")?.remove();
+  const logoEl = overlay.querySelector(".report-logo");
+  if (logoEl) logoEl.src = "MCT_logo.png";
+
+  document.getElementById("reportDatetime").textContent = fmtReportDateTime(snap.when);
+  document.getElementById("reportHeroImg").src = snap.hero.imgUrl;
+  document.getElementById("reportHeroName").textContent = snap.hero.name;
+  document.getElementById("reportOpponentLabel").textContent = snap.isCleared ? "撃破した相手" : "倒された相手";
+  document.getElementById("reportOpponentImg").src = snap.opponent.imgUrl;
+  document.getElementById("reportOpponentName").textContent = snap.opponent.name;
+  document.getElementById("reportStage").textContent =
+    (snap.isCleared ? "全ステージ制覇 / 最終: " : "到達ステージ: ") + (snap.stageName || "—");
+
+  const deckList = document.getElementById("reportDeckList");
+  deckList.innerHTML = "";
+  snap.deck.forEach((c) => deckList.appendChild(buildExtChip(c)));
+  document.getElementById("reportDeckCount").textContent = `(${snap.deck.length})`;
+
+  const llList = document.getElementById("reportLlList");
+  llList.innerHTML = "";
+  snap.llExtSlots.forEach((e) => llList.appendChild(buildExtChip(e)));
+  document.getElementById("reportLlCount").textContent = `(${snap.llExtSlots.length}/2)`;
+
+  overlay.classList.remove("hidden");
+  overlay.removeAttribute("aria-hidden");
+
+  const closeBtn = document.getElementById("reportCloseBtn");
+  const shareBtn = document.getElementById("reportShareBtn");
+  // クローン置換でリスナー重複を避ける
+  const newClose = closeBtn.cloneNode(true);
+  closeBtn.parentNode.replaceChild(newClose, closeBtn);
+  const newShare = shareBtn.cloneNode(true);
+  shareBtn.parentNode.replaceChild(newShare, shareBtn);
+
+  return new Promise((resolve) => {
+    newClose.addEventListener("click", () => {
+      overlay.classList.add("hidden");
+      overlay.setAttribute("aria-hidden", "true");
+      resolve();
+    });
+    newShare.addEventListener("click", () => {
+      const intro = snap.isCleared
+        ? `${snap.hero.name} で全ステージ制覇しました！`
+        : `${snap.hero.name} で「${snap.stageName}」まで到達。${snap.opponent.name} に倒された…`;
+      const text = `${intro} #${SHARE_TITLE}`;
+      const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(SHARE_URL)}`;
+      window.open(url, "_blank", "noopener,noreferrer");
+    });
+  });
+}
+
 // ─── 戦闘敗北 ────────────────────────────────────────────────────
 function endCombatLoss() {
   stopBgm();
   postCombatSnapshot = null;
-  showCutin("lose").then(() => {
+  // 敗北情報をリセット前にスナップショット
+  const defeatedBy = combat ? { name: combat.enemyName, imgId: combat.enemyImgId } : null;
+  lastReportSnapshot = captureRunSnapshot({ isCleared: false, defeatedBy });
+
+  showCutin("lose").then(async () => {
+    if (lastReportSnapshot) {
+      await showActivityReport(lastReportSnapshot);
+    }
     // 全ランステートをリセットしてヒーロー選択画面へ戻る
     combat = null;
     runState = null;
@@ -2653,6 +2781,13 @@ function init() {
     renderMap();
   });
   document.getElementById("btnRestart").addEventListener("click", resetRun);
+  // 活動レポート（クリア時）
+  document.getElementById("btnViewReportClear")?.addEventListener("click", () => {
+    if (!lastReportSnapshot && runState && runState.runComplete) {
+      lastReportSnapshot = captureRunSnapshot({ isCleared: true, defeatedBy: null });
+    }
+    if (lastReportSnapshot) showActivityReport(lastReportSnapshot);
+  });
   wireAssets();
   initHelp();
   bindHandTouchDelegation();
