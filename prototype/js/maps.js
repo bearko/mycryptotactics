@@ -27,7 +27,8 @@ function evenlySpaced(n, min, max) {
 function makeTypePicker(nodeRatios) {
   const pool = [];
   for (const [type, weight] of Object.entries(nodeRatios)) {
-    const resolved = type === 'event' ? 'rest' : type === 'craft' ? 'craft' : type;
+    // event は独立ノード化（B-3 武田信玄調整事件など、? アイコン）。craft / その他はそのまま
+    const resolved = type === 'craft' ? 'craft' : type;
     const count = Math.max(1, Math.round(weight * 20));
     for (let i = 0; i < count; i++) pool.push(resolved);
   }
@@ -36,7 +37,15 @@ function makeTypePicker(nodeRatios) {
 
 /** ノード種別の表示ラベル */
 function labelForType(type) {
-  return { fight: 'エネミー', rest: '休憩', shop: 'ショップ', elite: 'レアエネミー', boss: 'ボス', craft: 'クラフト' }[type] ?? '?';
+  return {
+    fight: 'エネミー',
+    rest: '休憩',
+    shop: 'ショップ',
+    elite: 'レアエネミー',
+    boss: 'ボス',
+    craft: 'クラフト',
+    event: '？イベント',
+  }[type] ?? '?';
 }
 
 /**

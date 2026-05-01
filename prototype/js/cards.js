@@ -1132,6 +1132,69 @@ function makeCardLibrary(clog, api) {
       previewLines() { return ["このターン（ターン終了まで）受けるダメージをすべて半減する"]; },
       play(s) { api.setDamageReducedThisTurn(s); },
     },
+
+    // ════════════════════════════════════════
+    // 特殊：「武田信玄調整事件」イベント専用カード
+    // 元タイトル初のナーフ事案の再現。pre は HP25%固定の超強力 PHY バフ、
+    // 1戦闘後にゲーム側ロジックで post（10〜25%ランダム）に強制置換される。
+    // ════════════════════════════════════════
+    cardShingenPre: {
+      libraryKey: "cardShingenPre",
+      extId: 1019, // 武田信玄のヒーローID（imgId 流用）
+      extNameJa: "武田信玄（暫定版）",
+      skillNameJa: "風林火山",
+      skillIcon: "BUF_phy.png",
+      cost: 2,
+      type: "skl",
+      target: "self",
+      pendingNerf: true, // 戦闘終了時にナーフされる目印
+      effectSummaryLines(s) {
+        const bonus = Math.floor((s.playerHpMax || 70) * 0.25);
+        return [`PHY +${bonus}（最大HPの25%固定）`];
+      },
+      peekHelpKeys() { return ["phy"]; },
+      previewLines(s) {
+        const bonus = Math.floor((s.playerHpMax || 70) * 0.25);
+        return [
+          `PHY を +${bonus}（最大HPの25%固定・戦闘中ずっと）`,
+          "⚠ 戦闘終了後、ナーフ後バージョンに置換されます",
+        ];
+      },
+      play(s) {
+        se("buff"); fx("player", "buff");
+        const bonus = Math.floor((s.playerHpMax || 70) * 0.25);
+        s.playerPhy += bonus;
+        clog(`風林火山: PHY +${bonus}（暫定版・固定値）`);
+      },
+    },
+    cardShingenPost: {
+      libraryKey: "cardShingenPost",
+      extId: 1019,
+      extNameJa: "武田信玄（ナーフ後）",
+      skillNameJa: "風林火山",
+      skillIcon: "BUF_phy.png",
+      cost: 2,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) {
+        const lo = Math.floor((s.playerHpMax || 70) * 0.10);
+        const hi = Math.floor((s.playerHpMax || 70) * 0.25);
+        return [`PHY +${lo}〜${hi}（ランダム）`];
+      },
+      peekHelpKeys() { return ["phy"]; },
+      previewLines(s) {
+        const lo = Math.floor((s.playerHpMax || 70) * 0.10);
+        const hi = Math.floor((s.playerHpMax || 70) * 0.25);
+        return [`PHY を +${lo}〜${hi}（最大HPの10〜25%・ランダム・戦闘中ずっと）`];
+      },
+      play(s) {
+        se("buff"); fx("player", "buff");
+        const pct = 0.10 + Math.random() * 0.15;
+        const bonus = Math.floor((s.playerHpMax || 70) * pct);
+        s.playerPhy += bonus;
+        clog(`風林火山: PHY +${bonus}（ナーフ後・ランダム）`);
+      },
+    },
   };
 }
 
@@ -1231,6 +1294,10 @@ export const CARD_RARITIES = {
   cd204:   'rare',      // エリートプロテクション（ガード+12）
   cd205:   'rare',      // エリートショット（INT×3）
   cd206:   'uncommon',  // 投資（GUM+20）
+
+  // ─── 特殊：イベント専用カード ────────────────────────────────────
+  cardShingenPre:  'legendary', // 武田信玄（暫定版・1戦闘後にナーフ）
+  cardShingenPost: 'rare',      // 武田信玄（ナーフ後）
 };
 
 /**

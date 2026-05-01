@@ -69,6 +69,7 @@ function setCurrentRegulation(id) {
     gold = 75;
     pendingShopNodeId = null;
     pendingCraftNodeId = null;
+    pendingEventNodeId = null;
     postCombatSnapshot = null;
   }
 }
@@ -164,6 +165,7 @@ let runState = null;
 let combat = null;
 let pendingShopNodeId = null;
 let pendingCraftNodeId = null;
+let pendingEventNodeId = null;
 /** @type {'win'|'lose'|null} */
 let cutinKind = null;
 let cutinResolve = null;
@@ -1069,7 +1071,8 @@ function renderMap() {
       node.type === "fight"  ? (node.elite ? "レアエネミー" : "エネミー") :
       node.type === "rest"   ? "HP回復" :
       node.type === "shop"   ? "ショップ" :
-      node.type === "craft"  ? "クラフト" : "ボス";
+      node.type === "craft"  ? "クラフト" :
+      node.type === "event"  ? "？イベント" : "ボス";
     g.appendChild(ty);
     const allowed = new Set(reachableNextNodeIds(runState.lastMapNodeId));
     if (!allowed.has(node.id)) g.style.pointerEvents = "none";
@@ -1101,6 +1104,7 @@ function renderMap() {
     if (node.type === "shop")  iconUrl = img("Image/Icons/gum.png");
     else if (node.type === "rest")  iconUrl = img("Image/BattleIcons/Parameters/hp.png");
     else if (node.type === "craft") iconUrl = img("Image/Icons/ce.png");
+    // event は文字「？」ラベルで表現するためアイコン省略
     if (!iconUrl) continue;
     const sz = 5.2;
     const iconEl = document.createElementNS("http://www.w3.org/2000/svg", "image");
@@ -1202,6 +1206,11 @@ function tryEnterMapNode(nodeId) {
     openCraftScreen();
     return;
   }
+  if (node.type === "event") {
+    pendingEventNodeId = nodeId;
+    openEventScreen();
+    return;
+  }
   // ボス突入前の MCHC ショップ：MCHC を持っていれば LL ext と交換できる
   if (node.type === "boss" && (runState.mchc ?? 0) >= 1 && runState.llExtSlots.some(s => s === null)) {
     openMchcShopModal(() => startCombatFromMapNode(node));
@@ -1292,6 +1301,8 @@ function showView(name) {
   if (nsv) nsv.classList.toggle("hidden", name !== "nodeSelect");
   const cv = document.getElementById("craftView");
   if (cv) cv.classList.toggle("hidden", name !== "craft");
+  const ev = document.getElementById("eventView");
+  if (ev) ev.classList.toggle("hidden", name !== "event");
   const hsv = document.getElementById("heroSelectView");
   if (hsv) hsv.classList.toggle("hidden", name !== "heroSelect");
   const rsv = document.getElementById("regulationSelectView");
@@ -2166,6 +2177,9 @@ function endCombatWin() {
     isBoss,
   };
   combat = null;
+
+  // ナーフ系イベントの適用（戦闘終了後）— 武田信玄調整事件など
+  applyPendingNerfs();
 
   // ─── LLエクステ ドロップ判定（ホレリス以降、章インデックス >= 1） ───
   let droppedLlExt = null;
@@ -3219,6 +3233,126 @@ function leaveCraft() {
   }
   showView("map");
   renderMap();
+}
+
+// ─── ？イベント画面 ──────────────────────────────────────────────
+/**
+ * ？ノードのイベントプール。元タイトルの史実イベントから取材したフレーバー。
+ * 各エントリ: { id, weight, title, body, options: [{ label, accept(runState) }] }
+ */
+const EVENT_POOL = [
+  {
+    id: "shingen-nerf",
+    weight: 5,
+    title: "武田信玄調整事件",
+    body:
+      "強力な能力を持つ「武田信玄（暫定版）」が手元に流れ着いた。\n" +
+      "しかし運営曰く「あまりに強すぎる」――次の戦闘終了後にナーフが入ることが告知されている…\n\n" +
+      "（最大HPの25%固定でPHYバフ → 戦闘1回後、10〜25%ランダムへ修正）",
+    options: [
+      {
+        label: "受け取る（1戦のみ強い）",
+        accept(rs) {
+          rs.deck.push(copyCard("cardShingenPre"));
+          rs.shingenPending = true;
+          clog("✨「武田信玄（暫定版）」をデッキに追加（次戦闘後にナーフ予定）");
+        },
+      },
+      {
+        label: "見送る",
+        accept() {
+          clog("武田信玄を見送った（賢明な判断）");
+        },
+      },
+    ],
+  },
+];
+
+function pickEvent() {
+  const total = EVENT_POOL.reduce((s, e) => s + (e.weight ?? 1), 0);
+  let r = Math.random() * total;
+  for (const e of EVENT_POOL) {
+    r -= e.weight ?? 1;
+    if (r <= 0) return e;
+  }
+  return EVENT_POOL[0];
+}
+
+function openEventScreen() {
+  showView("event");
+  const el = document.getElementById("eventView");
+  if (!el) return;
+  ensureRunState();
+
+  // 同一ノードでの再選択を防ぐためイベント抽選を runState に保持
+  if (!runState.eventSeeds) runState.eventSeeds = {};
+  if (pendingEventNodeId && !runState.eventSeeds[pendingEventNodeId]) {
+    runState.eventSeeds[pendingEventNodeId] = pickEvent().id;
+  }
+  const eventId = pendingEventNodeId
+    ? runState.eventSeeds[pendingEventNodeId]
+    : pickEvent().id;
+  const ev = EVENT_POOL.find(e => e.id === eventId) || EVENT_POOL[0];
+
+  el.innerHTML = `
+    <div class="craft-header">
+      <h2>？ ${ev.title}</h2>
+      <p class="craft-sub" style="white-space:pre-line">${ev.body}</p>
+    </div>
+  `;
+  const choices = document.createElement("div");
+  choices.className = "craft-choices";
+  choices.style.cssText = "display:flex;flex-direction:column;gap:0.5rem;margin:1rem 0";
+  ev.options.forEach(opt => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "action craft-opt-btn";
+    btn.textContent = opt.label;
+    btn.addEventListener("click", () => {
+      opt.accept(runState);
+      leaveEvent();
+    });
+    choices.appendChild(btn);
+  });
+  el.appendChild(choices);
+}
+
+function leaveEvent() {
+  ensureRunState();
+  if (pendingEventNodeId) {
+    runState.pathNodeIds.push(pendingEventNodeId);
+    runState.lastMapNodeId = pendingEventNodeId;
+    pendingEventNodeId = null;
+  }
+  syncResources();
+  showView("map");
+  renderMap();
+}
+
+/**
+ * 戦闘終了時に呼ばれる：保留中のナーフ系効果を適用する
+ * 武田信玄調整事件：deck 内の cardShingenPre を cardShingenPost に置換
+ */
+function applyPendingNerfs() {
+  ensureRunState();
+  if (!runState.shingenPending) return;
+  const before = runState.deck.length;
+  let replaced = 0;
+  runState.deck = runState.deck.map(c => {
+    if (c.libraryKey === "cardShingenPre") {
+      replaced++;
+      return copyCard("cardShingenPost");
+    }
+    return c;
+  });
+  runState.shingenPending = false;
+  if (replaced > 0) {
+    clog(`📢 ナーフ通知：「武田信玄（暫定版）」×${replaced} → ナーフ後バージョンへ修正されました`);
+    if (before === runState.deck.length) {
+      // navigator hint
+      renderNavigator(`武田信玄が運営から修正を受けました…（${replaced}枚を再調整）`);
+    }
+  }
 }
 
 function openCraftGetCard() {
