@@ -2315,8 +2315,13 @@ function showActivityReport(snap) {
       const intro = snap.isCleared
         ? `${snap.hero.name} で全ステージ制覇しました！`
         : `${snap.hero.name} で「${snap.stageName}」まで到達。${snap.opponent.name} に倒された…`;
-      const text = `${intro} #${SHARE_TITLE}`;
-      const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(SHARE_URL)}`;
+      // Twitter Web Intent: text / url / hashtags を分けて渡すと自然に組み立てられる。
+      // hashtags はカンマ区切りで # なし。`#MyCryptoTactics` が末尾に付く。
+      const url =
+        `https://twitter.com/intent/tweet` +
+        `?text=${encodeURIComponent(intro)}` +
+        `&url=${encodeURIComponent(SHARE_URL)}` +
+        `&hashtags=${encodeURIComponent(SHARE_TITLE)}`;
       window.open(url, "_blank", "noopener,noreferrer");
     });
   });
