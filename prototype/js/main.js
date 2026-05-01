@@ -841,11 +841,18 @@ function ensureRunState() {
     const chapter = CHAPTERS[0];
     const { nodes, edges, viewH, startY } = generateChapterMap(chapter, ENEMY_DEFS);
     setActiveMap(nodes, edges, viewH, startY);
+    // SPEC-005 Phase 3: party 初期化（最大 3 ヒーロー）
+    const partyIds = pendingPartyConfirmed && pendingPartyConfirmed.length > 0
+      ? pendingPartyConfirmed
+      : [LEADER.heroId];
+    const party = buildPartyLoadout(partyIds);
     runState = {
       chapterIdx: 0,
       deck: makeStarterDeck(),
-      playerHp: LEADER.hpMax,
-      playerHpMax: LEADER.hpMax,
+      party,
+      // 旧フィールドは前衛 (party[0]) と同期。既存コードの互換用。
+      playerHp: party[0].hpCurrent,
+      playerHpMax: party[0].hpMax,
       lastMapNodeId: null,
       pathNodeIds: [],
       runComplete: false,
@@ -1306,17 +1313,21 @@ function startCombatFromMapNode(node) {
     _lastUi: null,
   };
 
-  // SPEC-005 Phase 2: heroes[] / enemies[] を並行で初期化（Phase 3 で正式に使用、現状は表示・解決用の参照のみ）
-  combat.heroes = [makeHeroUnit({
-    position: 0,
-    defId: LEADER.heroId,
-    name: LEADER.nameJa,
-    imgUrl: typeof LEADER.img === "function" ? LEADER.img() : null,
-    hp: combat.playerHp, hpMax: combat.playerHpMax,
-    phy: pPhy, int: pInt, agi: pAgi,
-    phyBase: pPhy, intBase: pInt, agiBase: pAgi,
-    passiveKey: LEADER.passiveKey || null,
-  })];
+  // SPEC-005 Phase 3: party から combat.heroes (1〜3 体) を構築
+  const partyArr = (runState.party && runState.party.length > 0) ? runState.party : [{ heroId: LEADER.heroId, hpCurrent: LEADER.hpMax, hpMax: LEADER.hpMax }];
+  combat.heroes = partyArr.map((loadout, idx) => {
+    const heroDef = HERO_ROSTER.find(h => h.heroId === loadout.heroId) || LEADER;
+    return makeHeroUnit({
+      position: idx,
+      defId: heroDef.heroId,
+      name: heroDef.nameJa,
+      imgUrl: typeof heroDef.img === "function" ? heroDef.img() : null,
+      hp: loadout.hpCurrent, hpMax: loadout.hpMax,
+      phy: heroDef.basePhy, int: heroDef.baseInt, agi: heroDef.baseAgi,
+      phyBase: heroDef.basePhy, intBase: heroDef.baseInt, agiBase: heroDef.baseAgi,
+      passiveKey: heroDef.passiveKey || null,
+    });
+  });
   combat.enemies = [makeEnemyUnit({
     position: 0,
     defId: enemyDef.id,
@@ -1778,6 +1789,8 @@ function renderCombat() {
 
   renderStatusBadges();
   diffUiFloats();
+  // SPEC-005 Phase 3a: party.length > 1 ならサブヒーローを ghost slot に表示（表示のみ、Phase 3b で戦闘ロジック統合予定）
+  renderPartySubHeroes();
 
   const handEl = document.getElementById("hand");
   handEl.innerHTML = "";
@@ -2821,11 +2834,17 @@ function startRunFromChapter(chapterIdx) {
   const chapter = CHAPTERS[chapterIdx];
   const { nodes, edges, viewH, startY } = generateChapterMap(chapter, ENEMY_DEFS);
   setActiveMap(nodes, edges, viewH, startY);
+  // SPEC-005 Phase 3: party
+  const partyIds = pendingPartyConfirmed && pendingPartyConfirmed.length > 0
+    ? pendingPartyConfirmed
+    : [LEADER.heroId];
+  const party = buildPartyLoadout(partyIds);
   runState = {
     chapterIdx,
     deck: makeStarterDeck(),
-    playerHp: LEADER.hpMax,
-    playerHpMax: LEADER.hpMax,
+    party,
+    playerHp: party[0].hpCurrent,
+    playerHpMax: party[0].hpMax,
     lastMapNodeId: null,
     pathNodeIds: [],
     runComplete: false,
@@ -3018,40 +3037,168 @@ function updateHeaderRegulationIcons() {
   });
 }
 
-// ─── ヒーロー選択画面 ────────────────────────────────────────────────
+// ─── 戦闘中: サブヒーロー（heroes[1]/heroes[2]）を ghost スロットに表示 ────
+// SPEC-005 Phase 3a: 表示のみ。戦闘ロジック統合（被ダメ・キャスター切替）は Phase 3b で。
+function renderPartySubHeroes() {
+  const playerSide = document.querySelector(".party-side--player");
+  if (!playerSide || !combat || !Array.isArray(combat.heroes)) return;
+  const ghosts = playerSide.querySelectorAll(".party-slot--ghost");
+  // 既存表示を一旦クリア
+  ghosts.forEach((slot) => {
+    slot.classList.remove("party-slot--filled");
+    slot.innerHTML = "";
+  });
+  // heroes[1] (中衛) → 上 ghost、heroes[2] (後衛) → 下 ghost
+  const subHeroes = combat.heroes.slice(1);
+  subHeroes.forEach((hero, i) => {
+    const slot = ghosts[i === 0 ? 0 : ghosts.length - 1];
+    if (!slot) return;
+    slot.classList.add("party-slot--filled");
+    const isDead = hero.alive === false || (hero.hp != null && hero.hp <= 0);
+    const portraitImg = hero.imgUrl || "";
+    slot.innerHTML =
+      `<div class="ps-mini${isDead ? " ps-mini--dead" : ""}" title="${escapeHtml(hero.name || "")}">` +
+      `<img class="ps-mini-img" src="${portraitImg}" alt="${escapeHtml(hero.name || "")}" onerror="this.style.opacity='0.2'" />` +
+      `<div class="ps-mini-name">${escapeHtml(hero.name || "")}</div>` +
+      `<div class="ps-mini-hp">♥${hero.hp ?? "?"}/${hero.hpMax ?? "?"}</div>` +
+      `</div>`;
+  });
+}
+
+// ─── パーティ編成画面（旧ヒーロー選択を拡張） SPEC-005 Phase 3 ──────
+let pendingPartyHeroIds = []; // ユーザーが選択中のヒーロー id 配列（最大 3）
+const PARTY_MAX = 3;
+
 function renderHeroSelect() {
+  // SPEC-005 Phase 3: ヒーロー選択 → パーティ選択 (1〜3 体)
+  // 関数名は既存呼び出しとの互換のため維持。中身はパーティ編成。
   const el = document.getElementById("heroSelectView");
   if (!el) return;
 
-  let html = '<div class="hs-header"><h2>ヒーローを選んでください</h2><p class="hs-sub">パッシブスキルを持つ英雄があなたの旅を導きます</p></div>';
-  html += '<div class="hs-roster">';
+  // 初期化: 前回の選択を保持しつつ、空なら先頭ヒーロー 1 体を入れておく
+  if (pendingPartyHeroIds.length === 0) {
+    pendingPartyHeroIds = [HERO_ROSTER[0].heroId];
+  }
 
-  HERO_ROSTER.forEach((hero, idx) => {
-    html += `<div class="hs-card" data-idx="${idx}" role="button" tabindex="0">`;
-    html += `<img class="hs-hero-img" src="${hero.img()}" alt="${hero.nameJa}" />`;
-    html += `<div class="hs-hero-body">`;
-    html += `<div class="hs-hero-name">${hero.nameJa}</div>`;
-    html += `<div class="hs-hero-stats">`;
-    html += `<span>HP ${hero.hpMax}</span>`;
-    html += `<span>PHY ${hero.basePhy}</span>`;
-    html += `<span>INT ${hero.baseInt}</span>`;
-    html += `<span>AGI ${hero.baseAgi}</span>`;
-    html += `</div>`;
-    html += `<div class="hs-passive"><span class="hs-passive-name">【${hero.passiveName || '—'}】</span>${hero.passiveDesc}</div>`;
-    html += `<button class="hs-select-btn action">このヒーローで始める</button>`;
-    html += `</div>`;
-    html += `</div>`;
-  });
+  const renderInner = () => {
+    let html = '<div class="hs-header">';
+    html += '<h2>パーティを編成</h2>';
+    html += '<p class="hs-sub">最大 3 体まで選べます。先に選んだヒーローほど前衛 (画面中央寄り) に配置されます</p>';
+    html += '</div>';
 
-  html += '</div>';
-  el.innerHTML = html;
+    // 現在のパーティ表示 (3 スロット)
+    html += '<div class="ps-current">';
+    for (let pos = 0; pos < PARTY_MAX; pos++) {
+      const hid = pendingPartyHeroIds[pos];
+      const h = hid ? HERO_ROSTER.find(x => x.heroId === hid) : null;
+      const posLabel = ["前衛", "中衛", "後衛"][pos];
+      html += `<div class="ps-slot ps-slot--${pos}" data-pos="${pos}">`;
+      html += `<div class="ps-slot-pos">${posLabel}</div>`;
+      if (h) {
+        html += `<img class="ps-slot-img" src="${h.img()}" alt="${h.nameJa}" />`;
+        html += `<div class="ps-slot-name">${h.nameJa}</div>`;
+        html += `<button class="ps-slot-remove" data-remove-pos="${pos}" type="button" aria-label="外す">✕</button>`;
+      } else {
+        html += '<div class="ps-slot-empty">（空き）</div>';
+      }
+      html += '</div>';
+    }
+    html += '</div>';
 
-  el.querySelectorAll('.hs-select-btn').forEach((btn, idx) => {
-    btn.addEventListener('click', () => {
-      setLeader(HERO_ROSTER[idx]);
+    // 選択可能なヒーロー一覧
+    html += '<div class="hs-header" style="margin-top:1.2rem;"><h3 style="font-size:1rem;color:var(--accent);margin:0;">編成可能なヒーロー</h3></div>';
+    html += '<div class="hs-roster">';
+    HERO_ROSTER.forEach((hero) => {
+      const inParty = pendingPartyHeroIds.includes(hero.heroId);
+      const partyFull = pendingPartyHeroIds.length >= PARTY_MAX;
+      const cls = ['hs-card'];
+      if (inParty) cls.push('hs-card--in-party');
+      html += `<div class="${cls.join(' ')}" data-hid="${hero.heroId}" role="button" tabindex="0">`;
+      html += `<img class="hs-hero-img" src="${hero.img()}" alt="${hero.nameJa}" />`;
+      html += `<div class="hs-hero-body">`;
+      html += `<div class="hs-hero-name">${hero.nameJa}${inParty ? ' <span class="hs-in-party-mark">(編成中)</span>' : ''}</div>`;
+      html += `<div class="hs-hero-stats">`;
+      html += `<span>HP ${hero.hpMax}</span>`;
+      html += `<span>PHY ${hero.basePhy}</span>`;
+      html += `<span>INT ${hero.baseInt}</span>`;
+      html += `<span>AGI ${hero.baseAgi}</span>`;
+      html += `</div>`;
+      html += `<div class="hs-passive"><span class="hs-passive-name">【${hero.passiveName || '—'}】</span>${hero.passiveDesc}</div>`;
+      if (inParty) {
+        html += `<button class="hs-select-btn action" data-action="remove" data-hid="${hero.heroId}">パーティから外す</button>`;
+      } else if (partyFull) {
+        html += `<button class="hs-select-btn action" disabled>パーティ満員</button>`;
+      } else {
+        html += `<button class="hs-select-btn action" data-action="add" data-hid="${hero.heroId}">パーティに加える</button>`;
+      }
+      html += `</div></div>`;
+    });
+    html += '</div>';
+
+    // 確定ボタン
+    html += '<div class="ps-confirm-row">';
+    const partyCount = pendingPartyHeroIds.length;
+    const canStart = partyCount >= 1;
+    html += `<button class="action primary ps-confirm-btn" ${canStart ? '' : 'disabled'}>`;
+    html += `編成を確定（${partyCount}/${PARTY_MAX} 体）→ 出撃</button>`;
+    html += '</div>';
+
+    el.innerHTML = html;
+
+    // イベント
+    el.querySelectorAll('[data-action="add"]').forEach(btn => {
+      btn.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        const hid = parseInt(btn.dataset.hid, 10);
+        if (pendingPartyHeroIds.length < PARTY_MAX && !pendingPartyHeroIds.includes(hid)) {
+          pendingPartyHeroIds.push(hid);
+          renderInner();
+        }
+      });
+    });
+    el.querySelectorAll('[data-action="remove"]').forEach(btn => {
+      btn.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        const hid = parseInt(btn.dataset.hid, 10);
+        pendingPartyHeroIds = pendingPartyHeroIds.filter(id => id !== hid);
+        renderInner();
+      });
+    });
+    el.querySelectorAll('[data-remove-pos]').forEach(btn => {
+      btn.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        const pos = parseInt(btn.dataset.removePos, 10);
+        pendingPartyHeroIds.splice(pos, 1);
+        renderInner();
+      });
+    });
+    el.querySelector('.ps-confirm-btn')?.addEventListener('click', () => {
+      if (pendingPartyHeroIds.length < 1) return;
+      // パーティ確定 → setLeader は前衛 (party[0]) を従来通り反映
+      const leader = HERO_ROSTER.find(h => h.heroId === pendingPartyHeroIds[0]);
+      if (leader) setLeader(leader);
+      pendingPartyConfirmed = pendingPartyHeroIds.slice(); // 後で startRunFromChapter / ensureRunState で読む
       showView("nodeSelect");
       renderNodeSelect();
     });
+  };
+
+  renderInner();
+}
+
+// 確定したパーティ (HeroLoadout 構築用の id 配列)
+let pendingPartyConfirmed = null;
+
+/** ヒーロー id 配列から HeroLoadout 配列を作る */
+function buildPartyLoadout(heroIds) {
+  const ids = (heroIds && heroIds.length > 0) ? heroIds : [HERO_ROSTER[0].heroId];
+  return ids.map((hid) => {
+    const h = HERO_ROSTER.find(x => x.heroId === hid) || HERO_ROSTER[0];
+    return {
+      heroId: h.heroId,
+      hpCurrent: h.hpMax,
+      hpMax: h.hpMax,
+    };
   });
 }
 

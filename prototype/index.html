@@ -310,6 +310,29 @@
     .party-slot { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; }
     .party-slot--ghost { opacity: 0; pointer-events: none; min-height: 100px; }
     .party-slot--center { flex: 0 0 auto; }
+    /* SPEC-005 Phase 3a: ghost スロットに 2 体目 / 3 体目のヒーローを表示する場合 */
+    .party-slot--ghost.party-slot--filled {
+      opacity: 1; pointer-events: auto;
+    }
+    .party-slot--filled .ps-mini {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 0.15rem; opacity: 0.92;
+    }
+    .party-slot--filled .ps-mini-img {
+      width: 56px; height: 56px; object-fit: contain; image-rendering: pixelated;
+      background: rgba(20,16,32,0.6); border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    .party-slot--filled .ps-mini--dead .ps-mini-img {
+      filter: grayscale(1) brightness(0.55);
+    }
+    .party-slot--filled .ps-mini-name {
+      font-size: 0.6rem; color: var(--muted); font-weight: 700;
+      max-width: 64px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .party-slot--filled .ps-mini-hp {
+      font-size: 0.55rem; color: #e07080; font-weight: 700;
+    }
 
     .combatant { display: flex; flex-direction: column; align-items: center; gap: 0.18rem; }
 
@@ -1399,6 +1422,40 @@
       transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
     }
     .hs-card:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: 0 8px 24px #000a; }
+    /* SPEC-005 Phase 3a: パーティ編成画面 */
+    .hs-card--in-party { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(253,203,110,0.18); }
+    .hs-in-party-mark { color: var(--accent); font-size: 0.7rem; font-weight: 700; }
+    .ps-current {
+      display: flex; gap: 0.55rem; justify-content: center; flex-wrap: wrap;
+      margin: 0.6rem auto 1.1rem;
+      padding: 0.55rem 0.5rem;
+      background: #0e0a18; border: 1px solid var(--border);
+      border-radius: 10px; max-width: 520px;
+    }
+    .ps-slot {
+      flex: 1 1 110px; max-width: 150px;
+      background: #15121c; border: 1px dashed var(--border);
+      border-radius: 8px; padding: 0.45rem 0.4rem 0.55rem;
+      display: flex; flex-direction: column; align-items: center; gap: 0.25rem;
+      position: relative; min-height: 110px;
+    }
+    .ps-slot-pos { font-size: 0.65rem; color: var(--accent); font-weight: 800; letter-spacing: 0.06em; }
+    .ps-slot-img { width: 60px; height: 60px; object-fit: contain; image-rendering: pixelated; }
+    .ps-slot-name { font-size: 0.7rem; font-weight: 700; color: var(--text); line-height: 1.2; text-align: center; }
+    .ps-slot-empty { font-size: 0.7rem; color: var(--muted); padding: 1.4rem 0 0; }
+    .ps-slot-remove {
+      position: absolute; top: 4px; right: 4px;
+      width: 22px; height: 22px; border-radius: 999px;
+      background: #2a1a20; border: 1px solid var(--danger); color: #ff8090;
+      font-size: 0.7rem; cursor: pointer; line-height: 1;
+    }
+    .ps-confirm-row {
+      display: flex; justify-content: center;
+      margin: 1.2rem 0 0.6rem;
+    }
+    .ps-confirm-btn {
+      font-size: 0.95rem; padding: 0.6rem 1.4rem;
+    }
     .hs-hero-img {
       width: 100%; height: 160px;
       object-fit: contain; image-rendering: pixelated;
