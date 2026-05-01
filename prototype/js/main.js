@@ -55,6 +55,12 @@ import {
   unplayableBadge,
   CASTER_ROLE_LABELS,
 } from "./caster.js";
+import {
+  loadTargetLabels,
+  targetLabelText,
+  targetColorVar,
+  applyCssVariables,
+} from "./target-labels.js";
 
 // 現在選択中のレギュレーション (#37) — 全戦闘・全画面でこの値を参照
 let currentRegulationId = loadCurrentRegulationId();
@@ -2117,6 +2123,35 @@ function renderCombat() {
       ? `<div class="card-unplayable-badge" title="${escapeHtml(reasonBadge.title)}">${escapeHtml(reasonBadge.badge)}</div>`
       : "";
 
+    // SPEC-006 Phase 4e: caster icon (バトル中はヒーロー portrait + ロール名、不在時はロール名のみ)
+    const casterUnit = resolveCaster(card.caster, combat);
+    const roleKey = card.caster || "foremost";
+    const roleLabel = CASTER_ROLE_LABELS[roleKey] || roleKey;
+    const casterTitle = casterUnit
+      ? `${casterUnit.name || "ヒーロー"} (${roleLabel})`
+      : `キャスター候補不在 (ロール: ${roleLabel})`;
+    const casterDisplayHtml = casterUnit && casterUnit.imgUrl
+      ? `<div class="card-caster-display" title="${escapeHtml(casterTitle)}">` +
+        `<img class="card-caster-img" src="${casterUnit.imgUrl}" alt="${escapeHtml(casterUnit.name || "")}" onerror="this.style.opacity='0'" />` +
+        `<span class="card-caster-role">${escapeHtml(roleLabel)}</span>` +
+        `</div>`
+      : `<div class="card-caster-display card-caster-display--rolelabel" title="${escapeHtml(casterTitle)}">` +
+        `<span class="card-caster-role">${escapeHtml(roleLabel)}</span>` +
+        `</div>`;
+
+    // SPEC-006 Phase 4e: effects 配列を「対象 30% + 効果テキスト 70%」の行で描画
+    // (effects が空 / 未定義の場合は旧 effectSummaryLines にフォールバック)
+    const effectRowsHtml = (Array.isArray(card.effects) && card.effects.length > 0)
+      ? card.effects.map(e => {
+          const lbl = targetLabelText(e.target) || e.target || "";
+          const colorVar = targetColorVar(e.target) || "--text";
+          return `<div class="card-effect-row">` +
+            `<span class="card-effect-target" style="--target-pill-color: var(${colorVar})">${escapeHtml(lbl)}</span>` +
+            `<span class="card-effect-text">${escapeHtml(e.text || "")}</span>` +
+          `</div>`;
+        }).join("")
+      : summaryBody;
+
     slot.innerHTML =
       '<div class="card-cost-above"><span class="cost-zeus" aria-hidden="true">⚡</span>' + card.cost + '</div>' +
       unplayableBadgeHtml +
@@ -2126,9 +2161,9 @@ function renderCombat() {
       '<div class="card-icon-area">' +
       '<img class="card-ext-img-full" src="' + EXT_IMG(card.extId) + '" alt="" onerror="this.style.opacity=\'0\'" />' +
       '<img class="card-skill-icon-tl" src="' + battleIconUrl(card.skillIcon) + '" alt="" />' +
-      buildTargetBadgeHtml(card) +
+      casterDisplayHtml +
       '</div>' +
-      '<div class="card-effect-area">' + summaryBody + '</div>' +
+      '<div class="card-effect-area">' + effectRowsHtml + '</div>' +
       '</div>' +
       '<div class="card-peek-layer" aria-hidden="true">' +
       '<div class="card-peek-inner">' +
@@ -5438,6 +5473,12 @@ function init() {
   // ── LLエクステ 使用ボタン ─────────────────────────────────────
   document.getElementById("btnUseLlExt0")?.addEventListener("click", () => useLlExt(0));
   document.getElementById("btnUseLlExt1")?.addEventListener("click", () => useLlExt(1));
+
+  // SPEC-006 Phase 4e: TargetSpec ラベル + CSS 変数を JSON からロード
+  // (失敗時は HTML 側のフォールバック CSS 変数 + targetColorVar の "--text" デフォルト)
+  loadTargetLabels()
+    .then(() => applyCssVariables())
+    .catch(err => console.warn("[target-labels] load failed", err));
 }
 
 init();

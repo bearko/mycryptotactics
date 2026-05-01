@@ -683,10 +683,73 @@
       background: #d8d0e4; color: #1a1420;
       padding: 0.18rem 0.24rem; font-size: 0.58rem;
       font-weight: 700; line-height: 1.28; text-align: left;
-      flex-shrink: 0; min-height: 2.4rem; max-height: 2.8rem;
+      flex-shrink: 0; min-height: 2.4rem; max-height: 3.2rem;
       overflow: hidden;
     }
     .card-effect-area p { margin: 0.04rem 0; }
+
+    /* SPEC-006 Phase 4e: 効果エリアを「対象 30% + 効果 70%」の行構成に */
+    .card-effect-row {
+      display: grid;
+      grid-template-columns: 30% 70%;
+      gap: 0.18rem;
+      align-items: center;
+      margin: 0.06rem 0;
+    }
+    .card-effect-row .card-effect-target {
+      background: var(--target-pill-color, #888);
+      color: #fff;
+      font-weight: 800; font-size: 0.52rem;
+      padding: 1px 3px;
+      border-radius: 3px;
+      text-align: center;
+      line-height: 1.1;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      text-shadow: 0 1px 0 rgba(0,0,0,0.35);
+    }
+    .card-effect-row .card-effect-text {
+      font-size: 0.6rem; color: #1a1420;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+
+    /* SPEC-006 Phase 4e: caster 表示 (icon area の右下) */
+    .card-caster-display {
+      position: absolute; bottom: 4px; right: 4px;
+      display: flex; flex-direction: column; align-items: center;
+      gap: 1px;
+      pointer-events: none;
+    }
+    .card-caster-display .card-caster-img {
+      width: 28px; height: 28px;
+      object-fit: contain;
+      image-rendering: pixelated;
+      background: rgba(10,8,18,0.85);
+      border: 2px solid var(--accent);
+      border-radius: 6px;
+      padding: 1px;
+    }
+    .card-caster-display .card-caster-role {
+      font-size: 0.5rem; font-weight: 800;
+      background: rgba(10,8,18,0.85);
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      border-radius: 3px;
+      padding: 0 3px;
+      letter-spacing: 0.04em;
+      line-height: 1.2;
+    }
+    /* バトル外用 (ロールラベルのみ): icon area が無いコンテキストで使用 */
+    .card-caster-display.card-caster-display--rolelabel .card-caster-role {
+      font-size: 0.55rem;
+      padding: 1px 5px;
+    }
+    /* リワードカード等の小カードでは caster icon を縮小 */
+    .reward-card-inner .card-caster-display .card-caster-img {
+      width: 22px; height: 22px;
+    }
+    .reward-card-inner .card-caster-display .card-caster-role {
+      font-size: 0.45rem;
+    }
 
     /* Peek layer (shown when focused) — appears to the side of the card */
     .card-peek-layer {
