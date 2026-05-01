@@ -533,7 +533,7 @@ function useLlExt(slotIdx) {
   runState.llExtSlots[slotIdx] = null;
   applyLlExtEffect(ext);
   if (combat.enemyHp <= 0) { endCombatWin(); return; }
-  if (combat.playerHp <= 0) { endCombatLoss(); return; }
+  if (combat.playerHp <= 0 || isPartyWipedOut(combat)) { endCombatLoss(); return; }
   syncLlExtSlots();
   renderCombat();
 }
@@ -703,7 +703,38 @@ function healPlayerFromIntSkill(s, minPct, maxPct) {
 }
 
 // ─── 敵攻撃 ───────────────────────────────────────────────────────
+/** SPEC-005 Phase 3b: 敵攻撃の対象となる foremost living hero を返す。
+ *  全員死亡時は heroes[0] にフォールバック（保険）。 */
+function getEnemyAttackTargetHero(s) {
+  if (!s || !Array.isArray(s.heroes)) return null;
+  const tgt = foremostAlive(s.heroes);
+  return tgt || s.heroes[0] || null;
+}
+
+/** ヒーローユニットの hp / alive を更新し、必要に応じて legacy フィールドを同期する。 */
+function applyHpDeltaToHero(s, hero, delta) {
+  if (!hero) return;
+  hero.hp = Math.max(0, (hero.hp ?? 0) + delta);
+  if (hero.hp <= 0) hero.alive = false;
+  // heroes[0] (前衛) なら legacy combat.playerHp と同期
+  if (s.heroes && hero === s.heroes[0]) {
+    s.playerHp = hero.hp;
+  }
+}
+
+/** 全ヒーロー死亡判定 */
+function isPartyWipedOut(s) {
+  if (!s || !Array.isArray(s.heroes) || s.heroes.length === 0) {
+    return (s?.playerHp ?? 0) <= 0;
+  }
+  return s.heroes.every(h => !h || h.alive === false || (h.hp ?? 0) <= 0);
+}
+
 function dealPhySkillFromEnemyToPlayer(s, skillPct) {
+  // Phase 3b: 敵攻撃は foremost living hero を対象に
+  const target = getEnemyAttackTargetHero(s);
+  // ダメージ計算は legacy stats (heroes[0] 前衛) を使う - 簡略化のため
+  // (Phase 3c 以降で target.phy / guard / shield 個別管理に拡張予定)
   const cut = cutRateFromPhy(s.playerPhy);
   let base = phyIntDamageAfterCut(s.enemyPhy, skillPct, cut);
   let critBonus = 0;
@@ -722,8 +753,12 @@ function dealPhySkillFromEnemyToPlayer(s, skillPct) {
     total = Math.ceil(total / 2);
     clog("不屈: ダメージ半減");
   }
-  total = applyGuardToDamage("player", total);
-  s.playerHp = Math.max(0, s.playerHp - total);
+  // ガード/シールドは前衛 (heroes[0]) のみ。foremost が前衛以外ならそのまま透過。
+  if (target === s.heroes?.[0]) {
+    total = applyGuardToDamage("player", total);
+  }
+  // 対象ヒーローへ HP 反映
+  applyHpDeltaToHero(s, target, -total);
   checkResurrection(s);
   lungePortrait("enemy");
   flashPortrait("player");
@@ -741,6 +776,7 @@ function dealPhySkillFromEnemyToPlayer(s, skillPct) {
 }
 
 function dealIntSkillFromEnemyToPlayer(s, skillPct) {
+  const target = getEnemyAttackTargetHero(s);
   const cut = cutRateFromInt(s.playerInt);
   let base = phyIntDamageAfterCut(s.enemyInt, skillPct, cut);
   let critBonus = 0;
@@ -753,8 +789,10 @@ function dealIntSkillFromEnemyToPlayer(s, skillPct) {
     total = Math.ceil(total / 2);
     clog("不屈: ダメージ半減");
   }
-  total = applyGuardToDamage("player", total);
-  s.playerHp = Math.max(0, s.playerHp - total);
+  if (target === s.heroes?.[0]) {
+    total = applyGuardToDamage("player", total);
+  }
+  applyHpDeltaToHero(s, target, -total);
   checkResurrection(s);
   lungePortrait("enemy");
   flashPortrait("player");
@@ -773,10 +811,16 @@ function dealIntSkillFromEnemyToPlayer(s, skillPct) {
 
 /** 最大 HP 割合の特殊ダメージ（シールドのみ有効） */
 function dealSpecialMaxHpPercentToPlayer(s, pct) {
-  let raw = Math.max(0, Math.floor((s.playerHpMax * pct) / 100));
+  const target = getEnemyAttackTargetHero(s);
+  // 特殊ダメージは対象 hero の最大 HP 基準
+  const refMaxHp = (target?.hpMax ?? s.playerHpMax) || s.playerHpMax;
+  let raw = Math.max(0, Math.floor((refMaxHp * pct) / 100));
   if (s.damageReducedThisTurn) raw = Math.ceil(raw / 2);
-  raw = applyDamageThroughShield(s, "player", raw);
-  s.playerHp = Math.max(0, s.playerHp - raw);
+  // シールドは前衛 (heroes[0]) のみ
+  if (target === s.heroes?.[0]) {
+    raw = applyDamageThroughShield(s, "player", raw);
+  }
+  applyHpDeltaToHero(s, target, -raw);
   checkResurrection(s);
   lungePortrait("enemy");
   flashPortrait("player");
@@ -1460,7 +1504,7 @@ function startPlayerTurn() {
     flashPortrait("player"); playPortraitEffect("player", "debuff");
     clog(`毒ダメージ（自分）${dmg}`);
     checkResurrection(combat);
-    if (combat.playerHp <= 0) { endCombatLoss(); return; }
+    if (combat.playerHp <= 0 || isPartyWipedOut(combat)) { endCombatLoss(); return; }
   }
   // 毒ティック（敵）
   if ((combat.enemyPoison || 0) > 0) {
@@ -2006,7 +2050,7 @@ async function enemyTurn() {
     renderStatusBadges();
   }
 
-  if (combat.playerHp <= 0) { endCombatLoss(); return; }
+  if (combat.playerHp <= 0 || isPartyWipedOut(combat)) { endCombatLoss(); return; }
 
   // 張遼「遼来遼来」: 被ダメージ後に反撃（カットイン付き、非同期）
   renderCombat();
