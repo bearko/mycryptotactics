@@ -1346,7 +1346,9 @@ function startCombatFromMapNode(node) {
 
   if (node.type === "boss") {
     isBoss = true;
-    bossDef = BOSS_DEFS[chapter.bossId];
+    // node.bossOverrideId が指定されていれば章間レイド扱い（B-4）
+    const bId = node.bossOverrideId || chapter.bossId;
+    bossDef = BOSS_DEFS[bId];
     enemyDef = bossDef;
   } else if (node.enemyDefId && ENEMY_DEFS[node.enemyDefId]) {
     enemyDef = ENEMY_DEFS[node.enemyDefId];
@@ -2136,6 +2138,13 @@ async function enemyTurn() {
   if (combat.enemyHp <= 0) { endCombatWin(); return; }
 
   combat.turn++;
+  // 耐久勝利チェック（B-4 ヨシュカ・チョコ）：endurance ターン経過で勝利扱い
+  if (combat.bossDef?.enduranceTurns && combat.turn > combat.bossDef.enduranceTurns) {
+    combat.enduranceWin = true;
+    clog(`⏰ 耐久勝利！${combat.bossDef.enduranceTurns}ターン凌ぎ切った…`);
+    endCombatWin();
+    return;
+  }
   startPlayerTurn();
 }
 
@@ -2174,6 +2183,39 @@ function endCombatWin() {
   const chapter = CHAPTERS[runState.chapterIdx];
   const isBoss = combat.isBoss;
   const isElite = combat.isElite;
+
+  // ── 章間レイド勝利の特別処理（B-4） ──
+  // 通常報酬画面を経由せず、固有カードを直接付与して次章マップへ戻る
+  const interludeBossId = combat.bossDef?.id;
+  if (interludeBossId === 'boss-yoshiko' || interludeBossId === 'boss-yoshiko-choco') {
+    const isChoco = interludeBossId === 'boss-yoshiko-choco';
+    const wasEndurance = combat.enduranceWin === true;
+    runState.playerHp = combat.playerHp;
+    runState.playerHpMax = combat.playerHpMax;
+    runState.deck = combat.deck.map(c => ({ ...c }));
+    if (isChoco && wasEndurance) {
+      runState.deck.push(copyCard("cardChocoFragment"));
+      clog("🍫 「チョコ片」を入手！（耐久勝利の証）");
+      renderNavigator("ヨシュカ・チョコの30ターン耐久に成功しました！「チョコ片」をデッキに追加しました。");
+    } else if (isChoco) {
+      // 通常撃破は基本起こらないが、念のため
+      runState.deck.push(copyCard("cardChocoFragment"));
+      clog("🍫 まさかの撃破！「チョコ片」を入手");
+    } else {
+      // ヨシュカ通常撃破：報酬は微妙な GUM のみ
+      gold += 12;
+      clog("🍵 ヨシュカ撃破：GUM +12（…報酬は微妙）");
+      renderNavigator("ヨシュカは弱すぎて1日で討伐されました。報酬は微妙でしたね…");
+    }
+    runState.activeInterlude = null;
+    combat = null;
+    postCombatSnapshot = null;
+    stopBgm();
+    showView("map");
+    renderMap();
+    syncResources();
+    return;
+  }
 
   // GUM
   let earnedGold = isBoss ? chapter.bossRewardGold : isElite ? 45 : 28;
@@ -2327,6 +2369,18 @@ function advanceAfterRewardPick(libraryKey) {
         document.getElementById("gameOverMsg").textContent =
           "全 node クリアおめでとうございます！あなたは最高ですよ〜！";
       } else {
+        // 章間レイドの判定（B-4）
+        // clearedIdx 0 → ヨシュカ（簡単）／ clearedIdx 1 → ヨシュカ・チョコ（耐久）
+        if (clearedIdx === 0 && !runState.yoshikoCleared) {
+          runState.yoshikoCleared = true;
+          startInterludeCombat('boss-yoshiko', '🍵 章間レイド：ヨシュカ');
+          return;
+        }
+        if (clearedIdx === 1 && !runState.yoshikoChocoCleared) {
+          runState.yoshikoChocoCleared = true;
+          startInterludeCombat('boss-yoshiko-choco', '🍫 章間レイド：ヨシュカ・チョコ（30ターン耐久）');
+          return;
+        }
         // 次章のマップへそのまま遷移（runState.deck / playerHp / llExtSlots を引き継ぎ） #31
         // advanceToNextChapter() で chapterIdx++ と新章マップのセットアップは既に完了
         showView("map");
@@ -3467,6 +3521,32 @@ function leaveScout() {
   syncResources();
   showView("map");
   renderMap();
+}
+
+// ─── 章間レイド（B-4 ヨシュカ／ヨシュカ・チョコ） ─────────────────
+/**
+ * 章間に出現する特殊レイド戦闘を開始する。
+ * 通常の boss ノードを通さず、bossDef を直接渡してバトルに突入。
+ */
+function startInterludeCombat(bossId, narration) {
+  ensureRunState();
+  runState.activeInterlude = bossId;
+  const bossDef = BOSS_DEFS[bossId];
+  if (!bossDef) {
+    console.warn('未定義の interlude boss:', bossId);
+    showView("map"); renderMap();
+    return;
+  }
+  // 章 bossId をいじらず、bossOverrideId で直接指定
+  const fakeNode = {
+    id: `INTERLUDE-${bossId}`,
+    type: "boss",
+    elite: false,
+    enemyImgId: bossDef.imgId,
+    bossOverrideId: bossId,
+  };
+  clog(narration);
+  startCombatFromMapNode(fakeNode);
 }
 
 /**

@@ -73,6 +73,38 @@ export const BOSS_DEFS = {
       },
     ],
   },
+  // ─── 章間レイド ──────────────────────────────────────────────────
+  // 「ヨシュカ」初代レイド（弱すぎて1日で討伐された通称「よしこ」）の再現。
+  // 章1クリア後に幕間で出現。HP極小・火力激低。報酬は微妙な GUM のみ。
+  'boss-yoshiko': {
+    id: 'boss-yoshiko',
+    name: 'ヨシュカ（よしこ）',
+    hp: 18, phy: 4, int: 4, agi: 6, imgId: 171,
+    initialShield: 0,
+    intentRota: [
+      { kind: 'attack', phyPct: 50 },
+      { kind: 'guard', value: 4 },
+      { kind: 'attack', phyPct: 60 },
+    ],
+  },
+  // 「ヨシュカ・チョコ」2nd レイド（強すぎて時間切れまで倒し切れず）の再現。
+  // 章2クリア後の幕間。HP 999・初期シールド30 で討伐不能。
+  // 30 ターン経過で「耐久勝利」扱いとなり、報酬「チョコ片」（cardChocoFragment）獲得。
+  'boss-yoshiko-choco': {
+    id: 'boss-yoshiko-choco',
+    name: 'ヨシュカ・チョコ（討伐不能）',
+    hp: 999, phy: 14, int: 12, agi: 8, imgId: 425,
+    initialShield: 30,
+    enduranceTurns: 30, // main.js が turn 数をチェックして勝利扱いに
+    intentRota: [
+      { kind: 'guard', value: 8 },
+      { kind: 'attack', phyPct: 80 },
+      { kind: 'attackBleed', phyPct: 70, bleedStacks: 1 },
+      { kind: 'guard', value: 6 },
+      { kind: 'attackInt', intPct: 75 },
+    ],
+  },
+
   'boss-troy': {
     id: 'boss-troy',
     name: 'ディープ・ヨシュカ',

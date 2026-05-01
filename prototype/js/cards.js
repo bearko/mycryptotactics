@@ -1195,6 +1195,40 @@ function makeCardLibrary(clog, api) {
         clog(`風林火山: PHY +${bonus}（ナーフ後・ランダム）`);
       },
     },
+
+    // ════════════════════════════════════════
+    // 特殊：「ヨシュカ・チョコ」耐久報酬
+    // 30ターン耐え切ったプレイヤーに渡される伝説の Power 系カード。
+    // 元タイトル 2019 年 2nd レイドで時間切れになった証。
+    // ════════════════════════════════════════
+    cardChocoFragment: {
+      libraryKey: "cardChocoFragment",
+      extId: 380, // チョコ系（カスケード フラペチーノ近似）の imgId
+      extNameJa: "チョコ片",
+      skillNameJa: "甘美なる耐久",
+      skillIcon: "BUF_phy.png",
+      cost: 0,
+      type: "skl",
+      target: "self",
+      effectSummaryLines() {
+        return ["シールド +20", "PHY +5", "INT +5（戦闘中ずっと）"];
+      },
+      peekHelpKeys() { return ["shield", "phy", "int"]; },
+      previewLines() {
+        return [
+          "シールドを 20 得る（特殊ダメージ吸収）",
+          "PHY を +5・INT を +5（戦闘中ずっと）",
+          "コスト 0 の超強力カード（耐久勝利の証）",
+        ];
+      },
+      play(s) {
+        se("buff"); fx("player", "buff");
+        s.playerShield = (s.playerShield || 0) + 20;
+        s.playerPhy += 5;
+        s.playerInt += 5;
+        clog("甘美なる耐久: シールド+20・PHY+5・INT+5");
+      },
+    },
   };
 }
 
@@ -1298,6 +1332,7 @@ export const CARD_RARITIES = {
   // ─── 特殊：イベント専用カード ────────────────────────────────────
   cardShingenPre:  'legendary', // 武田信玄（暫定版・1戦闘後にナーフ）
   cardShingenPost: 'rare',      // 武田信玄（ナーフ後）
+  cardChocoFragment: 'legendary', // チョコ片（ヨシュカ・チョコ耐久報酬）
 };
 
 /**
