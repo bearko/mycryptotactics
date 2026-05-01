@@ -2428,6 +2428,9 @@ function openShop() {
   });
 
   // ─── カード破棄セクション ──────────────────────────────────────
+  // ショップ訪問のたびに 1 回までに制限 (#33) — 入店時にフラグ初期化
+  runState.shopRemoveUsed = false;
+
   const removeSection = document.createElement("div");
   removeSection.className = "shop-remove-section";
   const removeTitle = document.createElement("div");
@@ -2436,14 +2439,14 @@ function openShop() {
   removeSection.appendChild(removeTitle);
   const removeDesc = document.createElement("div");
   removeDesc.className = "shop-remove-desc";
-  removeDesc.textContent = "デッキ内のカードを1枚選んで除外できます（スターターも含む）。";
+  removeDesc.textContent = "デッキ内のカードを1枚選んで除外できます（スターターも含む）。1 ショップ訪問につき 1 枚まで。";
   removeSection.appendChild(removeDesc);
 
   const removeBtn = document.createElement("button");
   removeBtn.type = "button";
   removeBtn.className = "shop-remove-btn action";
   removeBtn.textContent = "カードを破棄する";
-  removeBtn.addEventListener("click", () => openShopRemoveCard(goldDisp));
+  removeBtn.addEventListener("click", () => openShopRemoveCard(goldDisp, removeBtn));
   removeSection.appendChild(removeBtn);
   list.parentElement.appendChild(removeSection);
 
@@ -2453,8 +2456,19 @@ function openShop() {
 
 // ─── ショップ カード破棄 ──────────────────────────────────────────
 const SHOP_REMOVE_COST = 50;
-function openShopRemoveCard(goldDisp) {
+function setShopRemoveBtnSoldOut(btn) {
+  if (!btn) return;
+  btn.disabled = true;
+  btn.classList.add("sold-out");
+  btn.textContent = "売り切れ（このショップでは使用済み）";
+}
+function openShopRemoveCard(goldDisp, removeBtn) {
   ensureRunState();
+  if (runState.shopRemoveUsed) {
+    renderNavigator("このショップではすでにカード破棄を 1 回使用しています");
+    setShopRemoveBtnSoldOut(removeBtn);
+    return;
+  }
   if (gold < SHOP_REMOVE_COST) {
     renderNavigator(`GUM が足りません（必要: ${SHOP_REMOVE_COST} GUM）`);
     return;
@@ -2510,6 +2524,9 @@ function openShopRemoveCard(goldDisp) {
       syncResources();
       clog(`破棄: ${card.extNameJa}（-${SHOP_REMOVE_COST} GUM）`);
       renderNavigator(`「${card.extNameJa}」を破棄しました！デッキが軽くなりましたよ！`);
+      // 1 ショップ訪問につき 1 回まで (#33)
+      runState.shopRemoveUsed = true;
+      setShopRemoveBtnSoldOut(removeBtn);
       overlay.remove();
     });
     wrapper.appendChild(delBtn);
