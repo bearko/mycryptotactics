@@ -2399,18 +2399,78 @@ function showActivityReport(snap) {
       overlay.setAttribute("aria-hidden", "true");
       resolve();
     });
-    newShare.addEventListener("click", () => {
+    newShare.addEventListener("click", async () => {
       const intro = snap.isCleared
         ? `${snap.hero.name} で全ステージ制覇しました！`
         : `${snap.hero.name} で「${snap.stageName}」まで到達。${snap.opponent.name} に倒された…`;
-      // Twitter Web Intent: text / url / hashtags を分けて渡すと自然に組み立てられる。
-      // hashtags はカンマ区切りで # なし。`#MyCryptoTactics` が末尾に付く。
-      const url =
+      const intentUrl =
         `https://twitter.com/intent/tweet` +
         `?text=${encodeURIComponent(intro)}` +
         `&url=${encodeURIComponent(SHARE_URL)}` +
         `&hashtags=${encodeURIComponent(SHARE_TITLE)}`;
-      window.open(url, "_blank", "noopener,noreferrer");
+
+      // 旧フォールバック (html2canvas が無い / 失敗時)
+      const openIntentOnly = () => window.open(intentUrl, "_blank", "noopener,noreferrer");
+
+      // html2canvas で活動レポートをスクショ → 共有 or ダウンロード
+      const targetEl = overlay.querySelector(".report-card");
+      if (!targetEl || typeof window.html2canvas !== "function") {
+        openIntentOnly();
+        return;
+      }
+
+      newShare.disabled = true;
+      const originalLabel = newShare.textContent;
+      newShare.textContent = "画像生成中…";
+
+      try {
+        const canvas = await window.html2canvas(targetEl, {
+          backgroundColor: "#0f0c18",
+          useCORS: true,
+          allowTaint: true,
+          scale: window.devicePixelRatio > 1 ? 2 : 1.5,
+          logging: false,
+        });
+        const blob = await new Promise(res => canvas.toBlob(res, "image/png"));
+        const filename = `mct-report-${Date.now()}.png`;
+        const file = blob ? new File([blob], filename, { type: "image/png" }) : null;
+
+        // モバイル等で Web Share API + ファイル共有が使える場合: 画像を直接添付して共有
+        if (file && navigator.canShare && navigator.canShare({ files: [file] }) && navigator.share) {
+          try {
+            await navigator.share({
+              files: [file],
+              text: `${intro} #${SHARE_TITLE}`,
+              url: SHARE_URL,
+            });
+            return; // 完了
+          } catch (e) {
+            // 共有キャンセルや拒否 → フォールバックへ
+            if (e && e.name === "AbortError") return;
+          }
+        }
+
+        // フォールバック: 画像をダウンロード + Twitter Intent を開く + 案内
+        if (blob) {
+          const dlUrl = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = dlUrl; a.download = filename;
+          document.body.appendChild(a); a.click();
+          document.body.removeChild(a);
+          setTimeout(() => URL.revokeObjectURL(dlUrl), 4000);
+        }
+        openIntentOnly();
+        // ユーザーへの案内（一度だけ）
+        try {
+          window.alert("活動レポート画像をダウンロードしました。X 投稿画面で「画像を添付」から手動で添付してください。");
+        } catch (_) {}
+      } catch (err) {
+        // html2canvas が CORS や renderer 制限で失敗した場合 → テキストのみ共有
+        openIntentOnly();
+      } finally {
+        newShare.disabled = false;
+        newShare.textContent = originalLabel;
+      }
     });
   });
 }
