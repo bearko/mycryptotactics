@@ -2028,9 +2028,10 @@ function advanceAfterRewardPick(libraryKey) {
         document.getElementById("gameOverMsg").textContent =
           "全 node クリアおめでとうございます！あなたは最高ですよ〜！";
       } else {
-        // 次の node が解放された → node 選択画面へ（解放アニメ付き）
-        showView("nodeSelect");
-        renderNodeSelect(clearedIdx + 1); // 新たに解放されたインデックス
+        // 次章のマップへそのまま遷移（runState.deck / playerHp / llExtSlots を引き継ぎ） #31
+        // advanceToNextChapter() で chapterIdx++ と新章マップのセットアップは既に完了
+        showView("map");
+        renderMap();
       }
       return;
     }
@@ -2119,28 +2120,21 @@ function openOwnedDeckOverlay() {
     cards = [...runState.deck];
   }
 
-  // libraryKey ごとに枚数を集計（同一カードはスタック表示）
-  const groupMap = new Map();
-  for (const c of cards) {
-    if (!c || !c.libraryKey) continue;
-    const k = c.libraryKey;
-    if (!groupMap.has(k)) groupMap.set(k, { def: CARD_LIBRARY[k] || c, count: 0 });
-    groupMap.get(k).count++;
-  }
-  const groups = Array.from(groupMap.values());
+  // ソート: シリーズキー → レアリティ → libraryKey（カード単位）
+  const sorted = cards
+    .filter(c => c && c.libraryKey)
+    .map(c => CARD_LIBRARY[c.libraryKey] || c)
+    .sort((a, b) => {
+      const sa = deckSeriesKey(a.libraryKey);
+      const sb = deckSeriesKey(b.libraryKey);
+      if (sa !== sb) return sa < sb ? -1 : 1;
+      const ra = RARITY_ORDER[CARD_RARITIES[a.libraryKey] || "common"] || 0;
+      const rb = RARITY_ORDER[CARD_RARITIES[b.libraryKey] || "common"] || 0;
+      if (ra !== rb) return ra - rb;
+      return a.libraryKey < b.libraryKey ? -1 : 1;
+    });
 
-  // ソート: シリーズキー → レアリティ → libraryKey
-  groups.sort((a, b) => {
-    const sa = deckSeriesKey(a.def.libraryKey);
-    const sb = deckSeriesKey(b.def.libraryKey);
-    if (sa !== sb) return sa < sb ? -1 : 1;
-    const ra = RARITY_ORDER[CARD_RARITIES[a.def.libraryKey] || "common"] || 0;
-    const rb = RARITY_ORDER[CARD_RARITIES[b.def.libraryKey] || "common"] || 0;
-    if (ra !== rb) return ra - rb;
-    return a.def.libraryKey < b.def.libraryKey ? -1 : 1;
-  });
-
-  // 上部サマリー
+  // 上部サマリー: レアリティアイコン（L/E/R/U/C）と総数
   const total = cards.length;
   const rarityCounts = {};
   for (const c of cards) {
@@ -2149,16 +2143,26 @@ function openOwnedDeckOverlay() {
     rarityCounts[r] = (rarityCounts[r] || 0) + 1;
   }
   const summaryEl = document.getElementById("ownedDeckSummary");
-  const rarityChips = ["common", "uncommon", "rare", "epic", "legendary", "ll"]
-    .filter(r => rarityCounts[r])
-    .map(r => `<span class="od-rarity" data-rarity="${r}">${RARITY_LABEL[r]} ×${rarityCounts[r]}</span>`)
-    .join("");
-  summaryEl.innerHTML = `<span class="od-total">合計 ${total} 枚</span>${rarityChips}`;
+  const RARITY_DISPLAY = [
+    { key: "legendary", letter: "L" },
+    { key: "epic",      letter: "E" },
+    { key: "rare",      letter: "R" },
+    { key: "uncommon",  letter: "U" },
+    { key: "common",    letter: "C" },
+  ];
+  const pills = RARITY_DISPLAY.map(({ key, letter }) => {
+    const n = rarityCounts[key] || 0;
+    return `<span class="od-rarity-pill" data-rarity="${key}" data-zero="${n === 0}" title="${RARITY_LABEL[key]} ${n} 枚">
+      <span class="od-pill-letter">${letter}</span>
+      <span class="od-pill-count">${n}</span>
+    </span>`;
+  }).join("");
+  summaryEl.innerHTML = pills + `<span class="od-total">${total}</span>`;
 
-  // グリッド
+  // グリッド: カードを 1 枚ずつ並べる（×N スタックではなく N 個並べる）
   const gridEl = document.getElementById("ownedDeckGrid");
   gridEl.innerHTML = "";
-  if (groups.length === 0) {
+  if (sorted.length === 0) {
     gridEl.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:0.8rem;padding:1rem">デッキは空です</p>`;
   } else {
     const mockS = {
@@ -2170,20 +2174,14 @@ function openOwnedDeckOverlay() {
       playerHpMax: runState?.playerHpMax ?? LEADER.hpMax,
       playerGuard: 0, playerShield: 0, energyMax: 3, energy: 3,
     };
-    for (const g of groups) {
+    for (const def of sorted) {
       const cell = document.createElement("button");
       cell.type = "button";
       cell.className = "owned-deck-cell";
-      cell.setAttribute("aria-label", g.def.extNameJa || g.def.libraryKey);
-      const cardBtn = buildRewardPickButton(g.def, mockS);
+      cell.setAttribute("aria-label", def.extNameJa || def.libraryKey);
+      const cardBtn = buildRewardPickButton(def, mockS);
       cell.appendChild(cardBtn);
-      if (g.count > 1) {
-        const stack = document.createElement("span");
-        stack.className = "owned-deck-cell-stack";
-        stack.textContent = `×${g.count}`;
-        cell.appendChild(stack);
-      }
-      cell.addEventListener("click", () => showOwnedDeckPeek(g.def));
+      cell.addEventListener("click", () => showOwnedDeckPeek(def));
       gridEl.appendChild(cell);
     }
   }
