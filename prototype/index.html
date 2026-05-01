@@ -61,6 +61,17 @@
       max-width: min(420px, 88vw);
       border-radius: 12px;
     }
+    .title-alpha {
+      margin: 0.4rem 0 0;
+      font-size: 0.85rem;
+      letter-spacing: 0.18em;
+      font-weight: 800;
+      color: #FDCB6E;
+      background: rgba(253,203,110,0.12);
+      border: 1px solid #FDCB6E;
+      border-radius: 999px;
+      padding: 0.22rem 0.95rem 0.2rem;
+    }
     .title-press {
       font-size: 1.05rem; color: #bba8d8; letter-spacing: 0.2em;
       text-transform: uppercase;
@@ -1019,18 +1030,24 @@
     footer {
       margin-top: auto;
       padding-top: 1rem;
-      font-size: 0.62rem;
+      font-size: 0.7rem;
       color: var(--muted);
       text-align: center;
       max-width: 720px;
-      line-height: 1.5;
+      line-height: 1.55;
+      display: flex; flex-direction: column; gap: 0.3rem;
+      align-items: center;
     }
     footer a { color: var(--accent); }
-    .footer-tech {
-      display: block;
-      margin-top: 0.35rem;
-      font-size: 0.58rem;
-      opacity: 0.9;
+    .footer-meta {
+      font-weight: 700; color: #FDCB6E; letter-spacing: 0.08em;
+    }
+    .footer-credit {
+      font-size: 0.7rem; max-width: 600px;
+    }
+    .footer-credit strong { color: var(--text); font-weight: 700; }
+    .footer-source {
+      font-size: 0.65rem; opacity: 0.85;
     }
 
     #deckModal {
@@ -2033,6 +2050,7 @@
   <!-- ── Title Screen ── -->
   <div id="titleView" class="title-screen" role="button" aria-label="ゲームを始める" tabindex="0">
     <img class="title-logo" src="./MCT_logo.jpg" alt="MyCryptoTactics" />
+    <p class="title-alpha">アルファ版</p>
     <p class="title-press">Press to Start</p>
   </div>
 
@@ -2055,7 +2073,7 @@
     <div id="mapView" class="panel" style="position:relative">
       <p class="map-title" id="mapTitle">始まりの塔（下から上へ。緑のノードから進む）</p>
       <div id="mapRows" class="map-graph-wrap" role="region" aria-label="マップ"></div>
-      <p style="font-size:0.75rem;color:var(--muted);margin:0.5rem 0 0">企画書 §3 に沿ったラン内ループ。ロジックは <code>prototype/js/</code>。</p>
+      <p style="font-size:0.7rem;color:var(--muted);margin:0.5rem 0 0">緑のノードから上へ進み、ボスを倒すと次の章へ。利用条件は <a href="https://github.com/bearko/mycryptoheroes/blob/main/README.md" target="_blank" rel="noopener">MCH README</a> を参照。</p>
       <!-- ── Mai Navigator（マップ内右下に絶対配置） ── -->
       <div class="mai-navigator hidden" id="maiNavigator" aria-live="polite">
         <div class="mai-bubble" id="maiBubble">
@@ -2325,9 +2343,19 @@
   </div>
 
   <footer>
-    企画: <code>docs/CHRONO_TACTICS_DESIGN.md</code> · SPEC: <code>docs/specs/SPEC-002-prototype.md</code> ·
-    <a href="https://github.com/bearko/mycryptoheroes" target="_blank" rel="noopener">bearko/mycryptoheroes</a>
-    <span class="footer-tech">仕様駆動 · データ分離 JS · 手札3列 · ドット絵は <code>image-rendering: pixelated</code>（ニアレストネイバー系。バイキュービックは低解像度でぼやけるため未使用）</span>
+    <span class="footer-meta">MyCryptoTactics アルファ版 · 非営利のファン制作</span>
+    <span class="footer-credit">
+      キャラクター画像 / BGM / SE は <strong>My Crypto Heroes (MCH Co., Ltd.)</strong> に帰属します。
+      利用条件・権利表記・二次創作ガイドラインは
+      <a href="https://github.com/bearko/mycryptoheroes/blob/main/README.md" target="_blank" rel="noopener">bearko/mycryptoheroes README</a>
+      を参照してください。
+    </span>
+    <span class="footer-source">
+      ソースコード: <a href="https://github.com/bearko/mycryptotactics" target="_blank" rel="noopener">bearko/mycryptotactics</a>
+      · フィードバック / バグ報告は
+      <a href="https://github.com/bearko/mycryptotactics/issues" target="_blank" rel="noopener">GitHub Issues</a>
+      へ
+    </span>
   </footer>
 
   <div id="helpOverlay" class="hidden" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
@@ -2402,8 +2430,9 @@
           <h3>シールド</h3>
           <p>PHY/INT 依存の通常ダメージには無効で、特殊ダメージのみシールドが減り、溢れた分が HP に入ります。</p>
           <p><a href="https://www.mycryptoheroes.net/ja/help-posts/2mNToh5xAynqPi6V23S9xc" target="_blank" rel="noopener">ヘルプ：シールド値</a></p>
-          <h3>実装の詳細</h3>
-          <p>リポジトリ内の <code>docs/specs/SPEC-002-prototype.md</code> §11 と <code>prototype/js/battle-mch.js</code> にコードレベルの説明があります。</p>
+          <h3>実装の詳細・権利表記</h3>
+          <p>戦闘ロジック・ステ計算は <a href="https://github.com/bearko/mycryptotactics/blob/main/prototype/js/battle-mch.js" target="_blank" rel="noopener">prototype/js/battle-mch.js</a> に実装されています。</p>
+          <p>キャラクター画像 / BGM / SE などのアセット利用条件・権利表記は <a href="https://github.com/bearko/mycryptoheroes/blob/main/README.md" target="_blank" rel="noopener">bearko/mycryptoheroes README</a> を参照してください。</p>
         </section>
       </div>
     </div>
