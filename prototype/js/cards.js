@@ -13193,6 +13193,6168 @@ function makeCardLibrary(clog, api) {
         api.healPlayerFromIntSkill(s, 15, 20);
       },
     },
+// ─── auto-generated Epic extensions (190 cards) ───
+    ext4001: {
+      libraryKey: "ext4001",
+      extId: 4001,
+      extNameJa: "インペリアルブレード",
+      skillNameJa: "インペリアルチャージ",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 65, 75)}`, "PHY\u3000+1"]; },
+      peekHelpKeys() { return ["phy"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 65, 75)} ダメージ（PHY 65〜75%）`, "PHY を +1"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 65, 75);
+        s.playerPhy += 1;
+      },
+    },
+    ext4002: {
+      libraryKey: "ext4002",
+      extId: 4002,
+      extNameJa: "三銃士のマスケット",
+      skillNameJa: "三銃士の一斉射撃",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 40, 45)}`, "INT\u3000+1"]; },
+      peekHelpKeys() { return ["int"]; },
+      previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 40, 45)} ダメージ（INT 40〜45%・1v1=単体）`, "INT を +1"]; },
+      play(s) {
+        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 40, 45);
+        s.playerInt += 1;
+      },
+    },
+    ext4003: {
+      libraryKey: "ext4003",
+      extId: 4003,
+      extNameJa: "楽聖の羽ペン",
+      skillNameJa: "ムジカノーヴァ",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 60, 70), "INT\u3000+1"]; },
+      peekHelpKeys() { return ["hp", "int"]; },
+      previewLines(s) { return [`HP を回復係数 60〜70% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 60, 70)}）`, "INT を +1"]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 60, 70);
+        s.playerInt += 1;
+      },
+    },
+    ext4004: {
+      libraryKey: "ext4004",
+      extId: 4004,
+      extNameJa: "フリューテッドアーマー",
+      skillNameJa: "蒸着",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 5, 5), "PHY\u3000+2"]; },
+      peekHelpKeys() { return ["hp", "phy"]; },
+      previewLines(s) { return [`HP を回復係数 5〜5% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 5, 5)}）`, "PHY を +2"]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 5, 5);
+        s.playerPhy += 2;
+      },
+    },
+    ext4005: {
+      libraryKey: "ext4005",
+      extId: 4005,
+      extNameJa: "赤兎馬",
+      skillNameJa: "一日千里",
+      skillIcon: "guard.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines() { return ["ガード\u3000+6"]; },
+      peekHelpKeys() { return ["guard"]; },
+      previewLines() { return ["ガードを 6 得る（StS 風代替効果）"]; },
+      play(s) {
+        s.playerGuard += 6; api.playBattleSe("buff"); api.portraitFx("player", "buff");
+      },
+    },
+    ext4006: {
+      libraryKey: "ext4006",
+      extId: 4006,
+      extNameJa: "和泉守兼定",
+      skillNameJa: "剣豪の一撃",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)}`, "PHY\u3000-1（敵）"]; },
+      peekHelpKeys() { return ["phy"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)} ダメージ（PHY 60〜70%）`, "敵の PHY を -1"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 60, 70);
+        s.enemyPhy = Math.max(1, s.enemyPhy + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+      },
+    },
+    ext4007: {
+      libraryKey: "ext4007",
+      extId: 4007,
+      extNameJa: "キューティー・エイリアン",
+      skillNameJa: "キューティー・エイリアン",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 60, 60)}`, "毒 ×3（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 60, 60)} ダメージ（PHY 60〜60%）`, "敵に毒 ×3 付与"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 60, 60);
+        api.addPoisonToEnemy(s, 3);
+      },
+    },
+    ext4008: {
+      libraryKey: "ext4008",
+      extId: 4008,
+      extNameJa: "罪と罰",
+      skillNameJa: "現代の予言書",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 40, 45)}`, "INT\u3000-1（敵）"]; },
+      peekHelpKeys() { return ["int"]; },
+      previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 40, 45)} ダメージ（INT 40〜45%・1v1=単体）`, "敵の INT を -1"]; },
+      play(s) {
+        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 40, 45);
+        s.enemyInt = Math.max(1, s.enemyInt + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+      },
+    },
+    ext4009: {
+      libraryKey: "ext4009",
+      extId: 4009,
+      extNameJa: "奇石の輝き",
+      skillNameJa: "不思議な光",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 60, 70)]; },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) { return [`HP を回復係数 60〜70% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 60, 70)}）`]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 60, 70);
+      },
+    },
+    ext4010: {
+      libraryKey: "ext4010",
+      extId: 4010,
+      extNameJa: "プリトウェン",
+      skillNameJa: "聖女の祈り",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 32, 37)}`, "AGI\u3000-1（敵）"]; },
+      peekHelpKeys() { return ["agi"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 32, 37)} ダメージ（PHY 32〜37%）`, "敵の AGI を -1"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 32, 37);
+        s.enemyAgi = Math.max(1, s.enemyAgi + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+      },
+    },
+    ext4011: {
+      libraryKey: "ext4011",
+      extId: 4011,
+      extNameJa: "テカムセのトマホーク",
+      skillNameJa: "テカムセの呪い",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)}`, "INT\u3000-1（敵）"]; },
+      peekHelpKeys() { return ["int"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)} ダメージ（PHY 60〜70%）`, "敵の INT を -1"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 60, 70);
+        s.enemyInt = Math.max(1, s.enemyInt + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+      },
+    },
+    ext4012: {
+      libraryKey: "ext4012",
+      extId: 4012,
+      extNameJa: "ETHEREMON-SIBERIZEN",
+      skillNameJa: "頼んだぞ!シベリゼン!",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 55)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 50, 55)} ダメージ（INT 50〜55%）`]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 50, 55);
+      },
+    },
+    ext4013: {
+      libraryKey: "ext4013",
+      extId: 4013,
+      extNameJa: "雷上動",
+      skillNameJa: "鵺殺し",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)}`, "PHY\u3000+1"]; },
+      peekHelpKeys() { return ["phy"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)} ダメージ（PHY 50〜60%）`, "PHY を +1"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 50, 60);
+        s.playerPhy += 1;
+      },
+    },
+    ext4014: {
+      libraryKey: "ext4014",
+      extId: 4014,
+      extNameJa: "人間無骨",
+      skillNameJa: "鬼武蔵",
+      skillIcon: "phy.png",
+      cost: 2,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines() { return [`敵にダメージ ×2`]; },
+      peekHelpKeys() { return []; },
+      previewLines() { return [`敵1体に PHY 30〜35% × 2 回ダメージ`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 30, 35);
+        if (s.enemyHp > 0) api.dealPhySkillToEnemy(s, 30, 35);
+      },
+    },
+    ext4015: {
+      libraryKey: "ext4015",
+      extId: 4015,
+      extNameJa: "丈八蛇矛",
+      skillNameJa: "旋風斬り",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 55, 65)}`, "毒 ×3（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 55, 65)} ダメージ（PHY 55〜65%）`, "敵に毒 ×3 付与"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 55, 65);
+        api.addPoisonToEnemy(s, 3);
+      },
+    },
+    ext4016: {
+      libraryKey: "ext4016",
+      extId: 4016,
+      extNameJa: "兵法書",
+      skillNameJa: "五事七計",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 30, 35)}`, "毒 ×3（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 30, 35)} ダメージ（INT 30〜35%・1v1=単体）`, "敵に毒 ×3 付与"]; },
+      play(s) {
+        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 30, 35);
+        api.addPoisonToEnemy(s, 3);
+      },
+    },
+    ext4017: {
+      libraryKey: "ext4017",
+      extId: 4017,
+      extNameJa: "シベリア杉の首飾り",
+      skillNameJa: "ドルイドの秘法",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 15, 25), "INT\u3000+1"]; },
+      peekHelpKeys() { return ["hp", "int"]; },
+      previewLines(s) { return [`HP を回復係数 15〜25% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 15, 25)}）`, "INT を +1"]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 15, 25);
+        s.playerInt += 1;
+      },
+    },
+    ext4018: {
+      libraryKey: "ext4018",
+      extId: 4018,
+      extNameJa: "諏訪法性兜",
+      skillNameJa: "軍神の加護",
+      skillIcon: "BUF_phy.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines() { return ["PHY\u3000+1", "INT\u3000+1", "INT\u3000-1（敵）"]; },
+      peekHelpKeys() { return ["phy", "int"]; },
+      previewLines() { return ["PHY を +1", "INT を +1", "敵の INT を -1"]; },
+      play(s) {
+        s.playerPhy += 1;
+        s.playerInt += 1;
+        s.enemyInt = Math.max(1, s.enemyInt + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+      },
+    },
+    ext4019: {
+      libraryKey: "ext4019",
+      extId: 4019,
+      extNameJa: "アーケロン",
+      skillNameJa: "帝亀",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 25, 25), "PHY\u3000+1", "INT\u3000+1"]; },
+      peekHelpKeys() { return ["hp", "phy", "int"]; },
+      previewLines(s) { return [`HP を回復係数 25〜25% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 25, 25)}）`, "PHY を +1", "INT を +1"]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 25, 25);
+        s.playerPhy += 1;
+        s.playerInt += 1;
+      },
+    },
+    ext4020: {
+      libraryKey: "ext4020",
+      extId: 4020,
+      extNameJa: "ホットスパー",
+      skillNameJa: "ファイティングクック",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)}`, "AGI\u3000+1"]; },
+      peekHelpKeys() { return ["agi"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)} ダメージ（PHY 35〜40%）`, "AGI を +1"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 35, 40);
+        s.playerAgi += 1;
+      },
+    },
+    ext4021: {
+      libraryKey: "ext4021",
+      extId: 4021,
+      extNameJa: "アムールタイガー",
+      skillNameJa: "タイガーシュート",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 45, 50)}`, "PHY\u3000+1"]; },
+      peekHelpKeys() { return ["phy"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 45, 50)} ダメージ（PHY 45〜50%）`, "PHY を +1"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 45, 50);
+        s.playerPhy += 1;
+      },
+    },
+    ext4022: {
+      libraryKey: "ext4022",
+      extId: 4022,
+      extNameJa: "ワイバーン",
+      skillNameJa: "ドラゴンクエイク",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 25, 30)}`, "INT\u3000-1（敵）"]; },
+      peekHelpKeys() { return ["int"]; },
+      previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 25, 30)} ダメージ（INT 25〜30%・1v1=単体）`, "敵の INT を -1"]; },
+      play(s) {
+        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 25, 30);
+        s.enemyInt = Math.max(1, s.enemyInt + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+      },
+    },
+    ext4023: {
+      libraryKey: "ext4023",
+      extId: 4023,
+      extNameJa: "バイソン",
+      skillNameJa: "レイドブル",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 45, 55)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 45, 55)} ダメージ（PHY 45〜55%）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 45, 55);
+      },
+    },
+    ext4024: {
+      libraryKey: "ext4024",
+      extId: 4024,
+      extNameJa: "マンモス",
+      skillNameJa: "リューバ",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 30, 35)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 30, 35)} ダメージ（PHY 30〜35%）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 30, 35);
+      },
+    },
+    ext4025: {
+      libraryKey: "ext4025",
+      extId: 4025,
+      extNameJa: "シルバーバック",
+      skillNameJa: "古老の知恵",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 25, 30)}`, "出血 ×3（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 25, 30)} ダメージ（INT 25〜30%）`, "敵に出血 ×3 付与"]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 25, 30);
+        api.addBleedToEnemy(s, 3);
+      },
+    },
+    ext4026: {
+      libraryKey: "ext4026",
+      extId: 4026,
+      extNameJa: "キングコブラ",
+      skillNameJa: "ムチャリンダ",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 18, 38)]; },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) { return [`HP を回復係数 18〜38% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 18, 38)}）`]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 18, 38);
+      },
+    },
+    ext4027: {
+      libraryKey: "ext4027",
+      extId: 4027,
+      extNameJa: "モロッサス",
+      skillNameJa: "ドッグファイト",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 45, 55)}`, "INT\u3000-1（敵）"]; },
+      peekHelpKeys() { return ["int"]; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 45, 55)} ダメージ（INT 45〜55%）`, "敵の INT を -1"]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 45, 55);
+        s.enemyInt = Math.max(1, s.enemyInt + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+      },
+    },
+    ext4028: {
+      libraryKey: "ext4028",
+      extId: 4028,
+      extNameJa: "エスパダ・ロペラ",
+      skillNameJa: "黄金世紀の一閃",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 55, 65)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 55, 65)} ダメージ（PHY 55〜65%）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 55, 65);
+      },
+    },
+    ext4029: {
+      libraryKey: "ext4029",
+      extId: 4029,
+      extNameJa: "ドラグーン",
+      skillNameJa: "荒野の一撃",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 60)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 50, 60)} ダメージ（INT 50〜60%）`]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 50, 60);
+      },
+    },
+    ext4030: {
+      libraryKey: "ext4030",
+      extId: 4030,
+      extNameJa: "幸若舞の盃",
+      skillNameJa: "敦盛",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 45, 55)]; },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) { return [`HP を回復係数 45〜55% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 45, 55)}）`]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 45, 55);
+      },
+    },
+    ext4031: {
+      libraryKey: "ext4031",
+      extId: 4031,
+      extNameJa: "大西部のブーツ",
+      skillNameJa: "開拓者の一歩",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 30, 35), "AGI\u3000+1"]; },
+      peekHelpKeys() { return ["hp", "agi"]; },
+      previewLines(s) { return [`HP を回復係数 30〜35% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 30, 35)}）`, "AGI を +1"]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 30, 35);
+        s.playerAgi += 1;
+      },
+    },
+    ext4032: {
+      libraryKey: "ext4032",
+      extId: 4032,
+      extNameJa: "舞扇",
+      skillNameJa: "棟梁の舞",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 30, 35)}`, "HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 10, 10), "INT\u3000+1"]; },
+      peekHelpKeys() { return ["hp", "int"]; },
+      previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 30, 35)} ダメージ（INT 30〜35%・1v1=単体）`, `HP を回復係数 10〜10% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 10, 10)}）`, "INT を +1"]; },
+      play(s) {
+        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 30, 35);
+        api.healPlayerFromIntSkill(s, 10, 10);
+        s.playerInt += 1;
+      },
+    },
+    ext4033: {
+      libraryKey: "ext4033",
+      extId: 4033,
+      extNameJa: "クレイジーMCHメダル",
+      skillNameJa: "クレイジーMaster Nobの御加護",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 5, 5), "PHY\u3000+1", "INT\u3000+1", "AGI\u3000+1"]; },
+      peekHelpKeys() { return ["hp", "phy", "int", "agi"]; },
+      previewLines(s) { return [`HP を回復係数 5〜5% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 5, 5)}）`, "PHY を +1", "INT を +1", "AGI を +1"]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 5, 5);
+        s.playerPhy += 1;
+        s.playerInt += 1;
+        s.playerAgi += 1;
+      },
+    },
+    ext4034: {
+      libraryKey: "ext4034",
+      extId: 4034,
+      extNameJa: "石槌",
+      skillNameJa: "名工の一振り",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 55, 65)}`, "HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 5, 5), "PHY\u3000+2"]; },
+      peekHelpKeys() { return ["hp", "phy"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 55, 65)} ダメージ（PHY 55〜65%）`, `HP を回復係数 5〜5% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 5, 5)}）`, "PHY を +2"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 55, 65);
+        api.healPlayerFromIntSkill(s, 5, 5);
+        s.playerPhy += 2;
+      },
+    },
+    ext4035: {
+      libraryKey: "ext4035",
+      extId: 4035,
+      extNameJa: "クロスボウ",
+      skillNameJa: "アップルシューター",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 60)}`, "HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 5, 5), "INT\u3000+2"]; },
+      peekHelpKeys() { return ["hp", "int"]; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 50, 60)} ダメージ（INT 50〜60%）`, `HP を回復係数 5〜5% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 5, 5)}）`, "INT を +2"]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 50, 60);
+        api.healPlayerFromIntSkill(s, 5, 5);
+        s.playerInt += 2;
+      },
+    },
+    ext4036: {
+      libraryKey: "ext4036",
+      extId: 4036,
+      extNameJa: "宝冠",
+      skillNameJa: "奉神礼",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 45, 55), "AGI\u3000+2"]; },
+      peekHelpKeys() { return ["hp", "agi"]; },
+      previewLines(s) { return [`HP を回復係数 45〜55% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 45, 55)}）`, "AGI を +2"]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 45, 55);
+        s.playerAgi += 2;
+      },
+    },
+    ext4037: {
+      libraryKey: "ext4037",
+      extId: 4037,
+      extNameJa: "立行司の軍配",
+      skillNameJa: "上覧相撲の奉仕",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 32, 37)}`, "PHY\u3000+1"]; },
+      peekHelpKeys() { return ["phy"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 32, 37)} ダメージ（PHY 32〜37%）`, "PHY を +1"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 32, 37);
+        s.playerPhy += 1;
+      },
+    },
+    ext4038: {
+      libraryKey: "ext4038",
+      extId: 4038,
+      extNameJa: "水底の舵輪",
+      skillNameJa: "クラーケン",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 20, 20)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 20, 20)} ダメージ（PHY 20〜20%）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 20, 20);
+      },
+    },
+    ext4039: {
+      libraryKey: "ext4039",
+      extId: 4039,
+      extNameJa: "スウィートキング",
+      skillNameJa: "極上の甘み",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 40, 50)]; },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) { return [`HP を回復係数 40〜50% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 40, 50)}）`]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 40, 50);
+      },
+    },
+    ext4040: {
+      libraryKey: "ext4040",
+      extId: 4040,
+      extNameJa: "ブッシュカン",
+      skillNameJa: "仏の掌",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 50)}`, "PHY\u3000-1（敵）"]; },
+      peekHelpKeys() { return ["phy"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 50)} ダメージ（PHY 50〜50%）`, "敵の PHY を -1"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 50, 50);
+        s.enemyPhy = Math.max(1, s.enemyPhy + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+      },
+    },
+    ext4041: {
+      libraryKey: "ext4041",
+      extId: 4041,
+      extNameJa: "カフィアライム",
+      skillNameJa: "スクイーザー",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)} ダメージ（PHY 50〜60%）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 50, 60);
+      },
+    },
+    ext4042: {
+      libraryKey: "ext4042",
+      extId: 4042,
+      extNameJa: "エアログラファイト",
+      skillNameJa: "ソノラ",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 30, 50)}`, "毒 ×3（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 30, 50)} ダメージ（PHY 30〜50%）`, "敵に毒 ×3 付与"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 30, 50);
+        api.addPoisonToEnemy(s, 3);
+      },
+    },
+    ext4043: {
+      libraryKey: "ext4043",
+      extId: 4043,
+      extNameJa: "怒りの葡萄",
+      skillNameJa: "ナパ・バレー",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 40, 50)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 40, 50)} ダメージ（INT 40〜50%・1v1=単体）`]; },
+      play(s) {
+        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 40, 50);
+      },
+    },
+    ext4044: {
+      libraryKey: "ext4044",
+      extId: 4044,
+      extNameJa: "ホワイトセージ",
+      skillNameJa: "スマッジング",
+      skillIcon: "DBF_phy.png",
+      cost: 1,
+      type: "skl",
+      target: "enemy.foremost",
+      effectSummaryLines() { return ["出血 ×3（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines() { return ["敵に出血 ×3 付与"]; },
+      play(s) {
+        api.addBleedToEnemy(s, 3);
+      },
+    },
+    ext4045: {
+      libraryKey: "ext4045",
+      extId: 4045,
+      extNameJa: "ハイブッシュ",
+      skillNameJa: "アルカロイド",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 50)}`, "毒 ×3（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 50, 50)} ダメージ（INT 50〜50%）`, "敵に毒 ×3 付与"]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 50, 50);
+        api.addPoisonToEnemy(s, 3);
+      },
+    },
+    ext4046: {
+      libraryKey: "ext4046",
+      extId: 4046,
+      extNameJa: "ピジョンブラッド",
+      skillNameJa: "オリジンミャンマー",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 30, 35)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 30, 35)} ダメージ（PHY 30〜35%）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 30, 35);
+      },
+    },
+    ext4047: {
+      libraryKey: "ext4047",
+      extId: 4047,
+      extNameJa: "咸臨丸",
+      skillNameJa: "榎本艦隊",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 0, 70)}`, `敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 0, 70)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 0, 70)} ダメージ（PHY 0〜70%）`, `敵1体に ${estIntHit(s.playerInt, s.enemyInt, 0, 70)} ダメージ（INT 0〜70%）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 0, 70);
+        api.dealIntSkillToEnemy(s, 0, 70);
+      },
+    },
+    ext4048: {
+      libraryKey: "ext4048",
+      extId: 4048,
+      extNameJa: "グルカナイフ",
+      skillNameJa: "ククリ",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 55, 65)}`, "PHY\u3000-1（敵）", "毒 ×3（敵）"]; },
+      peekHelpKeys() { return ["phy"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 55, 65)} ダメージ（PHY 55〜65%）`, "敵の PHY を -1", "敵に毒 ×3 付与"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 55, 65);
+        s.enemyPhy = Math.max(1, s.enemyPhy + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        api.addPoisonToEnemy(s, 3);
+      },
+    },
+    ext4049: {
+      libraryKey: "ext4049",
+      extId: 4049,
+      extNameJa: "八咫烏",
+      skillNameJa: "雑賀衆",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 60)}`, "INT\u3000-1（敵）", "毒 ×3（敵）"]; },
+      peekHelpKeys() { return ["int"]; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 50, 60)} ダメージ（INT 50〜60%）`, "敵の INT を -1", "敵に毒 ×3 付与"]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 50, 60);
+        s.enemyInt = Math.max(1, s.enemyInt + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        api.addPoisonToEnemy(s, 3);
+      },
+    },
+    ext4050: {
+      libraryKey: "ext4050",
+      extId: 4050,
+      extNameJa: "ロゼッタ・ストーン",
+      skillNameJa: "ヒエログリフ",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 25, 35), "INT\u3000+1"]; },
+      peekHelpKeys() { return ["hp", "int"]; },
+      previewLines(s) { return [`HP を回復係数 25〜35% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 25, 35)}）`, "INT を +1"]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 25, 35);
+        s.playerInt += 1;
+      },
+    },
+    ext4051: {
+      libraryKey: "ext4051",
+      extId: 4051,
+      extNameJa: "カラミティウィップ",
+      skillNameJa: "ワイルドウェストラッシング",
+      skillIcon: "phy.png",
+      cost: 2,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines() { return [`敵にダメージ ×2`, "AGI\u3000-1（敵）"]; },
+      peekHelpKeys() { return ["agi"]; },
+      previewLines() { return [`敵1体に PHY 22〜37% × 2 回ダメージ`, "敵の AGI を -1"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 22, 37);
+        if (s.enemyHp > 0) api.dealPhySkillToEnemy(s, 22, 37);
+        s.enemyAgi = Math.max(1, s.enemyAgi + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+      },
+    },
+    ext4055: {
+      libraryKey: "ext4055",
+      extId: 4055,
+      extNameJa: "とっておきのレアチーズケーキ",
+      skillNameJa: "レアチーズケーキの恨みを受けよ！",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 25, 35)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 25, 35)} ダメージ（INT 25〜35%）`]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 25, 35);
+      },
+    },
+    ext4056: {
+      libraryKey: "ext4056",
+      extId: 4056,
+      extNameJa: "デスサイズ",
+      skillNameJa: "死のアルカナ",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)}`, "INT\u3000-1（敵）"]; },
+      peekHelpKeys() { return ["int"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)} ダメージ（PHY 60〜70%）`, "敵の INT を -1"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 60, 70);
+        s.enemyInt = Math.max(1, s.enemyInt + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+      },
+    },
+    ext4057: {
+      libraryKey: "ext4057",
+      extId: 4057,
+      extNameJa: "ジェーズル",
+      skillNameJa: "聖体礼儀",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 60)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 50, 60)} ダメージ（INT 50〜60%）`]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 50, 60);
+      },
+    },
+    ext4058: {
+      libraryKey: "ext4058",
+      extId: 4058,
+      extNameJa: "神便鬼毒酒",
+      skillNameJa: "鬼殺し",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 45, 55), "PHY\u3000-3（敵）", "AGI\u3000-3（敵）"]; },
+      peekHelpKeys() { return ["hp", "phy", "agi"]; },
+      previewLines(s) { return [`HP を回復係数 45〜55% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 45, 55)}）`, "敵の PHY を -3", "敵の AGI を -3"]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 45, 55);
+        s.enemyPhy = Math.max(1, s.enemyPhy + (-3)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        s.enemyAgi = Math.max(1, s.enemyAgi + (-3)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+      },
+    },
+    ext4059: {
+      libraryKey: "ext4059",
+      extId: 4059,
+      extNameJa: "綸巾",
+      skillNameJa: "勝は知る可くして為す可からず",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 5, 5), "INT\u3000+2"]; },
+      peekHelpKeys() { return ["hp", "int"]; },
+      previewLines(s) { return [`HP を回復係数 5〜5% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 5, 5)}）`, "INT を +2"]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 5, 5);
+        s.playerInt += 2;
+      },
+    },
+    ext4060: {
+      libraryKey: "ext4060",
+      extId: 4060,
+      extNameJa: "レオ",
+      skillNameJa: "ジャングル大帝",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 55, 55)}`, "出血 ×3（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 55, 55)} ダメージ（PHY 55〜55%）`, "敵に出血 ×3 付与"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 55, 55);
+        api.addBleedToEnemy(s, 3);
+      },
+    },
+    ext4061: {
+      libraryKey: "ext4061",
+      extId: 4061,
+      extNameJa: "狩人のマント",
+      skillNameJa: "草原のそよ風",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 60, 70), "PHY\u3000+1"]; },
+      peekHelpKeys() { return ["hp", "phy"]; },
+      previewLines(s) { return [`HP を回復係数 60〜70% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 60, 70)}）`, "PHY を +1"]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 60, 70);
+        s.playerPhy += 1;
+      },
+    },
+    ext4063: {
+      libraryKey: "ext4063",
+      extId: 4063,
+      extNameJa: "アルルカン",
+      skillNameJa: "ワイルドカード",
+      skillIcon: "BUF_agi.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines() { return ["AGI\u3000+1", "出血 ×3（敵）"]; },
+      peekHelpKeys() { return ["agi"]; },
+      previewLines() { return ["AGI を +1", "敵に出血 ×3 付与"]; },
+      play(s) {
+        s.playerAgi += 1;
+        api.addBleedToEnemy(s, 3);
+      },
+    },
+    ext4064: {
+      libraryKey: "ext4064",
+      extId: 4064,
+      extNameJa: "コマンチェスピリット",
+      skillNameJa: "狩人の恋唄",
+      skillIcon: "DBF_phy.png",
+      cost: 1,
+      type: "skl",
+      target: "enemy.foremost",
+      effectSummaryLines() { return ["毒 ×3（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines() { return ["敵に毒 ×3 付与"]; },
+      play(s) {
+        api.addPoisonToEnemy(s, 3);
+      },
+    },
+    ext4065: {
+      libraryKey: "ext4065",
+      extId: 4065,
+      extNameJa: "ダビデのリラ",
+      skillNameJa: "神変浄化の音色",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 60)}`, "出血 ×3（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 50, 60)} ダメージ（INT 50〜60%）`, "敵に出血 ×3 付与"]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 50, 60);
+        api.addBleedToEnemy(s, 3);
+      },
+    },
+    ext4066: {
+      libraryKey: "ext4066",
+      extId: 4066,
+      extNameJa: "死者のマラカス",
+      skillNameJa: "死者の日",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 55, 65)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 55, 65)} ダメージ（PHY 55〜65%）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 55, 65);
+      },
+    },
+    ext4067: {
+      libraryKey: "ext4067",
+      extId: 4067,
+      extNameJa: "ショファール",
+      skillNameJa: "ローシュ・ハッシャーナー",
+      skillIcon: "DBF_agi.png",
+      cost: 1,
+      type: "skl",
+      target: "enemy.foremost",
+      effectSummaryLines() { return ["AGI\u3000-3（敵）"]; },
+      peekHelpKeys() { return ["agi"]; },
+      previewLines() { return ["敵の AGI を -3"]; },
+      play(s) {
+        s.enemyAgi = Math.max(1, s.enemyAgi + (-3)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+      },
+    },
+    ext4068: {
+      libraryKey: "ext4068",
+      extId: 4068,
+      extNameJa: "ジラフピアノ",
+      skillNameJa: "交響曲第3番変ホ長調 英雄",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)} ダメージ（PHY 50〜60%・代替効果）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 50, 60);
+      },
+    },
+    ext4069: {
+      libraryKey: "ext4069",
+      extId: 4069,
+      extNameJa: "イル・カノーネ",
+      skillNameJa: "戦場のソリスト",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 40, 50)]; },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) { return [`HP を回復係数 40〜50% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 40, 50)}）`]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 40, 50);
+      },
+    },
+    ext4070: {
+      libraryKey: "ext4070",
+      extId: 4070,
+      extNameJa: "馬頭二胡",
+      skillNameJa: "義に背き恩を忘るれば、天人ともに戮すべし",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 55, 65)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 55, 65)} ダメージ（INT 55〜65%）`]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 55, 65);
+      },
+    },
+    ext4071: {
+      libraryKey: "ext4071",
+      extId: 4071,
+      extNameJa: "ドレークの遺産",
+      skillNameJa: "世界を駆けたドラムライン",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 22, 22)]; },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) { return [`HP を回復係数 22〜22% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 22, 22)}）`]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 22, 22);
+      },
+    },
+    ext4072: {
+      libraryKey: "ext4072",
+      extId: 4072,
+      extNameJa: "バラナシのシタール",
+      skillNameJa: "ノルウェーの森",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 50)}`, "毒 ×3（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 50)} ダメージ（PHY 50〜50%）`, "敵に毒 ×3 付与"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 50, 50);
+        api.addPoisonToEnemy(s, 3);
+      },
+    },
+    ext4073: {
+      libraryKey: "ext4073",
+      extId: 4073,
+      extNameJa: "大黒の小槌",
+      skillNameJa: "現世と 夢路の境 うちくづし",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 65)}`, "出血 ×3（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 65)} ダメージ（PHY 50〜65%）`, "敵に出血 ×3 付与"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 50, 65);
+        api.addBleedToEnemy(s, 3);
+      },
+    },
+    ext4074: {
+      libraryKey: "ext4074",
+      extId: 4074,
+      extNameJa: "国崩し",
+      skillNameJa: "砲尾装填式砲",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 60)}`, "出血 ×3（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 50, 60)} ダメージ（INT 50〜60%）`, "敵に出血 ×3 付与"]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 50, 60);
+        api.addBleedToEnemy(s, 3);
+      },
+    },
+    ext4075: {
+      libraryKey: "ext4075",
+      extId: 4075,
+      extNameJa: "ローネット",
+      skillNameJa: "ロイヤルリザーブ",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 45, 55), "INT\u3000-3（敵）"]; },
+      peekHelpKeys() { return ["hp", "int"]; },
+      previewLines(s) { return [`HP を回復係数 45〜55% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 45, 55)}）`, "敵の INT を -3"]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 45, 55);
+        s.enemyInt = Math.max(1, s.enemyInt + (-3)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+      },
+    },
+    ext4079: {
+      libraryKey: "ext4079",
+      extId: 4079,
+      extNameJa: "オーガスタッフ",
+      skillNameJa: "獄卒",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 30, 35)}`, "PHY\u3000+1"]; },
+      peekHelpKeys() { return ["phy"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 30, 35)} ダメージ（PHY 30〜35%）`, "PHY を +1"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 30, 35);
+        s.playerPhy += 1;
+      },
+    },
+    ext4080: {
+      libraryKey: "ext4080",
+      extId: 4080,
+      extNameJa: "流星のホーキ",
+      skillNameJa: "シューティング・スター",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 30, 40)}`, "AGI\u3000+1"]; },
+      peekHelpKeys() { return ["agi"]; },
+      previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 30, 40)} ダメージ（INT 30〜40%・1v1=単体）`, "AGI を +1"]; },
+      play(s) {
+        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 30, 40);
+        s.playerAgi += 1;
+      },
+    },
+    ext4081: {
+      libraryKey: "ext4081",
+      extId: 4081,
+      extNameJa: "銀糸威当世小札",
+      skillNameJa: "戦国甲冑",
+      skillIcon: "BUF_phy.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines() { return ["PHY\u3000+2", "INT\u3000+2"]; },
+      peekHelpKeys() { return ["phy", "int"]; },
+      previewLines() { return ["PHY を +2", "INT を +2"]; },
+      play(s) {
+        s.playerPhy += 2;
+        s.playerInt += 2;
+      },
+    },
+    ext4082: {
+      libraryKey: "ext4082",
+      extId: 4082,
+      extNameJa: "詠春八斬刀",
+      skillNameJa: "短橋狭馬",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 55)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 55)} ダメージ（PHY 50〜55%）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 50, 55);
+      },
+    },
+    ext4083: {
+      libraryKey: "ext4083",
+      extId: 4083,
+      extNameJa: "クレイジーMCSメダル",
+      skillNameJa: "クレイジー神の御加護",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 30, 40)]; },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) { return [`HP を回復係数 30〜40% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 30, 40)}）`]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 30, 40);
+      },
+    },
+    ext4085: {
+      libraryKey: "ext4085",
+      extId: 4085,
+      extNameJa: "アルティメットバイナンスチャリティメダル",
+      skillNameJa: "アルティメットバイナンスチャリティの御加護",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 5, 5)]; },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) { return [`HP を回復係数 5〜5% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 5, 5)}）`]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 5, 5);
+      },
+    },
+    ext4086: {
+      libraryKey: "ext4086",
+      extId: 4086,
+      extNameJa: "ノストセラス",
+      skillNameJa: "アンモーンの角",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 60)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 50, 60)} ダメージ（INT 50〜60%・代替効果）`]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 50, 60);
+      },
+    },
+    ext4087: {
+      libraryKey: "ext4087",
+      extId: 4087,
+      extNameJa: "プテラマキナ",
+      skillNameJa: "はかいこうせん",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 90, 95)}`, "出血 ×3（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 90, 95)} ダメージ（PHY 90〜95%）`, "敵に出血 ×3 付与"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 90, 95);
+        api.addBleedToEnemy(s, 3);
+      },
+    },
+    ext4088: {
+      libraryKey: "ext4088",
+      extId: 4088,
+      extNameJa: "インペブレックス",
+      skillNameJa: "インペリアル・オーラ",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 15, 25)]; },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) { return [`HP を回復係数 15〜25% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 15, 25)}）`]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 15, 25);
+      },
+    },
+    ext4089: {
+      libraryKey: "ext4089",
+      extId: 4089,
+      extNameJa: "首長竜チャンプ",
+      skillNameJa: "龍海嘯",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 16, 16)}`, "INT\u3000-1（敵）", "毒 ×3（敵）"]; },
+      peekHelpKeys() { return ["int"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 16, 16)} ダメージ（PHY 16〜16%）`, "敵の INT を -1", "敵に毒 ×3 付与"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 16, 16);
+        s.enemyInt = Math.max(1, s.enemyInt + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        api.addPoisonToEnemy(s, 3);
+      },
+    },
+    ext4090: {
+      libraryKey: "ext4090",
+      extId: 4090,
+      extNameJa: "チャリオット",
+      skillNameJa: "衝角",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 45, 55)]; },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) { return [`HP を回復係数 45〜55% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 45, 55)}）`]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 45, 55);
+      },
+    },
+    ext4091: {
+      libraryKey: "ext4091",
+      extId: 4091,
+      extNameJa: "ミュルグレス・スクアマ",
+      skillNameJa: "グレイプフル デッド",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 45, 60)]; },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) { return [`HP を回復係数 45〜60% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 45, 60)}）`]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 45, 60);
+      },
+    },
+    ext4092: {
+      libraryKey: "ext4092",
+      extId: 4092,
+      extNameJa: "草樹の守護",
+      skillNameJa: "樹の種火",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 50)}`, "毒 ×3（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 50, 50)} ダメージ（INT 50〜50%）`, "敵に毒 ×3 付与"]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 50, 50);
+        api.addPoisonToEnemy(s, 3);
+      },
+    },
+    ext4093: {
+      libraryKey: "ext4093",
+      extId: 4093,
+      extNameJa: "スカルドメガロ",
+      skillNameJa: "バミューダギャングスター",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 45, 45)}`, "AGI\u3000+2"]; },
+      peekHelpKeys() { return ["agi"]; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 45, 45)} ダメージ（INT 45〜45%）`, "AGI を +2"]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 45, 45);
+        s.playerAgi += 2;
+      },
+    },
+    ext4094: {
+      libraryKey: "ext4094",
+      extId: 4094,
+      extNameJa: "ウロボロス・スタールビー",
+      skillNameJa: "ルージュインパクト",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)} ダメージ（PHY 50〜60%）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 50, 60);
+      },
+    },
+    ext4095: {
+      libraryKey: "ext4095",
+      extId: 4095,
+      extNameJa: "義士の采配",
+      skillNameJa: "金瘡治療の計",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 40, 40), "出血 ×3（敵）"]; },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) { return [`HP を回復係数 40〜40% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 40, 40)}）`, "敵に出血 ×3 付与"]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 40, 40);
+        api.addBleedToEnemy(s, 3);
+      },
+    },
+    ext4096: {
+      libraryKey: "ext4096",
+      extId: 4096,
+      extNameJa: "チャンピオンベルト",
+      skillNameJa: "頂点の覇気",
+      skillIcon: "DBF_int.png",
+      cost: 1,
+      type: "skl",
+      target: "enemy.foremost",
+      effectSummaryLines() { return ["PHY\u3000-3（敵）", "INT\u3000-3（敵）"]; },
+      peekHelpKeys() { return ["phy", "int"]; },
+      previewLines() { return ["敵の PHY を -3", "敵の INT を -3"]; },
+      play(s) {
+        s.enemyPhy = Math.max(1, s.enemyPhy + (-3)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        s.enemyInt = Math.max(1, s.enemyInt + (-3)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+      },
+    },
+    ext4097: {
+      libraryKey: "ext4097",
+      extId: 4097,
+      extNameJa: "悪夢の爪",
+      skillNameJa: "冥界の門",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 55, 65)}`, "HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 27, 37), "毒 ×3（敵）"]; },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 55, 65)} ダメージ（PHY 55〜65%）`, `HP を回復係数 27〜37% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 27, 37)}）`, "敵に毒 ×3 付与"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 55, 65);
+        api.healPlayerFromIntSkill(s, 27, 37);
+        api.addPoisonToEnemy(s, 3);
+      },
+    },
+    ext4098: {
+      libraryKey: "ext4098",
+      extId: 4098,
+      extNameJa: "カルデアの玉",
+      skillNameJa: "月神の目",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 60)}`, "HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 27, 37), "毒 ×3（敵）"]; },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 50, 60)} ダメージ（INT 50〜60%）`, `HP を回復係数 27〜37% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 27, 37)}）`, "敵に毒 ×3 付与"]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 50, 60);
+        api.healPlayerFromIntSkill(s, 27, 37);
+        api.addPoisonToEnemy(s, 3);
+      },
+    },
+    ext4099: {
+      libraryKey: "ext4099",
+      extId: 4099,
+      extNameJa: "鯰籠手",
+      skillNameJa: "義経伝承",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 20, 20)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 20, 20)} ダメージ（PHY 20〜20%）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 20, 20);
+      },
+    },
+    ext4100: {
+      libraryKey: "ext4100",
+      extId: 4100,
+      extNameJa: "魔法剣・双極",
+      skillNameJa: "紫電一閃",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 60, 65)}`, "PHY\u3000+6", "毒 ×3（敵）"]; },
+      peekHelpKeys() { return ["phy"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 60, 65)} ダメージ（PHY 60〜65%）`, "PHY を +6", "敵に毒 ×3 付与"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 60, 65);
+        s.playerPhy += 6;
+        api.addPoisonToEnemy(s, 3);
+      },
+    },
+    ext4101: {
+      libraryKey: "ext4101",
+      extId: 4101,
+      extNameJa: "マモリ",
+      skillNameJa: "エロ防具じゃないマモ！",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 5, 5)}`, "PHY\u3000+1", "INT\u3000+1", "毒 ×3（敵）"]; },
+      peekHelpKeys() { return ["phy", "int"]; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 5, 5)} ダメージ（INT 5〜5%）`, "PHY を +1", "INT を +1", "敵に毒 ×3 付与"]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 5, 5);
+        s.playerPhy += 1;
+        s.playerInt += 1;
+        api.addPoisonToEnemy(s, 3);
+      },
+    },
+    ext4102: {
+      libraryKey: "ext4102",
+      extId: 4102,
+      extNameJa: "MCHスカウター",
+      skillNameJa: "戦闘力…たったの５か…",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 99, 99)}`, "PHY\u3000+1"]; },
+      peekHelpKeys() { return ["phy"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 99, 99)} ダメージ（PHY 99〜99%）`, "PHY を +1"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 99, 99);
+        s.playerPhy += 1;
+      },
+    },
+    ext4103: {
+      libraryKey: "ext4103",
+      extId: 4103,
+      extNameJa: "召符　鳳凰炎来",
+      skillNameJa: "業焔乱舞",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 99, 99)}`, "INT\u3000+1"]; },
+      peekHelpKeys() { return ["int"]; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 99, 99)} ダメージ（INT 99〜99%）`, "INT を +1"]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 99, 99);
+        s.playerInt += 1;
+      },
+    },
+    ext4104: {
+      libraryKey: "ext4104",
+      extId: 4104,
+      extNameJa: "闇の筆パレ",
+      skillNameJa: "認められざる個性の闇",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 25, 25)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 25, 25)} ダメージ（PHY 25〜25%）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 25, 25);
+      },
+    },
+    ext4105: {
+      libraryKey: "ext4105",
+      extId: 4105,
+      extNameJa: "照魔鏡",
+      skillNameJa: "やみうつし",
+      skillIcon: "DBF_phy.png",
+      cost: 1,
+      type: "skl",
+      target: "enemy.foremost",
+      effectSummaryLines() { return ["毒 ×3（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines() { return ["敵に毒 ×3 付与"]; },
+      play(s) {
+        api.addPoisonToEnemy(s, 3);
+      },
+    },
+    ext4106: {
+      libraryKey: "ext4106",
+      extId: 4106,
+      extNameJa: "モアイ艦長",
+      skillNameJa: "極上！レーザー砲",
+      skillIcon: "DBF_phy.png",
+      cost: 1,
+      type: "skl",
+      target: "enemy.foremost",
+      effectSummaryLines() { return ["毒 ×3（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines() { return ["敵に毒 ×3 付与"]; },
+      play(s) {
+        api.addPoisonToEnemy(s, 3);
+      },
+    },
+    ext4107: {
+      libraryKey: "ext4107",
+      extId: 4107,
+      extNameJa: "アタナソフの頭足髑髏",
+      skillNameJa: "スパミング クイーンニーナ",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 62, 62)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 62, 62)} ダメージ（INT 62〜62%）`]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 62, 62);
+      },
+    },
+    ext4108: {
+      libraryKey: "ext4108",
+      extId: 4108,
+      extNameJa: "聖域の守護者",
+      skillNameJa: "静寂の雷撃",
+      skillIcon: "DBF_phy.png",
+      cost: 1,
+      type: "skl",
+      target: "enemy.foremost",
+      effectSummaryLines() { return ["PHY\u3000-3（敵）"]; },
+      peekHelpKeys() { return ["phy"]; },
+      previewLines() { return ["敵の PHY を -3"]; },
+      play(s) {
+        s.enemyPhy = Math.max(1, s.enemyPhy + (-3)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+      },
+    },
+    ext4109: {
+      libraryKey: "ext4109",
+      extId: 4109,
+      extNameJa: "呪詛の髑髏",
+      skillNameJa: "レブルグラッジ",
+      skillIcon: "DBF_phy.png",
+      cost: 1,
+      type: "skl",
+      target: "enemy.foremost",
+      effectSummaryLines() { return ["出血 ×3（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines() { return ["敵に出血 ×3 付与"]; },
+      play(s) {
+        api.addBleedToEnemy(s, 3);
+      },
+    },
+    ext4110: {
+      libraryKey: "ext4110",
+      extId: 4110,
+      extNameJa: "煉獄の聖城に棲む妖精のリボン",
+      skillNameJa: "煉獄の妖精の聖紫のノイズ",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 56, 56)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 56, 56)} ダメージ（PHY 56〜56%）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 56, 56);
+      },
+    },
+    ext4111: {
+      libraryKey: "ext4111",
+      extId: 4111,
+      extNameJa: "白兎の魔法時計",
+      skillNameJa: "不思議への誘い",
+      skillIcon: "guard.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines() { return ["ガード\u3000+6"]; },
+      peekHelpKeys() { return ["guard"]; },
+      previewLines() { return ["ガードを 6 得る（StS 風代替効果）"]; },
+      play(s) {
+        s.playerGuard += 6; api.playBattleSe("buff"); api.portraitFx("player", "buff");
+      },
+    },
+    ext4112: {
+      libraryKey: "ext4112",
+      extId: 4112,
+      extNameJa: "蝶の魔王",
+      skillNameJa: "闇の光",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 65, 70)}`, "INT\u3000+1"]; },
+      peekHelpKeys() { return ["int"]; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 65, 70)} ダメージ（INT 65〜70%）`, "INT を +1"]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 65, 70);
+        s.playerInt += 1;
+      },
+    },
+    ext4113: {
+      libraryKey: "ext4113",
+      extId: 4113,
+      extNameJa: "アドミラルパロット",
+      skillNameJa: "空と海に響く号令",
+      skillIcon: "BUF_agi.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines() { return ["AGI\u3000+6", "毒 ×3（敵）"]; },
+      peekHelpKeys() { return ["agi"]; },
+      previewLines() { return ["AGI を +6", "敵に毒 ×3 付与"]; },
+      play(s) {
+        s.playerAgi += 6;
+        api.addPoisonToEnemy(s, 3);
+      },
+    },
+    ext4114: {
+      libraryKey: "ext4114",
+      extId: 4114,
+      extNameJa: "南葛SCのエンブレム",
+      skillNameJa: "南葛の守護神",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)}`, "PHY\u3000+1"]; },
+      peekHelpKeys() { return ["phy"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)} ダメージ（PHY 60〜70%）`, "PHY を +1"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 60, 70);
+        s.playerPhy += 1;
+      },
+    },
+    ext4115: {
+      libraryKey: "ext4115",
+      extId: 4115,
+      extNameJa: "MZ-Phantom",
+      skillNameJa: "#教えてBCG",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 65, 65)}`, "毒 ×3（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 65, 65)} ダメージ（INT 65〜65%）`, "敵に毒 ×3 付与"]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 65, 65);
+        api.addPoisonToEnemy(s, 3);
+      },
+    },
+    ext4116: {
+      libraryKey: "ext4116",
+      extId: 4116,
+      extNameJa: "帝国式魔導機甲兵 近衛機インペリアルガード",
+      skillNameJa: "零式殲滅弾 ［知られざる者］",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 32, 32)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 32, 32)} ダメージ（PHY 32〜32%）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 32, 32);
+      },
+    },
+    ext4117: {
+      libraryKey: "ext4117",
+      extId: 4117,
+      extNameJa: "紅翼の騎龍",
+      skillNameJa: "その角、その翼、怒りに染まりて",
+      skillIcon: "phy.png",
+      cost: 2,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 107, 107)}`, "INT\u3000-4（敵）"]; },
+      peekHelpKeys() { return ["int"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 107, 107)} ダメージ（PHY 107〜107%）`, "敵の INT を -4"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 107, 107);
+        s.enemyInt = Math.max(1, s.enemyInt + (-4)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+      },
+    },
+    ext4118: {
+      libraryKey: "ext4118",
+      extId: 4118,
+      extNameJa: "真夜中の観覧車",
+      skillNameJa: "窓になにかが張り付いている",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 37, 37)}`, "INT\u3000-5（敵）"]; },
+      peekHelpKeys() { return ["int"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 37, 37)} ダメージ（PHY 37〜37%）`, "敵の INT を -5"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 37, 37);
+        s.enemyInt = Math.max(1, s.enemyInt + (-5)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+      },
+    },
+    ext4119: {
+      libraryKey: "ext4119",
+      extId: 4119,
+      extNameJa: "完全体超級大熊猫",
+      skillNameJa: "笹食ってる場合じゃねぇ！！",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 17, 17)]; },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) { return [`HP を回復係数 17〜17% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 17, 17)}）`]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 17, 17);
+      },
+    },
+    ext4120: {
+      libraryKey: "ext4120",
+      extId: 4120,
+      extNameJa: "紫雲の天馬",
+      skillNameJa: "妖馬飛翔",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 57, 57)}`, "毒 ×3（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 57, 57)} ダメージ（INT 57〜57%・1v1=単体）`, "敵に毒 ×3 付与"]; },
+      play(s) {
+        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 57, 57);
+        api.addPoisonToEnemy(s, 3);
+      },
+    },
+    ext4121: {
+      libraryKey: "ext4121",
+      extId: 4121,
+      extNameJa: "草コイン回収船",
+      skillNameJa: "0x0f77121166D977bf0ddd6445E8844d844087dc99",
+      skillIcon: "guard.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines() { return ["ガード\u3000+6"]; },
+      peekHelpKeys() { return ["guard"]; },
+      previewLines() { return ["ガードを 6 得る（StS 風代替効果）"]; },
+      play(s) {
+        s.playerGuard += 6; api.playBattleSe("buff"); api.portraitFx("player", "buff");
+      },
+    },
+    ext4122: {
+      libraryKey: "ext4122",
+      extId: 4122,
+      extNameJa: "シャークサブマリン",
+      skillNameJa: "アオリイカダ",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 55, 55), "出血 ×3（敵）"]; },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) { return [`HP を回復係数 55〜55% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 55, 55)}）`, "敵に出血 ×3 付与"]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 55, 55);
+        api.addBleedToEnemy(s, 3);
+      },
+    },
+    ext4123: {
+      libraryKey: "ext4123",
+      extId: 4123,
+      extNameJa: "世界の片翼と呼ばれた空の国の魔導兵器バ・ビ・ディ・オン・ファティオス",
+      skillNameJa: "天空から零れ落ちる七色の魔導の雷",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 61, 61)}`, "出血 ×3（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 61, 61)} ダメージ（PHY 61〜61%）`, "敵に出血 ×3 付与"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 61, 61);
+        api.addBleedToEnemy(s, 3);
+      },
+    },
+    ext4124: {
+      libraryKey: "ext4124",
+      extId: 4124,
+      extNameJa: "火車剣",
+      skillNameJa: "火遁・火車打剣",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 45, 55)}`, "AGI\u3000-4（敵）"]; },
+      peekHelpKeys() { return ["agi"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 45, 55)} ダメージ（PHY 45〜55%）`, "敵の AGI を -4"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 45, 55);
+        s.enemyAgi = Math.max(1, s.enemyAgi + (-4)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+      },
+    },
+    ext4125: {
+      libraryKey: "ext4125",
+      extId: 4125,
+      extNameJa: "銀艶女王マダム・ケロリーヌ",
+      skillNameJa: "銀艶親衛隊",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 30, 35)}`, "PHY\u3000+2"]; },
+      peekHelpKeys() { return ["phy"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 30, 35)} ダメージ（PHY 30〜35%）`, "PHY を +2"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 30, 35);
+        s.playerPhy += 2;
+      },
+    },
+    ext4126: {
+      libraryKey: "ext4126",
+      extId: 4126,
+      extNameJa: "慈愛の氷雪王妃クイーンスノー&ベビー",
+      skillNameJa: "慈愛の雪崩",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 30, 35)}`, "INT\u3000+2"]; },
+      peekHelpKeys() { return ["int"]; },
+      previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 30, 35)} ダメージ（INT 30〜35%・1v1=単体）`, "INT を +2"]; },
+      play(s) {
+        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 30, 35);
+        s.playerInt += 2;
+      },
+    },
+    ext4127: {
+      libraryKey: "ext4127",
+      extId: 4127,
+      extNameJa: "花嫁人形",
+      skillNameJa: "赤い鹿の子の千代紙衣装",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 55, 55)]; },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) { return [`HP を回復係数 55〜55% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 55, 55)}）`]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 55, 55);
+      },
+    },
+    ext4128: {
+      libraryKey: "ext4128",
+      extId: 4128,
+      extNameJa: "SDNメダル[E]",
+      skillNameJa: "Epic Stake POWER!",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 40, 40)}`, `敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 40, 40)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 40, 40)} ダメージ（PHY 40〜40%）`, `敵1体に ${estIntHit(s.playerInt, s.enemyInt, 40, 40)} ダメージ（INT 40〜40%）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 40, 40);
+        api.dealIntSkillToEnemy(s, 40, 40);
+      },
+    },
+    ext4129: {
+      libraryKey: "ext4129",
+      extId: 4129,
+      extNameJa: "ベリーベリーパンケーキ",
+      skillNameJa: "酸味と甘味の絶妙なハーモニー",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 30, 45)]; },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) { return [`HP を回復係数 30〜45% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 30, 45)}）`]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 30, 45);
+      },
+    },
+    ext4130: {
+      libraryKey: "ext4130",
+      extId: 4130,
+      extNameJa: "レーザーブラスター",
+      skillNameJa: "連射レーザー",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 55, 55)}`, "PHY\u3000+6", "出血 ×3（敵）"]; },
+      peekHelpKeys() { return ["phy"]; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 55, 55)} ダメージ（INT 55〜55%）`, "PHY を +6", "敵に出血 ×3 付与"]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 55, 55);
+        s.playerPhy += 6;
+        api.addBleedToEnemy(s, 3);
+      },
+    },
+    ext4131: {
+      libraryKey: "ext4131",
+      extId: 4131,
+      extNameJa: "バッタ野武士",
+      skillNameJa: "不撓不屈",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 16, 16)}`, "毒 ×3（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 16, 16)} ダメージ（INT 16〜16%・1v1=単体）`, "敵に毒 ×3 付与"]; },
+      play(s) {
+        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 16, 16);
+        api.addPoisonToEnemy(s, 3);
+      },
+    },
+    ext4132: {
+      libraryKey: "ext4132",
+      extId: 4132,
+      extNameJa: "ゴールデンリミュラス",
+      skillNameJa: "シルルの光",
+      skillIcon: "guard.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines() { return ["ガード\u3000+6"]; },
+      peekHelpKeys() { return ["guard"]; },
+      previewLines() { return ["ガードを 6 得る（StS 風代替効果）"]; },
+      play(s) {
+        s.playerGuard += 6; api.playBattleSe("buff"); api.portraitFx("player", "buff");
+      },
+    },
+    ext4133: {
+      libraryKey: "ext4133",
+      extId: 4133,
+      extNameJa: "魔薬キラーモス",
+      skillNameJa: "ココロ、カラダ、みなぎる！！",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 17, 17), "INT\u3000+1"]; },
+      peekHelpKeys() { return ["hp", "int"]; },
+      previewLines(s) { return [`HP を回復係数 17〜17% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 17, 17)}）`, "INT を +1"]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 17, 17);
+        s.playerInt += 1;
+      },
+    },
+    ext4134: {
+      libraryKey: "ext4134",
+      extId: 4134,
+      extNameJa: "デスストーカー",
+      skillNameJa: "死神の針",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 53, 53)}`, "毒 ×3（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 53, 53)} ダメージ（PHY 53〜53%）`, "敵に毒 ×3 付与"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 53, 53);
+        api.addPoisonToEnemy(s, 3);
+      },
+    },
+    ext4135: {
+      libraryKey: "ext4135",
+      extId: 4135,
+      extNameJa: "洗脳象蟲（せんのうぞうむし）ナルキッゾウス",
+      skillNameJa: "囚われた心",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 68, 68)}`, "AGI\u3000+1"]; },
+      peekHelpKeys() { return ["agi"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 68, 68)} ダメージ（PHY 68〜68%）`, "AGI を +1"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 68, 68);
+        s.playerAgi += 1;
+      },
+    },
+    ext4136: {
+      libraryKey: "ext4136",
+      extId: 4136,
+      extNameJa: "クイーンアネイラ",
+      skillNameJa: "ネッソスの血",
+      skillIcon: "guard.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines() { return ["ガード\u3000+6"]; },
+      peekHelpKeys() { return ["guard"]; },
+      previewLines() { return ["ガードを 6 得る（StS 風代替効果）"]; },
+      play(s) {
+        s.playerGuard += 6; api.playBattleSe("buff"); api.portraitFx("player", "buff");
+      },
+    },
+    ext4137: {
+      libraryKey: "ext4137",
+      extId: 4137,
+      extNameJa: "キラービー",
+      skillNameJa: "恐怖指数99",
+      skillIcon: "BUF_agi.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines() { return ["AGI\u3000+1", "毒 ×3（敵）"]; },
+      peekHelpKeys() { return ["agi"]; },
+      previewLines() { return ["AGI を +1", "敵に毒 ×3 付与"]; },
+      play(s) {
+        s.playerAgi += 1;
+        api.addPoisonToEnemy(s, 3);
+      },
+    },
+    ext4138: {
+      libraryKey: "ext4138",
+      extId: 4138,
+      extNameJa: "Duke",
+      skillNameJa: "To serve and please",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 100, 100), "PHY\u3000+1"]; },
+      peekHelpKeys() { return ["hp", "phy"]; },
+      previewLines(s) { return [`HP を回復係数 100〜100% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 100, 100)}）`, "PHY を +1"]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 100, 100);
+        s.playerPhy += 1;
+      },
+    },
+    ext4139: {
+      libraryKey: "ext4139",
+      extId: 4139,
+      extNameJa: "深淵艶紫",
+      skillNameJa: "天害蠱毒",
+      skillIcon: "guard.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines() { return ["ガード\u3000+6"]; },
+      peekHelpKeys() { return ["guard"]; },
+      previewLines() { return ["ガードを 6 得る（StS 風代替効果）"]; },
+      play(s) {
+        s.playerGuard += 6; api.playBattleSe("buff"); api.portraitFx("player", "buff");
+      },
+    },
+    ext4140: {
+      libraryKey: "ext4140",
+      extId: 4140,
+      extNameJa: "太陽のオリフラム",
+      skillNameJa: "黄金の炎",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 60, 65), "INT\u3000+6"]; },
+      peekHelpKeys() { return ["hp", "int"]; },
+      previewLines(s) { return [`HP を回復係数 60〜65% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 60, 65)}）`, "INT を +6"]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 60, 65);
+        s.playerInt += 6;
+      },
+    },
+    ext4141: {
+      libraryKey: "ext4141",
+      extId: 4141,
+      extNameJa: "武将陣羽織",
+      skillNameJa: "戦の矜持",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 55, 80)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 55, 80)} ダメージ（PHY 55〜80%）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 55, 80);
+      },
+    },
+    ext4142: {
+      libraryKey: "ext4142",
+      extId: 4142,
+      extNameJa: "華やか二段重箱",
+      skillNameJa: "春ルンルン",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 60)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 50, 60)} ダメージ（INT 50〜60%・代替効果）`]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 50, 60);
+      },
+    },
+    ext4143: {
+      libraryKey: "ext4143",
+      extId: 4143,
+      extNameJa: "古代機工三球儀",
+      skillNameJa: "日月星辰",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 25, 50)}`, "毒 ×3（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 25, 50)} ダメージ（INT 25〜50%）`, "敵に毒 ×3 付与"]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 25, 50);
+        api.addPoisonToEnemy(s, 3);
+      },
+    },
+    ext4145: {
+      libraryKey: "ext4145",
+      extId: 4145,
+      extNameJa: "余市町赤ワイン",
+      skillNameJa: "ヴィニュロン",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 55, 55)}`, "毒 ×3（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 55, 55)} ダメージ（INT 55〜55%）`, "敵に毒 ×3 付与"]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 55, 55);
+        api.addPoisonToEnemy(s, 3);
+      },
+    },
+    ext4146: {
+      libraryKey: "ext4146",
+      extId: 4146,
+      extNameJa: "余市町白ワイン",
+      skillNameJa: "雪の布団",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 60, 60), "毒 ×3（敵）"]; },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) { return [`HP を回復係数 60〜60% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 60, 60)}）`, "敵に毒 ×3 付与"]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 60, 60);
+        api.addPoisonToEnemy(s, 3);
+      },
+    },
+    ext4147: {
+      libraryKey: "ext4147",
+      extId: 4147,
+      extNameJa: "天津神の石碑",
+      skillNameJa: "高天原のとばり",
+      skillIcon: "guard.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines() { return ["ガード\u3000+6"]; },
+      peekHelpKeys() { return ["guard"]; },
+      previewLines() { return ["ガードを 6 得る（StS 風代替効果）"]; },
+      play(s) {
+        s.playerGuard += 6; api.playBattleSe("buff"); api.portraitFx("player", "buff");
+      },
+    },
+    ext4148: {
+      libraryKey: "ext4148",
+      extId: 4148,
+      extNameJa: "RYUOU.phy",
+      skillNameJa: "RYUアサルト",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 35, 35)}`, "毒 ×3（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 35, 35)} ダメージ（PHY 35〜35%）`, "敵に毒 ×3 付与"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 35, 35);
+        api.addPoisonToEnemy(s, 3);
+      },
+    },
+    ext4149: {
+      libraryKey: "ext4149",
+      extId: 4149,
+      extNameJa: "RYUOU.int",
+      skillNameJa: "RYUプロミネンス",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 35, 35)}`, "毒 ×3（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 35, 35)} ダメージ（INT 35〜35%・1v1=単体）`, "敵に毒 ×3 付与"]; },
+      play(s) {
+        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 35, 35);
+        api.addPoisonToEnemy(s, 3);
+      },
+    },
+    ext4150: {
+      libraryKey: "ext4150",
+      extId: 4150,
+      extNameJa: "魔界の扉",
+      skillNameJa: "深淵の燈",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 18, 18)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 18, 18)} ダメージ（INT 18〜18%・1v1=単体）`]; },
+      play(s) {
+        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 18, 18);
+      },
+    },
+    ext4151: {
+      libraryKey: "ext4151",
+      extId: 4151,
+      extNameJa: "ダブルにゃんバーガー",
+      skillNameJa: "二倍楽しむ、猫型バーガー！",
+      skillIcon: "DBF_phy.png",
+      cost: 1,
+      type: "skl",
+      target: "enemy.foremost",
+      effectSummaryLines() { return ["毒 ×3（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines() { return ["敵に毒 ×3 付与"]; },
+      play(s) {
+        api.addPoisonToEnemy(s, 3);
+      },
+    },
+    ext4152: {
+      libraryKey: "ext4152",
+      extId: 4152,
+      extNameJa: "帝国式機鋼戦棍",
+      skillNameJa: "迫り立つ処断の唸り",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)} ダメージ（PHY 60〜70%）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 60, 70);
+      },
+    },
+    ext4153: {
+      libraryKey: "ext4153",
+      extId: 4153,
+      extNameJa: "自律型パンジャンドラム",
+      skillNameJa: "ノトーリアス・ウェポン",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 60, 70)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 60, 70)} ダメージ（INT 60〜70%・1v1=単体）`]; },
+      play(s) {
+        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 60, 70);
+      },
+    },
+    ext4154: {
+      libraryKey: "ext4154",
+      extId: 4154,
+      extNameJa: "デカ盛りもやしラーメン",
+      skillNameJa: "分け入っても分け入っても白い山",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 26, 36), "AGI\u3000+4"]; },
+      peekHelpKeys() { return ["hp", "agi"]; },
+      previewLines(s) { return [`HP を回復係数 26〜36% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 26, 36)}）`, "AGI を +4"]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 26, 36);
+        s.playerAgi += 4;
+      },
+    },
+    ext4155: {
+      libraryKey: "ext4155",
+      extId: 4155,
+      extNameJa: "スワンクイーン",
+      skillNameJa: "水紋の女帝",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)}`, "PHY\u3000-5（敵）", "出血 ×3（敵）"]; },
+      peekHelpKeys() { return ["phy"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)} ダメージ（PHY 50〜60%）`, "敵の PHY を -5", "敵に出血 ×3 付与"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 50, 60);
+        s.enemyPhy = Math.max(1, s.enemyPhy + (-5)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        api.addBleedToEnemy(s, 3);
+      },
+    },
+    ext4156: {
+      libraryKey: "ext4156",
+      extId: 4156,
+      extNameJa: "終末の羅針盤",
+      skillNameJa: "終焉を告げる針",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 60)}`, "INT\u3000-5（敵）", "出血 ×3（敵）"]; },
+      peekHelpKeys() { return ["int"]; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 50, 60)} ダメージ（INT 50〜60%）`, "敵の INT を -5", "敵に出血 ×3 付与"]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 50, 60);
+        s.enemyInt = Math.max(1, s.enemyInt + (-5)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        api.addBleedToEnemy(s, 3);
+      },
+    },
+    ext4157: {
+      libraryKey: "ext4157",
+      extId: 4157,
+      extNameJa: "七つの海寿司",
+      skillNameJa: "特盛・海の幸",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 130, 135)]; },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) { return [`HP を回復係数 130〜135% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 130, 135)}）`]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 130, 135);
+      },
+    },
+    ext4158: {
+      libraryKey: "ext4158",
+      extId: 4158,
+      extNameJa: "コキュートススタッフ",
+      skillNameJa: "マジックトランスフューザー",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 65, 70)}`, "INT\u3000+6"]; },
+      peekHelpKeys() { return ["int"]; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 65, 70)} ダメージ（INT 65〜70%）`, "INT を +6"]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 65, 70);
+        s.playerInt += 6;
+      },
+    },
+    ext4159: {
+      libraryKey: "ext4159",
+      extId: 4159,
+      extNameJa: "帝国式林檎型電脳心臓 APC1984",
+      skillNameJa: "ハード・ハート",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 55, 60)}`, "INT\u3000+6", "毒 ×3（敵）"]; },
+      peekHelpKeys() { return ["int"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 55, 60)} ダメージ（PHY 55〜60%）`, "INT を +6", "敵に毒 ×3 付与"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 55, 60);
+        s.playerInt += 6;
+        api.addPoisonToEnemy(s, 3);
+      },
+    },
+    ext4160: {
+      libraryKey: "ext4160",
+      extId: 4160,
+      extNameJa: "月明かりのハンギングアクアリウム",
+      skillNameJa: "月影の波動",
+      skillIcon: "DBF_phy.png",
+      cost: 1,
+      type: "skl",
+      target: "enemy.foremost",
+      effectSummaryLines() { return ["毒 ×3（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines() { return ["敵に毒 ×3 付与"]; },
+      play(s) {
+        api.addPoisonToEnemy(s, 3);
+      },
+    },
+    ext4161: {
+      libraryKey: "ext4161",
+      extId: 4161,
+      extNameJa: "ステュクス",
+      skillNameJa: "冥界の大河",
+      skillIcon: "BUF_phy.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines() { return ["PHY\u3000+6", "INT\u3000+6"]; },
+      peekHelpKeys() { return ["phy", "int"]; },
+      previewLines() { return ["PHY を +6", "INT を +6"]; },
+      play(s) {
+        s.playerPhy += 6;
+        s.playerInt += 6;
+      },
+    },
+    ext4162: {
+      libraryKey: "ext4162",
+      extId: 4162,
+      extNameJa: "マンドラゴラ賢者",
+      skillNameJa: "呪術の叡智",
+      skillIcon: "DBF_agi.png",
+      cost: 1,
+      type: "skl",
+      target: "enemy.foremost",
+      effectSummaryLines() { return ["AGI\u3000-5（敵）", "毒 ×3（敵）"]; },
+      peekHelpKeys() { return ["agi"]; },
+      previewLines() { return ["敵の AGI を -5", "敵に毒 ×3 付与"]; },
+      play(s) {
+        s.enemyAgi = Math.max(1, s.enemyAgi + (-5)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        api.addPoisonToEnemy(s, 3);
+      },
+    },
+    ext4163: {
+      libraryKey: "ext4163",
+      extId: 4163,
+      extNameJa: "エント盆栽",
+      skillNameJa: "エントの庭園",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 13, 17), "PHY\u3000+3", "INT\u3000+3"]; },
+      peekHelpKeys() { return ["hp", "phy", "int"]; },
+      previewLines(s) { return [`HP を回復係数 13〜17% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 13, 17)}）`, "PHY を +3", "INT を +3"]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 13, 17);
+        s.playerPhy += 3;
+        s.playerInt += 3;
+      },
+    },
+    ext4164: {
+      libraryKey: "ext4164",
+      extId: 4164,
+      extNameJa: "宝石獣のメリケンサック",
+      skillNameJa: "虹彩獣影",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 65, 75)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 65, 75)} ダメージ（PHY 65〜75%）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 65, 75);
+      },
+    },
+    ext4165: {
+      libraryKey: "ext4165",
+      extId: 4165,
+      extNameJa: "ハープを弾く貴婦人",
+      skillNameJa: "リーガルハープ・ラプソディ",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 65, 75)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 65, 75)} ダメージ（INT 65〜75%）`]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 65, 75);
+      },
+    },
+    ext4166: {
+      libraryKey: "ext4166",
+      extId: 4166,
+      extNameJa: "レーヴァテイン[PK Alterna]",
+      skillNameJa: "大切な仲間だし！",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 40, 45)}`, "PHY\u3000+3"]; },
+      peekHelpKeys() { return ["phy"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 40, 45)} ダメージ（PHY 40〜45%）`, "PHY を +3"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 40, 45);
+        s.playerPhy += 3;
+      },
+    },
+    ext4167: {
+      libraryKey: "ext4167",
+      extId: 4167,
+      extNameJa: "アルマス[PK Alterna]",
+      skillNameJa: "絶対解放戦線",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 25, 35)}`, `敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 25, 35)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 25, 35)} ダメージ（PHY 25〜35%）`, `敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 25, 35)} ダメージ（INT 25〜35%・1v1=単体）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 25, 35);
+        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 25, 35);
+      },
+    },
+    ext4168: {
+      libraryKey: "ext4168",
+      extId: 4168,
+      extNameJa: "フェイルノート[PK Alterna]",
+      skillNameJa: "誓約されし明星の魔弓",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 25, 40)}`, "INT\u3000+2"]; },
+      peekHelpKeys() { return ["int"]; },
+      previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 25, 40)} ダメージ（INT 25〜40%・1v1=単体）`, "INT を +2"]; },
+      play(s) {
+        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 25, 40);
+        s.playerInt += 2;
+      },
+    },
+    ext4169: {
+      libraryKey: "ext4169",
+      extId: 4169,
+      extNameJa: "シーサーペントの尾ビレ標本",
+      skillNameJa: "深海の渦潮思念",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 30, 35)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 30, 35)} ダメージ（INT 30〜35%・1v1=単体）`]; },
+      play(s) {
+        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 30, 35);
+      },
+    },
+    ext4170: {
+      libraryKey: "ext4170",
+      extId: 4170,
+      extNameJa: "マッサージチェア",
+      skillNameJa: "心もくつろげる",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 105, 125), "PHY\u3000+2", "出血 ×3（敵）"]; },
+      peekHelpKeys() { return ["hp", "phy"]; },
+      previewLines(s) { return [`HP を回復係数 105〜125% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 105, 125)}）`, "PHY を +2", "敵に出血 ×3 付与"]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 105, 125);
+        s.playerPhy += 2;
+        api.addBleedToEnemy(s, 3);
+      },
+    },
+    ext4171: {
+      libraryKey: "ext4171",
+      extId: 4171,
+      extNameJa: "ワイヤーカッター",
+      skillNameJa: "シンクロニティ・スニップ",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)} ダメージ（PHY 50〜60%・代替効果）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 50, 60);
+      },
+    },
+    ext4172: {
+      libraryKey: "ext4172",
+      extId: 4172,
+      extNameJa: "ワニ革財布",
+      skillNameJa: "みかじめ料",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines() { return ["ドロー　1"]; },
+      peekHelpKeys() { return ["draw"]; },
+      previewLines() { return ["カードを 1 枚引く（StS 風代替効果）"]; },
+      play(s) {
+        api.drawCards(s, 1);
+      },
+    },
+    ext4173: {
+      libraryKey: "ext4173",
+      extId: 4173,
+      extNameJa: "黒蜘蛛のタリスマン",
+      skillNameJa: "幻影蜘蛛",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 30, 30)}`, "出血 ×3（敵）", "毒 ×3（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 30, 30)} ダメージ（INT 30〜30%）`, "敵に出血 ×3 付与", "敵に毒 ×3 付与"]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 30, 30);
+        api.addBleedToEnemy(s, 3);
+        api.addPoisonToEnemy(s, 3);
+      },
+    },
+    ext4174: {
+      libraryKey: "ext4174",
+      extId: 4174,
+      extNameJa: "ムーンライトセット",
+      skillNameJa: "ルナー・レストレーション",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 15, 20)]; },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) { return [`HP を回復係数 15〜20% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 15, 20)}）`]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 15, 20);
+      },
+    },
+    ext4175: {
+      libraryKey: "ext4175",
+      extId: 4175,
+      extNameJa: "魔獣の大角",
+      skillNameJa: "魔獣の妖気",
+      skillIcon: "guard.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines() { return ["ガード\u3000+6"]; },
+      peekHelpKeys() { return ["guard"]; },
+      previewLines() { return ["ガードを 6 得る（StS 風代替効果）"]; },
+      play(s) {
+        s.playerGuard += 6; api.playBattleSe("buff"); api.portraitFx("player", "buff");
+      },
+    },
+    ext4176: {
+      libraryKey: "ext4176",
+      extId: 4176,
+      extNameJa: "王族のいちごタルト",
+      skillNameJa: "高貴なる甘味",
+      skillIcon: "DBF_phy.png",
+      cost: 1,
+      type: "skl",
+      target: "enemy.foremost",
+      effectSummaryLines() { return ["毒 ×3（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines() { return ["敵に毒 ×3 付与"]; },
+      play(s) {
+        api.addPoisonToEnemy(s, 3);
+      },
+    },
+    ext4177: {
+      libraryKey: "ext4177",
+      extId: 4177,
+      extNameJa: "ゴーレムナイト",
+      skillNameJa: "グラナイト・チャージ",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 40, 45)}`, "PHY\u3000+1"]; },
+      peekHelpKeys() { return ["phy"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 40, 45)} ダメージ（PHY 40〜45%）`, "PHY を +1"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 40, 45);
+        s.playerPhy += 1;
+      },
+    },
+    ext4178: {
+      libraryKey: "ext4178",
+      extId: 4178,
+      extNameJa: "マジックカード：闇",
+      skillNameJa: "呪詠・漆黒",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 40, 45)}`, "INT\u3000+1"]; },
+      peekHelpKeys() { return ["int"]; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 40, 45)} ダメージ（INT 40〜45%）`, "INT を +1"]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 40, 45);
+        s.playerInt += 1;
+      },
+    },
+    ext4179: {
+      libraryKey: "ext4179",
+      extId: 4179,
+      extNameJa: "地雷",
+      skillNameJa: "伏爆の罠",
+      skillIcon: "DBF_int.png",
+      cost: 1,
+      type: "skl",
+      target: "enemy.foremost",
+      effectSummaryLines() { return ["INT\u3000-4（敵）", "AGI\u3000-4（敵）", "出血 ×3（敵）"]; },
+      peekHelpKeys() { return ["int", "agi"]; },
+      previewLines() { return ["敵の INT を -4", "敵の AGI を -4", "敵に出血 ×3 付与"]; },
+      play(s) {
+        s.enemyInt = Math.max(1, s.enemyInt + (-4)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        s.enemyAgi = Math.max(1, s.enemyAgi + (-4)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        api.addBleedToEnemy(s, 3);
+      },
+    },
+    ext4180: {
+      libraryKey: "ext4180",
+      extId: 4180,
+      extNameJa: "長毛猫&釣り竿じゃらし",
+      skillNameJa: "ふゎしねぃしょん",
+      skillIcon: "DBF_agi.png",
+      cost: 1,
+      type: "skl",
+      target: "enemy.foremost",
+      effectSummaryLines() { return ["PHY\u3000-4（敵）", "AGI\u3000-4（敵）", "毒 ×3（敵）"]; },
+      peekHelpKeys() { return ["phy", "agi"]; },
+      previewLines() { return ["敵の PHY を -4", "敵の AGI を -4", "敵に毒 ×3 付与"]; },
+      play(s) {
+        s.enemyPhy = Math.max(1, s.enemyPhy + (-4)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        s.enemyAgi = Math.max(1, s.enemyAgi + (-4)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        api.addPoisonToEnemy(s, 3);
+      },
+    },
+    ext4181: {
+      libraryKey: "ext4181",
+      extId: 4181,
+      extNameJa: "デモンズボード",
+      skillNameJa: "アビサル・アトラクション",
+      skillIcon: "guard.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines() { return ["ガード\u3000+6"]; },
+      peekHelpKeys() { return ["guard"]; },
+      previewLines() { return ["ガードを 6 得る（StS 風代替効果）"]; },
+      play(s) {
+        s.playerGuard += 6; api.playBattleSe("buff"); api.portraitFx("player", "buff");
+      },
+    },
+    ext4182: {
+      libraryKey: "ext4182",
+      extId: 4182,
+      extNameJa: "お屋敷",
+      skillNameJa: "可憐で雄大な邸園",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 60)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 50, 60)} ダメージ（INT 50〜60%・代替効果）`]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 50, 60);
+      },
+    },
+    ext4183: {
+      libraryKey: "ext4183",
+      extId: 4183,
+      extNameJa: "血濡れの鎖鎌",
+      skillNameJa: "ブラッディスナッチ",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)} ダメージ（PHY 50〜60%・代替効果）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 50, 60);
+      },
+    },
+    ext4184: {
+      libraryKey: "ext4184",
+      extId: 4184,
+      extNameJa: "光合成オオスカシバ",
+      skillNameJa: "光葉幻翅",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)} ダメージ（PHY 50〜60%・代替効果）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 50, 60);
+      },
+    },
+    ext4185: {
+      libraryKey: "ext4185",
+      extId: 4185,
+      extNameJa: "ブラックオパールワームドラゴン",
+      skillNameJa: "ムシュマフフ",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 50)}`, "PHY\u3000+3", "AGI\u3000-5（敵）"]; },
+      peekHelpKeys() { return ["phy", "agi"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 50)} ダメージ（PHY 50〜50%）`, "PHY を +3", "敵の AGI を -5"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 50, 50);
+        s.playerPhy += 3;
+        s.enemyAgi = Math.max(1, s.enemyAgi + (-5)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+      },
+    },
+    ext4186: {
+      libraryKey: "ext4186",
+      extId: 4186,
+      extNameJa: "オウルモンキー",
+      skillNameJa: "ニュクストリクス・シミウス",
+      skillIcon: "guard.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines() { return ["ガード\u3000+6"]; },
+      peekHelpKeys() { return ["guard"]; },
+      previewLines() { return ["ガードを 6 得る（StS 風代替効果）"]; },
+      play(s) {
+        s.playerGuard += 6; api.playBattleSe("buff"); api.portraitFx("player", "buff");
+      },
+    },
+    ext4187: {
+      libraryKey: "ext4187",
+      extId: 4187,
+      extNameJa: "帝国式機工投擲槍ゲイボルグ",
+      skillNameJa: "インペリアル・インペイル",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)} ダメージ（PHY 50〜60%）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 50, 60);
+      },
+    },
+    ext4188: {
+      libraryKey: "ext4188",
+      extId: 4188,
+      extNameJa: "帝国式機工回旋鏢",
+      skillNameJa: "機工旋刃",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 60)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 50, 60)} ダメージ（INT 50〜60%）`]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 50, 60);
+      },
+    },
+    ext4189: {
+      libraryKey: "ext4189",
+      extId: 4189,
+      extNameJa: "ルビードラゴン",
+      skillNameJa: "スカーレットバースト",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 30, 30)}`, `敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 30, 30)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 30, 30)} ダメージ（PHY 30〜30%）`, `敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 30, 30)} ダメージ（INT 30〜30%・1v1=単体）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 30, 30);
+        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 30, 30);
+      },
+    },
+    ext4190: {
+      libraryKey: "ext4190",
+      extId: 4190,
+      extNameJa: "貴族の日傘",
+      skillNameJa: "ロイヤルレインヴェール",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 35, 35)]; },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) { return [`HP を回復係数 35〜35% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 35, 35)}）`]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 35, 35);
+      },
+    },
+    ext4191: {
+      libraryKey: "ext4191",
+      extId: 4191,
+      extNameJa: "聖域の霊果",
+      skillNameJa: "白露",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 55)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 55)} ダメージ（PHY 50〜55%）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 50, 55);
+      },
+    },
+    ext4192: {
+      libraryKey: "ext4192",
+      extId: 4192,
+      extNameJa: "帝国式機光戦輪ウロボロス",
+      skillNameJa: "無限の循環",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 45, 55)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 45, 55)} ダメージ（INT 45〜55%・1v1=単体）`]; },
+      play(s) {
+        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 45, 55);
+      },
+    },
+    ext4193: {
+      libraryKey: "ext4193",
+      extId: 4193,
+      extNameJa: "ニュクスのボンネット",
+      skillNameJa: "ダスクミティゲーション",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 60, 70), "INT\u3000+1"]; },
+      peekHelpKeys() { return ["hp", "int"]; },
+      previewLines(s) { return [`HP を回復係数 60〜70% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 60, 70)}）`, "INT を +1"]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 60, 70);
+        s.playerInt += 1;
+      },
+    },
+    ext4194: {
+      libraryKey: "ext4194",
+      extId: 4194,
+      extNameJa: "デスペラードレオ",
+      skillNameJa: "デスペラードハウル",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 45, 55)}`, "毒 ×3（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 45, 55)} ダメージ（PHY 45〜55%）`, "敵に毒 ×3 付与"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 45, 55);
+        api.addPoisonToEnemy(s, 3);
+      },
+    },
+    ext4600: {
+      libraryKey: "ext4600",
+      extId: 4600,
+      extNameJa: "ぴっぴ教 一攫千金壺",
+      skillNameJa: "すくわ〜る",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 60, 65)}`, "PHY\u3000+6", "毒 ×3（敵）"]; },
+      peekHelpKeys() { return ["phy"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 60, 65)} ダメージ（PHY 60〜65%）`, "PHY を +6", "敵に毒 ×3 付与"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 60, 65);
+        s.playerPhy += 6;
+        api.addPoisonToEnemy(s, 3);
+      },
+    },
+    ext4640: {
+      libraryKey: "ext4640",
+      extId: 4640,
+      extNameJa: "霊剣トンナルシャーペ",
+      skillNameJa: "タンマ！タンマ！",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 60, 65), "INT\u3000+6"]; },
+      peekHelpKeys() { return ["hp", "int"]; },
+      previewLines(s) { return [`HP を回復係数 60〜65% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 60, 65)}）`, "INT を +6"]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 60, 65);
+        s.playerInt += 6;
+      },
+    },
+    ext4647: {
+      libraryKey: "ext4647",
+      extId: 4647,
+      extNameJa: "AC-130 ガンシップ",
+      skillNameJa: "エンジェルフレア",
+      skillIcon: "guard.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines() { return ["ガード\u3000+6"]; },
+      peekHelpKeys() { return ["guard"]; },
+      previewLines() { return ["ガードを 6 得る（StS 風代替効果）"]; },
+      play(s) {
+        s.playerGuard += 6; api.playBattleSe("buff"); api.portraitFx("player", "buff");
+      },
+    },
+    ext4651: {
+      libraryKey: "ext4651",
+      extId: 4651,
+      extNameJa: "女王蟹",
+      skillNameJa: "女王の威厳",
+      skillIcon: "DBF_phy.png",
+      cost: 1,
+      type: "skl",
+      target: "enemy.foremost",
+      effectSummaryLines() { return ["毒 ×3（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines() { return ["敵に毒 ×3 付与"]; },
+      play(s) {
+        api.addPoisonToEnemy(s, 3);
+      },
+    },
+    ext4674: {
+      libraryKey: "ext4674",
+      extId: 4674,
+      extNameJa: "ぴっぴ教 開運招福尊師像",
+      skillNameJa: "１億円ぽぴぃ（毎月）",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 15, 20)]; },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) { return [`HP を回復係数 15〜20% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 15, 20)}）`]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 15, 20);
+      },
+    },
+// ─── auto-generated Legendary extensions (178 cards、ext>=5501 LL ext は除外) ───
+    ext5001: {
+      libraryKey: "ext5001",
+      extId: 5001,
+      extNameJa: "MCHブレード",
+      skillNameJa: "英雄の一撃",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 70, 80)}`, "PHY\u3000+1"]; },
+      peekHelpKeys() { return ["phy"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 70, 80)} ダメージ（PHY 70〜80%）`, "PHY を +1"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 70, 80);
+        s.playerPhy += 1;
+      },
+    },
+    ext5002: {
+      libraryKey: "ext5002",
+      extId: 5002,
+      extNameJa: "グランダルメ",
+      skillNameJa: "グランダルメ一斉射撃",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 45, 50)}`, "INT\u3000+1"]; },
+      peekHelpKeys() { return ["int"]; },
+      previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 45, 50)} ダメージ（INT 45〜50%・1v1=単体）`, "INT を +1"]; },
+      play(s) {
+        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 45, 50);
+        s.playerInt += 1;
+      },
+    },
+    ext5003: {
+      libraryKey: "ext5003",
+      extId: 5003,
+      extNameJa: "劇作家の羽ペン",
+      skillNameJa: "カーテンコール",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 70, 80), "INT\u3000+1"]; },
+      peekHelpKeys() { return ["hp", "int"]; },
+      previewLines(s) { return [`HP を回復係数 70〜80% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 70, 80)}）`, "INT を +1"]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 70, 80);
+        s.playerInt += 1;
+      },
+    },
+    ext5004: {
+      libraryKey: "ext5004",
+      extId: 5004,
+      extNameJa: "MCHアーマー",
+      skillNameJa: "超合金",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 10, 10), "PHY\u3000+3"]; },
+      peekHelpKeys() { return ["hp", "phy"]; },
+      previewLines(s) { return [`HP を回復係数 10〜10% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 10, 10)}）`, "PHY を +3"]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 10, 10);
+        s.playerPhy += 3;
+      },
+    },
+    ext5005: {
+      libraryKey: "ext5005",
+      extId: 5005,
+      extNameJa: "ブケファロス",
+      skillNameJa: "神託の軍馬",
+      skillIcon: "guard.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines() { return ["ガード\u3000+6"]; },
+      peekHelpKeys() { return ["guard"]; },
+      previewLines() { return ["ガードを 6 得る（StS 風代替効果）"]; },
+      play(s) {
+        s.playerGuard += 6; api.playBattleSe("buff"); api.portraitFx("player", "buff");
+      },
+    },
+    ext5006: {
+      libraryKey: "ext5006",
+      extId: 5006,
+      extNameJa: "へし切長谷部",
+      skillNameJa: "天下統一の一斬",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 65, 75)}`, "PHY\u3000-1（敵）"]; },
+      peekHelpKeys() { return ["phy"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 65, 75)} ダメージ（PHY 65〜75%）`, "敵の PHY を -1"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 65, 75);
+        s.enemyPhy = Math.max(1, s.enemyPhy + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+      },
+    },
+    ext5008: {
+      libraryKey: "ext5008",
+      extId: 5008,
+      extNameJa: "アトランティコ手稿",
+      skillNameJa: "万能人の遺稿",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 45, 50)}`, "INT\u3000-1（敵）"]; },
+      peekHelpKeys() { return ["int"]; },
+      previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 45, 50)} ダメージ（INT 45〜50%・1v1=単体）`, "敵の INT を -1"]; },
+      play(s) {
+        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 45, 50);
+        s.enemyInt = Math.max(1, s.enemyInt + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+      },
+    },
+    ext5009: {
+      libraryKey: "ext5009",
+      extId: 5009,
+      extNameJa: "王妃の指輪",
+      skillNameJa: "女王の威光",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 70, 80)]; },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) { return [`HP を回復係数 70〜80% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 70, 80)}）`]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 70, 80);
+      },
+    },
+    ext5010: {
+      libraryKey: "ext5010",
+      extId: 5010,
+      extNameJa: "アイギス",
+      skillNameJa: "石化の呪い",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)}`, "AGI\u3000-1（敵）"]; },
+      peekHelpKeys() { return ["agi"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)} ダメージ（PHY 35〜40%）`, "敵の AGI を -1"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 35, 40);
+        s.enemyAgi = Math.max(1, s.enemyAgi + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+      },
+    },
+    ext5011: {
+      libraryKey: "ext5011",
+      extId: 5011,
+      extNameJa: "バイキングアックス",
+      skillNameJa: "ヴァルハラ",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 65, 75)}`, "INT\u3000-1（敵）"]; },
+      peekHelpKeys() { return ["int"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 65, 75)} ダメージ（PHY 65〜75%）`, "敵の INT を -1"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 65, 75);
+        s.enemyInt = Math.max(1, s.enemyInt + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+      },
+    },
+    ext5012: {
+      libraryKey: "ext5012",
+      extId: 5012,
+      extNameJa: "ETHEREMON-ZEDAKAZM",
+      skillNameJa: "トドメだ!ゼダカン!",
+      skillIcon: "DBF_phy.png",
+      cost: 1,
+      type: "skl",
+      target: "enemy.foremost",
+      effectSummaryLines() { return ["出血 ×4（敵）", "毒 ×8（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines() { return ["敵に出血 ×4 付与", "敵に毒 ×8 付与"]; },
+      play(s) {
+        api.addBleedToEnemy(s, 4);
+        api.addPoisonToEnemy(s, 8);
+      },
+    },
+    ext5013: {
+      libraryKey: "ext5013",
+      extId: 5013,
+      extNameJa: "与一の弓",
+      skillNameJa: "扇落とし",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 55, 75)}`, "PHY\u3000+1"]; },
+      peekHelpKeys() { return ["phy"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 55, 75)} ダメージ（PHY 55〜75%）`, "PHY を +1"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 55, 75);
+        s.playerPhy += 1;
+      },
+    },
+    ext5014: {
+      libraryKey: "ext5014",
+      extId: 5014,
+      extNameJa: "蜻蛉切",
+      skillNameJa: "古今独歩の一突き",
+      skillIcon: "phy.png",
+      cost: 2,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines() { return [`敵にダメージ ×2`]; },
+      peekHelpKeys() { return []; },
+      previewLines() { return [`敵1体に PHY 30〜40% × 2 回ダメージ`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 30, 40);
+        if (s.enemyHp > 0) api.dealPhySkillToEnemy(s, 30, 40);
+      },
+    },
+    ext5015: {
+      libraryKey: "ext5015",
+      extId: 5015,
+      extNameJa: "方天画戟",
+      skillNameJa: "裏切りの一撃",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)}`, "毒 ×4（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)} ダメージ（PHY 60〜70%）`, "敵に毒 ×4 付与"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 60, 70);
+        api.addPoisonToEnemy(s, 4);
+      },
+    },
+    ext5016: {
+      libraryKey: "ext5016",
+      extId: 5016,
+      extNameJa: "大唐西域記",
+      skillNameJa: "求法の旅",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 35, 40)}`, "毒 ×4（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 35, 40)} ダメージ（INT 35〜40%・1v1=単体）`, "敵に毒 ×4 付与"]; },
+      play(s) {
+        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 35, 40);
+        api.addPoisonToEnemy(s, 4);
+      },
+    },
+    ext5017: {
+      libraryKey: "ext5017",
+      extId: 5017,
+      extNameJa: "太陽神の首飾り",
+      skillNameJa: "太陽神の涙",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 20, 30), "INT\u3000+1"]; },
+      peekHelpKeys() { return ["hp", "int"]; },
+      previewLines(s) { return [`HP を回復係数 20〜30% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 20, 30)}）`, "INT を +1"]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 20, 30);
+        s.playerInt += 1;
+      },
+    },
+    ext5018: {
+      libraryKey: "ext5018",
+      extId: 5018,
+      extNameJa: "弦月形鍬形兜",
+      skillNameJa: "星界の加護",
+      skillIcon: "BUF_phy.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines() { return ["PHY\u3000+1", "INT\u3000+1", "INT\u3000-1（敵）"]; },
+      peekHelpKeys() { return ["phy", "int"]; },
+      previewLines() { return ["PHY を +1", "INT を +1", "敵の INT を -1"]; },
+      play(s) {
+        s.playerPhy += 1;
+        s.playerInt += 1;
+        s.enemyInt = Math.max(1, s.enemyInt + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+      },
+    },
+    ext5019: {
+      libraryKey: "ext5019",
+      extId: 5019,
+      extNameJa: "アクーパーラ",
+      skillNameJa: "乳海攪拌",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 30, 30), "PHY\u3000+1", "INT\u3000+1"]; },
+      peekHelpKeys() { return ["hp", "phy", "int"]; },
+      previewLines(s) { return [`HP を回復係数 30〜30% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 30, 30)}）`, "PHY を +1", "INT を +1"]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 30, 30);
+        s.playerPhy += 1;
+        s.playerInt += 1;
+      },
+    },
+    ext5020: {
+      libraryKey: "ext5020",
+      extId: 5020,
+      extNameJa: "金鶏",
+      skillNameJa: "暁に鳴く",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)}`, "AGI\u3000+1"]; },
+      peekHelpKeys() { return ["agi"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)} ダメージ（PHY 35〜40%）`, "AGI を +1"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 35, 40);
+        s.playerAgi += 1;
+      },
+    },
+    ext5021: {
+      libraryKey: "ext5021",
+      extId: 5021,
+      extNameJa: "サーベルタイガー",
+      skillNameJa: "剣歯虎の一撃",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 45, 50)}`, "PHY\u3000+2"]; },
+      peekHelpKeys() { return ["phy"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 45, 50)} ダメージ（PHY 45〜50%）`, "PHY を +2"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 45, 50);
+        s.playerPhy += 2;
+      },
+    },
+    ext5022: {
+      libraryKey: "ext5022",
+      extId: 5022,
+      extNameJa: "金龍",
+      skillNameJa: "龍王の息吹",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 25, 30)}`, "INT\u3000-1（敵）"]; },
+      peekHelpKeys() { return ["int"]; },
+      previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 25, 30)} ダメージ（INT 25〜30%・1v1=単体）`, "敵の INT を -1"]; },
+      play(s) {
+        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 25, 30);
+        s.enemyInt = Math.max(1, s.enemyInt + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+      },
+    },
+    ext5023: {
+      libraryKey: "ext5023",
+      extId: 5023,
+      extNameJa: "金牛",
+      skillNameJa: "グレイトホーン",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)} ダメージ（PHY 50〜60%）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 50, 60);
+      },
+    },
+    ext5024: {
+      libraryKey: "ext5024",
+      extId: 5024,
+      extNameJa: "ハンニバルの軍象",
+      skillNameJa: "戦象部隊の突撃",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)} ダメージ（PHY 35〜40%）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 35, 40);
+      },
+    },
+    ext5025: {
+      libraryKey: "ext5025",
+      extId: 5025,
+      extNameJa: "狒々",
+      skillNameJa: "白羽の矢",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 30, 35)}`, "出血 ×4（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 30, 35)} ダメージ（INT 30〜35%）`, "敵に出血 ×4 付与"]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 30, 35);
+        api.addBleedToEnemy(s, 4);
+      },
+    },
+    ext5026: {
+      libraryKey: "ext5026",
+      extId: 5026,
+      extNameJa: "ケツァルコアトル",
+      skillNameJa: "太陽神の加護",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 20, 40)]; },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) { return [`HP を回復係数 20〜40% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 20, 40)}）`]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 20, 40);
+      },
+    },
+    ext5027: {
+      libraryKey: "ext5027",
+      extId: 5027,
+      extNameJa: "しっぺい太郎",
+      skillNameJa: "猿神退治",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 60)}`, "INT\u3000-1（敵）"]; },
+      peekHelpKeys() { return ["int"]; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 50, 60)} ダメージ（INT 50〜60%）`, "敵の INT を -1"]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 50, 60);
+        s.enemyInt = Math.max(1, s.enemyInt + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+      },
+    },
+    ext5028: {
+      libraryKey: "ext5028",
+      extId: 5028,
+      extNameJa: "フランベルジェ",
+      skillNameJa: "揺らめく炎の刺突",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)} ダメージ（PHY 60〜70%）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 60, 70);
+      },
+    },
+    ext5029: {
+      libraryKey: "ext5029",
+      extId: 5029,
+      extNameJa: "モデル１",
+      skillNameJa: "幕末志士の一射",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 55, 65)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 55, 65)} ダメージ（INT 55〜65%）`]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 55, 65);
+      },
+    },
+    ext5030: {
+      libraryKey: "ext5030",
+      extId: 5030,
+      extNameJa: "聖杯",
+      skillNameJa: "復活の奇跡",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 50, 60)]; },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) { return [`HP を回復係数 50〜60% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 50, 60)}）`]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 50, 60);
+      },
+    },
+    ext5031: {
+      libraryKey: "ext5031",
+      extId: 5031,
+      extNameJa: "コボルドのブーツ",
+      skillNameJa: "ルンペルシュティルツヒェン",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 35, 40), "AGI\u3000+1"]; },
+      peekHelpKeys() { return ["hp", "agi"]; },
+      previewLines(s) { return [`HP を回復係数 35〜40% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 35, 40)}）`, "AGI を +1"]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 35, 40);
+        s.playerAgi += 1;
+      },
+    },
+    ext5032: {
+      libraryKey: "ext5032",
+      extId: 5032,
+      extNameJa: "白羽根太極",
+      skillNameJa: "策士の舞",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 35, 40)}`, "HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 10, 10), "INT\u3000+1"]; },
+      peekHelpKeys() { return ["hp", "int"]; },
+      previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 35, 40)} ダメージ（INT 35〜40%・1v1=単体）`, `HP を回復係数 10〜10% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 10, 10)}）`, "INT を +1"]; },
+      play(s) {
+        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 35, 40);
+        api.healPlayerFromIntSkill(s, 10, 10);
+        s.playerInt += 1;
+      },
+    },
+    ext5033: {
+      libraryKey: "ext5033",
+      extId: 5033,
+      extNameJa: "ビヨンドMCHメダル",
+      skillNameJa: "ビヨンドMaster Nobの御加護",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 10, 10), "PHY\u3000+1", "INT\u3000+1", "AGI\u3000+1"]; },
+      peekHelpKeys() { return ["hp", "phy", "int", "agi"]; },
+      previewLines(s) { return [`HP を回復係数 10〜10% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 10, 10)}）`, "PHY を +1", "INT を +1", "AGI を +1"]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 10, 10);
+        s.playerPhy += 1;
+        s.playerInt += 1;
+        s.playerAgi += 1;
+      },
+    },
+    ext5034: {
+      libraryKey: "ext5034",
+      extId: 5034,
+      extNameJa: "審判の槌",
+      skillNameJa: "正義の鉄槌",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)}`, "HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 10, 10), "PHY\u3000+2"]; },
+      peekHelpKeys() { return ["hp", "phy"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)} ダメージ（PHY 60〜70%）`, `HP を回復係数 10〜10% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 10, 10)}）`, "PHY を +2"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 60, 70);
+        api.healPlayerFromIntSkill(s, 10, 10);
+        s.playerPhy += 2;
+      },
+    },
+    ext5035: {
+      libraryKey: "ext5035",
+      extId: 5035,
+      extNameJa: "バリスタ",
+      skillNameJa: "崩城の一撃",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 55, 65)}`, "HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 10, 10), "INT\u3000+2"]; },
+      peekHelpKeys() { return ["hp", "int"]; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 55, 65)} ダメージ（INT 55〜65%）`, `HP を回復係数 10〜10% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 10, 10)}）`, "INT を +2"]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 55, 65);
+        api.healPlayerFromIntSkill(s, 10, 10);
+        s.playerInt += 2;
+      },
+    },
+    ext5036: {
+      libraryKey: "ext5036",
+      extId: 5036,
+      extNameJa: "冕冠",
+      skillNameJa: "皇帝の威光",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 50, 60), "AGI\u3000+2"]; },
+      peekHelpKeys() { return ["hp", "agi"]; },
+      previewLines(s) { return [`HP を回復係数 50〜60% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 50, 60)}）`, "AGI を +2"]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 50, 60);
+        s.playerAgi += 2;
+      },
+    },
+    ext5037: {
+      libraryKey: "ext5037",
+      extId: 5037,
+      extNameJa: "梵字軍配",
+      skillNameJa: "攻めること火の如し",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)}`, "PHY\u3000+1"]; },
+      peekHelpKeys() { return ["phy"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)} ダメージ（PHY 35〜40%）`, "PHY を +1"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 35, 40);
+        s.playerPhy += 1;
+      },
+    },
+    ext5038: {
+      libraryKey: "ext5038",
+      extId: 5038,
+      extNameJa: "大航海の舵輪",
+      skillNameJa: "リヴァイアサン",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 20, 20)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 20, 20)} ダメージ（PHY 20〜20%）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 20, 20);
+      },
+    },
+    ext5039: {
+      libraryKey: "ext5039",
+      extId: 5039,
+      extNameJa: "女神フリッグの果実",
+      skillNameJa: "フリッグの祈り",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 50, 60)]; },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) { return [`HP を回復係数 50〜60% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 50, 60)}）`]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 50, 60);
+      },
+    },
+    ext5040: {
+      libraryKey: "ext5040",
+      extId: 5040,
+      extNameJa: "左慈の柑子",
+      skillNameJa: "温州路",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 60, 60)}`, "PHY\u3000-1（敵）"]; },
+      peekHelpKeys() { return ["phy"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 60, 60)} ダメージ（PHY 60〜60%）`, "敵の PHY を -1"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 60, 60);
+        s.enemyPhy = Math.max(1, s.enemyPhy + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+      },
+    },
+    ext5041: {
+      libraryKey: "ext5041",
+      extId: 5041,
+      extNameJa: "英国海軍のライム",
+      skillNameJa: "ライミーズアタック",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)} ダメージ（PHY 60〜70%）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 60, 70);
+      },
+    },
+    ext5042: {
+      libraryKey: "ext5042",
+      extId: 5042,
+      extNameJa: "球状黒鉛",
+      skillNameJa: "サバラガムワ",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 40, 60)}`, "毒 ×4（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 40, 60)} ダメージ（PHY 40〜60%）`, "敵に毒 ×4 付与"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 40, 60);
+        api.addPoisonToEnemy(s, 4);
+      },
+    },
+    ext5043: {
+      libraryKey: "ext5043",
+      extId: 5043,
+      extNameJa: "バッカスグレープ",
+      skillNameJa: "テュルソスの杖",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 60)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 50, 60)} ダメージ（INT 50〜60%・1v1=単体）`]; },
+      play(s) {
+        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 50, 60);
+      },
+    },
+    ext5044: {
+      libraryKey: "ext5044",
+      extId: 5044,
+      extNameJa: "大帝のセージ",
+      skillNameJa: "シャルルマーニュハーブ",
+      skillIcon: "DBF_phy.png",
+      cost: 1,
+      type: "skl",
+      target: "enemy.foremost",
+      effectSummaryLines() { return ["出血 ×4（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines() { return ["敵に出血 ×4 付与"]; },
+      play(s) {
+        api.addBleedToEnemy(s, 4);
+      },
+    },
+    ext5045: {
+      libraryKey: "ext5045",
+      extId: 5045,
+      extNameJa: "先住民の叡智",
+      skillNameJa: "太古のドライベリー",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 60, 60)}`, "毒 ×4（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 60, 60)} ダメージ（INT 60〜60%）`, "敵に毒 ×4 付与"]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 60, 60);
+        api.addPoisonToEnemy(s, 4);
+      },
+    },
+    ext5046: {
+      libraryKey: "ext5046",
+      extId: 5046,
+      extNameJa: "真夜中のスタールビー",
+      skillNameJa: "116.75カラット",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)} ダメージ（PHY 35〜40%）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 35, 40);
+      },
+    },
+    ext5047: {
+      libraryKey: "ext5047",
+      extId: 5047,
+      extNameJa: "ビクトリア号",
+      skillNameJa: "マゼラン海峡",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 0, 80)}`, `敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 0, 80)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 0, 80)} ダメージ（PHY 0〜80%）`, `敵1体に ${estIntHit(s.playerInt, s.enemyInt, 0, 80)} ダメージ（INT 0〜80%）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 0, 80);
+        api.dealIntSkillToEnemy(s, 0, 80);
+      },
+    },
+    ext5048: {
+      libraryKey: "ext5048",
+      extId: 5048,
+      extNameJa: "アゾット",
+      skillNameJa: "パラケルススの一閃",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)}`, "PHY\u3000-1（敵）", "毒 ×4（敵）"]; },
+      peekHelpKeys() { return ["phy"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)} ダメージ（PHY 60〜70%）`, "敵の PHY を -1", "敵に毒 ×4 付与"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 60, 70);
+        s.enemyPhy = Math.max(1, s.enemyPhy + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        api.addPoisonToEnemy(s, 4);
+      },
+    },
+    ext5049: {
+      libraryKey: "ext5049",
+      extId: 5049,
+      extNameJa: "雨夜手拍子",
+      skillNameJa: "毛利秀包の号令",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 55, 65)}`, "INT\u3000-1（敵）", "毒 ×4（敵）"]; },
+      peekHelpKeys() { return ["int"]; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 55, 65)} ダメージ（INT 55〜65%）`, "敵の INT を -1", "敵に毒 ×4 付与"]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 55, 65);
+        s.enemyInt = Math.max(1, s.enemyInt + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        api.addPoisonToEnemy(s, 4);
+      },
+    },
+    ext5050: {
+      libraryKey: "ext5050",
+      extId: 5050,
+      extNameJa: "十戒の石版",
+      skillNameJa: "モーセの声",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 30, 40), "INT\u3000+1"]; },
+      peekHelpKeys() { return ["hp", "int"]; },
+      previewLines(s) { return [`HP を回復係数 30〜40% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 30, 40)}）`, "INT を +1"]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 30, 40);
+        s.playerInt += 1;
+      },
+    },
+    ext5051: {
+      libraryKey: "ext5051",
+      extId: 5051,
+      extNameJa: "大王の鞭",
+      skillNameJa: "アッティラの怒り",
+      skillIcon: "phy.png",
+      cost: 2,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines() { return [`敵にダメージ ×2`, "AGI\u3000-1（敵）"]; },
+      peekHelpKeys() { return ["agi"]; },
+      previewLines() { return [`敵1体に PHY 25〜40% × 2 回ダメージ`, "敵の AGI を -1"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 25, 40);
+        if (s.enemyHp > 0) api.dealPhySkillToEnemy(s, 25, 40);
+        s.enemyAgi = Math.max(1, s.enemyAgi + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+      },
+    },
+    ext5055: {
+      libraryKey: "ext5055",
+      extId: 5055,
+      extNameJa: "とっておきのフルーツパフェ",
+      skillNameJa: "フルーツパフェの恨みを受けよ！",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 30, 40)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 30, 40)} ダメージ（INT 30〜40%）`]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 30, 40);
+      },
+    },
+    ext5056: {
+      libraryKey: "ext5056",
+      extId: 5056,
+      extNameJa: "アダマスの鎌",
+      skillNameJa: "金剛",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 65, 75)}`, "INT\u3000-1（敵）"]; },
+      peekHelpKeys() { return ["int"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 65, 75)} ダメージ（PHY 65〜75%）`, "敵の INT を -1"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 65, 75);
+        s.enemyInt = Math.max(1, s.enemyInt + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+      },
+    },
+    ext5057: {
+      libraryKey: "ext5057",
+      extId: 5057,
+      extNameJa: "ケーリュケイオン",
+      skillNameJa: "友好の証",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 55, 65)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 55, 65)} ダメージ（INT 55〜65%）`]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 55, 65);
+      },
+    },
+    ext5058: {
+      libraryKey: "ext5058",
+      extId: 5058,
+      extNameJa: "ネクタール",
+      skillNameJa: "呪われた神酒",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 50, 60), "PHY\u3000-4（敵）", "AGI\u3000-4（敵）"]; },
+      peekHelpKeys() { return ["hp", "phy", "agi"]; },
+      previewLines(s) { return [`HP を回復係数 50〜60% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 50, 60)}）`, "敵の PHY を -4", "敵の AGI を -4"]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 50, 60);
+        s.enemyPhy = Math.max(1, s.enemyPhy + (-4)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        s.enemyAgi = Math.max(1, s.enemyAgi + (-4)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+      },
+    },
+    ext5059: {
+      libraryKey: "ext5059",
+      extId: 5059,
+      extNameJa: "提督のトリコーン",
+      skillNameJa: "マン・オブ・ウォー",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 10, 10), "INT\u3000+3"]; },
+      peekHelpKeys() { return ["hp", "int"]; },
+      previewLines(s) { return [`HP を回復係数 10〜10% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 10, 10)}）`, "INT を +3"]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 10, 10);
+        s.playerInt += 3;
+      },
+    },
+    ext5060: {
+      libraryKey: "ext5060",
+      extId: 5060,
+      extNameJa: "火の鳥",
+      skillNameJa: "永遠の生命",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 65, 65)}`, "出血 ×4（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 65, 65)} ダメージ（PHY 65〜65%）`, "敵に出血 ×4 付与"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 65, 65);
+        api.addBleedToEnemy(s, 4);
+      },
+    },
+    ext5061: {
+      libraryKey: "ext5061",
+      extId: 5061,
+      extNameJa: "皇帝のマント",
+      skillNameJa: "ディヴィシオ・レグノールム",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 70, 80), "PHY\u3000+1"]; },
+      peekHelpKeys() { return ["hp", "phy"]; },
+      previewLines(s) { return [`HP を回復係数 70〜80% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 70, 80)}）`, "PHY を +1"]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 70, 80);
+        s.playerPhy += 1;
+      },
+    },
+    ext5063: {
+      libraryKey: "ext5063",
+      extId: 5063,
+      extNameJa: "ジョーカー",
+      skillNameJa: "死神は最後に笑う",
+      skillIcon: "BUF_agi.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines() { return ["AGI\u3000+1", "出血 ×4（敵）"]; },
+      peekHelpKeys() { return ["agi"]; },
+      previewLines() { return ["AGI を +1", "敵に出血 ×4 付与"]; },
+      play(s) {
+        s.playerAgi += 1;
+        api.addBleedToEnemy(s, 4);
+      },
+    },
+    ext5064: {
+      libraryKey: "ext5064",
+      extId: 5064,
+      extNameJa: "クリシュナのバーンスリー",
+      skillNameJa: "バガヴァッド・ギーター",
+      skillIcon: "DBF_phy.png",
+      cost: 1,
+      type: "skl",
+      target: "enemy.foremost",
+      effectSummaryLines() { return ["毒 ×4（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines() { return ["敵に毒 ×4 付与"]; },
+      play(s) {
+        api.addPoisonToEnemy(s, 4);
+      },
+    },
+    ext5065: {
+      libraryKey: "ext5065",
+      extId: 5065,
+      extNameJa: "ヴェガ",
+      skillNameJa: "織女星の蒼き煌めき",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 55, 65)}`, "出血 ×4（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 55, 65)} ダメージ（INT 55〜65%）`, "敵に出血 ×4 付与"]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 55, 65);
+        api.addBleedToEnemy(s, 4);
+      },
+    },
+    ext5066: {
+      libraryKey: "ext5066",
+      extId: 5066,
+      extNameJa: "シストルム",
+      skillNameJa: "ブバスティスの女主",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)} ダメージ（PHY 60〜70%）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 60, 70);
+      },
+    },
+    ext5067: {
+      libraryKey: "ext5067",
+      extId: 5067,
+      extNameJa: "ギャラルホルン",
+      skillNameJa: "世界の終焉を告げる魔笛",
+      skillIcon: "DBF_agi.png",
+      cost: 1,
+      type: "skl",
+      target: "enemy.foremost",
+      effectSummaryLines() { return ["AGI\u3000-4（敵）"]; },
+      peekHelpKeys() { return ["agi"]; },
+      previewLines() { return ["敵の AGI を -4"]; },
+      play(s) {
+        s.enemyAgi = Math.max(1, s.enemyAgi + (-4)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+      },
+    },
+    ext5068: {
+      libraryKey: "ext5068",
+      extId: 5068,
+      extNameJa: "バロックオルガン",
+      skillNameJa: "幻想曲とフーガ ト短調",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)} ダメージ（PHY 50〜60%・代替効果）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 50, 60);
+      },
+    },
+    ext5069: {
+      libraryKey: "ext5069",
+      extId: 5069,
+      extNameJa: "メサイア",
+      skillNameJa: "サラブーエ伯爵のコレクション",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 50, 60)]; },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) { return [`HP を回復係数 50〜60% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 50, 60)}）`]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 50, 60);
+      },
+    },
+    ext5070: {
+      libraryKey: "ext5070",
+      extId: 5070,
+      extNameJa: "龍頭二胡",
+      skillNameJa: "ラストエンペラー",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 60, 70)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 60, 70)} ダメージ（INT 60〜70%）`]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 60, 70);
+      },
+    },
+    ext5071: {
+      libraryKey: "ext5071",
+      extId: 5071,
+      extNameJa: "雷鼓",
+      skillNameJa: "雷獣の嘶き",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 25, 25)]; },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) { return [`HP を回復係数 25〜25% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 25, 25)}）`]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 25, 25);
+      },
+    },
+    ext5072: {
+      libraryKey: "ext5072",
+      extId: 5072,
+      extNameJa: "サラスワティ・ヴィーナ",
+      skillNameJa: "マハー・デーヴィ・リグ",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 50)}`, "毒 ×4（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 50)} ダメージ（PHY 50〜50%）`, "敵に毒 ×4 付与"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 50, 50);
+        api.addPoisonToEnemy(s, 4);
+      },
+    },
+    ext5073: {
+      libraryKey: "ext5073",
+      extId: 5073,
+      extNameJa: "ミョルニル",
+      skillNameJa: "青天の霹靂",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 55, 70)}`, "出血 ×4（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 55, 70)} ダメージ（PHY 55〜70%）`, "敵に出血 ×4 付与"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 55, 70);
+        api.addBleedToEnemy(s, 4);
+      },
+    },
+    ext5074: {
+      libraryKey: "ext5074",
+      extId: 5074,
+      extNameJa: "宝貝火尖鎗",
+      skillNameJa: "哪吒太子の焔撃",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 55, 65)}`, "出血 ×4（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 55, 65)} ダメージ（INT 55〜65%）`, "敵に出血 ×4 付与"]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 55, 65);
+        api.addBleedToEnemy(s, 4);
+      },
+    },
+    ext5075: {
+      libraryKey: "ext5075",
+      extId: 5075,
+      extNameJa: "フォトングラス",
+      skillNameJa: "スペクトラムブラスト",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 50, 60), "INT\u3000-4（敵）"]; },
+      peekHelpKeys() { return ["hp", "int"]; },
+      previewLines(s) { return [`HP を回復係数 50〜60% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 50, 60)}）`, "敵の INT を -4"]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 50, 60);
+        s.enemyInt = Math.max(1, s.enemyInt + (-4)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+      },
+    },
+    ext5078: {
+      libraryKey: "ext5078",
+      extId: 5078,
+      extNameJa: "ディバインドラゴン",
+      skillNameJa: "ディバイン・ブレイズ・ブレス",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 30, 35)}`, `敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 30, 35)}`, "PHY\u3000-1（敵）", "INT\u3000-1（敵）"]; },
+      peekHelpKeys() { return ["phy", "int"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 30, 35)} ダメージ（PHY 30〜35%）`, `敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 30, 35)} ダメージ（INT 30〜35%・1v1=単体）`, "敵の PHY を -1", "敵の INT を -1"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 30, 35);
+        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 30, 35);
+        s.enemyPhy = Math.max(1, s.enemyPhy + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        s.enemyInt = Math.max(1, s.enemyInt + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+      },
+    },
+    ext5079: {
+      libraryKey: "ext5079",
+      extId: 5079,
+      extNameJa: "如意金箍棒",
+      skillNameJa: "忉利天",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)}`, "PHY\u3000+1"]; },
+      peekHelpKeys() { return ["phy"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)} ダメージ（PHY 35〜40%）`, "PHY を +1"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 35, 40);
+        s.playerPhy += 1;
+      },
+    },
+    ext5080: {
+      libraryKey: "ext5080",
+      extId: 5080,
+      extNameJa: "自由のホーキ",
+      skillNameJa: "アンリーシュ",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 35, 45)}`, "AGI\u3000+1"]; },
+      peekHelpKeys() { return ["agi"]; },
+      previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 35, 45)} ダメージ（INT 35〜45%・1v1=単体）`, "AGI を +1"]; },
+      play(s) {
+        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 35, 45);
+        s.playerAgi += 1;
+      },
+    },
+    ext5081: {
+      libraryKey: "ext5081",
+      extId: 5081,
+      extNameJa: "赤糸威大鎧",
+      skillNameJa: "雀躍虎哮",
+      skillIcon: "BUF_phy.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines() { return ["PHY\u3000+2", "INT\u3000+2"]; },
+      peekHelpKeys() { return ["phy", "int"]; },
+      previewLines() { return ["PHY を +2", "INT を +2"]; },
+      play(s) {
+        s.playerPhy += 2;
+        s.playerInt += 2;
+      },
+    },
+    ext5082: {
+      libraryKey: "ext5082",
+      extId: 5082,
+      extNameJa: "無銘金重・了戒",
+      skillNameJa: "万理一空",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 55)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 55)} ダメージ（PHY 50〜55%）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 50, 55);
+      },
+    },
+    ext5086: {
+      libraryKey: "ext5086",
+      extId: 5086,
+      extNameJa: "カリュブディス",
+      skillNameJa: "海の神秘",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 60)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 50, 60)} ダメージ（INT 50〜60%・代替効果）`]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 50, 60);
+      },
+    },
+    ext5087: {
+      libraryKey: "ext5087",
+      extId: 5087,
+      extNameJa: "アスタロス",
+      skillNameJa: "光を打ち砕く者",
+      skillIcon: "phy.png",
+      cost: 2,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 100, 100)}`, "出血 ×4（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 100, 100)} ダメージ（PHY 100〜100%）`, "敵に出血 ×4 付与"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 100, 100);
+        api.addBleedToEnemy(s, 4);
+      },
+    },
+    ext5088: {
+      libraryKey: "ext5088",
+      extId: 5088,
+      extNameJa: "MCHブレックス",
+      skillNameJa: "英雄の剣気",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 20, 30)]; },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) { return [`HP を回復係数 20〜30% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 20, 30)}）`]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 20, 30);
+      },
+    },
+    ext5089: {
+      libraryKey: "ext5089",
+      extId: 5089,
+      extNameJa: "ネッシー",
+      skillNameJa: "翠龍海嘯",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 20, 20)}`, "INT\u3000-1（敵）", "毒 ×4（敵）"]; },
+      peekHelpKeys() { return ["int"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 20, 20)} ダメージ（PHY 20〜20%）`, "敵の INT を -1", "敵に毒 ×4 付与"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 20, 20);
+        s.enemyInt = Math.max(1, s.enemyInt + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        api.addPoisonToEnemy(s, 4);
+      },
+    },
+    ext5090: {
+      libraryKey: "ext5090",
+      extId: 5090,
+      extNameJa: "ダイヤモンドヘッド",
+      skillNameJa: "透輝石の角",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 50, 60)]; },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) { return [`HP を回復係数 50〜60% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 50, 60)}）`]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 50, 60);
+      },
+    },
+    ext5091: {
+      libraryKey: "ext5091",
+      extId: 5091,
+      extNameJa: "デュランダル・ドラゴン",
+      skillNameJa: "スピリット オブ グレープ",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 50, 65)]; },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) { return [`HP を回復係数 50〜65% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 50, 65)}）`]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 50, 65);
+      },
+    },
+    ext5092: {
+      libraryKey: "ext5092",
+      extId: 5092,
+      extNameJa: "太古の再臨",
+      skillNameJa: "セージファイヤー",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 50)}`, "毒 ×4（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 50, 50)} ダメージ（INT 50〜50%）`, "敵に毒 ×4 付与"]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 50, 50);
+        api.addPoisonToEnemy(s, 4);
+      },
+    },
+    ext5093: {
+      libraryKey: "ext5093",
+      extId: 5093,
+      extNameJa: "海賊要塞メガロディアス",
+      skillNameJa: "トレジャーオブユニバース",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 50)}`, "AGI\u3000+2"]; },
+      peekHelpKeys() { return ["agi"]; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 50, 50)} ダメージ（INT 50〜50%）`, "AGI を +2"]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 50, 50);
+        s.playerAgi += 2;
+      },
+    },
+    ext5094: {
+      libraryKey: "ext5094",
+      extId: 5094,
+      extNameJa: "フラマ・ファクス",
+      skillNameJa: "全ての炎を司りし者",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 55, 65)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 55, 65)} ダメージ（PHY 55〜65%）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 55, 65);
+      },
+    },
+    ext5095: {
+      libraryKey: "ext5095",
+      extId: 5095,
+      extNameJa: "大軍師の采配",
+      skillNameJa: "死灰復然",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 50, 50), "出血 ×4（敵）"]; },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) { return [`HP を回復係数 50〜50% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 50, 50)}）`, "敵に出血 ×4 付与"]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 50, 50);
+        api.addBleedToEnemy(s, 4);
+      },
+    },
+    ext5096: {
+      libraryKey: "ext5096",
+      extId: 5096,
+      extNameJa: "メギンギョルズ",
+      skillNameJa: "プリペアー・ラグナロク",
+      skillIcon: "DBF_int.png",
+      cost: 1,
+      type: "skl",
+      target: "enemy.foremost",
+      effectSummaryLines() { return ["PHY\u3000-4（敵）", "INT\u3000-4（敵）"]; },
+      peekHelpKeys() { return ["phy", "int"]; },
+      previewLines() { return ["敵の PHY を -4", "敵の INT を -4"]; },
+      play(s) {
+        s.enemyPhy = Math.max(1, s.enemyPhy + (-4)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        s.enemyInt = Math.max(1, s.enemyInt + (-4)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+      },
+    },
+    ext5097: {
+      libraryKey: "ext5097",
+      extId: 5097,
+      extNameJa: "バグナウ",
+      skillNameJa: "忍び寄る死の影 ",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)}`, "HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 30, 40), "毒 ×4（敵）"]; },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)} ダメージ（PHY 60〜70%）`, `HP を回復係数 30〜40% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 30, 40)}）`, "敵に毒 ×4 付与"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 60, 70);
+        api.healPlayerFromIntSkill(s, 30, 40);
+        api.addPoisonToEnemy(s, 4);
+      },
+    },
+    ext5098: {
+      libraryKey: "ext5098",
+      extId: 5098,
+      extNameJa: "龍玉",
+      skillNameJa: "チンターマニ",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 55, 65)}`, "HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 30, 40), "毒 ×4（敵）"]; },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 55, 65)} ダメージ（INT 55〜65%）`, `HP を回復係数 30〜40% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 30, 40)}）`, "敵に毒 ×4 付与"]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 55, 65);
+        api.healPlayerFromIntSkill(s, 30, 40);
+        api.addPoisonToEnemy(s, 4);
+      },
+    },
+    ext5099: {
+      libraryKey: "ext5099",
+      extId: 5099,
+      extNameJa: "ヤールングレイプル",
+      skillNameJa: "霜の巨人殺し",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 20, 20)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 20, 20)} ダメージ（PHY 20〜20%）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 20, 20);
+      },
+    },
+    ext5100: {
+      libraryKey: "ext5100",
+      extId: 5100,
+      extNameJa: "魔法剣・天照",
+      skillNameJa: "幻日",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 65, 70)}`, "PHY\u3000+7", "毒 ×4（敵）"]; },
+      peekHelpKeys() { return ["phy"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 65, 70)} ダメージ（PHY 65〜70%）`, "PHY を +7", "敵に毒 ×4 付与"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 65, 70);
+        s.playerPhy += 7;
+        api.addPoisonToEnemy(s, 4);
+      },
+    },
+    ext5102: {
+      libraryKey: "ext5102",
+      extId: 5102,
+      extNameJa: "アイリスギア",
+      skillNameJa: "レインボー・バルス",
+      skillIcon: "phy.png",
+      cost: 2,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 104, 104)}`, "PHY\u3000+1"]; },
+      peekHelpKeys() { return ["phy"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 104, 104)} ダメージ（PHY 104〜104%）`, "PHY を +1"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 104, 104);
+        s.playerPhy += 1;
+      },
+    },
+    ext5103: {
+      libraryKey: "ext5103",
+      extId: 5103,
+      extNameJa: "降神召符　青龍雷臨",
+      skillNameJa: "天地召雷",
+      skillIcon: "int.png",
+      cost: 2,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 104, 104)}`, "INT\u3000+1"]; },
+      peekHelpKeys() { return ["int"]; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 104, 104)} ダメージ（INT 104〜104%）`, "INT を +1"]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 104, 104);
+        s.playerInt += 1;
+      },
+    },
+    ext5104: {
+      libraryKey: "ext5104",
+      extId: 5104,
+      extNameJa: "虹の筆パレ",
+      skillNameJa: "愛と自由で、今日も描く！",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 28, 28)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 28, 28)} ダメージ（PHY 28〜28%）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 28, 28);
+      },
+    },
+    ext5105: {
+      libraryKey: "ext5105",
+      extId: 5105,
+      extNameJa: "浄玻璃鏡",
+      skillNameJa: "ビハーヴァ・カルマ",
+      skillIcon: "DBF_phy.png",
+      cost: 1,
+      type: "skl",
+      target: "enemy.foremost",
+      effectSummaryLines() { return ["毒 ×4（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines() { return ["敵に毒 ×4 付与"]; },
+      play(s) {
+        api.addPoisonToEnemy(s, 4);
+      },
+    },
+    ext5106: {
+      libraryKey: "ext5106",
+      extId: 5106,
+      extNameJa: "財宝ゴールデンモアイ",
+      skillNameJa: "金箱レースの極意",
+      skillIcon: "DBF_phy.png",
+      cost: 1,
+      type: "skl",
+      target: "enemy.foremost",
+      effectSummaryLines() { return ["毒 ×4（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines() { return ["敵に毒 ×4 付与"]; },
+      play(s) {
+        api.addPoisonToEnemy(s, 4);
+      },
+    },
+    ext5107: {
+      libraryKey: "ext5107",
+      extId: 5107,
+      extNameJa: "ホレリスの黄金像",
+      skillNameJa: "リファクタリング バイオレットキング",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 65, 65)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 65, 65)} ダメージ（INT 65〜65%）`]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 65, 65);
+      },
+    },
+    ext5108: {
+      libraryKey: "ext5108",
+      extId: 5108,
+      extNameJa: "女神像レム",
+      skillNameJa: "一滴の涙",
+      skillIcon: "DBF_phy.png",
+      cost: 1,
+      type: "skl",
+      target: "enemy.foremost",
+      effectSummaryLines() { return ["PHY\u3000-4（敵）"]; },
+      peekHelpKeys() { return ["phy"]; },
+      previewLines() { return ["敵の PHY を -4"]; },
+      play(s) {
+        s.enemyPhy = Math.max(1, s.enemyPhy + (-4)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+      },
+    },
+    ext5109: {
+      libraryKey: "ext5109",
+      extId: 5109,
+      extNameJa: "大海賊の秘宝",
+      skillNameJa: "We are the chicken pirates!",
+      skillIcon: "DBF_phy.png",
+      cost: 1,
+      type: "skl",
+      target: "enemy.foremost",
+      effectSummaryLines() { return ["出血 ×4（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines() { return ["敵に出血 ×4 付与"]; },
+      play(s) {
+        api.addBleedToEnemy(s, 4);
+      },
+    },
+    ext5110: {
+      libraryKey: "ext5110",
+      extId: 5110,
+      extNameJa: "魔界の魔王の目玉を施した破壊禁忌リボン",
+      skillNameJa: "破壊の魂に導かれて",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 61, 61)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 61, 61)} ダメージ（PHY 61〜61%）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 61, 61);
+      },
+    },
+    ext5111: {
+      libraryKey: "ext5111",
+      extId: 5111,
+      extNameJa: "王妃の黄金時計",
+      skillNameJa: "命の刻限",
+      skillIcon: "guard.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines() { return ["ガード\u3000+6"]; },
+      peekHelpKeys() { return ["guard"]; },
+      previewLines() { return ["ガードを 6 得る（StS 風代替効果）"]; },
+      play(s) {
+        s.playerGuard += 6; api.playBattleSe("buff"); api.portraitFx("player", "buff");
+      },
+    },
+    ext5112: {
+      libraryKey: "ext5112",
+      extId: 5112,
+      extNameJa: "ティターニア",
+      skillNameJa: "誇り高き輝き",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 30, 30)}`, "INT\u3000+1"]; },
+      peekHelpKeys() { return ["int"]; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 30, 30)} ダメージ（INT 30〜30%）`, "INT を +1"]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 30, 30);
+        s.playerInt += 1;
+      },
+    },
+    ext5113: {
+      libraryKey: "ext5113",
+      extId: 5113,
+      extNameJa: "ジュエルパロット",
+      skillNameJa: "宝石の囀り",
+      skillIcon: "BUF_agi.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines() { return ["AGI\u3000+7", "毒 ×4（敵）"]; },
+      peekHelpKeys() { return ["agi"]; },
+      previewLines() { return ["AGI を +7", "敵に毒 ×4 付与"]; },
+      play(s) {
+        s.playerAgi += 7;
+        api.addPoisonToEnemy(s, 4);
+      },
+    },
+    ext5114: {
+      libraryKey: "ext5114",
+      extId: 5114,
+      extNameJa: "南葛SCのインシグニア",
+      skillNameJa: "南葛魂",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 65, 75)}`, "PHY\u3000+2"]; },
+      peekHelpKeys() { return ["phy"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 65, 75)} ダメージ（PHY 65〜75%）`, "PHY を +2"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 65, 75);
+        s.playerPhy += 2;
+      },
+    },
+    ext5115: {
+      libraryKey: "ext5115",
+      extId: 5115,
+      extNameJa: "Nob-Phoenix",
+      skillNameJa: "Master of Ocean",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 70, 70)}`, "毒 ×4（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 70, 70)} ダメージ（INT 70〜70%）`, "敵に毒 ×4 付与"]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 70, 70);
+        api.addPoisonToEnemy(s, 4);
+      },
+    },
+    ext5116: {
+      libraryKey: "ext5116",
+      extId: 5116,
+      extNameJa: "帝国式魔導機甲兵 皇帝機ルシファー",
+      skillNameJa: "壱伍式究極殲滅弾 ［明けの明星］",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 35, 35)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 35, 35)} ダメージ（PHY 35〜35%）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 35, 35);
+      },
+    },
+    ext5117: {
+      libraryKey: "ext5117",
+      extId: 5117,
+      extNameJa: "幻翼の騎龍",
+      skillNameJa: "月光を受け、太陽に吼える",
+      skillIcon: "phy.png",
+      cost: 2,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 112, 112)}`, "INT\u3000-4（敵）"]; },
+      peekHelpKeys() { return ["int"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 112, 112)} ダメージ（PHY 112〜112%）`, "敵の INT を -4"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 112, 112);
+        s.enemyInt = Math.max(1, s.enemyInt + (-4)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+      },
+    },
+    ext5118: {
+      libraryKey: "ext5118",
+      extId: 5118,
+      extNameJa: "キャンディクロック21",
+      skillNameJa: "幸せを呼ぶ虹色の観覧車",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 42, 42)}`, "INT\u3000-6（敵）"]; },
+      peekHelpKeys() { return ["int"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 42, 42)} ダメージ（PHY 42〜42%）`, "敵の INT を -6"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 42, 42);
+        s.enemyInt = Math.max(1, s.enemyInt + (-6)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+      },
+    },
+    ext5119: {
+      libraryKey: "ext5119",
+      extId: 5119,
+      extNameJa: "パンダ・エクス・マキナ",
+      skillNameJa: "パンダやってる場合じゃねぇ！！",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 20, 20)]; },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) { return [`HP を回復係数 20〜20% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 20, 20)}）`]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 20, 20);
+      },
+    },
+    ext5120: {
+      libraryKey: "ext5120",
+      extId: 5120,
+      extNameJa: "天翔神馬",
+      skillNameJa: "神雷纏いし輝翼",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 62, 62)}`, "毒 ×4（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 62, 62)} ダメージ（INT 62〜62%・1v1=単体）`, "敵に毒 ×4 付与"]; },
+      play(s) {
+        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 62, 62);
+        api.addPoisonToEnemy(s, 4);
+      },
+    },
+    ext5121: {
+      libraryKey: "ext5121",
+      extId: 5121,
+      extNameJa: "宇宙船セージ号",
+      skillNameJa: "To the moon",
+      skillIcon: "guard.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines() { return ["ガード\u3000+6"]; },
+      peekHelpKeys() { return ["guard"]; },
+      previewLines() { return ["ガードを 6 得る（StS 風代替効果）"]; },
+      play(s) {
+        s.playerGuard += 6; api.playBattleSe("buff"); api.portraitFx("player", "buff");
+      },
+    },
+    ext5122: {
+      libraryKey: "ext5122",
+      extId: 5122,
+      extNameJa: "フライング・チキンマン号",
+      skillNameJa: "大王イカダ",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 60, 60), "出血 ×4（敵）"]; },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) { return [`HP を回復係数 60〜60% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 60, 60)}）`, "敵に出血 ×4 付与"]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 60, 60);
+        api.addBleedToEnemy(s, 4);
+      },
+    },
+    ext5123: {
+      libraryKey: "ext5123",
+      extId: 5123,
+      extNameJa: "破壊神を封じ込めた心臓で動く古代魔導ロボット・ディア・ガ・レティウス",
+      skillNameJa: "破壊の神の魔導一閃",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 66, 66)}`, "出血 ×4（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 66, 66)} ダメージ（PHY 66〜66%）`, "敵に出血 ×4 付与"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 66, 66);
+        api.addBleedToEnemy(s, 4);
+      },
+    },
+    ext5124: {
+      libraryKey: "ext5124",
+      extId: 5124,
+      extNameJa: "赤目四十八滝",
+      skillNameJa: "ワレヲシルヘシ",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)}`, "AGI\u3000-5（敵）"]; },
+      peekHelpKeys() { return ["agi"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)} ダメージ（PHY 50〜60%）`, "敵の AGI を -5"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 50, 60);
+        s.enemyAgi = Math.max(1, s.enemyAgi + (-5)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+      },
+    },
+    ext5125: {
+      libraryKey: "ext5125",
+      extId: 5125,
+      extNameJa: "黄金大王ゲコ・ゲッコー",
+      skillNameJa: "大王直属黄金騎士団",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)}`, "PHY\u3000+3"]; },
+      peekHelpKeys() { return ["phy"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)} ダメージ（PHY 35〜40%）`, "PHY を +3"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 35, 40);
+        s.playerPhy += 3;
+      },
+    },
+    ext5126: {
+      libraryKey: "ext5126",
+      extId: 5126,
+      extNameJa: "絶対零度ゴールデンスノーマン",
+      skillNameJa: "黄金氷河期",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 35, 40)}`, "INT\u3000+3"]; },
+      peekHelpKeys() { return ["int"]; },
+      previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 35, 40)} ダメージ（INT 35〜40%・1v1=単体）`, "INT を +3"]; },
+      play(s) {
+        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 35, 40);
+        s.playerInt += 3;
+      },
+    },
+    ext5127: {
+      libraryKey: "ext5127",
+      extId: 5127,
+      extNameJa: "雛人形",
+      skillNameJa: "春の弥生のこの佳き日",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 60, 60)]; },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) { return [`HP を回復係数 60〜60% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 60, 60)}）`]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 60, 60);
+      },
+    },
+    ext5128: {
+      libraryKey: "ext5128",
+      extId: 5128,
+      extNameJa: "SDNメダル[L]",
+      skillNameJa: "Legendary Stake POWER!",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 40, 45)}`, `敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 40, 45)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 40, 45)} ダメージ（PHY 40〜45%）`, `敵1体に ${estIntHit(s.playerInt, s.enemyInt, 40, 45)} ダメージ（INT 40〜45%）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 40, 45);
+        api.dealIntSkillToEnemy(s, 40, 45);
+      },
+    },
+    ext5129: {
+      libraryKey: "ext5129",
+      extId: 5129,
+      extNameJa: "アルコンスィエルパンケーキ",
+      skillNameJa: "天にも昇るよう",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 30, 50)]; },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) { return [`HP を回復係数 30〜50% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 30, 50)}）`]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 30, 50);
+      },
+    },
+    ext5130: {
+      libraryKey: "ext5130",
+      extId: 5130,
+      extNameJa: "メギド",
+      skillNameJa: "神火",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 60, 60)}`, "PHY\u3000+7", "出血 ×4（敵）"]; },
+      peekHelpKeys() { return ["phy"]; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 60, 60)} ダメージ（INT 60〜60%）`, "PHY を +7", "敵に出血 ×4 付与"]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 60, 60);
+        s.playerPhy += 7;
+        api.addBleedToEnemy(s, 4);
+      },
+    },
+    ext5131: {
+      libraryKey: "ext5131",
+      extId: 5131,
+      extNameJa: "バッタ聖人",
+      skillNameJa: "古今無双",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 20, 20)}`, "毒 ×4（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 20, 20)} ダメージ（INT 20〜20%・1v1=単体）`, "敵に毒 ×4 付与"]; },
+      play(s) {
+        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 20, 20);
+        api.addPoisonToEnemy(s, 4);
+      },
+    },
+    ext5132: {
+      libraryKey: "ext5132",
+      extId: 5132,
+      extNameJa: "フルアーマーリミュラス",
+      skillNameJa: "カンブリアの光",
+      skillIcon: "guard.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines() { return ["ガード\u3000+6"]; },
+      peekHelpKeys() { return ["guard"]; },
+      previewLines() { return ["ガードを 6 得る（StS 風代替効果）"]; },
+      play(s) {
+        s.playerGuard += 6; api.playBattleSe("buff"); api.portraitFx("player", "buff");
+      },
+    },
+    ext5133: {
+      libraryKey: "ext5133",
+      extId: 5133,
+      extNameJa: "放射線変異キングモス",
+      skillNameJa: "地獄からの使者、モスマン！",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 20, 20), "INT\u3000+1"]; },
+      peekHelpKeys() { return ["hp", "int"]; },
+      previewLines(s) { return [`HP を回復係数 20〜20% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 20, 20)}）`, "INT を +1"]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 20, 20);
+        s.playerInt += 1;
+      },
+    },
+    ext5134: {
+      libraryKey: "ext5134",
+      extId: 5134,
+      extNameJa: "アンタレス",
+      skillNameJa: "英雄殺し",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 58, 58)}`, "毒 ×4（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 58, 58)} ダメージ（PHY 58〜58%）`, "敵に毒 ×4 付与"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 58, 58);
+        api.addPoisonToEnemy(s, 4);
+      },
+    },
+    ext5135: {
+      libraryKey: "ext5135",
+      extId: 5135,
+      extNameJa: "改造象蟲  イビルズ＝ノーズ",
+      skillNameJa: "悪の心",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 73, 73)}`, "AGI\u3000+1"]; },
+      peekHelpKeys() { return ["agi"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 73, 73)} ダメージ（PHY 73〜73%）`, "AGI を +1"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 73, 73);
+        s.playerAgi += 1;
+      },
+    },
+    ext5136: {
+      libraryKey: "ext5136",
+      extId: 5136,
+      extNameJa: "キングヘラクレス",
+      skillNameJa: "十二の功業",
+      skillIcon: "guard.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines() { return ["ガード\u3000+6"]; },
+      peekHelpKeys() { return ["guard"]; },
+      previewLines() { return ["ガードを 6 得る（StS 風代替効果）"]; },
+      play(s) {
+        s.playerGuard += 6; api.playBattleSe("buff"); api.portraitFx("player", "buff");
+      },
+    },
+    ext5137: {
+      libraryKey: "ext5137",
+      extId: 5137,
+      extNameJa: "女王バチ",
+      skillNameJa: "女王様とお呼び！！",
+      skillIcon: "BUF_agi.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines() { return ["AGI\u3000+1", "毒 ×4（敵）"]; },
+      peekHelpKeys() { return ["agi"]; },
+      previewLines() { return ["AGI を +1", "敵に毒 ×4 付与"]; },
+      play(s) {
+        s.playerAgi += 1;
+        api.addPoisonToEnemy(s, 4);
+      },
+    },
+    ext5138: {
+      libraryKey: "ext5138",
+      extId: 5138,
+      extNameJa: "Queen",
+      skillNameJa: "Girl rules",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 105, 105), "PHY\u3000+1"]; },
+      peekHelpKeys() { return ["hp", "phy"]; },
+      previewLines(s) { return [`HP を回復係数 105〜105% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 105, 105)}）`, "PHY を +1"]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 105, 105);
+        s.playerPhy += 1;
+      },
+    },
+    ext5139: {
+      libraryKey: "ext5139",
+      extId: 5139,
+      extNameJa: "終焉鳳炎",
+      skillNameJa: "終末の幻炎",
+      skillIcon: "guard.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines() { return ["ガード\u3000+6"]; },
+      peekHelpKeys() { return ["guard"]; },
+      previewLines() { return ["ガードを 6 得る（StS 風代替効果）"]; },
+      play(s) {
+        s.playerGuard += 6; api.playBattleSe("buff"); api.portraitFx("player", "buff");
+      },
+    },
+    ext5140: {
+      libraryKey: "ext5140",
+      extId: 5140,
+      extNameJa: "フルール・ド・リス",
+      skillNameJa: "Advance bravely",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 65, 70), "INT\u3000+7"]; },
+      peekHelpKeys() { return ["hp", "int"]; },
+      previewLines(s) { return [`HP を回復係数 65〜70% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 65, 70)}）`, "INT を +7"]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 65, 70);
+        s.playerInt += 7;
+      },
+    },
+    ext5141: {
+      libraryKey: "ext5141",
+      extId: 5141,
+      extNameJa: "信長の天鵞絨",
+      skillNameJa: "天下の煌めき",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 60, 85)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 60, 85)} ダメージ（PHY 60〜85%）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 60, 85);
+      },
+    },
+    ext5142: {
+      libraryKey: "ext5142",
+      extId: 5142,
+      extNameJa: "豪華絢爛五段重箱",
+      skillNameJa: "満開キラキラ",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 60)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 50, 60)} ダメージ（INT 50〜60%・代替効果）`]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 50, 60);
+      },
+    },
+    ext5143: {
+      libraryKey: "ext5143",
+      extId: 5143,
+      extNameJa: "宇宙観測スフィア",
+      skillNameJa: "無窮の最果て",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 30, 55)}`, "毒 ×4（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 30, 55)} ダメージ（INT 30〜55%・1v1=単体）`, "敵に毒 ×4 付与"]; },
+      play(s) {
+        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 30, 55);
+        api.addPoisonToEnemy(s, 4);
+      },
+    },
+    ext5144: {
+      libraryKey: "ext5144",
+      extId: 5144,
+      extNameJa: "余市の宝〜北海道余市町名産ワイン〜",
+      skillNameJa: "テロワール～1227～",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 60)}`, "HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 40, 50), "毒 ×4（敵）"]; },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 50, 60)} ダメージ（INT 50〜60%）`, `HP を回復係数 40〜50% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 40, 50)}）`, "敵に毒 ×4 付与"]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 50, 60);
+        api.healPlayerFromIntSkill(s, 40, 50);
+        api.addPoisonToEnemy(s, 4);
+      },
+    },
+    ext5147: {
+      libraryKey: "ext5147",
+      extId: 5147,
+      extNameJa: "アメノミナカヌシ",
+      skillNameJa: "天地開闢の守護",
+      skillIcon: "guard.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines() { return ["ガード\u3000+6"]; },
+      peekHelpKeys() { return ["guard"]; },
+      previewLines() { return ["ガードを 6 得る（StS 風代替効果）"]; },
+      play(s) {
+        s.playerGuard += 6; api.playBattleSe("buff"); api.portraitFx("player", "buff");
+      },
+    },
+    ext5148: {
+      libraryKey: "ext5148",
+      extId: 5148,
+      extNameJa: "RYUJIN.phy",
+      skillNameJa: "RYUテールスイング",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 40, 40)}`, "毒 ×4（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 40, 40)} ダメージ（PHY 40〜40%）`, "敵に毒 ×4 付与"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 40, 40);
+        api.addPoisonToEnemy(s, 4);
+      },
+    },
+    ext5149: {
+      libraryKey: "ext5149",
+      extId: 5149,
+      extNameJa: "RYUJIN.int",
+      skillNameJa: "RYUフレイムブラスト",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 40, 40)}`, "毒 ×4（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 40, 40)} ダメージ（INT 40〜40%・1v1=単体）`, "敵に毒 ×4 付与"]; },
+      play(s) {
+        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 40, 40);
+        api.addPoisonToEnemy(s, 4);
+      },
+    },
+    ext5150: {
+      libraryKey: "ext5150",
+      extId: 5150,
+      extNameJa: "天界の煌石",
+      skillNameJa: "ステラー・ステア",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 20, 20)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 20, 20)} ダメージ（INT 20〜20%・1v1=単体）`]; },
+      play(s) {
+        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 20, 20);
+      },
+    },
+    ext5151: {
+      libraryKey: "ext5151",
+      extId: 5151,
+      extNameJa: "スプリームにゃんバーガーセット",
+      skillNameJa: "究極の猫好きグルメ体験！",
+      skillIcon: "DBF_phy.png",
+      cost: 1,
+      type: "skl",
+      target: "enemy.foremost",
+      effectSummaryLines() { return ["毒 ×4（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines() { return ["敵に毒 ×4 付与"]; },
+      play(s) {
+        api.addPoisonToEnemy(s, 4);
+      },
+    },
+    ext5152: {
+      libraryKey: "ext5152",
+      extId: 5152,
+      extNameJa: "神砕き",
+      skillNameJa: "魔を砕き天を砕き次に望むは",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 65, 75)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 65, 75)} ダメージ（PHY 65〜75%）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 65, 75);
+      },
+    },
+    ext5153: {
+      libraryKey: "ext5153",
+      extId: 5153,
+      extNameJa: "クリプトパンジャンドラム",
+      skillNameJa: "ホイール・オブ・フォーチュン",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 65, 75)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 65, 75)} ダメージ（INT 65〜75%・1v1=単体）`]; },
+      play(s) {
+        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 65, 75);
+      },
+    },
+    ext5154: {
+      libraryKey: "ext5154",
+      extId: 5154,
+      extNameJa: "絶品龍骨ラーメン",
+      skillNameJa: "千載一遇の至杯",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 30, 40), "AGI\u3000+4"]; },
+      peekHelpKeys() { return ["hp", "agi"]; },
+      previewLines(s) { return [`HP を回復係数 30〜40% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 30, 40)}）`, "AGI を +4"]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 30, 40);
+        s.playerAgi += 4;
+      },
+    },
+    ext5155: {
+      libraryKey: "ext5155",
+      extId: 5155,
+      extNameJa: "スワンメカキング",
+      skillNameJa: "アンデュレーション・ソブリン",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 55, 65)}`, "PHY\u3000-6（敵）", "出血 ×4（敵）"]; },
+      peekHelpKeys() { return ["phy"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 55, 65)} ダメージ（PHY 55〜65%）`, "敵の PHY を -6", "敵に出血 ×4 付与"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 55, 65);
+        s.enemyPhy = Math.max(1, s.enemyPhy + (-6)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        api.addBleedToEnemy(s, 4);
+      },
+    },
+    ext5156: {
+      libraryKey: "ext5156",
+      extId: 5156,
+      extNameJa: "フォーチュンロケーター",
+      skillNameJa: "明導",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 55, 65)}`, "INT\u3000-6（敵）", "出血 ×4（敵）"]; },
+      peekHelpKeys() { return ["int"]; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 55, 65)} ダメージ（INT 55〜65%）`, "敵の INT を -6", "敵に出血 ×4 付与"]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 55, 65);
+        s.enemyInt = Math.max(1, s.enemyInt + (-6)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        api.addBleedToEnemy(s, 4);
+      },
+    },
+    ext5157: {
+      libraryKey: "ext5157",
+      extId: 5157,
+      extNameJa: "バミューダトライアングル寿司",
+      skillNameJa: "海神の食卓",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 135, 140)]; },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) { return [`HP を回復係数 135〜140% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 135, 140)}）`]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 135, 140);
+      },
+    },
+    ext5158: {
+      libraryKey: "ext5158",
+      extId: 5158,
+      extNameJa: "ニルヴァーナ",
+      skillNameJa: "アークリンクマトリックス",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 70, 75)}`, "INT\u3000+7"]; },
+      peekHelpKeys() { return ["int"]; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 70, 75)} ダメージ（INT 70〜75%）`, "INT を +7"]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 70, 75);
+        s.playerInt += 7;
+      },
+    },
+    ext5159: {
+      libraryKey: "ext5159",
+      extId: 5159,
+      extNameJa: "不和の女神授けし黄金の果実",
+      skillNameJa: "エニューオー",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 60, 65)}`, "INT\u3000+7", "毒 ×4（敵）"]; },
+      peekHelpKeys() { return ["int"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 60, 65)} ダメージ（PHY 60〜65%）`, "INT を +7", "敵に毒 ×4 付与"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 60, 65);
+        s.playerInt += 7;
+        api.addPoisonToEnemy(s, 4);
+      },
+    },
+    ext5160: {
+      libraryKey: "ext5160",
+      extId: 5160,
+      extNameJa: "マジカルラウンドアクアリウム",
+      skillNameJa: "魔法の水流",
+      skillIcon: "DBF_phy.png",
+      cost: 1,
+      type: "skl",
+      target: "enemy.foremost",
+      effectSummaryLines() { return ["毒 ×4（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines() { return ["敵に毒 ×4 付与"]; },
+      play(s) {
+        api.addPoisonToEnemy(s, 4);
+      },
+    },
+    ext5161: {
+      libraryKey: "ext5161",
+      extId: 5161,
+      extNameJa: "アーカーシャ",
+      skillNameJa: "虚空閃",
+      skillIcon: "BUF_phy.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines() { return ["PHY\u3000+7", "INT\u3000+7"]; },
+      peekHelpKeys() { return ["phy", "int"]; },
+      previewLines() { return ["PHY を +7", "INT を +7"]; },
+      play(s) {
+        s.playerPhy += 7;
+        s.playerInt += 7;
+      },
+    },
+    ext5162: {
+      libraryKey: "ext5162",
+      extId: 5162,
+      extNameJa: "マンドラゴラキング",
+      skillNameJa: "呪王の咆哮",
+      skillIcon: "DBF_agi.png",
+      cost: 1,
+      type: "skl",
+      target: "enemy.foremost",
+      effectSummaryLines() { return ["AGI\u3000-6（敵）", "毒 ×4（敵）"]; },
+      peekHelpKeys() { return ["agi"]; },
+      previewLines() { return ["敵の AGI を -6", "敵に毒 ×4 付与"]; },
+      play(s) {
+        s.enemyAgi = Math.max(1, s.enemyAgi + (-6)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        api.addPoisonToEnemy(s, 4);
+      },
+    },
+    ext5163: {
+      libraryKey: "ext5163",
+      extId: 5163,
+      extNameJa: "ユグドラシル盆栽",
+      skillNameJa: "生命の樹の恩寵",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 15, 20), "PHY\u3000+3", "INT\u3000+3"]; },
+      peekHelpKeys() { return ["hp", "phy", "int"]; },
+      previewLines(s) { return [`HP を回復係数 15〜20% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 15, 20)}）`, "PHY を +3", "INT を +3"]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 15, 20);
+        s.playerPhy += 3;
+        s.playerInt += 3;
+      },
+    },
+    ext5164: {
+      libraryKey: "ext5164",
+      extId: 5164,
+      extNameJa: "若き魔王のメリケンサック",
+      skillNameJa: "アビサルデーモンシャドウ",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 70, 80)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 70, 80)} ダメージ（PHY 70〜80%）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 70, 80);
+      },
+    },
+    ext5165: {
+      libraryKey: "ext5165",
+      extId: 5165,
+      extNameJa: "メリーオルゴーラウンド",
+      skillNameJa: "メロディゴーランド",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 70, 80)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 70, 80)} ダメージ（INT 70〜80%）`]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 70, 80);
+      },
+    },
+    ext5169: {
+      libraryKey: "ext5169",
+      extId: 5169,
+      extNameJa: "レッドドラゴンの右腕標本",
+      skillNameJa: "竜炎知識の解放",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 35, 40)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 35, 40)} ダメージ（INT 35〜40%・1v1=単体）`]; },
+      play(s) {
+        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 35, 40);
+      },
+    },
+    ext5170: {
+      libraryKey: "ext5170",
+      extId: 5170,
+      extNameJa: "パドマ・アーサナ",
+      skillNameJa: "ディヤーナ",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 110, 130), "PHY\u3000+3", "出血 ×4（敵）"]; },
+      peekHelpKeys() { return ["hp", "phy"]; },
+      previewLines(s) { return [`HP を回復係数 110〜130% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 110, 130)}）`, "PHY を +3", "敵に出血 ×4 付与"]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 110, 130);
+        s.playerPhy += 3;
+        api.addBleedToEnemy(s, 4);
+      },
+    },
+    ext5171: {
+      libraryKey: "ext5171",
+      extId: 5171,
+      extNameJa: "アトロポスの鋏",
+      skillNameJa: "因果断絶",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)} ダメージ（PHY 50〜60%・代替効果）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 50, 60);
+      },
+    },
+    ext5172: {
+      libraryKey: "ext5172",
+      extId: 5172,
+      extNameJa: "ハードウェアウォレット",
+      skillNameJa: "ソウルバウンドトーメント",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines() { return ["ドロー　1"]; },
+      peekHelpKeys() { return ["draw"]; },
+      previewLines() { return ["カードを 1 枚引く（StS 風代替効果）"]; },
+      play(s) {
+        api.drawCards(s, 1);
+      },
+    },
+    ext5173: {
+      libraryKey: "ext5173",
+      extId: 5173,
+      extNameJa: "古代竜のタリスマン",
+      skillNameJa: "幻龍の咆哮",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 30, 30)}`, "出血 ×4（敵）", "毒 ×4（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 30, 30)} ダメージ（INT 30〜30%）`, "敵に出血 ×4 付与", "敵に毒 ×4 付与"]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 30, 30);
+        api.addBleedToEnemy(s, 4);
+        api.addPoisonToEnemy(s, 4);
+      },
+    },
+    ext5174: {
+      libraryKey: "ext5174",
+      extId: 5174,
+      extNameJa: "エンジェルセット",
+      skillNameJa: "ヘブンリー・グレイス",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 15, 20)]; },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) { return [`HP を回復係数 15〜20% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 15, 20)}）`]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 15, 20);
+      },
+    },
+    ext5175: {
+      libraryKey: "ext5175",
+      extId: 5175,
+      extNameJa: "精霊王の巻き角",
+      skillNameJa: "精霊王の神気",
+      skillIcon: "guard.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines() { return ["ガード\u3000+6"]; },
+      peekHelpKeys() { return ["guard"]; },
+      previewLines() { return ["ガードを 6 得る（StS 風代替効果）"]; },
+      play(s) {
+        s.playerGuard += 6; api.playBattleSe("buff"); api.portraitFx("player", "buff");
+      },
+    },
+    ext5176: {
+      libraryKey: "ext5176",
+      extId: 5176,
+      extNameJa: "妖精の森の山盛りベリータルト",
+      skillNameJa: "ベリーの饗宴",
+      skillIcon: "DBF_phy.png",
+      cost: 1,
+      type: "skl",
+      target: "enemy.foremost",
+      effectSummaryLines() { return ["毒 ×4（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines() { return ["敵に毒 ×4 付与"]; },
+      play(s) {
+        api.addPoisonToEnemy(s, 4);
+      },
+    },
+    ext5177: {
+      libraryKey: "ext5177",
+      extId: 5177,
+      extNameJa: "ゴーレムクイーン",
+      skillNameJa: "大地の女帝",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 45, 50)}`, "PHY\u3000+1"]; },
+      peekHelpKeys() { return ["phy"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 45, 50)} ダメージ（PHY 45〜50%）`, "PHY を +1"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 45, 50);
+        s.playerPhy += 1;
+      },
+    },
+    ext5178: {
+      libraryKey: "ext5178",
+      extId: 5178,
+      extNameJa: "マジックカード：光輝",
+      skillNameJa: "コスモ・ノヴァ",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 45, 50)}`, "INT\u3000+1"]; },
+      peekHelpKeys() { return ["int"]; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 45, 50)} ダメージ（INT 45〜50%）`, "INT を +1"]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 45, 50);
+        s.playerInt += 1;
+      },
+    },
+    ext5179: {
+      libraryKey: "ext5179",
+      extId: 5179,
+      extNameJa: "トロイの木馬",
+      skillNameJa: "ホロウ・ギフト",
+      skillIcon: "DBF_int.png",
+      cost: 1,
+      type: "skl",
+      target: "enemy.foremost",
+      effectSummaryLines() { return ["INT\u3000-4（敵）", "AGI\u3000-4（敵）", "出血 ×4（敵）"]; },
+      peekHelpKeys() { return ["int", "agi"]; },
+      previewLines() { return ["敵の INT を -4", "敵の AGI を -4", "敵に出血 ×4 付与"]; },
+      play(s) {
+        s.enemyInt = Math.max(1, s.enemyInt + (-4)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        s.enemyAgi = Math.max(1, s.enemyAgi + (-4)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        api.addBleedToEnemy(s, 4);
+      },
+    },
+    ext5180: {
+      libraryKey: "ext5180",
+      extId: 5180,
+      extNameJa: "大型猫&虹蛇じゃらし",
+      skillNameJa: "虹色の幻惑",
+      skillIcon: "DBF_agi.png",
+      cost: 1,
+      type: "skl",
+      target: "enemy.foremost",
+      effectSummaryLines() { return ["PHY\u3000-4（敵）", "AGI\u3000-4（敵）", "毒 ×4（敵）"]; },
+      peekHelpKeys() { return ["phy", "agi"]; },
+      previewLines() { return ["敵の PHY を -4", "敵の AGI を -4", "敵に毒 ×4 付与"]; },
+      play(s) {
+        s.enemyPhy = Math.max(1, s.enemyPhy + (-4)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        s.enemyAgi = Math.max(1, s.enemyAgi + (-4)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        api.addPoisonToEnemy(s, 4);
+      },
+    },
+    ext5181: {
+      libraryKey: "ext5181",
+      extId: 5181,
+      extNameJa: "セラフィックボード",
+      skillNameJa: "天降の威圧",
+      skillIcon: "guard.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines() { return ["ガード\u3000+6"]; },
+      peekHelpKeys() { return ["guard"]; },
+      previewLines() { return ["ガードを 6 得る（StS 風代替効果）"]; },
+      play(s) {
+        s.playerGuard += 6; api.playBattleSe("buff"); api.portraitFx("player", "buff");
+      },
+    },
+    ext5182: {
+      libraryKey: "ext5182",
+      extId: 5182,
+      extNameJa: "お城",
+      skillNameJa: "エクスクイジット・ミニ・ランパート",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 60)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 50, 60)} ダメージ（INT 50〜60%・代替効果）`]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 50, 60);
+      },
+    },
+    ext5183: {
+      libraryKey: "ext5183",
+      extId: 5183,
+      extNameJa: "ルシファーフレイル",
+      skillNameJa: "失墜せし裁き",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)} ダメージ（PHY 50〜60%・代替効果）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 50, 60);
+      },
+    },
+    ext5184: {
+      libraryKey: "ext5184",
+      extId: 5184,
+      extNameJa: "ガイアマイマイ",
+      skillNameJa: "螺旋花泉",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)} ダメージ（PHY 50〜60%・代替効果）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 50, 60);
+      },
+    },
+    ext5185: {
+      libraryKey: "ext5185",
+      extId: 5185,
+      extNameJa: "ダイヤモンドドラゴン",
+      skillNameJa: "宝輝創世",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 55, 55)}`, "PHY\u3000+3", "AGI\u3000-6（敵）"]; },
+      peekHelpKeys() { return ["phy", "agi"]; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 55, 55)} ダメージ（PHY 55〜55%）`, "PHY を +3", "敵の AGI を -6"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 55, 55);
+        s.playerPhy += 3;
+        s.enemyAgi = Math.max(1, s.enemyAgi + (-6)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+      },
+    },
+    ext5186: {
+      libraryKey: "ext5186",
+      extId: 5186,
+      extNameJa: "スケールホーク",
+      skillNameJa: "アイギスケイル・アクシグリフ",
+      skillIcon: "guard.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines() { return ["ガード\u3000+6"]; },
+      peekHelpKeys() { return ["guard"]; },
+      previewLines() { return ["ガードを 6 得る（StS 風代替効果）"]; },
+      play(s) {
+        s.playerGuard += 6; api.playBattleSe("buff"); api.portraitFx("player", "buff");
+      },
+    },
+    ext5187: {
+      libraryKey: "ext5187",
+      extId: 5187,
+      extNameJa: "グングニル",
+      skillNameJa: "因果収束",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 55, 65)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 55, 65)} ダメージ（PHY 55〜65%）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 55, 65);
+      },
+    },
+    ext5188: {
+      libraryKey: "ext5188",
+      extId: 5188,
+      extNameJa: "クレセントムーン",
+      skillNameJa: "エターナル・リカーブ",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 55, 65)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 55, 65)} ダメージ（INT 55〜65%）`]; },
+      play(s) {
+        api.dealIntSkillToEnemy(s, 55, 65);
+      },
+    },
+    ext5189: {
+      libraryKey: "ext5189",
+      extId: 5189,
+      extNameJa: "アレキサンドライトドラゴン",
+      skillNameJa: "イルミネーションレザルトバースト",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 30, 35)}`, `敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 30, 35)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 30, 35)} ダメージ（PHY 30〜35%）`, `敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 30, 35)} ダメージ（INT 30〜35%・1v1=単体）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 30, 35);
+        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 30, 35);
+      },
+    },
+    ext5190: {
+      libraryKey: "ext5190",
+      extId: 5190,
+      extNameJa: "天候操作装置ゼウス",
+      skillNameJa: "嵐のアイギス",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 40, 40)]; },
+      peekHelpKeys() { return ["hp"]; },
+      previewLines(s) { return [`HP を回復係数 40〜40% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 40, 40)}）`]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 40, 40);
+      },
+    },
+    ext5191: {
+      libraryKey: "ext5191",
+      extId: 5191,
+      extNameJa: "九頭龍大神の大好物",
+      skillNameJa: "水神の恩寵",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 55, 60)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 55, 60)} ダメージ（PHY 55〜60%）`]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 55, 60);
+      },
+    },
+    ext5192: {
+      libraryKey: "ext5192",
+      extId: 5192,
+      extNameJa: "スダルシャナ",
+      skillNameJa: "刻の輪",
+      skillIcon: "int.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 60)}`]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 50, 60)} ダメージ（INT 50〜60%・1v1=単体）`]; },
+      play(s) {
+        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 50, 60);
+      },
+    },
+    ext5193: {
+      libraryKey: "ext5193",
+      extId: 5193,
+      extNameJa: "アルテミスのボンネット",
+      skillNameJa: "月光の慰撫",
+      skillIcon: "hp.png",
+      cost: 1,
+      type: "skl",
+      target: "self",
+      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 65, 75), "INT\u3000+1"]; },
+      peekHelpKeys() { return ["hp", "int"]; },
+      previewLines(s) { return [`HP を回復係数 65〜75% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 65, 75)}）`, "INT を +1"]; },
+      play(s) {
+        api.healPlayerFromIntSkill(s, 65, 75);
+        s.playerInt += 1;
+      },
+    },
+    ext5194: {
+      libraryKey: "ext5194",
+      extId: 5194,
+      extNameJa: "ゴールデンブレイバー",
+      skillNameJa: "獅子咆哮",
+      skillIcon: "phy.png",
+      cost: 1,
+      type: "atk",
+      target: "enemy.foremost",
+      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)}`, "毒 ×4（敵）"]; },
+      peekHelpKeys() { return []; },
+      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)} ダメージ（PHY 50〜60%）`, "敵に毒 ×4 付与"]; },
+      play(s) {
+        api.dealPhySkillToEnemy(s, 50, 60);
+        api.addPoisonToEnemy(s, 4);
+      },
+    },
   };
 }
 
@@ -13826,6 +19988,376 @@ export const CARD_RARITIES = {
   ext3647: 'rare',
   ext3651: 'rare',
   ext3674: 'rare',
+// ─── auto-generated CARD_RARITIES entries ───
+  ext4001: 'epic',
+  ext4002: 'epic',
+  ext4003: 'epic',
+  ext4004: 'epic',
+  ext4005: 'epic',
+  ext4006: 'epic',
+  ext4007: 'epic',
+  ext4008: 'epic',
+  ext4009: 'epic',
+  ext4010: 'epic',
+  ext4011: 'epic',
+  ext4012: 'epic',
+  ext4013: 'epic',
+  ext4014: 'epic',
+  ext4015: 'epic',
+  ext4016: 'epic',
+  ext4017: 'epic',
+  ext4018: 'epic',
+  ext4019: 'epic',
+  ext4020: 'epic',
+  ext4021: 'epic',
+  ext4022: 'epic',
+  ext4023: 'epic',
+  ext4024: 'epic',
+  ext4025: 'epic',
+  ext4026: 'epic',
+  ext4027: 'epic',
+  ext4028: 'epic',
+  ext4029: 'epic',
+  ext4030: 'epic',
+  ext4031: 'epic',
+  ext4032: 'epic',
+  ext4033: 'epic',
+  ext4034: 'epic',
+  ext4035: 'epic',
+  ext4036: 'epic',
+  ext4037: 'epic',
+  ext4038: 'epic',
+  ext4039: 'epic',
+  ext4040: 'epic',
+  ext4041: 'epic',
+  ext4042: 'epic',
+  ext4043: 'epic',
+  ext4044: 'epic',
+  ext4045: 'epic',
+  ext4046: 'epic',
+  ext4047: 'epic',
+  ext4048: 'epic',
+  ext4049: 'epic',
+  ext4050: 'epic',
+  ext4051: 'epic',
+  ext4055: 'epic',
+  ext4056: 'epic',
+  ext4057: 'epic',
+  ext4058: 'epic',
+  ext4059: 'epic',
+  ext4060: 'epic',
+  ext4061: 'epic',
+  ext4063: 'epic',
+  ext4064: 'epic',
+  ext4065: 'epic',
+  ext4066: 'epic',
+  ext4067: 'epic',
+  ext4068: 'epic',
+  ext4069: 'epic',
+  ext4070: 'epic',
+  ext4071: 'epic',
+  ext4072: 'epic',
+  ext4073: 'epic',
+  ext4074: 'epic',
+  ext4075: 'epic',
+  ext4079: 'epic',
+  ext4080: 'epic',
+  ext4081: 'epic',
+  ext4082: 'epic',
+  ext4083: 'epic',
+  ext4085: 'epic',
+  ext4086: 'epic',
+  ext4087: 'epic',
+  ext4088: 'epic',
+  ext4089: 'epic',
+  ext4090: 'epic',
+  ext4091: 'epic',
+  ext4092: 'epic',
+  ext4093: 'epic',
+  ext4094: 'epic',
+  ext4095: 'epic',
+  ext4096: 'epic',
+  ext4097: 'epic',
+  ext4098: 'epic',
+  ext4099: 'epic',
+  ext4100: 'epic',
+  ext4101: 'epic',
+  ext4102: 'epic',
+  ext4103: 'epic',
+  ext4104: 'epic',
+  ext4105: 'epic',
+  ext4106: 'epic',
+  ext4107: 'epic',
+  ext4108: 'epic',
+  ext4109: 'epic',
+  ext4110: 'epic',
+  ext4111: 'epic',
+  ext4112: 'epic',
+  ext4113: 'epic',
+  ext4114: 'epic',
+  ext4115: 'epic',
+  ext4116: 'epic',
+  ext4117: 'epic',
+  ext4118: 'epic',
+  ext4119: 'epic',
+  ext4120: 'epic',
+  ext4121: 'epic',
+  ext4122: 'epic',
+  ext4123: 'epic',
+  ext4124: 'epic',
+  ext4125: 'epic',
+  ext4126: 'epic',
+  ext4127: 'epic',
+  ext4128: 'epic',
+  ext4129: 'epic',
+  ext4130: 'epic',
+  ext4131: 'epic',
+  ext4132: 'epic',
+  ext4133: 'epic',
+  ext4134: 'epic',
+  ext4135: 'epic',
+  ext4136: 'epic',
+  ext4137: 'epic',
+  ext4138: 'epic',
+  ext4139: 'epic',
+  ext4140: 'epic',
+  ext4141: 'epic',
+  ext4142: 'epic',
+  ext4143: 'epic',
+  ext4145: 'epic',
+  ext4146: 'epic',
+  ext4147: 'epic',
+  ext4148: 'epic',
+  ext4149: 'epic',
+  ext4150: 'epic',
+  ext4151: 'epic',
+  ext4152: 'epic',
+  ext4153: 'epic',
+  ext4154: 'epic',
+  ext4155: 'epic',
+  ext4156: 'epic',
+  ext4157: 'epic',
+  ext4158: 'epic',
+  ext4159: 'epic',
+  ext4160: 'epic',
+  ext4161: 'epic',
+  ext4162: 'epic',
+  ext4163: 'epic',
+  ext4164: 'epic',
+  ext4165: 'epic',
+  ext4166: 'epic',
+  ext4167: 'epic',
+  ext4168: 'epic',
+  ext4169: 'epic',
+  ext4170: 'epic',
+  ext4171: 'epic',
+  ext4172: 'epic',
+  ext4173: 'epic',
+  ext4174: 'epic',
+  ext4175: 'epic',
+  ext4176: 'epic',
+  ext4177: 'epic',
+  ext4178: 'epic',
+  ext4179: 'epic',
+  ext4180: 'epic',
+  ext4181: 'epic',
+  ext4182: 'epic',
+  ext4183: 'epic',
+  ext4184: 'epic',
+  ext4185: 'epic',
+  ext4186: 'epic',
+  ext4187: 'epic',
+  ext4188: 'epic',
+  ext4189: 'epic',
+  ext4190: 'epic',
+  ext4191: 'epic',
+  ext4192: 'epic',
+  ext4193: 'epic',
+  ext4194: 'epic',
+  ext4600: 'epic',
+  ext4640: 'epic',
+  ext4647: 'epic',
+  ext4651: 'epic',
+  ext4674: 'epic',
+// ─── auto-generated CARD_RARITIES entries ───
+  ext5001: 'legendary',
+  ext5002: 'legendary',
+  ext5003: 'legendary',
+  ext5004: 'legendary',
+  ext5005: 'legendary',
+  ext5006: 'legendary',
+  ext5008: 'legendary',
+  ext5009: 'legendary',
+  ext5010: 'legendary',
+  ext5011: 'legendary',
+  ext5012: 'legendary',
+  ext5013: 'legendary',
+  ext5014: 'legendary',
+  ext5015: 'legendary',
+  ext5016: 'legendary',
+  ext5017: 'legendary',
+  ext5018: 'legendary',
+  ext5019: 'legendary',
+  ext5020: 'legendary',
+  ext5021: 'legendary',
+  ext5022: 'legendary',
+  ext5023: 'legendary',
+  ext5024: 'legendary',
+  ext5025: 'legendary',
+  ext5026: 'legendary',
+  ext5027: 'legendary',
+  ext5028: 'legendary',
+  ext5029: 'legendary',
+  ext5030: 'legendary',
+  ext5031: 'legendary',
+  ext5032: 'legendary',
+  ext5033: 'legendary',
+  ext5034: 'legendary',
+  ext5035: 'legendary',
+  ext5036: 'legendary',
+  ext5037: 'legendary',
+  ext5038: 'legendary',
+  ext5039: 'legendary',
+  ext5040: 'legendary',
+  ext5041: 'legendary',
+  ext5042: 'legendary',
+  ext5043: 'legendary',
+  ext5044: 'legendary',
+  ext5045: 'legendary',
+  ext5046: 'legendary',
+  ext5047: 'legendary',
+  ext5048: 'legendary',
+  ext5049: 'legendary',
+  ext5050: 'legendary',
+  ext5051: 'legendary',
+  ext5055: 'legendary',
+  ext5056: 'legendary',
+  ext5057: 'legendary',
+  ext5058: 'legendary',
+  ext5059: 'legendary',
+  ext5060: 'legendary',
+  ext5061: 'legendary',
+  ext5063: 'legendary',
+  ext5064: 'legendary',
+  ext5065: 'legendary',
+  ext5066: 'legendary',
+  ext5067: 'legendary',
+  ext5068: 'legendary',
+  ext5069: 'legendary',
+  ext5070: 'legendary',
+  ext5071: 'legendary',
+  ext5072: 'legendary',
+  ext5073: 'legendary',
+  ext5074: 'legendary',
+  ext5075: 'legendary',
+  ext5078: 'legendary',
+  ext5079: 'legendary',
+  ext5080: 'legendary',
+  ext5081: 'legendary',
+  ext5082: 'legendary',
+  ext5086: 'legendary',
+  ext5087: 'legendary',
+  ext5088: 'legendary',
+  ext5089: 'legendary',
+  ext5090: 'legendary',
+  ext5091: 'legendary',
+  ext5092: 'legendary',
+  ext5093: 'legendary',
+  ext5094: 'legendary',
+  ext5095: 'legendary',
+  ext5096: 'legendary',
+  ext5097: 'legendary',
+  ext5098: 'legendary',
+  ext5099: 'legendary',
+  ext5100: 'legendary',
+  ext5102: 'legendary',
+  ext5103: 'legendary',
+  ext5104: 'legendary',
+  ext5105: 'legendary',
+  ext5106: 'legendary',
+  ext5107: 'legendary',
+  ext5108: 'legendary',
+  ext5109: 'legendary',
+  ext5110: 'legendary',
+  ext5111: 'legendary',
+  ext5112: 'legendary',
+  ext5113: 'legendary',
+  ext5114: 'legendary',
+  ext5115: 'legendary',
+  ext5116: 'legendary',
+  ext5117: 'legendary',
+  ext5118: 'legendary',
+  ext5119: 'legendary',
+  ext5120: 'legendary',
+  ext5121: 'legendary',
+  ext5122: 'legendary',
+  ext5123: 'legendary',
+  ext5124: 'legendary',
+  ext5125: 'legendary',
+  ext5126: 'legendary',
+  ext5127: 'legendary',
+  ext5128: 'legendary',
+  ext5129: 'legendary',
+  ext5130: 'legendary',
+  ext5131: 'legendary',
+  ext5132: 'legendary',
+  ext5133: 'legendary',
+  ext5134: 'legendary',
+  ext5135: 'legendary',
+  ext5136: 'legendary',
+  ext5137: 'legendary',
+  ext5138: 'legendary',
+  ext5139: 'legendary',
+  ext5140: 'legendary',
+  ext5141: 'legendary',
+  ext5142: 'legendary',
+  ext5143: 'legendary',
+  ext5144: 'legendary',
+  ext5147: 'legendary',
+  ext5148: 'legendary',
+  ext5149: 'legendary',
+  ext5150: 'legendary',
+  ext5151: 'legendary',
+  ext5152: 'legendary',
+  ext5153: 'legendary',
+  ext5154: 'legendary',
+  ext5155: 'legendary',
+  ext5156: 'legendary',
+  ext5157: 'legendary',
+  ext5158: 'legendary',
+  ext5159: 'legendary',
+  ext5160: 'legendary',
+  ext5161: 'legendary',
+  ext5162: 'legendary',
+  ext5163: 'legendary',
+  ext5164: 'legendary',
+  ext5165: 'legendary',
+  ext5169: 'legendary',
+  ext5170: 'legendary',
+  ext5171: 'legendary',
+  ext5172: 'legendary',
+  ext5173: 'legendary',
+  ext5174: 'legendary',
+  ext5175: 'legendary',
+  ext5176: 'legendary',
+  ext5177: 'legendary',
+  ext5178: 'legendary',
+  ext5179: 'legendary',
+  ext5180: 'legendary',
+  ext5181: 'legendary',
+  ext5182: 'legendary',
+  ext5183: 'legendary',
+  ext5184: 'legendary',
+  ext5185: 'legendary',
+  ext5186: 'legendary',
+  ext5187: 'legendary',
+  ext5188: 'legendary',
+  ext5189: 'legendary',
+  ext5190: 'legendary',
+  ext5191: 'legendary',
+  ext5192: 'legendary',
+  ext5193: 'legendary',
+  ext5194: 'legendary',
 };
 
 /**
