@@ -1292,8 +1292,12 @@
     }
 
     /* ── Header Regulation Icon (#37) ────────────────────────── */
-    /* 横長カップ画像のアスペクト比を活かすため横幅を 3 倍に */
-    .header-reg-icon {
+    /* 横長カップ画像のアスペクト比を活かすため横幅を 3 倍に。
+       .resources img の generic 指定 (22×22) を上書きするため
+       両ヘッダー context での指定で specificity を確保。 */
+    .header-reg-icon,
+    .resources img.header-reg-icon,
+    .combat-header-btns img.header-reg-icon {
       width: 84px; height: 28px;
       object-fit: contain; image-rendering: pixelated;
       vertical-align: middle;
@@ -1302,7 +1306,11 @@
       padding: 1px 3px;
     }
     @media (max-width: 380px) {
-      .header-reg-icon { width: 64px; height: 24px; }
+      .header-reg-icon,
+      .resources img.header-reg-icon,
+      .combat-header-btns img.header-reg-icon {
+        width: 64px; height: 24px;
+      }
     }
 
     .hs-header { text-align: center; margin-bottom: 1.2rem; }
