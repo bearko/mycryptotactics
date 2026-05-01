@@ -2442,6 +2442,7 @@
         <button type="button" class="help-nav-btn help-nav-btn--active" data-help-nav="goal" role="tab" aria-selected="true">目的</button>
         <button type="button" class="help-nav-btn" data-help-nav="controls" role="tab" aria-selected="false">操作</button>
         <button type="button" class="help-nav-btn" data-help-nav="params" role="tab" aria-selected="false">パラメーター</button>
+        <button type="button" class="help-nav-btn" data-help-nav="terms" role="tab" aria-selected="false">用語</button>
         <button type="button" class="help-nav-btn" data-help-nav="battle" role="tab" aria-selected="false">バトル</button>
       </div>
       <div class="help-body">
@@ -2484,6 +2485,29 @@
             <li><strong>✦ シールド</strong> — <strong>特殊ダメージ</strong>（最大 HP 割合など）だけを先に吸収します。PHY/INT 通常攻撃には効きません。</li>
           </ul>
           <p>詳しい原作の定義は <a href="https://www.mycryptoheroes.net/ja/help-posts/7iMLBLL1sMJ9Rlk2Fv2Zmj" target="_blank" rel="noopener">MCH ヘルプ：パラメーター</a> を参照してください。</p>
+        </section>
+        <section class="help-page" data-help-page="terms">
+          <h3>カードに出てくる用語</h3>
+          <ul>
+            <li><strong>戦闘中ずっと</strong> — その効果は<strong>そのバトルが終わるまで</strong>続きます。次のバトルでは元の値に戻ります（例: <code>PHY +3（戦闘中ずっと）</code>）。</li>
+            <li><strong>【消耗】</strong> — 使用後、そのカードは<strong>除外</strong>され、残りデッキ・捨て札に戻りません（例: エリートペン）。</li>
+            <li><strong>ガード +N</strong> — そのターン中に受ける PHY/INT ダメージを N 分先に削る軽減層。<strong>ターン開始でリセット</strong>されます。</li>
+            <li><strong>シールド +N</strong> — 特殊ダメージ（最大 HP 割合等）のみ吸収。PHY/INT 通常攻撃には<strong>効きません</strong>。リセットなし。</li>
+            <li><strong>ドロー N</strong> — 山札から N 枚カードを引きます。山札が空のときは捨て札を切り直してから引きます。</li>
+            <li><strong>毒 ×N</strong> — 各ターン開始時に N ダメージ。スタック数だけ繰り返し効きます。</li>
+            <li><strong>出血 ×N</strong> — そのユニットがカードを使う / 行動するたびに N ダメージ。スタックする。</li>
+          </ul>
+          <h3>カードのターゲット表示（右上の色付きラベル）</h3>
+          <ul>
+            <li><strong style="color:#ff8090">敵先頭</strong>（赤）— その時点で生存している<strong>最も画面中央寄りの敵</strong>。前衛 → 中衛 → 後衛 の順に見ます。</li>
+            <li><strong style="color:#ff8090">敵全</strong>（赤）— 生存している敵全員に効果を適用。</li>
+            <li><strong style="color:#2ecc71">自身</strong>（緑）— カードを使ったヒーロー自身に効果を適用。</li>
+            <li><strong style="color:#2ecc71">味方先頭 / 味方全</strong>（緑）— 味方パーティ側の対象。</li>
+            <li><strong style="color:#c8b6e6">全</strong>（紫）— 敵味方すべて。</li>
+            <li><strong>?</strong> — ランダム（その時点の生存者から無作為に選択）。</li>
+            <li><strong>PHY↑ / HP↓</strong> 等 — そのステータスが<strong>最も高い / 低い</strong>対象を選択。</li>
+          </ul>
+          <p style="font-size:0.78rem;color:var(--muted)">※ パーティ編成（3 人 vs 3 人）はベータ版で実装予定。アルファ版では実質 1 体ずつのため、上記ラベルは <strong>誰に効くか</strong>の予告として機能します。</p>
         </section>
         <section class="help-page" data-help-page="battle">
           <h3>バトルロジック（概要）</h3>

@@ -560,9 +560,9 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
-      effectSummaryLines() { return ["ガード　+8", "AGI　+2（永続）"]; },
+      effectSummaryLines() { return ["ガード　+8", "AGI　+2（戦闘中ずっと）"]; },
       peekHelpKeys() { return ["guard", "agi"]; },
-      previewLines() { return ["ガードを 8 得る", "AGI を +2（永続）"]; },
+      previewLines() { return ["ガードを 8 得る", "AGI を +2（戦闘中ずっと）"]; },
       play(s) {
         se("buff"); fx("player", "buff");
         s.playerGuard += 8;
@@ -579,9 +579,9 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
-      effectSummaryLines() { return ["INT　+2（永続）", "ドロー　3"]; },
+      effectSummaryLines() { return ["INT　+2（戦闘中ずっと）", "ドロー　3"]; },
       peekHelpKeys() { return ["int", "draw"]; },
-      previewLines() { return ["INT を +2（永続）", "カードを 3 枚引く"]; },
+      previewLines() { return ["INT を +2（戦闘中ずっと）", "カードを 3 枚引く"]; },
       play(s) {
         se("buff"); fx("player", "buff");
         s.playerInt += 2;
@@ -706,9 +706,9 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
-      effectSummaryLines() { return ["PHY　+3（永続）"]; },
+      effectSummaryLines() { return ["PHY　+3（戦闘中ずっと）"]; },
       peekHelpKeys() { return ["phy"]; },
-      previewLines() { return ["PHY を +3（このランの残り全ての戦闘で有効）"]; },
+      previewLines() { return ["PHY を +3（戦闘中ずっと。次の戦闘では戻る）"]; },
       play(s) {
         se("buff"); fx("player", "buff");
         s.playerPhy += 3;
@@ -828,10 +828,10 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
-      effectSummaryLines() { return ["ガード　+8", "AGI　+2（永続）"]; },
+      effectSummaryLines() { return ["ガード　+8", "AGI　+2（戦闘中ずっと）"]; },
       peekHelpKeys() { return ["guard", "agi"]; },
       previewLines() {
-        return ["ガードを 8 得る", "AGI を +2（永続）"];
+        return ["ガードを 8 得る", "AGI を +2（戦闘中ずっと）"];
       },
       play(s) {
         se("buff"); fx("player", "buff");
@@ -902,9 +902,9 @@ function makeCardLibrary(clog, api) {
       cost: 2,
       type: "skl",
       target: "self",
-      effectSummaryLines() { return ["INT　+2（永続）", "ドロー　3"]; },
+      effectSummaryLines() { return ["INT　+2（戦闘中ずっと）", "ドロー　3"]; },
       peekHelpKeys() { return ["int", "draw"]; },
-      previewLines() { return ["INT を +2（永続）", "カードを 3 枚引く"]; },
+      previewLines() { return ["INT を +2（戦闘中ずっと）", "カードを 3 枚引く"]; },
       play(s) {
         se("buff"); fx("player", "buff");
         s.playerInt += 2;
@@ -1086,9 +1086,9 @@ function makeCardLibrary(clog, api) {
       cost: 2,
       type: "skl",
       target: "self",
-      effectSummaryLines() { return ["PHY　+5", "INT　+5（永続）"]; },
+      effectSummaryLines() { return ["PHY　+5", "INT　+5（戦闘中ずっと）"]; },
       peekHelpKeys() { return ["phy", "int"]; },
-      previewLines() { return ["PHY を +5、INT を +5（永続）"]; },
+      previewLines() { return ["PHY を +5、INT を +5（戦闘中ずっと）"]; },
       play(s) {
         se("buff"); fx("player", "buff");
         s.playerPhy += 5;
