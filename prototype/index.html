@@ -703,7 +703,11 @@
     }
     .card-effect-row .card-effect-text {
       font-size: 0.6rem; color: #1a1420;
-      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      /* 1 行で収まらない場合は折り返し許容 (見切れ防止) */
+      white-space: normal; word-break: break-word;
+      overflow: hidden;
+      max-height: 2.6em;  /* 約 2 行 */
+      line-height: 1.25;
     }
     /* container queries: card-effect-area を query container に */
     .card-effect-area { container-type: inline-size; }
@@ -739,12 +743,23 @@
       font-size: 0.55rem;
       padding: 1px 5px;
     }
-    /* リワードカード等の小カードでは caster icon を縮小 */
-    .reward-card-inner .card-caster-display .card-caster-img {
-      width: 22px; height: 22px;
+    /* SPEC-006 Phase 4h: リワード/ショップ/クラフト/デッキ一覧 (reward-card-inner) では
+       役割ラベルをアートワーク領域の右下 (= card-effect-summary の上) に配置。
+       effect-summary は bottom: 0 / height: 38% なので、ラベルは bottom: 39% 付近 */
+    .reward-card-inner .card-caster-display.card-caster-display--rolelabel {
+      position: absolute;
+      bottom: calc(38% + 4px); right: 4px;
+      z-index: 8; /* effect-summary より前面 */
     }
-    .reward-card-inner .card-caster-display .card-caster-role {
-      font-size: 0.45rem;
+    .reward-card-inner .card-caster-display.card-caster-display--rolelabel .card-caster-role {
+      font-size: clamp(0.55rem, 8cqw, 0.75rem);
+      padding: 2px 6px;
+      background: rgba(10,8,18,0.92);
+      border: 1.5px solid var(--accent);
+      color: var(--accent);
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.5);
     }
 
     /* Peek layer (shown when focused) — appears to the side of the card */
@@ -1070,6 +1085,10 @@
     .reward-card-inner .card-effect-summary .card-effect-text {
       font-size: clamp(0.65rem, 11cqw, 0.95rem);
       color: #e6e0f0;
+      /* 見切れ防止: 2 行までは折り返し許容 */
+      white-space: normal; word-break: break-word;
+      max-height: 2.6em; line-height: 1.25;
+      text-overflow: clip;
     }
 
     /* Rarity border colors on reward / shop / craft cards */
