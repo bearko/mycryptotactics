@@ -71,9 +71,31 @@ export function rollCrit(critChancePct) {
 
 /**
  * シールド: PHY/INT 依存ダメージには無効。特殊ダメージのみシールドが先に削れる。
+ *
+ * SPEC-006 Phase 4f: target に unit (object) を渡すと per-hero shield を消費。
+ * 文字列 ("player"/"enemy") の場合は legacy state.playerShield/enemyShield を使う。
  */
 export function applyDamageThroughShield(state, target, rawDamage) {
   if (rawDamage <= 0) return 0;
+  // 新パス: hero/enemy unit (object)
+  if (target && typeof target === "object") {
+    const u = target;
+    const sh = u.shield || 0;
+    if (sh <= 0) return rawDamage;
+    if (rawDamage <= sh) {
+      u.shield = sh - rawDamage;
+      // heroes[0] / enemies[0] なら legacy mirror
+      if (state?.heroes?.[0] === u) state.playerShield = u.shield;
+      if (state?.enemies?.[0] === u) state.enemyShield = u.shield;
+      return 0;
+    }
+    const overflow = rawDamage - sh;
+    u.shield = 0;
+    if (state?.heroes?.[0] === u) state.playerShield = 0;
+    if (state?.enemies?.[0] === u) state.enemyShield = 0;
+    return overflow;
+  }
+  // legacy パス
   const key = target === "player" ? "playerShield" : "enemyShield";
   let sh = state[key] || 0;
   if (sh <= 0) return rawDamage;

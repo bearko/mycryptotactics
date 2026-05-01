@@ -13203,6 +13203,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 65-75%" },
+        { target: "self", text: "PHY +1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 65, 75)}`, "PHY\u3000+1"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 65, 75)} ダメージ（PHY 65〜75%）`, "PHY を +1"]; },
@@ -13220,6 +13226,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 40-45%" },
+        { target: "self", text: "INT +1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 40, 45)}`, "INT\u3000+1"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 40, 45)} ダメージ（INT 40〜45%・1v1=単体）`, "INT を +1"]; },
@@ -13237,6 +13249,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT60-70%" },
+        { target: "self", text: "INT +1" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 60, 70), "INT\u3000+1"]; },
       peekHelpKeys() { return ["hp", "int"]; },
       previewLines(s) { return [`HP を回復係数 60〜70% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 60, 70)}）`, "INT を +1"]; },
@@ -13254,6 +13272,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT5-5%" },
+        { target: "self", text: "PHY +2" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 5, 5), "PHY\u3000+2"]; },
       peekHelpKeys() { return ["hp", "phy"]; },
       previewLines(s) { return [`HP を回復係数 5〜5% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 5, 5)}）`, "PHY を +2"]; },
@@ -13271,6 +13295,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "ガード +6" }
+      ],
       effectSummaryLines() { return ["ガード\u3000+6"]; },
       peekHelpKeys() { return ["guard"]; },
       previewLines() { return ["ガードを 6 得る（StS 風代替効果）"]; },
@@ -13287,6 +13316,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 60-70%" },
+        { target: "enemy.foremost", text: "敵PHY -1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)}`, "PHY\u3000-1（敵）"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)} ダメージ（PHY 60〜70%）`, "敵の PHY を -1"]; },
@@ -13304,6 +13339,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 60-60%" },
+        { target: "enemy.foremost", text: "毒 ×3" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 60, 60)}`, "毒 ×3（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 60, 60)} ダメージ（PHY 60〜60%）`, "敵に毒 ×3 付与"]; },
@@ -13321,6 +13362,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 40-45%" },
+        { target: "enemy.foremost", text: "敵INT -1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 40, 45)}`, "INT\u3000-1（敵）"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 40, 45)} ダメージ（INT 40〜45%・1v1=単体）`, "敵の INT を -1"]; },
@@ -13338,6 +13385,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT60-70%" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 60, 70)]; },
       peekHelpKeys() { return ["hp"]; },
       previewLines(s) { return [`HP を回復係数 60〜70% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 60, 70)}）`]; },
@@ -13354,6 +13406,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 32-37%" },
+        { target: "enemy.foremost", text: "敵AGI -1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 32, 37)}`, "AGI\u3000-1（敵）"]; },
       peekHelpKeys() { return ["agi"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 32, 37)} ダメージ（PHY 32〜37%）`, "敵の AGI を -1"]; },
@@ -13371,6 +13429,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 60-70%" },
+        { target: "enemy.foremost", text: "敵INT -1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)}`, "INT\u3000-1（敵）"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)} ダメージ（PHY 60〜70%）`, "敵の INT を -1"]; },
@@ -13388,6 +13452,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 50-55%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 55)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 50, 55)} ダメージ（INT 50〜55%）`]; },
@@ -13404,6 +13473,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 50-60%" },
+        { target: "self", text: "PHY +1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)}`, "PHY\u3000+1"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)} ダメージ（PHY 50〜60%）`, "PHY を +1"]; },
@@ -13421,6 +13496,12 @@ function makeCardLibrary(clog, api) {
       cost: 2,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 30-35%" },
+        { target: "enemy.foremost", text: "PHYダメ 30-35%" }
+      ],
       effectSummaryLines() { return [`敵にダメージ ×2`]; },
       peekHelpKeys() { return []; },
       previewLines() { return [`敵1体に PHY 30〜35% × 2 回ダメージ`]; },
@@ -13438,6 +13519,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 55-65%" },
+        { target: "enemy.foremost", text: "毒 ×3" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 55, 65)}`, "毒 ×3（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 55, 65)} ダメージ（PHY 55〜65%）`, "敵に毒 ×3 付与"]; },
@@ -13455,6 +13542,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 30-35%" },
+        { target: "enemy.foremost", text: "毒 ×3" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 30, 35)}`, "毒 ×3（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 30, 35)} ダメージ（INT 30〜35%・1v1=単体）`, "敵に毒 ×3 付与"]; },
@@ -13472,6 +13565,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT15-25%" },
+        { target: "self", text: "INT +1" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 15, 25), "INT\u3000+1"]; },
       peekHelpKeys() { return ["hp", "int"]; },
       previewLines(s) { return [`HP を回復係数 15〜25% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 15, 25)}）`, "INT を +1"]; },
@@ -13489,6 +13588,13 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "PHY +1" },
+        { target: "self", text: "INT +1" },
+        { target: "self", text: "敵INT -1" }
+      ],
       effectSummaryLines() { return ["PHY\u3000+1", "INT\u3000+1", "INT\u3000-1（敵）"]; },
       peekHelpKeys() { return ["phy", "int"]; },
       previewLines() { return ["PHY を +1", "INT を +1", "敵の INT を -1"]; },
@@ -13507,6 +13613,13 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT25-25%" },
+        { target: "self", text: "PHY +1" },
+        { target: "self", text: "INT +1" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 25, 25), "PHY\u3000+1", "INT\u3000+1"]; },
       peekHelpKeys() { return ["hp", "phy", "int"]; },
       previewLines(s) { return [`HP を回復係数 25〜25% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 25, 25)}）`, "PHY を +1", "INT を +1"]; },
@@ -13525,6 +13638,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 35-40%" },
+        { target: "self", text: "AGI +1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)}`, "AGI\u3000+1"]; },
       peekHelpKeys() { return ["agi"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)} ダメージ（PHY 35〜40%）`, "AGI を +1"]; },
@@ -13542,6 +13661,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 45-50%" },
+        { target: "self", text: "PHY +1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 45, 50)}`, "PHY\u3000+1"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 45, 50)} ダメージ（PHY 45〜50%）`, "PHY を +1"]; },
@@ -13559,6 +13684,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 25-30%" },
+        { target: "enemy.foremost", text: "敵INT -1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 25, 30)}`, "INT\u3000-1（敵）"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 25, 30)} ダメージ（INT 25〜30%・1v1=単体）`, "敵の INT を -1"]; },
@@ -13576,6 +13707,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 45-55%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 45, 55)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 45, 55)} ダメージ（PHY 45〜55%）`]; },
@@ -13592,6 +13728,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 30-35%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 30, 35)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 30, 35)} ダメージ（PHY 30〜35%）`]; },
@@ -13608,6 +13749,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 25-30%" },
+        { target: "enemy.foremost", text: "出血 ×3" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 25, 30)}`, "出血 ×3（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 25, 30)} ダメージ（INT 25〜30%）`, "敵に出血 ×3 付与"]; },
@@ -13625,6 +13772,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT18-38%" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 18, 38)]; },
       peekHelpKeys() { return ["hp"]; },
       previewLines(s) { return [`HP を回復係数 18〜38% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 18, 38)}）`]; },
@@ -13641,6 +13793,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 45-55%" },
+        { target: "enemy.foremost", text: "敵INT -1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 45, 55)}`, "INT\u3000-1（敵）"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 45, 55)} ダメージ（INT 45〜55%）`, "敵の INT を -1"]; },
@@ -13658,6 +13816,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 55-65%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 55, 65)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 55, 65)} ダメージ（PHY 55〜65%）`]; },
@@ -13674,6 +13837,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 50-60%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 60)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 50, 60)} ダメージ（INT 50〜60%）`]; },
@@ -13690,6 +13858,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT45-55%" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 45, 55)]; },
       peekHelpKeys() { return ["hp"]; },
       previewLines(s) { return [`HP を回復係数 45〜55% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 45, 55)}）`]; },
@@ -13706,6 +13879,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT30-35%" },
+        { target: "self", text: "AGI +1" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 30, 35), "AGI\u3000+1"]; },
       peekHelpKeys() { return ["hp", "agi"]; },
       previewLines(s) { return [`HP を回復係数 30〜35% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 30, 35)}）`, "AGI を +1"]; },
@@ -13723,6 +13902,13 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 30-35%" },
+        { target: "self", text: "HP回復 INT10-10%" },
+        { target: "self", text: "INT +1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 30, 35)}`, "HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 10, 10), "INT\u3000+1"]; },
       peekHelpKeys() { return ["hp", "int"]; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 30, 35)} ダメージ（INT 30〜35%・1v1=単体）`, `HP を回復係数 10〜10% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 10, 10)}）`, "INT を +1"]; },
@@ -13741,6 +13927,14 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT5-5%" },
+        { target: "self", text: "PHY +1" },
+        { target: "self", text: "INT +1" },
+        { target: "self", text: "AGI +1" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 5, 5), "PHY\u3000+1", "INT\u3000+1", "AGI\u3000+1"]; },
       peekHelpKeys() { return ["hp", "phy", "int", "agi"]; },
       previewLines(s) { return [`HP を回復係数 5〜5% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 5, 5)}）`, "PHY を +1", "INT を +1", "AGI を +1"]; },
@@ -13760,6 +13954,13 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 55-65%" },
+        { target: "self", text: "HP回復 INT5-5%" },
+        { target: "self", text: "PHY +2" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 55, 65)}`, "HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 5, 5), "PHY\u3000+2"]; },
       peekHelpKeys() { return ["hp", "phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 55, 65)} ダメージ（PHY 55〜65%）`, `HP を回復係数 5〜5% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 5, 5)}）`, "PHY を +2"]; },
@@ -13778,6 +13979,13 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 50-60%" },
+        { target: "self", text: "HP回復 INT5-5%" },
+        { target: "self", text: "INT +2" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 60)}`, "HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 5, 5), "INT\u3000+2"]; },
       peekHelpKeys() { return ["hp", "int"]; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 50, 60)} ダメージ（INT 50〜60%）`, `HP を回復係数 5〜5% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 5, 5)}）`, "INT を +2"]; },
@@ -13796,6 +14004,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT45-55%" },
+        { target: "self", text: "AGI +2" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 45, 55), "AGI\u3000+2"]; },
       peekHelpKeys() { return ["hp", "agi"]; },
       previewLines(s) { return [`HP を回復係数 45〜55% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 45, 55)}）`, "AGI を +2"]; },
@@ -13813,6 +14027,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 32-37%" },
+        { target: "self", text: "PHY +1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 32, 37)}`, "PHY\u3000+1"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 32, 37)} ダメージ（PHY 32〜37%）`, "PHY を +1"]; },
@@ -13830,6 +14050,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 20-20%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 20, 20)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 20, 20)} ダメージ（PHY 20〜20%）`]; },
@@ -13846,6 +14071,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT40-50%" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 40, 50)]; },
       peekHelpKeys() { return ["hp"]; },
       previewLines(s) { return [`HP を回復係数 40〜50% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 40, 50)}）`]; },
@@ -13862,6 +14092,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 50-50%" },
+        { target: "enemy.foremost", text: "敵PHY -1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 50)}`, "PHY\u3000-1（敵）"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 50)} ダメージ（PHY 50〜50%）`, "敵の PHY を -1"]; },
@@ -13879,6 +14115,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 50-60%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)} ダメージ（PHY 50〜60%）`]; },
@@ -13895,6 +14136,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 30-50%" },
+        { target: "enemy.foremost", text: "毒 ×3" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 30, 50)}`, "毒 ×3（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 30, 50)} ダメージ（PHY 30〜50%）`, "敵に毒 ×3 付与"]; },
@@ -13912,6 +14159,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 40-50%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 40, 50)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 40, 50)} ダメージ（INT 40〜50%・1v1=単体）`]; },
@@ -13928,6 +14180,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "出血 ×3" }
+      ],
       effectSummaryLines() { return ["出血 ×3（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines() { return ["敵に出血 ×3 付与"]; },
@@ -13944,6 +14201,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 50-50%" },
+        { target: "enemy.foremost", text: "毒 ×3" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 50)}`, "毒 ×3（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 50, 50)} ダメージ（INT 50〜50%）`, "敵に毒 ×3 付与"]; },
@@ -13961,6 +14224,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 30-35%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 30, 35)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 30, 35)} ダメージ（PHY 30〜35%）`]; },
@@ -13977,6 +14245,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 0-70%" },
+        { target: "enemy.foremost", text: "INTダメ 0-70%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 0, 70)}`, `敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 0, 70)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 0, 70)} ダメージ（PHY 0〜70%）`, `敵1体に ${estIntHit(s.playerInt, s.enemyInt, 0, 70)} ダメージ（INT 0〜70%）`]; },
@@ -13994,6 +14268,13 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 55-65%" },
+        { target: "enemy.foremost", text: "敵PHY -1" },
+        { target: "enemy.foremost", text: "毒 ×3" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 55, 65)}`, "PHY\u3000-1（敵）", "毒 ×3（敵）"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 55, 65)} ダメージ（PHY 55〜65%）`, "敵の PHY を -1", "敵に毒 ×3 付与"]; },
@@ -14012,6 +14293,13 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 50-60%" },
+        { target: "enemy.foremost", text: "敵INT -1" },
+        { target: "enemy.foremost", text: "毒 ×3" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 60)}`, "INT\u3000-1（敵）", "毒 ×3（敵）"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 50, 60)} ダメージ（INT 50〜60%）`, "敵の INT を -1", "敵に毒 ×3 付与"]; },
@@ -14030,6 +14318,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT25-35%" },
+        { target: "self", text: "INT +1" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 25, 35), "INT\u3000+1"]; },
       peekHelpKeys() { return ["hp", "int"]; },
       previewLines(s) { return [`HP を回復係数 25〜35% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 25, 35)}）`, "INT を +1"]; },
@@ -14047,6 +14341,13 @@ function makeCardLibrary(clog, api) {
       cost: 2,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 22-37%" },
+        { target: "enemy.foremost", text: "PHYダメ 22-37%" },
+        { target: "enemy.foremost", text: "敵AGI -1" }
+      ],
       effectSummaryLines() { return [`敵にダメージ ×2`, "AGI\u3000-1（敵）"]; },
       peekHelpKeys() { return ["agi"]; },
       previewLines() { return [`敵1体に PHY 22〜37% × 2 回ダメージ`, "敵の AGI を -1"]; },
@@ -14065,6 +14366,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 25-35%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 25, 35)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 25, 35)} ダメージ（INT 25〜35%）`]; },
@@ -14081,6 +14387,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 60-70%" },
+        { target: "enemy.foremost", text: "敵INT -1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)}`, "INT\u3000-1（敵）"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)} ダメージ（PHY 60〜70%）`, "敵の INT を -1"]; },
@@ -14098,6 +14410,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 50-60%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 60)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 50, 60)} ダメージ（INT 50〜60%）`]; },
@@ -14114,6 +14431,13 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT45-55%" },
+        { target: "self", text: "敵PHY -3" },
+        { target: "self", text: "敵AGI -3" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 45, 55), "PHY\u3000-3（敵）", "AGI\u3000-3（敵）"]; },
       peekHelpKeys() { return ["hp", "phy", "agi"]; },
       previewLines(s) { return [`HP を回復係数 45〜55% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 45, 55)}）`, "敵の PHY を -3", "敵の AGI を -3"]; },
@@ -14132,6 +14456,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT5-5%" },
+        { target: "self", text: "INT +2" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 5, 5), "INT\u3000+2"]; },
       peekHelpKeys() { return ["hp", "int"]; },
       previewLines(s) { return [`HP を回復係数 5〜5% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 5, 5)}）`, "INT を +2"]; },
@@ -14149,6 +14479,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 55-55%" },
+        { target: "enemy.foremost", text: "出血 ×3" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 55, 55)}`, "出血 ×3（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 55, 55)} ダメージ（PHY 55〜55%）`, "敵に出血 ×3 付与"]; },
@@ -14166,6 +14502,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT60-70%" },
+        { target: "self", text: "PHY +1" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 60, 70), "PHY\u3000+1"]; },
       peekHelpKeys() { return ["hp", "phy"]; },
       previewLines(s) { return [`HP を回復係数 60〜70% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 60, 70)}）`, "PHY を +1"]; },
@@ -14183,6 +14525,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "AGI +1" },
+        { target: "self", text: "出血 ×3" }
+      ],
       effectSummaryLines() { return ["AGI\u3000+1", "出血 ×3（敵）"]; },
       peekHelpKeys() { return ["agi"]; },
       previewLines() { return ["AGI を +1", "敵に出血 ×3 付与"]; },
@@ -14200,6 +14548,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "毒 ×3" }
+      ],
       effectSummaryLines() { return ["毒 ×3（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines() { return ["敵に毒 ×3 付与"]; },
@@ -14216,6 +14569,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 50-60%" },
+        { target: "enemy.foremost", text: "出血 ×3" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 60)}`, "出血 ×3（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 50, 60)} ダメージ（INT 50〜60%）`, "敵に出血 ×3 付与"]; },
@@ -14233,6 +14592,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 55-65%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 55, 65)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 55, 65)} ダメージ（PHY 55〜65%）`]; },
@@ -14249,6 +14613,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "敵AGI -3" }
+      ],
       effectSummaryLines() { return ["AGI\u3000-3（敵）"]; },
       peekHelpKeys() { return ["agi"]; },
       previewLines() { return ["敵の AGI を -3"]; },
@@ -14265,6 +14634,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 50-60%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)} ダメージ（PHY 50〜60%・代替効果）`]; },
@@ -14281,6 +14655,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT40-50%" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 40, 50)]; },
       peekHelpKeys() { return ["hp"]; },
       previewLines(s) { return [`HP を回復係数 40〜50% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 40, 50)}）`]; },
@@ -14297,6 +14676,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 55-65%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 55, 65)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 55, 65)} ダメージ（INT 55〜65%）`]; },
@@ -14313,6 +14697,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT22-22%" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 22, 22)]; },
       peekHelpKeys() { return ["hp"]; },
       previewLines(s) { return [`HP を回復係数 22〜22% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 22, 22)}）`]; },
@@ -14329,6 +14718,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 50-50%" },
+        { target: "enemy.foremost", text: "毒 ×3" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 50)}`, "毒 ×3（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 50)} ダメージ（PHY 50〜50%）`, "敵に毒 ×3 付与"]; },
@@ -14346,6 +14741,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 50-65%" },
+        { target: "enemy.foremost", text: "出血 ×3" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 65)}`, "出血 ×3（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 65)} ダメージ（PHY 50〜65%）`, "敵に出血 ×3 付与"]; },
@@ -14363,6 +14764,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 50-60%" },
+        { target: "enemy.foremost", text: "出血 ×3" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 60)}`, "出血 ×3（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 50, 60)} ダメージ（INT 50〜60%）`, "敵に出血 ×3 付与"]; },
@@ -14380,6 +14787,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT45-55%" },
+        { target: "self", text: "敵INT -3" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 45, 55), "INT\u3000-3（敵）"]; },
       peekHelpKeys() { return ["hp", "int"]; },
       previewLines(s) { return [`HP を回復係数 45〜55% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 45, 55)}）`, "敵の INT を -3"]; },
@@ -14397,6 +14810,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 30-35%" },
+        { target: "self", text: "PHY +1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 30, 35)}`, "PHY\u3000+1"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 30, 35)} ダメージ（PHY 30〜35%）`, "PHY を +1"]; },
@@ -14414,6 +14833,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 30-40%" },
+        { target: "self", text: "AGI +1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 30, 40)}`, "AGI\u3000+1"]; },
       peekHelpKeys() { return ["agi"]; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 30, 40)} ダメージ（INT 30〜40%・1v1=単体）`, "AGI を +1"]; },
@@ -14431,6 +14856,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "PHY +2" },
+        { target: "self", text: "INT +2" }
+      ],
       effectSummaryLines() { return ["PHY\u3000+2", "INT\u3000+2"]; },
       peekHelpKeys() { return ["phy", "int"]; },
       previewLines() { return ["PHY を +2", "INT を +2"]; },
@@ -14448,6 +14879,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 50-55%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 55)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 55)} ダメージ（PHY 50〜55%）`]; },
@@ -14464,6 +14900,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT30-40%" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 30, 40)]; },
       peekHelpKeys() { return ["hp"]; },
       previewLines(s) { return [`HP を回復係数 30〜40% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 30, 40)}）`]; },
@@ -14480,6 +14921,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT5-5%" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 5, 5)]; },
       peekHelpKeys() { return ["hp"]; },
       previewLines(s) { return [`HP を回復係数 5〜5% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 5, 5)}）`]; },
@@ -14496,6 +14942,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 50-60%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 60)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 50, 60)} ダメージ（INT 50〜60%・代替効果）`]; },
@@ -14512,6 +14963,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 90-95%" },
+        { target: "enemy.foremost", text: "出血 ×3" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 90, 95)}`, "出血 ×3（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 90, 95)} ダメージ（PHY 90〜95%）`, "敵に出血 ×3 付与"]; },
@@ -14529,6 +14986,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT15-25%" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 15, 25)]; },
       peekHelpKeys() { return ["hp"]; },
       previewLines(s) { return [`HP を回復係数 15〜25% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 15, 25)}）`]; },
@@ -14545,6 +15007,13 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 16-16%" },
+        { target: "enemy.foremost", text: "敵INT -1" },
+        { target: "enemy.foremost", text: "毒 ×3" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 16, 16)}`, "INT\u3000-1（敵）", "毒 ×3（敵）"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 16, 16)} ダメージ（PHY 16〜16%）`, "敵の INT を -1", "敵に毒 ×3 付与"]; },
@@ -14563,6 +15032,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT45-55%" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 45, 55)]; },
       peekHelpKeys() { return ["hp"]; },
       previewLines(s) { return [`HP を回復係数 45〜55% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 45, 55)}）`]; },
@@ -14579,6 +15053,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT45-60%" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 45, 60)]; },
       peekHelpKeys() { return ["hp"]; },
       previewLines(s) { return [`HP を回復係数 45〜60% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 45, 60)}）`]; },
@@ -14595,6 +15074,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 50-50%" },
+        { target: "enemy.foremost", text: "毒 ×3" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 50)}`, "毒 ×3（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 50, 50)} ダメージ（INT 50〜50%）`, "敵に毒 ×3 付与"]; },
@@ -14612,6 +15097,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 45-45%" },
+        { target: "self", text: "AGI +2" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 45, 45)}`, "AGI\u3000+2"]; },
       peekHelpKeys() { return ["agi"]; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 45, 45)} ダメージ（INT 45〜45%）`, "AGI を +2"]; },
@@ -14629,6 +15120,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 50-60%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)} ダメージ（PHY 50〜60%）`]; },
@@ -14645,6 +15141,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT40-40%" },
+        { target: "self", text: "出血 ×3" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 40, 40), "出血 ×3（敵）"]; },
       peekHelpKeys() { return ["hp"]; },
       previewLines(s) { return [`HP を回復係数 40〜40% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 40, 40)}）`, "敵に出血 ×3 付与"]; },
@@ -14662,6 +15164,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "敵PHY -3" },
+        { target: "enemy.foremost", text: "敵INT -3" }
+      ],
       effectSummaryLines() { return ["PHY\u3000-3（敵）", "INT\u3000-3（敵）"]; },
       peekHelpKeys() { return ["phy", "int"]; },
       previewLines() { return ["敵の PHY を -3", "敵の INT を -3"]; },
@@ -14679,6 +15187,13 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 55-65%" },
+        { target: "self", text: "HP回復 INT27-37%" },
+        { target: "enemy.foremost", text: "毒 ×3" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 55, 65)}`, "HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 27, 37), "毒 ×3（敵）"]; },
       peekHelpKeys() { return ["hp"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 55, 65)} ダメージ（PHY 55〜65%）`, `HP を回復係数 27〜37% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 27, 37)}）`, "敵に毒 ×3 付与"]; },
@@ -14697,6 +15212,13 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 50-60%" },
+        { target: "self", text: "HP回復 INT27-37%" },
+        { target: "enemy.foremost", text: "毒 ×3" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 60)}`, "HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 27, 37), "毒 ×3（敵）"]; },
       peekHelpKeys() { return ["hp"]; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 50, 60)} ダメージ（INT 50〜60%）`, `HP を回復係数 27〜37% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 27, 37)}）`, "敵に毒 ×3 付与"]; },
@@ -14715,6 +15237,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 20-20%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 20, 20)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 20, 20)} ダメージ（PHY 20〜20%）`]; },
@@ -14731,6 +15258,13 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 60-65%" },
+        { target: "self", text: "PHY +6" },
+        { target: "enemy.foremost", text: "毒 ×3" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 60, 65)}`, "PHY\u3000+6", "毒 ×3（敵）"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 60, 65)} ダメージ（PHY 60〜65%）`, "PHY を +6", "敵に毒 ×3 付与"]; },
@@ -14749,6 +15283,14 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 5-5%" },
+        { target: "self", text: "PHY +1" },
+        { target: "self", text: "INT +1" },
+        { target: "enemy.foremost", text: "毒 ×3" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 5, 5)}`, "PHY\u3000+1", "INT\u3000+1", "毒 ×3（敵）"]; },
       peekHelpKeys() { return ["phy", "int"]; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 5, 5)} ダメージ（INT 5〜5%）`, "PHY を +1", "INT を +1", "敵に毒 ×3 付与"]; },
@@ -14768,6 +15310,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 99-99%" },
+        { target: "self", text: "PHY +1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 99, 99)}`, "PHY\u3000+1"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 99, 99)} ダメージ（PHY 99〜99%）`, "PHY を +1"]; },
@@ -14785,6 +15333,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 99-99%" },
+        { target: "self", text: "INT +1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 99, 99)}`, "INT\u3000+1"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 99, 99)} ダメージ（INT 99〜99%）`, "INT を +1"]; },
@@ -14802,6 +15356,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 25-25%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 25, 25)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 25, 25)} ダメージ（PHY 25〜25%）`]; },
@@ -14818,6 +15377,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "毒 ×3" }
+      ],
       effectSummaryLines() { return ["毒 ×3（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines() { return ["敵に毒 ×3 付与"]; },
@@ -14834,6 +15398,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "毒 ×3" }
+      ],
       effectSummaryLines() { return ["毒 ×3（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines() { return ["敵に毒 ×3 付与"]; },
@@ -14850,6 +15419,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 62-62%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 62, 62)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 62, 62)} ダメージ（INT 62〜62%）`]; },
@@ -14866,6 +15440,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "敵PHY -3" }
+      ],
       effectSummaryLines() { return ["PHY\u3000-3（敵）"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines() { return ["敵の PHY を -3"]; },
@@ -14882,6 +15461,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "出血 ×3" }
+      ],
       effectSummaryLines() { return ["出血 ×3（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines() { return ["敵に出血 ×3 付与"]; },
@@ -14898,6 +15482,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 56-56%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 56, 56)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 56, 56)} ダメージ（PHY 56〜56%）`]; },
@@ -14914,6 +15503,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "ガード +6" }
+      ],
       effectSummaryLines() { return ["ガード\u3000+6"]; },
       peekHelpKeys() { return ["guard"]; },
       previewLines() { return ["ガードを 6 得る（StS 風代替効果）"]; },
@@ -14930,6 +15524,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 65-70%" },
+        { target: "self", text: "INT +1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 65, 70)}`, "INT\u3000+1"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 65, 70)} ダメージ（INT 65〜70%）`, "INT を +1"]; },
@@ -14947,6 +15547,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "AGI +6" },
+        { target: "self", text: "毒 ×3" }
+      ],
       effectSummaryLines() { return ["AGI\u3000+6", "毒 ×3（敵）"]; },
       peekHelpKeys() { return ["agi"]; },
       previewLines() { return ["AGI を +6", "敵に毒 ×3 付与"]; },
@@ -14964,6 +15570,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 60-70%" },
+        { target: "self", text: "PHY +1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)}`, "PHY\u3000+1"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)} ダメージ（PHY 60〜70%）`, "PHY を +1"]; },
@@ -14981,6 +15593,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 65-65%" },
+        { target: "enemy.foremost", text: "毒 ×3" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 65, 65)}`, "毒 ×3（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 65, 65)} ダメージ（INT 65〜65%）`, "敵に毒 ×3 付与"]; },
@@ -14998,6 +15616,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 32-32%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 32, 32)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 32, 32)} ダメージ（PHY 32〜32%）`]; },
@@ -15014,6 +15637,12 @@ function makeCardLibrary(clog, api) {
       cost: 2,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 107-107%" },
+        { target: "enemy.foremost", text: "敵INT -4" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 107, 107)}`, "INT\u3000-4（敵）"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 107, 107)} ダメージ（PHY 107〜107%）`, "敵の INT を -4"]; },
@@ -15031,6 +15660,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 37-37%" },
+        { target: "enemy.foremost", text: "敵INT -5" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 37, 37)}`, "INT\u3000-5（敵）"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 37, 37)} ダメージ（PHY 37〜37%）`, "敵の INT を -5"]; },
@@ -15048,6 +15683,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT17-17%" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 17, 17)]; },
       peekHelpKeys() { return ["hp"]; },
       previewLines(s) { return [`HP を回復係数 17〜17% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 17, 17)}）`]; },
@@ -15064,6 +15704,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 57-57%" },
+        { target: "enemy.foremost", text: "毒 ×3" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 57, 57)}`, "毒 ×3（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 57, 57)} ダメージ（INT 57〜57%・1v1=単体）`, "敵に毒 ×3 付与"]; },
@@ -15081,6 +15727,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "ガード +6" }
+      ],
       effectSummaryLines() { return ["ガード\u3000+6"]; },
       peekHelpKeys() { return ["guard"]; },
       previewLines() { return ["ガードを 6 得る（StS 風代替効果）"]; },
@@ -15097,6 +15748,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT55-55%" },
+        { target: "self", text: "出血 ×3" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 55, 55), "出血 ×3（敵）"]; },
       peekHelpKeys() { return ["hp"]; },
       previewLines(s) { return [`HP を回復係数 55〜55% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 55, 55)}）`, "敵に出血 ×3 付与"]; },
@@ -15114,6 +15771,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 61-61%" },
+        { target: "enemy.foremost", text: "出血 ×3" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 61, 61)}`, "出血 ×3（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 61, 61)} ダメージ（PHY 61〜61%）`, "敵に出血 ×3 付与"]; },
@@ -15131,6 +15794,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 45-55%" },
+        { target: "enemy.foremost", text: "敵AGI -4" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 45, 55)}`, "AGI\u3000-4（敵）"]; },
       peekHelpKeys() { return ["agi"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 45, 55)} ダメージ（PHY 45〜55%）`, "敵の AGI を -4"]; },
@@ -15148,6 +15817,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 30-35%" },
+        { target: "self", text: "PHY +2" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 30, 35)}`, "PHY\u3000+2"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 30, 35)} ダメージ（PHY 30〜35%）`, "PHY を +2"]; },
@@ -15165,6 +15840,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 30-35%" },
+        { target: "self", text: "INT +2" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 30, 35)}`, "INT\u3000+2"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 30, 35)} ダメージ（INT 30〜35%・1v1=単体）`, "INT を +2"]; },
@@ -15182,6 +15863,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT55-55%" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 55, 55)]; },
       peekHelpKeys() { return ["hp"]; },
       previewLines(s) { return [`HP を回復係数 55〜55% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 55, 55)}）`]; },
@@ -15198,6 +15884,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 40-40%" },
+        { target: "enemy.foremost", text: "INTダメ 40-40%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 40, 40)}`, `敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 40, 40)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 40, 40)} ダメージ（PHY 40〜40%）`, `敵1体に ${estIntHit(s.playerInt, s.enemyInt, 40, 40)} ダメージ（INT 40〜40%）`]; },
@@ -15215,6 +15907,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT30-45%" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 30, 45)]; },
       peekHelpKeys() { return ["hp"]; },
       previewLines(s) { return [`HP を回復係数 30〜45% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 30, 45)}）`]; },
@@ -15231,6 +15928,13 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 55-55%" },
+        { target: "self", text: "PHY +6" },
+        { target: "enemy.foremost", text: "出血 ×3" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 55, 55)}`, "PHY\u3000+6", "出血 ×3（敵）"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 55, 55)} ダメージ（INT 55〜55%）`, "PHY を +6", "敵に出血 ×3 付与"]; },
@@ -15249,6 +15953,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 16-16%" },
+        { target: "enemy.foremost", text: "毒 ×3" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 16, 16)}`, "毒 ×3（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 16, 16)} ダメージ（INT 16〜16%・1v1=単体）`, "敵に毒 ×3 付与"]; },
@@ -15266,6 +15976,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "ガード +6" }
+      ],
       effectSummaryLines() { return ["ガード\u3000+6"]; },
       peekHelpKeys() { return ["guard"]; },
       previewLines() { return ["ガードを 6 得る（StS 風代替効果）"]; },
@@ -15282,6 +15997,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT17-17%" },
+        { target: "self", text: "INT +1" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 17, 17), "INT\u3000+1"]; },
       peekHelpKeys() { return ["hp", "int"]; },
       previewLines(s) { return [`HP を回復係数 17〜17% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 17, 17)}）`, "INT を +1"]; },
@@ -15299,6 +16020,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 53-53%" },
+        { target: "enemy.foremost", text: "毒 ×3" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 53, 53)}`, "毒 ×3（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 53, 53)} ダメージ（PHY 53〜53%）`, "敵に毒 ×3 付与"]; },
@@ -15316,6 +16043,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 68-68%" },
+        { target: "self", text: "AGI +1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 68, 68)}`, "AGI\u3000+1"]; },
       peekHelpKeys() { return ["agi"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 68, 68)} ダメージ（PHY 68〜68%）`, "AGI を +1"]; },
@@ -15333,6 +16066,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "ガード +6" }
+      ],
       effectSummaryLines() { return ["ガード\u3000+6"]; },
       peekHelpKeys() { return ["guard"]; },
       previewLines() { return ["ガードを 6 得る（StS 風代替効果）"]; },
@@ -15349,6 +16087,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "AGI +1" },
+        { target: "self", text: "毒 ×3" }
+      ],
       effectSummaryLines() { return ["AGI\u3000+1", "毒 ×3（敵）"]; },
       peekHelpKeys() { return ["agi"]; },
       previewLines() { return ["AGI を +1", "敵に毒 ×3 付与"]; },
@@ -15366,6 +16110,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT100-100%" },
+        { target: "self", text: "PHY +1" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 100, 100), "PHY\u3000+1"]; },
       peekHelpKeys() { return ["hp", "phy"]; },
       previewLines(s) { return [`HP を回復係数 100〜100% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 100, 100)}）`, "PHY を +1"]; },
@@ -15383,6 +16133,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "ガード +6" }
+      ],
       effectSummaryLines() { return ["ガード\u3000+6"]; },
       peekHelpKeys() { return ["guard"]; },
       previewLines() { return ["ガードを 6 得る（StS 風代替効果）"]; },
@@ -15399,6 +16154,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT60-65%" },
+        { target: "self", text: "INT +6" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 60, 65), "INT\u3000+6"]; },
       peekHelpKeys() { return ["hp", "int"]; },
       previewLines(s) { return [`HP を回復係数 60〜65% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 60, 65)}）`, "INT を +6"]; },
@@ -15416,6 +16177,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 55-80%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 55, 80)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 55, 80)} ダメージ（PHY 55〜80%）`]; },
@@ -15432,6 +16198,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 50-60%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 60)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 50, 60)} ダメージ（INT 50〜60%・代替効果）`]; },
@@ -15448,6 +16219,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 25-50%" },
+        { target: "enemy.foremost", text: "毒 ×3" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 25, 50)}`, "毒 ×3（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 25, 50)} ダメージ（INT 25〜50%）`, "敵に毒 ×3 付与"]; },
@@ -15465,6 +16242,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 55-55%" },
+        { target: "enemy.foremost", text: "毒 ×3" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 55, 55)}`, "毒 ×3（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 55, 55)} ダメージ（INT 55〜55%）`, "敵に毒 ×3 付与"]; },
@@ -15482,6 +16265,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT60-60%" },
+        { target: "self", text: "毒 ×3" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 60, 60), "毒 ×3（敵）"]; },
       peekHelpKeys() { return ["hp"]; },
       previewLines(s) { return [`HP を回復係数 60〜60% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 60, 60)}）`, "敵に毒 ×3 付与"]; },
@@ -15499,6 +16288,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "ガード +6" }
+      ],
       effectSummaryLines() { return ["ガード\u3000+6"]; },
       peekHelpKeys() { return ["guard"]; },
       previewLines() { return ["ガードを 6 得る（StS 風代替効果）"]; },
@@ -15515,6 +16309,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 35-35%" },
+        { target: "enemy.foremost", text: "毒 ×3" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 35, 35)}`, "毒 ×3（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 35, 35)} ダメージ（PHY 35〜35%）`, "敵に毒 ×3 付与"]; },
@@ -15532,6 +16332,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 35-35%" },
+        { target: "enemy.foremost", text: "毒 ×3" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 35, 35)}`, "毒 ×3（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 35, 35)} ダメージ（INT 35〜35%・1v1=単体）`, "敵に毒 ×3 付与"]; },
@@ -15549,6 +16355,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 18-18%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 18, 18)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 18, 18)} ダメージ（INT 18〜18%・1v1=単体）`]; },
@@ -15565,6 +16376,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "毒 ×3" }
+      ],
       effectSummaryLines() { return ["毒 ×3（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines() { return ["敵に毒 ×3 付与"]; },
@@ -15581,6 +16397,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 60-70%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)} ダメージ（PHY 60〜70%）`]; },
@@ -15597,6 +16418,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 60-70%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 60, 70)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 60, 70)} ダメージ（INT 60〜70%・1v1=単体）`]; },
@@ -15613,6 +16439,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT26-36%" },
+        { target: "self", text: "AGI +4" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 26, 36), "AGI\u3000+4"]; },
       peekHelpKeys() { return ["hp", "agi"]; },
       previewLines(s) { return [`HP を回復係数 26〜36% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 26, 36)}）`, "AGI を +4"]; },
@@ -15630,6 +16462,13 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 50-60%" },
+        { target: "enemy.foremost", text: "敵PHY -5" },
+        { target: "enemy.foremost", text: "出血 ×3" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)}`, "PHY\u3000-5（敵）", "出血 ×3（敵）"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)} ダメージ（PHY 50〜60%）`, "敵の PHY を -5", "敵に出血 ×3 付与"]; },
@@ -15648,6 +16487,13 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 50-60%" },
+        { target: "enemy.foremost", text: "敵INT -5" },
+        { target: "enemy.foremost", text: "出血 ×3" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 60)}`, "INT\u3000-5（敵）", "出血 ×3（敵）"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 50, 60)} ダメージ（INT 50〜60%）`, "敵の INT を -5", "敵に出血 ×3 付与"]; },
@@ -15666,6 +16512,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT130-135%" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 130, 135)]; },
       peekHelpKeys() { return ["hp"]; },
       previewLines(s) { return [`HP を回復係数 130〜135% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 130, 135)}）`]; },
@@ -15682,6 +16533,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 65-70%" },
+        { target: "self", text: "INT +6" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 65, 70)}`, "INT\u3000+6"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 65, 70)} ダメージ（INT 65〜70%）`, "INT を +6"]; },
@@ -15699,6 +16556,13 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 55-60%" },
+        { target: "self", text: "INT +6" },
+        { target: "enemy.foremost", text: "毒 ×3" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 55, 60)}`, "INT\u3000+6", "毒 ×3（敵）"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 55, 60)} ダメージ（PHY 55〜60%）`, "INT を +6", "敵に毒 ×3 付与"]; },
@@ -15717,6 +16581,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "毒 ×3" }
+      ],
       effectSummaryLines() { return ["毒 ×3（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines() { return ["敵に毒 ×3 付与"]; },
@@ -15733,6 +16602,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "PHY +6" },
+        { target: "self", text: "INT +6" }
+      ],
       effectSummaryLines() { return ["PHY\u3000+6", "INT\u3000+6"]; },
       peekHelpKeys() { return ["phy", "int"]; },
       previewLines() { return ["PHY を +6", "INT を +6"]; },
@@ -15750,6 +16625,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "敵AGI -5" },
+        { target: "enemy.foremost", text: "毒 ×3" }
+      ],
       effectSummaryLines() { return ["AGI\u3000-5（敵）", "毒 ×3（敵）"]; },
       peekHelpKeys() { return ["agi"]; },
       previewLines() { return ["敵の AGI を -5", "敵に毒 ×3 付与"]; },
@@ -15767,6 +16648,13 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT13-17%" },
+        { target: "self", text: "PHY +3" },
+        { target: "self", text: "INT +3" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 13, 17), "PHY\u3000+3", "INT\u3000+3"]; },
       peekHelpKeys() { return ["hp", "phy", "int"]; },
       previewLines(s) { return [`HP を回復係数 13〜17% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 13, 17)}）`, "PHY を +3", "INT を +3"]; },
@@ -15785,6 +16673,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 65-75%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 65, 75)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 65, 75)} ダメージ（PHY 65〜75%）`]; },
@@ -15801,6 +16694,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 65-75%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 65, 75)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 65, 75)} ダメージ（INT 65〜75%）`]; },
@@ -15817,6 +16715,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 40-45%" },
+        { target: "self", text: "PHY +3" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 40, 45)}`, "PHY\u3000+3"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 40, 45)} ダメージ（PHY 40〜45%）`, "PHY を +3"]; },
@@ -15834,6 +16738,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 25-35%" },
+        { target: "enemy.foremost", text: "INTダメ 25-35%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 25, 35)}`, `敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 25, 35)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 25, 35)} ダメージ（PHY 25〜35%）`, `敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 25, 35)} ダメージ（INT 25〜35%・1v1=単体）`]; },
@@ -15851,6 +16761,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 25-40%" },
+        { target: "self", text: "INT +2" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 25, 40)}`, "INT\u3000+2"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 25, 40)} ダメージ（INT 25〜40%・1v1=単体）`, "INT を +2"]; },
@@ -15868,6 +16784,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 30-35%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 30, 35)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 30, 35)} ダメージ（INT 30〜35%・1v1=単体）`]; },
@@ -15884,6 +16805,13 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT105-125%" },
+        { target: "self", text: "PHY +2" },
+        { target: "self", text: "出血 ×3" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 105, 125), "PHY\u3000+2", "出血 ×3（敵）"]; },
       peekHelpKeys() { return ["hp", "phy"]; },
       previewLines(s) { return [`HP を回復係数 105〜125% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 105, 125)}）`, "PHY を +2", "敵に出血 ×3 付与"]; },
@@ -15902,6 +16830,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 50-60%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)} ダメージ（PHY 50〜60%・代替効果）`]; },
@@ -15918,6 +16851,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "ドロー +1" }
+      ],
       effectSummaryLines() { return ["ドロー　1"]; },
       peekHelpKeys() { return ["draw"]; },
       previewLines() { return ["カードを 1 枚引く（StS 風代替効果）"]; },
@@ -15934,6 +16872,13 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 30-30%" },
+        { target: "enemy.foremost", text: "出血 ×3" },
+        { target: "enemy.foremost", text: "毒 ×3" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 30, 30)}`, "出血 ×3（敵）", "毒 ×3（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 30, 30)} ダメージ（INT 30〜30%）`, "敵に出血 ×3 付与", "敵に毒 ×3 付与"]; },
@@ -15952,6 +16897,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT15-20%" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 15, 20)]; },
       peekHelpKeys() { return ["hp"]; },
       previewLines(s) { return [`HP を回復係数 15〜20% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 15, 20)}）`]; },
@@ -15968,6 +16918,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "ガード +6" }
+      ],
       effectSummaryLines() { return ["ガード\u3000+6"]; },
       peekHelpKeys() { return ["guard"]; },
       previewLines() { return ["ガードを 6 得る（StS 風代替効果）"]; },
@@ -15984,6 +16939,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "毒 ×3" }
+      ],
       effectSummaryLines() { return ["毒 ×3（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines() { return ["敵に毒 ×3 付与"]; },
@@ -16000,6 +16960,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 40-45%" },
+        { target: "self", text: "PHY +1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 40, 45)}`, "PHY\u3000+1"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 40, 45)} ダメージ（PHY 40〜45%）`, "PHY を +1"]; },
@@ -16017,6 +16983,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 40-45%" },
+        { target: "self", text: "INT +1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 40, 45)}`, "INT\u3000+1"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 40, 45)} ダメージ（INT 40〜45%）`, "INT を +1"]; },
@@ -16034,6 +17006,13 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "敵INT -4" },
+        { target: "enemy.foremost", text: "敵AGI -4" },
+        { target: "enemy.foremost", text: "出血 ×3" }
+      ],
       effectSummaryLines() { return ["INT\u3000-4（敵）", "AGI\u3000-4（敵）", "出血 ×3（敵）"]; },
       peekHelpKeys() { return ["int", "agi"]; },
       previewLines() { return ["敵の INT を -4", "敵の AGI を -4", "敵に出血 ×3 付与"]; },
@@ -16052,6 +17031,13 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "敵PHY -4" },
+        { target: "enemy.foremost", text: "敵AGI -4" },
+        { target: "enemy.foremost", text: "毒 ×3" }
+      ],
       effectSummaryLines() { return ["PHY\u3000-4（敵）", "AGI\u3000-4（敵）", "毒 ×3（敵）"]; },
       peekHelpKeys() { return ["phy", "agi"]; },
       previewLines() { return ["敵の PHY を -4", "敵の AGI を -4", "敵に毒 ×3 付与"]; },
@@ -16070,6 +17056,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "ガード +6" }
+      ],
       effectSummaryLines() { return ["ガード\u3000+6"]; },
       peekHelpKeys() { return ["guard"]; },
       previewLines() { return ["ガードを 6 得る（StS 風代替効果）"]; },
@@ -16086,6 +17077,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 50-60%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 60)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 50, 60)} ダメージ（INT 50〜60%・代替効果）`]; },
@@ -16102,6 +17098,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 50-60%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)} ダメージ（PHY 50〜60%・代替効果）`]; },
@@ -16118,6 +17119,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 50-60%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)} ダメージ（PHY 50〜60%・代替効果）`]; },
@@ -16134,6 +17140,13 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 50-50%" },
+        { target: "self", text: "PHY +3" },
+        { target: "enemy.foremost", text: "敵AGI -5" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 50)}`, "PHY\u3000+3", "AGI\u3000-5（敵）"]; },
       peekHelpKeys() { return ["phy", "agi"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 50)} ダメージ（PHY 50〜50%）`, "PHY を +3", "敵の AGI を -5"]; },
@@ -16152,6 +17165,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "ガード +6" }
+      ],
       effectSummaryLines() { return ["ガード\u3000+6"]; },
       peekHelpKeys() { return ["guard"]; },
       previewLines() { return ["ガードを 6 得る（StS 風代替効果）"]; },
@@ -16168,6 +17186,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 50-60%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)} ダメージ（PHY 50〜60%）`]; },
@@ -16184,6 +17207,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 50-60%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 60)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 50, 60)} ダメージ（INT 50〜60%）`]; },
@@ -16200,6 +17228,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 30-30%" },
+        { target: "enemy.foremost", text: "INTダメ 30-30%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 30, 30)}`, `敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 30, 30)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 30, 30)} ダメージ（PHY 30〜30%）`, `敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 30, 30)} ダメージ（INT 30〜30%・1v1=単体）`]; },
@@ -16217,6 +17251,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT35-35%" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 35, 35)]; },
       peekHelpKeys() { return ["hp"]; },
       previewLines(s) { return [`HP を回復係数 35〜35% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 35, 35)}）`]; },
@@ -16233,6 +17272,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 50-55%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 55)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 55)} ダメージ（PHY 50〜55%）`]; },
@@ -16249,6 +17293,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 45-55%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 45, 55)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 45, 55)} ダメージ（INT 45〜55%・1v1=単体）`]; },
@@ -16265,6 +17314,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT60-70%" },
+        { target: "self", text: "INT +1" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 60, 70), "INT\u3000+1"]; },
       peekHelpKeys() { return ["hp", "int"]; },
       previewLines(s) { return [`HP を回復係数 60〜70% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 60, 70)}）`, "INT を +1"]; },
@@ -16282,6 +17337,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 45-55%" },
+        { target: "enemy.foremost", text: "毒 ×3" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 45, 55)}`, "毒 ×3（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 45, 55)} ダメージ（PHY 45〜55%）`, "敵に毒 ×3 付与"]; },
@@ -16299,6 +17360,13 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 60-65%" },
+        { target: "self", text: "PHY +6" },
+        { target: "enemy.foremost", text: "毒 ×3" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 60, 65)}`, "PHY\u3000+6", "毒 ×3（敵）"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 60, 65)} ダメージ（PHY 60〜65%）`, "PHY を +6", "敵に毒 ×3 付与"]; },
@@ -16317,6 +17385,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT60-65%" },
+        { target: "self", text: "INT +6" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 60, 65), "INT\u3000+6"]; },
       peekHelpKeys() { return ["hp", "int"]; },
       previewLines(s) { return [`HP を回復係数 60〜65% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 60, 65)}）`, "INT を +6"]; },
@@ -16334,6 +17408,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "ガード +6" }
+      ],
       effectSummaryLines() { return ["ガード\u3000+6"]; },
       peekHelpKeys() { return ["guard"]; },
       previewLines() { return ["ガードを 6 得る（StS 風代替効果）"]; },
@@ -16350,6 +17429,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "毒 ×3" }
+      ],
       effectSummaryLines() { return ["毒 ×3（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines() { return ["敵に毒 ×3 付与"]; },
@@ -16366,6 +17450,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT15-20%" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 15, 20)]; },
       peekHelpKeys() { return ["hp"]; },
       previewLines(s) { return [`HP を回復係数 15〜20% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 15, 20)}）`]; },
@@ -16383,6 +17472,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 70-80%" },
+        { target: "self", text: "PHY +1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 70, 80)}`, "PHY\u3000+1"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 70, 80)} ダメージ（PHY 70〜80%）`, "PHY を +1"]; },
@@ -16400,6 +17495,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 45-50%" },
+        { target: "self", text: "INT +1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 45, 50)}`, "INT\u3000+1"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 45, 50)} ダメージ（INT 45〜50%・1v1=単体）`, "INT を +1"]; },
@@ -16417,6 +17518,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT70-80%" },
+        { target: "self", text: "INT +1" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 70, 80), "INT\u3000+1"]; },
       peekHelpKeys() { return ["hp", "int"]; },
       previewLines(s) { return [`HP を回復係数 70〜80% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 70, 80)}）`, "INT を +1"]; },
@@ -16434,6 +17541,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT10-10%" },
+        { target: "self", text: "PHY +3" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 10, 10), "PHY\u3000+3"]; },
       peekHelpKeys() { return ["hp", "phy"]; },
       previewLines(s) { return [`HP を回復係数 10〜10% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 10, 10)}）`, "PHY を +3"]; },
@@ -16451,6 +17564,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "ガード +6" }
+      ],
       effectSummaryLines() { return ["ガード\u3000+6"]; },
       peekHelpKeys() { return ["guard"]; },
       previewLines() { return ["ガードを 6 得る（StS 風代替効果）"]; },
@@ -16467,6 +17585,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 65-75%" },
+        { target: "enemy.foremost", text: "敵PHY -1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 65, 75)}`, "PHY\u3000-1（敵）"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 65, 75)} ダメージ（PHY 65〜75%）`, "敵の PHY を -1"]; },
@@ -16484,6 +17608,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 45-50%" },
+        { target: "enemy.foremost", text: "敵INT -1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 45, 50)}`, "INT\u3000-1（敵）"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 45, 50)} ダメージ（INT 45〜50%・1v1=単体）`, "敵の INT を -1"]; },
@@ -16501,6 +17631,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT70-80%" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 70, 80)]; },
       peekHelpKeys() { return ["hp"]; },
       previewLines(s) { return [`HP を回復係数 70〜80% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 70, 80)}）`]; },
@@ -16517,6 +17652,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 35-40%" },
+        { target: "enemy.foremost", text: "敵AGI -1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)}`, "AGI\u3000-1（敵）"]; },
       peekHelpKeys() { return ["agi"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)} ダメージ（PHY 35〜40%）`, "敵の AGI を -1"]; },
@@ -16534,6 +17675,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 65-75%" },
+        { target: "enemy.foremost", text: "敵INT -1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 65, 75)}`, "INT\u3000-1（敵）"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 65, 75)} ダメージ（PHY 65〜75%）`, "敵の INT を -1"]; },
@@ -16551,6 +17698,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "出血 ×4" },
+        { target: "enemy.foremost", text: "毒 ×8" }
+      ],
       effectSummaryLines() { return ["出血 ×4（敵）", "毒 ×8（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines() { return ["敵に出血 ×4 付与", "敵に毒 ×8 付与"]; },
@@ -16568,6 +17721,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 55-75%" },
+        { target: "self", text: "PHY +1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 55, 75)}`, "PHY\u3000+1"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 55, 75)} ダメージ（PHY 55〜75%）`, "PHY を +1"]; },
@@ -16585,6 +17744,12 @@ function makeCardLibrary(clog, api) {
       cost: 2,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 30-40%" },
+        { target: "enemy.foremost", text: "PHYダメ 30-40%" }
+      ],
       effectSummaryLines() { return [`敵にダメージ ×2`]; },
       peekHelpKeys() { return []; },
       previewLines() { return [`敵1体に PHY 30〜40% × 2 回ダメージ`]; },
@@ -16602,6 +17767,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 60-70%" },
+        { target: "enemy.foremost", text: "毒 ×4" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)}`, "毒 ×4（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)} ダメージ（PHY 60〜70%）`, "敵に毒 ×4 付与"]; },
@@ -16619,6 +17790,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 35-40%" },
+        { target: "enemy.foremost", text: "毒 ×4" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 35, 40)}`, "毒 ×4（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 35, 40)} ダメージ（INT 35〜40%・1v1=単体）`, "敵に毒 ×4 付与"]; },
@@ -16636,6 +17813,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT20-30%" },
+        { target: "self", text: "INT +1" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 20, 30), "INT\u3000+1"]; },
       peekHelpKeys() { return ["hp", "int"]; },
       previewLines(s) { return [`HP を回復係数 20〜30% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 20, 30)}）`, "INT を +1"]; },
@@ -16653,6 +17836,13 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "PHY +1" },
+        { target: "self", text: "INT +1" },
+        { target: "self", text: "敵INT -1" }
+      ],
       effectSummaryLines() { return ["PHY\u3000+1", "INT\u3000+1", "INT\u3000-1（敵）"]; },
       peekHelpKeys() { return ["phy", "int"]; },
       previewLines() { return ["PHY を +1", "INT を +1", "敵の INT を -1"]; },
@@ -16671,6 +17861,13 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT30-30%" },
+        { target: "self", text: "PHY +1" },
+        { target: "self", text: "INT +1" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 30, 30), "PHY\u3000+1", "INT\u3000+1"]; },
       peekHelpKeys() { return ["hp", "phy", "int"]; },
       previewLines(s) { return [`HP を回復係数 30〜30% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 30, 30)}）`, "PHY を +1", "INT を +1"]; },
@@ -16689,6 +17886,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 35-40%" },
+        { target: "self", text: "AGI +1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)}`, "AGI\u3000+1"]; },
       peekHelpKeys() { return ["agi"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)} ダメージ（PHY 35〜40%）`, "AGI を +1"]; },
@@ -16706,6 +17909,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 45-50%" },
+        { target: "self", text: "PHY +2" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 45, 50)}`, "PHY\u3000+2"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 45, 50)} ダメージ（PHY 45〜50%）`, "PHY を +2"]; },
@@ -16723,6 +17932,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 25-30%" },
+        { target: "enemy.foremost", text: "敵INT -1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 25, 30)}`, "INT\u3000-1（敵）"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 25, 30)} ダメージ（INT 25〜30%・1v1=単体）`, "敵の INT を -1"]; },
@@ -16740,6 +17955,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 50-60%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)} ダメージ（PHY 50〜60%）`]; },
@@ -16756,6 +17976,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 35-40%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)} ダメージ（PHY 35〜40%）`]; },
@@ -16772,6 +17997,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 30-35%" },
+        { target: "enemy.foremost", text: "出血 ×4" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 30, 35)}`, "出血 ×4（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 30, 35)} ダメージ（INT 30〜35%）`, "敵に出血 ×4 付与"]; },
@@ -16789,6 +18020,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT20-40%" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 20, 40)]; },
       peekHelpKeys() { return ["hp"]; },
       previewLines(s) { return [`HP を回復係数 20〜40% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 20, 40)}）`]; },
@@ -16805,6 +18041,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 50-60%" },
+        { target: "enemy.foremost", text: "敵INT -1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 60)}`, "INT\u3000-1（敵）"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 50, 60)} ダメージ（INT 50〜60%）`, "敵の INT を -1"]; },
@@ -16822,6 +18064,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 60-70%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)} ダメージ（PHY 60〜70%）`]; },
@@ -16838,6 +18085,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 55-65%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 55, 65)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 55, 65)} ダメージ（INT 55〜65%）`]; },
@@ -16854,6 +18106,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT50-60%" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 50, 60)]; },
       peekHelpKeys() { return ["hp"]; },
       previewLines(s) { return [`HP を回復係数 50〜60% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 50, 60)}）`]; },
@@ -16870,6 +18127,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT35-40%" },
+        { target: "self", text: "AGI +1" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 35, 40), "AGI\u3000+1"]; },
       peekHelpKeys() { return ["hp", "agi"]; },
       previewLines(s) { return [`HP を回復係数 35〜40% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 35, 40)}）`, "AGI を +1"]; },
@@ -16887,6 +18150,13 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 35-40%" },
+        { target: "self", text: "HP回復 INT10-10%" },
+        { target: "self", text: "INT +1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 35, 40)}`, "HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 10, 10), "INT\u3000+1"]; },
       peekHelpKeys() { return ["hp", "int"]; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 35, 40)} ダメージ（INT 35〜40%・1v1=単体）`, `HP を回復係数 10〜10% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 10, 10)}）`, "INT を +1"]; },
@@ -16905,6 +18175,14 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT10-10%" },
+        { target: "self", text: "PHY +1" },
+        { target: "self", text: "INT +1" },
+        { target: "self", text: "AGI +1" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 10, 10), "PHY\u3000+1", "INT\u3000+1", "AGI\u3000+1"]; },
       peekHelpKeys() { return ["hp", "phy", "int", "agi"]; },
       previewLines(s) { return [`HP を回復係数 10〜10% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 10, 10)}）`, "PHY を +1", "INT を +1", "AGI を +1"]; },
@@ -16924,6 +18202,13 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 60-70%" },
+        { target: "self", text: "HP回復 INT10-10%" },
+        { target: "self", text: "PHY +2" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)}`, "HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 10, 10), "PHY\u3000+2"]; },
       peekHelpKeys() { return ["hp", "phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)} ダメージ（PHY 60〜70%）`, `HP を回復係数 10〜10% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 10, 10)}）`, "PHY を +2"]; },
@@ -16942,6 +18227,13 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 55-65%" },
+        { target: "self", text: "HP回復 INT10-10%" },
+        { target: "self", text: "INT +2" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 55, 65)}`, "HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 10, 10), "INT\u3000+2"]; },
       peekHelpKeys() { return ["hp", "int"]; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 55, 65)} ダメージ（INT 55〜65%）`, `HP を回復係数 10〜10% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 10, 10)}）`, "INT を +2"]; },
@@ -16960,6 +18252,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT50-60%" },
+        { target: "self", text: "AGI +2" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 50, 60), "AGI\u3000+2"]; },
       peekHelpKeys() { return ["hp", "agi"]; },
       previewLines(s) { return [`HP を回復係数 50〜60% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 50, 60)}）`, "AGI を +2"]; },
@@ -16977,6 +18275,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 35-40%" },
+        { target: "self", text: "PHY +1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)}`, "PHY\u3000+1"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)} ダメージ（PHY 35〜40%）`, "PHY を +1"]; },
@@ -16994,6 +18298,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 20-20%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 20, 20)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 20, 20)} ダメージ（PHY 20〜20%）`]; },
@@ -17010,6 +18319,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT50-60%" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 50, 60)]; },
       peekHelpKeys() { return ["hp"]; },
       previewLines(s) { return [`HP を回復係数 50〜60% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 50, 60)}）`]; },
@@ -17026,6 +18340,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 60-60%" },
+        { target: "enemy.foremost", text: "敵PHY -1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 60, 60)}`, "PHY\u3000-1（敵）"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 60, 60)} ダメージ（PHY 60〜60%）`, "敵の PHY を -1"]; },
@@ -17043,6 +18363,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 60-70%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)} ダメージ（PHY 60〜70%）`]; },
@@ -17059,6 +18384,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 40-60%" },
+        { target: "enemy.foremost", text: "毒 ×4" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 40, 60)}`, "毒 ×4（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 40, 60)} ダメージ（PHY 40〜60%）`, "敵に毒 ×4 付与"]; },
@@ -17076,6 +18407,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 50-60%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 60)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 50, 60)} ダメージ（INT 50〜60%・1v1=単体）`]; },
@@ -17092,6 +18428,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "出血 ×4" }
+      ],
       effectSummaryLines() { return ["出血 ×4（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines() { return ["敵に出血 ×4 付与"]; },
@@ -17108,6 +18449,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 60-60%" },
+        { target: "enemy.foremost", text: "毒 ×4" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 60, 60)}`, "毒 ×4（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 60, 60)} ダメージ（INT 60〜60%）`, "敵に毒 ×4 付与"]; },
@@ -17125,6 +18472,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 35-40%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)} ダメージ（PHY 35〜40%）`]; },
@@ -17141,6 +18493,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 0-80%" },
+        { target: "enemy.foremost", text: "INTダメ 0-80%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 0, 80)}`, `敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 0, 80)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 0, 80)} ダメージ（PHY 0〜80%）`, `敵1体に ${estIntHit(s.playerInt, s.enemyInt, 0, 80)} ダメージ（INT 0〜80%）`]; },
@@ -17158,6 +18516,13 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 60-70%" },
+        { target: "enemy.foremost", text: "敵PHY -1" },
+        { target: "enemy.foremost", text: "毒 ×4" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)}`, "PHY\u3000-1（敵）", "毒 ×4（敵）"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)} ダメージ（PHY 60〜70%）`, "敵の PHY を -1", "敵に毒 ×4 付与"]; },
@@ -17176,6 +18541,13 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 55-65%" },
+        { target: "enemy.foremost", text: "敵INT -1" },
+        { target: "enemy.foremost", text: "毒 ×4" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 55, 65)}`, "INT\u3000-1（敵）", "毒 ×4（敵）"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 55, 65)} ダメージ（INT 55〜65%）`, "敵の INT を -1", "敵に毒 ×4 付与"]; },
@@ -17194,6 +18566,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT30-40%" },
+        { target: "self", text: "INT +1" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 30, 40), "INT\u3000+1"]; },
       peekHelpKeys() { return ["hp", "int"]; },
       previewLines(s) { return [`HP を回復係数 30〜40% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 30, 40)}）`, "INT を +1"]; },
@@ -17211,6 +18589,13 @@ function makeCardLibrary(clog, api) {
       cost: 2,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 25-40%" },
+        { target: "enemy.foremost", text: "PHYダメ 25-40%" },
+        { target: "enemy.foremost", text: "敵AGI -1" }
+      ],
       effectSummaryLines() { return [`敵にダメージ ×2`, "AGI\u3000-1（敵）"]; },
       peekHelpKeys() { return ["agi"]; },
       previewLines() { return [`敵1体に PHY 25〜40% × 2 回ダメージ`, "敵の AGI を -1"]; },
@@ -17229,6 +18614,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 30-40%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 30, 40)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 30, 40)} ダメージ（INT 30〜40%）`]; },
@@ -17245,6 +18635,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 65-75%" },
+        { target: "enemy.foremost", text: "敵INT -1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 65, 75)}`, "INT\u3000-1（敵）"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 65, 75)} ダメージ（PHY 65〜75%）`, "敵の INT を -1"]; },
@@ -17262,6 +18658,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 55-65%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 55, 65)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 55, 65)} ダメージ（INT 55〜65%）`]; },
@@ -17278,6 +18679,13 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT50-60%" },
+        { target: "self", text: "敵PHY -4" },
+        { target: "self", text: "敵AGI -4" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 50, 60), "PHY\u3000-4（敵）", "AGI\u3000-4（敵）"]; },
       peekHelpKeys() { return ["hp", "phy", "agi"]; },
       previewLines(s) { return [`HP を回復係数 50〜60% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 50, 60)}）`, "敵の PHY を -4", "敵の AGI を -4"]; },
@@ -17296,6 +18704,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT10-10%" },
+        { target: "self", text: "INT +3" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 10, 10), "INT\u3000+3"]; },
       peekHelpKeys() { return ["hp", "int"]; },
       previewLines(s) { return [`HP を回復係数 10〜10% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 10, 10)}）`, "INT を +3"]; },
@@ -17313,6 +18727,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 65-65%" },
+        { target: "enemy.foremost", text: "出血 ×4" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 65, 65)}`, "出血 ×4（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 65, 65)} ダメージ（PHY 65〜65%）`, "敵に出血 ×4 付与"]; },
@@ -17330,6 +18750,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT70-80%" },
+        { target: "self", text: "PHY +1" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 70, 80), "PHY\u3000+1"]; },
       peekHelpKeys() { return ["hp", "phy"]; },
       previewLines(s) { return [`HP を回復係数 70〜80% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 70, 80)}）`, "PHY を +1"]; },
@@ -17347,6 +18773,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "AGI +1" },
+        { target: "self", text: "出血 ×4" }
+      ],
       effectSummaryLines() { return ["AGI\u3000+1", "出血 ×4（敵）"]; },
       peekHelpKeys() { return ["agi"]; },
       previewLines() { return ["AGI を +1", "敵に出血 ×4 付与"]; },
@@ -17364,6 +18796,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "毒 ×4" }
+      ],
       effectSummaryLines() { return ["毒 ×4（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines() { return ["敵に毒 ×4 付与"]; },
@@ -17380,6 +18817,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 55-65%" },
+        { target: "enemy.foremost", text: "出血 ×4" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 55, 65)}`, "出血 ×4（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 55, 65)} ダメージ（INT 55〜65%）`, "敵に出血 ×4 付与"]; },
@@ -17397,6 +18840,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 60-70%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)} ダメージ（PHY 60〜70%）`]; },
@@ -17413,6 +18861,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "敵AGI -4" }
+      ],
       effectSummaryLines() { return ["AGI\u3000-4（敵）"]; },
       peekHelpKeys() { return ["agi"]; },
       previewLines() { return ["敵の AGI を -4"]; },
@@ -17429,6 +18882,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 50-60%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)} ダメージ（PHY 50〜60%・代替効果）`]; },
@@ -17445,6 +18903,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT50-60%" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 50, 60)]; },
       peekHelpKeys() { return ["hp"]; },
       previewLines(s) { return [`HP を回復係数 50〜60% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 50, 60)}）`]; },
@@ -17461,6 +18924,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 60-70%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 60, 70)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 60, 70)} ダメージ（INT 60〜70%）`]; },
@@ -17477,6 +18945,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT25-25%" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 25, 25)]; },
       peekHelpKeys() { return ["hp"]; },
       previewLines(s) { return [`HP を回復係数 25〜25% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 25, 25)}）`]; },
@@ -17493,6 +18966,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 50-50%" },
+        { target: "enemy.foremost", text: "毒 ×4" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 50)}`, "毒 ×4（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 50)} ダメージ（PHY 50〜50%）`, "敵に毒 ×4 付与"]; },
@@ -17510,6 +18989,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 55-70%" },
+        { target: "enemy.foremost", text: "出血 ×4" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 55, 70)}`, "出血 ×4（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 55, 70)} ダメージ（PHY 55〜70%）`, "敵に出血 ×4 付与"]; },
@@ -17527,6 +19012,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 55-65%" },
+        { target: "enemy.foremost", text: "出血 ×4" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 55, 65)}`, "出血 ×4（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 55, 65)} ダメージ（INT 55〜65%）`, "敵に出血 ×4 付与"]; },
@@ -17544,6 +19035,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT50-60%" },
+        { target: "self", text: "敵INT -4" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 50, 60), "INT\u3000-4（敵）"]; },
       peekHelpKeys() { return ["hp", "int"]; },
       previewLines(s) { return [`HP を回復係数 50〜60% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 50, 60)}）`, "敵の INT を -4"]; },
@@ -17561,6 +19058,14 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 30-35%" },
+        { target: "enemy.foremost", text: "INTダメ 30-35%" },
+        { target: "enemy.foremost", text: "敵PHY -1" },
+        { target: "enemy.foremost", text: "敵INT -1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 30, 35)}`, `敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 30, 35)}`, "PHY\u3000-1（敵）", "INT\u3000-1（敵）"]; },
       peekHelpKeys() { return ["phy", "int"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 30, 35)} ダメージ（PHY 30〜35%）`, `敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 30, 35)} ダメージ（INT 30〜35%・1v1=単体）`, "敵の PHY を -1", "敵の INT を -1"]; },
@@ -17580,6 +19085,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 35-40%" },
+        { target: "self", text: "PHY +1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)}`, "PHY\u3000+1"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)} ダメージ（PHY 35〜40%）`, "PHY を +1"]; },
@@ -17597,6 +19108,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 35-45%" },
+        { target: "self", text: "AGI +1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 35, 45)}`, "AGI\u3000+1"]; },
       peekHelpKeys() { return ["agi"]; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 35, 45)} ダメージ（INT 35〜45%・1v1=単体）`, "AGI を +1"]; },
@@ -17614,6 +19131,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "PHY +2" },
+        { target: "self", text: "INT +2" }
+      ],
       effectSummaryLines() { return ["PHY\u3000+2", "INT\u3000+2"]; },
       peekHelpKeys() { return ["phy", "int"]; },
       previewLines() { return ["PHY を +2", "INT を +2"]; },
@@ -17631,6 +19154,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 50-55%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 55)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 55)} ダメージ（PHY 50〜55%）`]; },
@@ -17647,6 +19175,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 50-60%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 60)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 50, 60)} ダメージ（INT 50〜60%・代替効果）`]; },
@@ -17663,6 +19196,12 @@ function makeCardLibrary(clog, api) {
       cost: 2,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 100-100%" },
+        { target: "enemy.foremost", text: "出血 ×4" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 100, 100)}`, "出血 ×4（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 100, 100)} ダメージ（PHY 100〜100%）`, "敵に出血 ×4 付与"]; },
@@ -17680,6 +19219,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT20-30%" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 20, 30)]; },
       peekHelpKeys() { return ["hp"]; },
       previewLines(s) { return [`HP を回復係数 20〜30% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 20, 30)}）`]; },
@@ -17696,6 +19240,13 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 20-20%" },
+        { target: "enemy.foremost", text: "敵INT -1" },
+        { target: "enemy.foremost", text: "毒 ×4" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 20, 20)}`, "INT\u3000-1（敵）", "毒 ×4（敵）"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 20, 20)} ダメージ（PHY 20〜20%）`, "敵の INT を -1", "敵に毒 ×4 付与"]; },
@@ -17714,6 +19265,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT50-60%" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 50, 60)]; },
       peekHelpKeys() { return ["hp"]; },
       previewLines(s) { return [`HP を回復係数 50〜60% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 50, 60)}）`]; },
@@ -17730,6 +19286,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT50-65%" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 50, 65)]; },
       peekHelpKeys() { return ["hp"]; },
       previewLines(s) { return [`HP を回復係数 50〜65% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 50, 65)}）`]; },
@@ -17746,6 +19307,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 50-50%" },
+        { target: "enemy.foremost", text: "毒 ×4" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 50)}`, "毒 ×4（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 50, 50)} ダメージ（INT 50〜50%）`, "敵に毒 ×4 付与"]; },
@@ -17763,6 +19330,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 50-50%" },
+        { target: "self", text: "AGI +2" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 50)}`, "AGI\u3000+2"]; },
       peekHelpKeys() { return ["agi"]; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 50, 50)} ダメージ（INT 50〜50%）`, "AGI を +2"]; },
@@ -17780,6 +19353,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 55-65%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 55, 65)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 55, 65)} ダメージ（PHY 55〜65%）`]; },
@@ -17796,6 +19374,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT50-50%" },
+        { target: "self", text: "出血 ×4" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 50, 50), "出血 ×4（敵）"]; },
       peekHelpKeys() { return ["hp"]; },
       previewLines(s) { return [`HP を回復係数 50〜50% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 50, 50)}）`, "敵に出血 ×4 付与"]; },
@@ -17813,6 +19397,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "敵PHY -4" },
+        { target: "enemy.foremost", text: "敵INT -4" }
+      ],
       effectSummaryLines() { return ["PHY\u3000-4（敵）", "INT\u3000-4（敵）"]; },
       peekHelpKeys() { return ["phy", "int"]; },
       previewLines() { return ["敵の PHY を -4", "敵の INT を -4"]; },
@@ -17830,6 +19420,13 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 60-70%" },
+        { target: "self", text: "HP回復 INT30-40%" },
+        { target: "enemy.foremost", text: "毒 ×4" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)}`, "HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 30, 40), "毒 ×4（敵）"]; },
       peekHelpKeys() { return ["hp"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)} ダメージ（PHY 60〜70%）`, `HP を回復係数 30〜40% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 30, 40)}）`, "敵に毒 ×4 付与"]; },
@@ -17848,6 +19445,13 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 55-65%" },
+        { target: "self", text: "HP回復 INT30-40%" },
+        { target: "enemy.foremost", text: "毒 ×4" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 55, 65)}`, "HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 30, 40), "毒 ×4（敵）"]; },
       peekHelpKeys() { return ["hp"]; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 55, 65)} ダメージ（INT 55〜65%）`, `HP を回復係数 30〜40% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 30, 40)}）`, "敵に毒 ×4 付与"]; },
@@ -17866,6 +19470,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 20-20%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 20, 20)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 20, 20)} ダメージ（PHY 20〜20%）`]; },
@@ -17882,6 +19491,13 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 65-70%" },
+        { target: "self", text: "PHY +7" },
+        { target: "enemy.foremost", text: "毒 ×4" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 65, 70)}`, "PHY\u3000+7", "毒 ×4（敵）"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 65, 70)} ダメージ（PHY 65〜70%）`, "PHY を +7", "敵に毒 ×4 付与"]; },
@@ -17900,6 +19516,12 @@ function makeCardLibrary(clog, api) {
       cost: 2,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 104-104%" },
+        { target: "self", text: "PHY +1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 104, 104)}`, "PHY\u3000+1"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 104, 104)} ダメージ（PHY 104〜104%）`, "PHY を +1"]; },
@@ -17917,6 +19539,12 @@ function makeCardLibrary(clog, api) {
       cost: 2,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 104-104%" },
+        { target: "self", text: "INT +1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 104, 104)}`, "INT\u3000+1"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 104, 104)} ダメージ（INT 104〜104%）`, "INT を +1"]; },
@@ -17934,6 +19562,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 28-28%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 28, 28)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 28, 28)} ダメージ（PHY 28〜28%）`]; },
@@ -17950,6 +19583,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "毒 ×4" }
+      ],
       effectSummaryLines() { return ["毒 ×4（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines() { return ["敵に毒 ×4 付与"]; },
@@ -17966,6 +19604,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "毒 ×4" }
+      ],
       effectSummaryLines() { return ["毒 ×4（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines() { return ["敵に毒 ×4 付与"]; },
@@ -17982,6 +19625,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 65-65%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 65, 65)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 65, 65)} ダメージ（INT 65〜65%）`]; },
@@ -17998,6 +19646,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "敵PHY -4" }
+      ],
       effectSummaryLines() { return ["PHY\u3000-4（敵）"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines() { return ["敵の PHY を -4"]; },
@@ -18014,6 +19667,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "出血 ×4" }
+      ],
       effectSummaryLines() { return ["出血 ×4（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines() { return ["敵に出血 ×4 付与"]; },
@@ -18030,6 +19688,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 61-61%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 61, 61)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 61, 61)} ダメージ（PHY 61〜61%）`]; },
@@ -18046,6 +19709,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "ガード +6" }
+      ],
       effectSummaryLines() { return ["ガード\u3000+6"]; },
       peekHelpKeys() { return ["guard"]; },
       previewLines() { return ["ガードを 6 得る（StS 風代替効果）"]; },
@@ -18062,6 +19730,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 30-30%" },
+        { target: "self", text: "INT +1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 30, 30)}`, "INT\u3000+1"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 30, 30)} ダメージ（INT 30〜30%）`, "INT を +1"]; },
@@ -18079,6 +19753,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "AGI +7" },
+        { target: "self", text: "毒 ×4" }
+      ],
       effectSummaryLines() { return ["AGI\u3000+7", "毒 ×4（敵）"]; },
       peekHelpKeys() { return ["agi"]; },
       previewLines() { return ["AGI を +7", "敵に毒 ×4 付与"]; },
@@ -18096,6 +19776,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 65-75%" },
+        { target: "self", text: "PHY +2" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 65, 75)}`, "PHY\u3000+2"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 65, 75)} ダメージ（PHY 65〜75%）`, "PHY を +2"]; },
@@ -18113,6 +19799,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 70-70%" },
+        { target: "enemy.foremost", text: "毒 ×4" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 70, 70)}`, "毒 ×4（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 70, 70)} ダメージ（INT 70〜70%）`, "敵に毒 ×4 付与"]; },
@@ -18130,6 +19822,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 35-35%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 35, 35)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 35, 35)} ダメージ（PHY 35〜35%）`]; },
@@ -18146,6 +19843,12 @@ function makeCardLibrary(clog, api) {
       cost: 2,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 112-112%" },
+        { target: "enemy.foremost", text: "敵INT -4" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 112, 112)}`, "INT\u3000-4（敵）"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 112, 112)} ダメージ（PHY 112〜112%）`, "敵の INT を -4"]; },
@@ -18163,6 +19866,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 42-42%" },
+        { target: "enemy.foremost", text: "敵INT -6" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 42, 42)}`, "INT\u3000-6（敵）"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 42, 42)} ダメージ（PHY 42〜42%）`, "敵の INT を -6"]; },
@@ -18180,6 +19889,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT20-20%" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 20, 20)]; },
       peekHelpKeys() { return ["hp"]; },
       previewLines(s) { return [`HP を回復係数 20〜20% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 20, 20)}）`]; },
@@ -18196,6 +19910,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 62-62%" },
+        { target: "enemy.foremost", text: "毒 ×4" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 62, 62)}`, "毒 ×4（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 62, 62)} ダメージ（INT 62〜62%・1v1=単体）`, "敵に毒 ×4 付与"]; },
@@ -18213,6 +19933,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "ガード +6" }
+      ],
       effectSummaryLines() { return ["ガード\u3000+6"]; },
       peekHelpKeys() { return ["guard"]; },
       previewLines() { return ["ガードを 6 得る（StS 風代替効果）"]; },
@@ -18229,6 +19954,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT60-60%" },
+        { target: "self", text: "出血 ×4" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 60, 60), "出血 ×4（敵）"]; },
       peekHelpKeys() { return ["hp"]; },
       previewLines(s) { return [`HP を回復係数 60〜60% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 60, 60)}）`, "敵に出血 ×4 付与"]; },
@@ -18246,6 +19977,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 66-66%" },
+        { target: "enemy.foremost", text: "出血 ×4" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 66, 66)}`, "出血 ×4（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 66, 66)} ダメージ（PHY 66〜66%）`, "敵に出血 ×4 付与"]; },
@@ -18263,6 +20000,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 50-60%" },
+        { target: "enemy.foremost", text: "敵AGI -5" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)}`, "AGI\u3000-5（敵）"]; },
       peekHelpKeys() { return ["agi"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)} ダメージ（PHY 50〜60%）`, "敵の AGI を -5"]; },
@@ -18280,6 +20023,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 35-40%" },
+        { target: "self", text: "PHY +3" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)}`, "PHY\u3000+3"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)} ダメージ（PHY 35〜40%）`, "PHY を +3"]; },
@@ -18297,6 +20046,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 35-40%" },
+        { target: "self", text: "INT +3" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 35, 40)}`, "INT\u3000+3"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 35, 40)} ダメージ（INT 35〜40%・1v1=単体）`, "INT を +3"]; },
@@ -18314,6 +20069,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT60-60%" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 60, 60)]; },
       peekHelpKeys() { return ["hp"]; },
       previewLines(s) { return [`HP を回復係数 60〜60% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 60, 60)}）`]; },
@@ -18330,6 +20090,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 40-45%" },
+        { target: "enemy.foremost", text: "INTダメ 40-45%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 40, 45)}`, `敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 40, 45)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 40, 45)} ダメージ（PHY 40〜45%）`, `敵1体に ${estIntHit(s.playerInt, s.enemyInt, 40, 45)} ダメージ（INT 40〜45%）`]; },
@@ -18347,6 +20113,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT30-50%" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 30, 50)]; },
       peekHelpKeys() { return ["hp"]; },
       previewLines(s) { return [`HP を回復係数 30〜50% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 30, 50)}）`]; },
@@ -18363,6 +20134,13 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 60-60%" },
+        { target: "self", text: "PHY +7" },
+        { target: "enemy.foremost", text: "出血 ×4" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 60, 60)}`, "PHY\u3000+7", "出血 ×4（敵）"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 60, 60)} ダメージ（INT 60〜60%）`, "PHY を +7", "敵に出血 ×4 付与"]; },
@@ -18381,6 +20159,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 20-20%" },
+        { target: "enemy.foremost", text: "毒 ×4" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 20, 20)}`, "毒 ×4（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 20, 20)} ダメージ（INT 20〜20%・1v1=単体）`, "敵に毒 ×4 付与"]; },
@@ -18398,6 +20182,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "ガード +6" }
+      ],
       effectSummaryLines() { return ["ガード\u3000+6"]; },
       peekHelpKeys() { return ["guard"]; },
       previewLines() { return ["ガードを 6 得る（StS 風代替効果）"]; },
@@ -18414,6 +20203,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT20-20%" },
+        { target: "self", text: "INT +1" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 20, 20), "INT\u3000+1"]; },
       peekHelpKeys() { return ["hp", "int"]; },
       previewLines(s) { return [`HP を回復係数 20〜20% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 20, 20)}）`, "INT を +1"]; },
@@ -18431,6 +20226,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 58-58%" },
+        { target: "enemy.foremost", text: "毒 ×4" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 58, 58)}`, "毒 ×4（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 58, 58)} ダメージ（PHY 58〜58%）`, "敵に毒 ×4 付与"]; },
@@ -18448,6 +20249,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 73-73%" },
+        { target: "self", text: "AGI +1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 73, 73)}`, "AGI\u3000+1"]; },
       peekHelpKeys() { return ["agi"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 73, 73)} ダメージ（PHY 73〜73%）`, "AGI を +1"]; },
@@ -18465,6 +20272,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "ガード +6" }
+      ],
       effectSummaryLines() { return ["ガード\u3000+6"]; },
       peekHelpKeys() { return ["guard"]; },
       previewLines() { return ["ガードを 6 得る（StS 風代替効果）"]; },
@@ -18481,6 +20293,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "AGI +1" },
+        { target: "self", text: "毒 ×4" }
+      ],
       effectSummaryLines() { return ["AGI\u3000+1", "毒 ×4（敵）"]; },
       peekHelpKeys() { return ["agi"]; },
       previewLines() { return ["AGI を +1", "敵に毒 ×4 付与"]; },
@@ -18498,6 +20316,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT105-105%" },
+        { target: "self", text: "PHY +1" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 105, 105), "PHY\u3000+1"]; },
       peekHelpKeys() { return ["hp", "phy"]; },
       previewLines(s) { return [`HP を回復係数 105〜105% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 105, 105)}）`, "PHY を +1"]; },
@@ -18515,6 +20339,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "ガード +6" }
+      ],
       effectSummaryLines() { return ["ガード\u3000+6"]; },
       peekHelpKeys() { return ["guard"]; },
       previewLines() { return ["ガードを 6 得る（StS 風代替効果）"]; },
@@ -18531,6 +20360,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT65-70%" },
+        { target: "self", text: "INT +7" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 65, 70), "INT\u3000+7"]; },
       peekHelpKeys() { return ["hp", "int"]; },
       previewLines(s) { return [`HP を回復係数 65〜70% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 65, 70)}）`, "INT を +7"]; },
@@ -18548,6 +20383,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 60-85%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 60, 85)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 60, 85)} ダメージ（PHY 60〜85%）`]; },
@@ -18564,6 +20404,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 50-60%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 60)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 50, 60)} ダメージ（INT 50〜60%・代替効果）`]; },
@@ -18580,6 +20425,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 30-55%" },
+        { target: "enemy.foremost", text: "毒 ×4" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 30, 55)}`, "毒 ×4（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 30, 55)} ダメージ（INT 30〜55%・1v1=単体）`, "敵に毒 ×4 付与"]; },
@@ -18597,6 +20448,13 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 50-60%" },
+        { target: "self", text: "HP回復 INT40-50%" },
+        { target: "enemy.foremost", text: "毒 ×4" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 60)}`, "HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 40, 50), "毒 ×4（敵）"]; },
       peekHelpKeys() { return ["hp"]; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 50, 60)} ダメージ（INT 50〜60%）`, `HP を回復係数 40〜50% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 40, 50)}）`, "敵に毒 ×4 付与"]; },
@@ -18615,6 +20473,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "ガード +6" }
+      ],
       effectSummaryLines() { return ["ガード\u3000+6"]; },
       peekHelpKeys() { return ["guard"]; },
       previewLines() { return ["ガードを 6 得る（StS 風代替効果）"]; },
@@ -18631,6 +20494,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 40-40%" },
+        { target: "enemy.foremost", text: "毒 ×4" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 40, 40)}`, "毒 ×4（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 40, 40)} ダメージ（PHY 40〜40%）`, "敵に毒 ×4 付与"]; },
@@ -18648,6 +20517,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 40-40%" },
+        { target: "enemy.foremost", text: "毒 ×4" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 40, 40)}`, "毒 ×4（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 40, 40)} ダメージ（INT 40〜40%・1v1=単体）`, "敵に毒 ×4 付与"]; },
@@ -18665,6 +20540,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 20-20%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 20, 20)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 20, 20)} ダメージ（INT 20〜20%・1v1=単体）`]; },
@@ -18681,6 +20561,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "毒 ×4" }
+      ],
       effectSummaryLines() { return ["毒 ×4（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines() { return ["敵に毒 ×4 付与"]; },
@@ -18697,6 +20582,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 65-75%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 65, 75)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 65, 75)} ダメージ（PHY 65〜75%）`]; },
@@ -18713,6 +20603,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 65-75%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 65, 75)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 65, 75)} ダメージ（INT 65〜75%・1v1=単体）`]; },
@@ -18729,6 +20624,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT30-40%" },
+        { target: "self", text: "AGI +4" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 30, 40), "AGI\u3000+4"]; },
       peekHelpKeys() { return ["hp", "agi"]; },
       previewLines(s) { return [`HP を回復係数 30〜40% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 30, 40)}）`, "AGI を +4"]; },
@@ -18746,6 +20647,13 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 55-65%" },
+        { target: "enemy.foremost", text: "敵PHY -6" },
+        { target: "enemy.foremost", text: "出血 ×4" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 55, 65)}`, "PHY\u3000-6（敵）", "出血 ×4（敵）"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 55, 65)} ダメージ（PHY 55〜65%）`, "敵の PHY を -6", "敵に出血 ×4 付与"]; },
@@ -18764,6 +20672,13 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 55-65%" },
+        { target: "enemy.foremost", text: "敵INT -6" },
+        { target: "enemy.foremost", text: "出血 ×4" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 55, 65)}`, "INT\u3000-6（敵）", "出血 ×4（敵）"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 55, 65)} ダメージ（INT 55〜65%）`, "敵の INT を -6", "敵に出血 ×4 付与"]; },
@@ -18782,6 +20697,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT135-140%" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 135, 140)]; },
       peekHelpKeys() { return ["hp"]; },
       previewLines(s) { return [`HP を回復係数 135〜140% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 135, 140)}）`]; },
@@ -18798,6 +20718,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 70-75%" },
+        { target: "self", text: "INT +7" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 70, 75)}`, "INT\u3000+7"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 70, 75)} ダメージ（INT 70〜75%）`, "INT を +7"]; },
@@ -18815,6 +20741,13 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 60-65%" },
+        { target: "self", text: "INT +7" },
+        { target: "enemy.foremost", text: "毒 ×4" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 60, 65)}`, "INT\u3000+7", "毒 ×4（敵）"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 60, 65)} ダメージ（PHY 60〜65%）`, "INT を +7", "敵に毒 ×4 付与"]; },
@@ -18833,6 +20766,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "毒 ×4" }
+      ],
       effectSummaryLines() { return ["毒 ×4（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines() { return ["敵に毒 ×4 付与"]; },
@@ -18849,6 +20787,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "PHY +7" },
+        { target: "self", text: "INT +7" }
+      ],
       effectSummaryLines() { return ["PHY\u3000+7", "INT\u3000+7"]; },
       peekHelpKeys() { return ["phy", "int"]; },
       previewLines() { return ["PHY を +7", "INT を +7"]; },
@@ -18866,6 +20810,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "敵AGI -6" },
+        { target: "enemy.foremost", text: "毒 ×4" }
+      ],
       effectSummaryLines() { return ["AGI\u3000-6（敵）", "毒 ×4（敵）"]; },
       peekHelpKeys() { return ["agi"]; },
       previewLines() { return ["敵の AGI を -6", "敵に毒 ×4 付与"]; },
@@ -18883,6 +20833,13 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT15-20%" },
+        { target: "self", text: "PHY +3" },
+        { target: "self", text: "INT +3" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 15, 20), "PHY\u3000+3", "INT\u3000+3"]; },
       peekHelpKeys() { return ["hp", "phy", "int"]; },
       previewLines(s) { return [`HP を回復係数 15〜20% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 15, 20)}）`, "PHY を +3", "INT を +3"]; },
@@ -18901,6 +20858,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 70-80%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 70, 80)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 70, 80)} ダメージ（PHY 70〜80%）`]; },
@@ -18917,6 +20879,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 70-80%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 70, 80)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 70, 80)} ダメージ（INT 70〜80%）`]; },
@@ -18933,6 +20900,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 35-40%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 35, 40)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 35, 40)} ダメージ（INT 35〜40%・1v1=単体）`]; },
@@ -18949,6 +20921,13 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT110-130%" },
+        { target: "self", text: "PHY +3" },
+        { target: "self", text: "出血 ×4" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 110, 130), "PHY\u3000+3", "出血 ×4（敵）"]; },
       peekHelpKeys() { return ["hp", "phy"]; },
       previewLines(s) { return [`HP を回復係数 110〜130% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 110, 130)}）`, "PHY を +3", "敵に出血 ×4 付与"]; },
@@ -18967,6 +20946,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 50-60%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)} ダメージ（PHY 50〜60%・代替効果）`]; },
@@ -18983,6 +20967,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "ドロー +1" }
+      ],
       effectSummaryLines() { return ["ドロー　1"]; },
       peekHelpKeys() { return ["draw"]; },
       previewLines() { return ["カードを 1 枚引く（StS 風代替効果）"]; },
@@ -18999,6 +20988,13 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 30-30%" },
+        { target: "enemy.foremost", text: "出血 ×4" },
+        { target: "enemy.foremost", text: "毒 ×4" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 30, 30)}`, "出血 ×4（敵）", "毒 ×4（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 30, 30)} ダメージ（INT 30〜30%）`, "敵に出血 ×4 付与", "敵に毒 ×4 付与"]; },
@@ -19017,6 +21013,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT15-20%" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 15, 20)]; },
       peekHelpKeys() { return ["hp"]; },
       previewLines(s) { return [`HP を回復係数 15〜20% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 15, 20)}）`]; },
@@ -19033,6 +21034,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "ガード +6" }
+      ],
       effectSummaryLines() { return ["ガード\u3000+6"]; },
       peekHelpKeys() { return ["guard"]; },
       previewLines() { return ["ガードを 6 得る（StS 風代替効果）"]; },
@@ -19049,6 +21055,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "毒 ×4" }
+      ],
       effectSummaryLines() { return ["毒 ×4（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines() { return ["敵に毒 ×4 付与"]; },
@@ -19065,6 +21076,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 45-50%" },
+        { target: "self", text: "PHY +1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 45, 50)}`, "PHY\u3000+1"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 45, 50)} ダメージ（PHY 45〜50%）`, "PHY を +1"]; },
@@ -19082,6 +21099,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 45-50%" },
+        { target: "self", text: "INT +1" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 45, 50)}`, "INT\u3000+1"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 45, 50)} ダメージ（INT 45〜50%）`, "INT を +1"]; },
@@ -19099,6 +21122,13 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "敵INT -4" },
+        { target: "enemy.foremost", text: "敵AGI -4" },
+        { target: "enemy.foremost", text: "出血 ×4" }
+      ],
       effectSummaryLines() { return ["INT\u3000-4（敵）", "AGI\u3000-4（敵）", "出血 ×4（敵）"]; },
       peekHelpKeys() { return ["int", "agi"]; },
       previewLines() { return ["敵の INT を -4", "敵の AGI を -4", "敵に出血 ×4 付与"]; },
@@ -19117,6 +21147,13 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "敵PHY -4" },
+        { target: "enemy.foremost", text: "敵AGI -4" },
+        { target: "enemy.foremost", text: "毒 ×4" }
+      ],
       effectSummaryLines() { return ["PHY\u3000-4（敵）", "AGI\u3000-4（敵）", "毒 ×4（敵）"]; },
       peekHelpKeys() { return ["phy", "agi"]; },
       previewLines() { return ["敵の PHY を -4", "敵の AGI を -4", "敵に毒 ×4 付与"]; },
@@ -19135,6 +21172,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "ガード +6" }
+      ],
       effectSummaryLines() { return ["ガード\u3000+6"]; },
       peekHelpKeys() { return ["guard"]; },
       previewLines() { return ["ガードを 6 得る（StS 風代替効果）"]; },
@@ -19151,6 +21193,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 50-60%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 60)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 50, 60)} ダメージ（INT 50〜60%・代替効果）`]; },
@@ -19167,6 +21214,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 50-60%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)} ダメージ（PHY 50〜60%・代替効果）`]; },
@@ -19183,6 +21235,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 50-60%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)} ダメージ（PHY 50〜60%・代替効果）`]; },
@@ -19199,6 +21256,13 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 55-55%" },
+        { target: "self", text: "PHY +3" },
+        { target: "enemy.foremost", text: "敵AGI -6" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 55, 55)}`, "PHY\u3000+3", "AGI\u3000-6（敵）"]; },
       peekHelpKeys() { return ["phy", "agi"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 55, 55)} ダメージ（PHY 55〜55%）`, "PHY を +3", "敵の AGI を -6"]; },
@@ -19217,6 +21281,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "ガード +6" }
+      ],
       effectSummaryLines() { return ["ガード\u3000+6"]; },
       peekHelpKeys() { return ["guard"]; },
       previewLines() { return ["ガードを 6 得る（StS 風代替効果）"]; },
@@ -19233,6 +21302,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 55-65%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 55, 65)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 55, 65)} ダメージ（PHY 55〜65%）`]; },
@@ -19249,6 +21323,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 55-65%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 55, 65)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 55, 65)} ダメージ（INT 55〜65%）`]; },
@@ -19265,6 +21344,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 30-35%" },
+        { target: "enemy.foremost", text: "INTダメ 30-35%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 30, 35)}`, `敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 30, 35)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 30, 35)} ダメージ（PHY 30〜35%）`, `敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 30, 35)} ダメージ（INT 30〜35%・1v1=単体）`]; },
@@ -19282,6 +21367,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT40-40%" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 40, 40)]; },
       peekHelpKeys() { return ["hp"]; },
       previewLines(s) { return [`HP を回復係数 40〜40% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 40, 40)}）`]; },
@@ -19298,6 +21388,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 55-60%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 55, 60)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 55, 60)} ダメージ（PHY 55〜60%）`]; },
@@ -19314,6 +21409,11 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "INTダメ 50-60%" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 60)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 50, 60)} ダメージ（INT 50〜60%・1v1=単体）`]; },
@@ -19330,6 +21430,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "self", text: "HP回復 INT65-75%" },
+        { target: "self", text: "INT +1" }
+      ],
       effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 65, 75), "INT\u3000+1"]; },
       peekHelpKeys() { return ["hp", "int"]; },
       previewLines(s) { return [`HP を回復係数 65〜75% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 65, 75)}）`, "INT を +1"]; },
@@ -19347,6 +21453,12 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
+      caster: "foremost",
+      // SPEC-006: auto-derived effects (review needed: no)
+      effects: [
+        { target: "enemy.foremost", text: "PHYダメ 50-60%" },
+        { target: "enemy.foremost", text: "毒 ×4" }
+      ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)}`, "毒 ×4（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)} ダメージ（PHY 50〜60%）`, "敵に毒 ×4 付与"]; },

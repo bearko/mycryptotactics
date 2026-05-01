@@ -18,7 +18,7 @@
 | 4c | 全 577 カードに `caster` + `effects` 付与 | P0 | ✅ **完了** | 569 件 (98.6%) 自動 + 9 件手動修正 (cd205/cd206/cdH04/cd107/cd104/ext2003/ext1023/ext1022/ext1012)。残り TODO ゼロ |
 | 4d | `play(s, ctx)` 化 + caster 個別 stats 反映 | P0 | ✅ **完了** | swap 方式: `loadCasterStatsToLegacy` で caster の phy/int/agi/hp を legacy に load → card.play() 実行 → `syncLegacyStatsToCaster` で書き戻し。card.play() 本体は無変更 (=ctx は将来用に予約)。caster=A の攻撃カードは A の PHY で計算、self-buff も caster 個人に乗る |
 | 4e | カード券面 UI 左30/右70 + キャスターアイコン + ロールラベル | P0 | ✅ **完了** | バトル中ハンド render が effects 配列 + caster icon (hero portrait + ロール名) を使用。target-labels.js を init で load し CSS 変数注入。card-effect-row はターゲット pill (色付) 30% + 効果テキスト 70% のグリッド |
-| 4f | per-hero state 化 + legacy 廃止 | P0 | 未着手 | 大規模、4d 完了後 |
+| 4f | per-hero state 化 + legacy 廃止 | P0 | ✅ **完了** (legacy 完全廃止は Phase 4g) | guard/shield/poison/bleed/vulnerable を heroes[i] 個別に。swap 拡張、damage 吸収を target hero 経由、毒 tick・guard reset を per-hero、敵攻撃の状態異常付与を target hero 個別に。Status badges UI もサブ portrait に展開 |
 | 4g | Phase 3j 撤去 | P0 | 未着手 | 4f 完了後 |
 | 4h | バトル外カード券面係数表記 + 使用ヒーローログ | P1 | 未着手 | 4e 完了後 |
 | 4i | 577 カード手動 caster 再指定 | P2 | 未着手 | content PR 全マージ完了済み (PR #51/#56)、差別化したいものを手動再指定 |
@@ -44,9 +44,25 @@
 
 - バトル中の手札カード右下に **caster ヒーローの portrait + ロール名** (`先頭`/`前衛`/`高PHY` 等) が表示される
 - 効果エリアが「**対象 pill (30%) + 効果テキスト (70%)**」のグリッド構成に
-- 対象 pill の色は target-labels.json の `_meta.css_variables` から動的に注入 (味方=緑 / 敵=赤 / 全=紫 / 自身=シアン)
+- 対象 pill の色は target-labels.js から (味方=緑 / 敵=赤 / 全=黒 / 自身=緑)
 - `app init` 時に `loadTargetLabels()` → `applyCssVariables()` で CSS 変数 :root に注入。fetch 失敗時は HTML 側の fallback CSS 変数を使用
 - effects 配列が空のカード (将来発生し得る) は旧 effectSummaryLines にフォールバック
+
+### Phase 4f の動作確認済み事項
+
+- `combat.heroes[i].guard / shield / poison / bleed / vulnerable` が個別 state の source-of-truth
+- `loadCasterStatsToLegacy` / `syncLegacyStatsToCaster` が上記フィールドも load/sync
+- `applyHeroPassiveOnCombatStart` / `applyHeroPassiveOnCardUse` を passiveHero swap でラップ → パッシブ書き込み (`s.playerGuard += 6` 等) が LEADER 個人に反映
+- 敵攻撃時:
+  - ガード吸収は **target hero 個別** の `applyGuardToDamage(targetUnit, raw)` を使用
+  - シールド吸収は **target hero 個別** の `applyDamageThroughShield(s, targetUnit, raw)`
+  - 出血ダメ加算は **target.bleed** を読む
+- 状態異常付与 (敵 attackPoison / attackBleed / レギュレーション bleed / サブ敵 attackPoison/Bleed) は **target hero 個別** に `addStatusToHero(s, hero, kind, stacks)` で付与
+- `startPlayerTurn` 開始時:
+  - 全ヒーローの `guard` を per-hero リセット
+  - 全ヒーローの `poison` を個別に tick (各ヒーロー portrait に FX)
+- Status badges UI もサブヒーロー portrait wrap 内に動的注入 (`☠N` / `🩸N`)
+- `combat.playerGuard / Shield / Poison / Bleed / Vulnerable` は `heroes[0]` の mirror として残る (Phase 4g で完全廃止予定)
 
 ## 完了した事前準備物 (このブランチ)
 

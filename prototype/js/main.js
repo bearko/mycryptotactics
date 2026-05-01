@@ -647,10 +647,26 @@ function checkResurrection(s) {
   return false;
 }
 
+/** SPEC-006 Phase 4f: ガード吸収。ヒーロー unit を渡すと per-hero guard を消費する。
+ *  target が文字列 ("enemy") の場合は legacy combat.enemyGuard を使う (敵側はまだ shared)。
+ *  target が unit (object) の場合は target.guard を直接消費し、heroes[0] なら legacy も同期。 */
 function applyGuardToDamage(target, raw) {
+  if (raw <= 0) return raw;
+  // 新パス: hero unit (object)
+  if (target && typeof target === "object") {
+    const hero = target;
+    const g = hero.guard || 0;
+    if (g <= 0) return raw;
+    const use = Math.min(g, raw);
+    hero.guard = g - use;
+    // legacy mirror for UI (heroes[0] のみ)
+    if (combat?.heroes?.[0] === hero) combat.playerGuard = hero.guard;
+    return raw - use;
+  }
+  // legacy パス: "player" / "enemy" 文字列
   const key = target === "player" ? "playerGuard" : "enemyGuard";
   let g = combat[key] || 0;
-  if (g <= 0 || raw <= 0) return raw;
+  if (g <= 0) return raw;
   const use = Math.min(g, raw);
   combat[key] = g - use;
   return raw - use;
@@ -866,8 +882,8 @@ function setActiveHero(idx) {
 // caster とし、その stats を legacy フィールドに swap して card.play() を実行する。
 // → 違うカードを使うと違うヒーローが caster になり、バフ/HP もそのヒーロー個人に乗る。
 
-/** caster の stats を legacy combat.player* に流し込む。phy/int/agi/hp/hpMax を per-hero 化。
- *  guard/shield/poison/bleed は Phase 4f で per-hero 化予定、現状 legacy 据え置き。 */
+/** SPEC-006 Phase 4d/4f: caster の全 stats を legacy combat.player* に流し込む。
+ *  phy/int/agi/hp/hpMax/guard/shield/poison/bleed/vulnerable を per-hero 化。 */
 function loadCasterStatsToLegacy(s, caster) {
   if (!caster) return;
   s.playerPhy = caster.phy;
@@ -878,10 +894,31 @@ function loadCasterStatsToLegacy(s, caster) {
   s.playerAgiBase = caster.agiBase ?? caster.agi;
   s.playerHp = caster.hp;
   s.playerHpMax = caster.hpMax;
+  // SPEC-006 Phase 4f: guard / shield / poison / bleed / vulnerable も per-hero
+  s.playerGuard = caster.guard ?? 0;
+  s.playerShield = caster.shield ?? 0;
+  s.playerPoison = caster.poison ?? 0;
+  s.playerBleed = caster.bleed ?? 0;
+  s.playerVulnerable = caster.vulnerable ?? 0;
 }
 
-/** card.play() で変化した legacy stats を caster に書き戻す。
- *  これにより heroes[i] が個人状態の真の source-of-truth として更新される。 */
+/** SPEC-006 Phase 4f: 状態異常 (poison/bleed/vulnerable) をヒーロー個別に付与
+ *  heroes[0] なら legacy combat.playerXxx も同期 (UI mirror) */
+function addStatusToHero(s, hero, kind, stacks) {
+  if (!hero || !stacks) return;
+  const map = { poison: "poison", bleed: "bleed", vulnerable: "vulnerable" };
+  const field = map[kind];
+  if (!field) return;
+  hero[field] = (hero[field] || 0) + stacks;
+  // legacy mirror
+  if (s.heroes?.[0] === hero) {
+    if (field === "poison") s.playerPoison = hero.poison;
+    else if (field === "bleed") s.playerBleed = hero.bleed;
+    else if (field === "vulnerable") s.playerVulnerable = hero.vulnerable;
+  }
+}
+
+/** card.play() で変化した legacy stats を caster に書き戻す。 */
 function syncLegacyStatsToCaster(s, caster) {
   if (!caster) return;
   caster.phy = s.playerPhy;
@@ -889,6 +926,12 @@ function syncLegacyStatsToCaster(s, caster) {
   caster.agi = s.playerAgi;
   caster.hp = s.playerHp;
   if (caster.hp <= 0) caster.alive = false;
+  // SPEC-006 Phase 4f: per-hero state も書き戻し
+  caster.guard = s.playerGuard ?? 0;
+  caster.shield = s.playerShield ?? 0;
+  caster.poison = s.playerPoison ?? 0;
+  caster.bleed = s.playerBleed ?? 0;
+  caster.vulnerable = s.playerVulnerable ?? 0;
 }
 
 function dealPhySkillFromEnemyToPlayer(s, skillPct, caster) {
@@ -904,20 +947,18 @@ function dealPhySkillFromEnemyToPlayer(s, skillPct, caster) {
     clog("敵クリティカル（PHY）");
   }
   let total = base + critBonus;
-  // 出血（プレイヤーが出血スタックを持つとき、被物理攻撃で追加ダメージ）
-  if ((s.playerBleed || 0) > 0) {
-    total += s.playerBleed;
-    clog(`出血 ×${s.playerBleed} 追加`);
+  // SPEC-006 Phase 4f: 出血は対象ヒーロー個別に判定 (target.bleed)
+  if (target && (target.bleed || 0) > 0) {
+    total += target.bleed;
+    clog(`出血 ×${target.bleed} 追加`);
   }
   // 不屈（このターン被ダメ半減）
   if (s.damageReducedThisTurn) {
     total = Math.ceil(total / 2);
     clog("不屈: ダメージ半減");
   }
-  // ガード/シールドは前衛 (heroes[0]) のみ。foremost が前衛以外ならそのまま透過。
-  if (target === s.heroes?.[0]) {
-    total = applyGuardToDamage("player", total);
-  }
+  // SPEC-006 Phase 4f: ガードは対象ヒーロー個別に消費 (target.guard)
+  if (target) total = applyGuardToDamage(target, total);
   // 対象ヒーローへ HP 反映
   applyHpDeltaToHero(s, target, -total);
   checkResurrection(s);
@@ -952,9 +993,8 @@ function dealIntSkillFromEnemyToPlayer(s, skillPct, caster) {
     total = Math.ceil(total / 2);
     clog("不屈: ダメージ半減");
   }
-  if (target === s.heroes?.[0]) {
-    total = applyGuardToDamage("player", total);
-  }
+  // SPEC-006 Phase 4f: 対象ヒーロー個別ガード
+  if (target) total = applyGuardToDamage(target, total);
   applyHpDeltaToHero(s, target, -total);
   checkResurrection(s);
   lungePortrait("enemy", caster);
@@ -979,10 +1019,8 @@ function dealSpecialMaxHpPercentToPlayer(s, pct, caster) {
   const refMaxHp = (target?.hpMax ?? s.playerHpMax) || s.playerHpMax;
   let raw = Math.max(0, Math.floor((refMaxHp * pct) / 100));
   if (s.damageReducedThisTurn) raw = Math.ceil(raw / 2);
-  // シールドは前衛 (heroes[0]) のみ
-  if (target === s.heroes?.[0]) {
-    raw = applyDamageThroughShield(s, "player", raw);
-  }
+  // SPEC-006 Phase 4f: 対象ヒーロー個別シールド
+  if (target) raw = applyDamageThroughShield(s, target, raw);
   applyHpDeltaToHero(s, target, -raw);
   checkResurrection(s);
   lungePortrait("enemy", caster);
@@ -1704,19 +1742,32 @@ function advanceEnemyIntent() {
 
 // ─── プレイヤーターン開始 ─────────────────────────────────────────
 function startPlayerTurn() {
-  combat.playerGuard = 0;
+  // SPEC-006 Phase 4f: 全ヒーローのガードをリセット (per-hero)
+  if (Array.isArray(combat.heroes)) {
+    for (const h of combat.heroes) { if (h) h.guard = 0; }
+  }
+  combat.playerGuard = 0;  // legacy mirror (heroes[0])
   combat.damageReducedThisTurn = false;
 
-  // 毒ティック（ターン開始時に自分に毒ダメージ）
-  if ((combat.playerPoison || 0) > 0) {
+  // SPEC-006 Phase 4f: 毒ティックを per-hero (生存ヒーロー個別に判定 + ダメージ + FX)
+  if (Array.isArray(combat.heroes)) {
+    for (const hero of combat.heroes) {
+      if (!hero || hero.alive === false || (hero.hp ?? 0) <= 0) continue;
+      const dmg = hero.poison || 0;
+      if (dmg <= 0) continue;
+      applyHpDeltaToHero(combat, hero, -dmg);
+      flashPortrait("player", hero);
+      playPortraitEffect("player", "debuff", hero);
+      clog(`${hero.name || "ヒーロー"} 毒ダメージ ${dmg}`);
+      checkResurrection(combat);
+      if (isPartyWipedOut(combat)) { endCombatLoss(); return; }
+    }
+  } else if ((combat.playerPoison || 0) > 0) {
+    // ヒーロー配列が無いレガシー経路 (フォールバック、現状未到達)
     const dmg = combat.playerPoison;
     combat.playerHp = Math.max(0, combat.playerHp - dmg);
-    if (combat.heroes?.[0]) {
-      combat.heroes[0].hp = combat.playerHp;
-      if (combat.heroes[0].hp <= 0) combat.heroes[0].alive = false;
-    }
-    flashPortrait("player", combat.heroes?.[0]);
-    playPortraitEffect("player", "debuff", combat.heroes?.[0]);
+    flashPortrait("player");
+    playPortraitEffect("player", "debuff");
     clog(`毒ダメージ（自分）${dmg}`);
     checkResurrection(combat);
     if (isPartyWipedOut(combat)) { endCombatLoss(); return; }
@@ -2029,8 +2080,7 @@ function bindHandCard(el, idx, card) {
 // ─── 状態異常バッジ更新 ─────────────────────────────────────────
 function renderStatusBadges() {
   if (!combat) return;
-  const renderTo = (elId, poison, bleed) => {
-    const el = document.getElementById(elId);
+  const renderToEl = (el, poison, bleed) => {
     if (!el) return;
     el.innerHTML = "";
     if (poison > 0) {
@@ -2047,8 +2097,32 @@ function renderStatusBadges() {
     }
     el.style.display = (poison > 0 || bleed > 0) ? "" : "none";
   };
-  renderTo("playerStatusBadge", combat.playerPoison || 0, combat.playerBleed || 0);
-  renderTo("enemyStatusBadge", combat.enemyPoison || 0, combat.enemyBleed || 0);
+  // 前衛 (heroes[0]) は static element に描画 (legacy mirror = combat.playerXxx と一致)
+  const h0 = combat.heroes?.[0];
+  renderToEl(
+    document.getElementById("playerStatusBadge"),
+    h0 ? (h0.poison || 0) : (combat.playerPoison || 0),
+    h0 ? (h0.bleed || 0) : (combat.playerBleed || 0),
+  );
+  renderToEl(
+    document.getElementById("enemyStatusBadge"),
+    combat.enemies?.[0] ? (combat.enemies[0].poison || 0) : (combat.enemyPoison || 0),
+    combat.enemies?.[0] ? (combat.enemies[0].bleed || 0) : (combat.enemyBleed || 0),
+  );
+  // SPEC-006 Phase 4f: サブヒーロー (heroes[1+]) の portrait wrap 内にも status badge を注入
+  for (let pos = 1; pos < (combat.heroes?.length || 0); pos++) {
+    const hero = combat.heroes[pos];
+    if (!hero) continue;
+    const slotEl = document.querySelector(`.party-slot[data-side="player"][data-pos="${pos}"] .combatant-portrait-wrap`);
+    if (!slotEl) continue;
+    let badgeEl = slotEl.querySelector(".status-badges");
+    if (!badgeEl) {
+      badgeEl = document.createElement("div");
+      badgeEl.className = "status-badges";
+      slotEl.appendChild(badgeEl);
+    }
+    renderToEl(badgeEl, hero.poison || 0, hero.bleed || 0);
+  }
 }
 
 // ─── 戦闘 UI 描画 ─────────────────────────────────────────────────
@@ -2287,8 +2361,13 @@ async function applyZhangPassive(s) {
 // ─── 新規 Common ヒーロー (1004-1010) パッシブ ─────────────────────
 // onCombatStart: 戦闘開始時に 1 回発動（startCombatFromMapNode から呼ばれる）
 function applyHeroPassiveOnCombatStart(s) {
-  switch (LEADER.passiveKey) {
-    case "seton":      applySetonPassive(s);      break;
+  // SPEC-006 Phase 4f: パッシブが書き込む s.player* (guard/shield/bleed/etc.) を
+  // パッシブ持ちヒーロー個人 (= heroes[0] = LEADER) に書き戻す
+  const passiveHero = s.heroes?.[0];
+  if (passiveHero) loadCasterStatsToLegacy(s, passiveHero);
+  try {
+    switch (LEADER.passiveKey) {
+      case "seton":      applySetonPassive(s);      break;
     case "inoh":       applyInohPassive(s);       break;
     case "pythagoras": applyPythagorasPassive(s); break;
     case "sullivan":   applySullivanPassive(s);   break;
@@ -2396,7 +2475,11 @@ case "zhangfei": applyZhangfeiPassive(s); break;
     case "michizane": applyMichizanePassive(s); break;
     case "soseki": applySosekiPassive(s); break;
     case "boudica": applyBoudicaPassive(s); break;
-    default: return;
+      default: return;
+    }
+  } finally {
+    // SPEC-006 Phase 4f: パッシブ実行後に passiveHero へ書き戻し
+    if (passiveHero) syncLegacyStatsToCaster(s, passiveHero);
   }
   renderStatusBadges();
   renderCombat();
@@ -2404,6 +2487,10 @@ case "zhangfei": applyZhangfeiPassive(s); break;
 
 // onCardUse: カード使用後に発動（playCard から呼ばれる）
 async function applyHeroPassiveOnCardUse(s) {
+  // SPEC-006 Phase 4f: パッシブが書き込む s.player* を passiveHero (LEADER) に書き戻す
+  const passiveHero = s.heroes?.[0];
+  if (passiveHero) loadCasterStatsToLegacy(s, passiveHero);
+  try {
   switch (LEADER.passiveKey) {
     case "daejanggeum": await applyDaejanggeumPassive(s); break;
     // ─── Uncommon (heroId 2001-2053) onCardUse cases ───
@@ -2476,7 +2563,11 @@ case "nightingale": await applyNightingalePassive(s); break;
     case "cobra": await applyCobraPassive(s); break;
     case "suzuishi": await applySuzuishiPassive(s); break;
     case "tyrfing": await applyTyrfingPassive(s); break;
-    default: return;
+      default: return;
+    }
+  } finally {
+    // SPEC-006 Phase 4f: 書き戻し (passive 内 await があっても finally で必ず実行)
+    if (passiveHero) syncLegacyStatsToCaster(s, passiveHero);
   }
 }
 
@@ -4472,22 +4563,29 @@ async function enemyTurn() {
       case "attack":
         dealPhySkillFromEnemyToPlayer(combat, it.phyPct);
         break;
-      case "attackPoison":
+      case "attackPoison": {
+        // SPEC-006 Phase 4f: 攻撃前に対象 hero を確保し、生存時のみ毒付与
+        const ptarget = getEnemyAttackTargetHero(combat);
         dealPhySkillFromEnemyToPlayer(combat, it.phyPct);
-        if (combat.playerHp > 0 && (it.poisonStacks || 0) > 0) {
-          combat.playerPoison = (combat.playerPoison || 0) + it.poisonStacks;
-          playBattleSe("debuff"); clog(`毒 ×${it.poisonStacks} 付与（自分）`);
+        if (ptarget && ptarget.alive !== false && (ptarget.hp ?? 0) > 0 && (it.poisonStacks || 0) > 0) {
+          addStatusToHero(combat, ptarget, "poison", it.poisonStacks);
+          playBattleSe("debuff");
+          clog(`${ptarget.name || "ヒーロー"} に毒 ×${it.poisonStacks}`);
           renderStatusBadges();
         }
         break;
-      case "attackBleed":
+      }
+      case "attackBleed": {
+        const btarget = getEnemyAttackTargetHero(combat);
         dealPhySkillFromEnemyToPlayer(combat, it.phyPct);
-        if (combat.playerHp > 0 && (it.bleedStacks || 0) > 0) {
-          combat.playerBleed = (combat.playerBleed || 0) + it.bleedStacks;
-          playBattleSe("debuff"); clog(`出血 ×${it.bleedStacks} 付与（自分）`);
+        if (btarget && btarget.alive !== false && (btarget.hp ?? 0) > 0 && (it.bleedStacks || 0) > 0) {
+          addStatusToHero(combat, btarget, "bleed", it.bleedStacks);
+          playBattleSe("debuff");
+          clog(`${btarget.name || "ヒーロー"} に出血 ×${it.bleedStacks}`);
           renderStatusBadges();
         }
         break;
+      }
       case "attackDouble":
         dealPhySkillFromEnemyToPlayer(combat, it.phyPct);
         if (combat.playerHp > 0) dealPhySkillFromEnemyToPlayer(combat, it.phyPct);
@@ -4526,11 +4624,15 @@ async function enemyTurn() {
     }
 
     // レギュレーション効果: 攻撃に出血付与（Red+） (#37)
-    if (isAttackKind && regBleedStacks > 0 && combat.playerHp > 0) {
-      combat.playerBleed = (combat.playerBleed || 0) + regBleedStacks;
-      playBattleSe("debuff");
-      clog(`出血 ×${regBleedStacks} 付与（自分・${reg.nameJa} 効果）`);
-      renderStatusBadges();
+    // SPEC-006 Phase 4f: 直前に攻撃された hero に付与
+    if (isAttackKind && regBleedStacks > 0) {
+      const rtarget = getEnemyAttackTargetHero(combat);
+      if (rtarget && rtarget.alive !== false && (rtarget.hp ?? 0) > 0) {
+        addStatusToHero(combat, rtarget, "bleed", regBleedStacks);
+        playBattleSe("debuff");
+        clog(`${rtarget.name || "ヒーロー"} に出血 ×${regBleedStacks}（${reg.nameJa} 効果）`);
+        renderStatusBadges();
+      }
     }
 
     actorActed = true;
@@ -4578,26 +4680,31 @@ async function enemyTurn() {
       combat.enemyHp = sub.hp; combat.enemyHpMax = sub.hpMax;
       try {
         // Phase 3g: caster=sub を渡し、sub の portrait が lunge するように
+        // SPEC-006 Phase 4f: poison/bleed は対象 hero 個別に付与
         switch (subIt.kind) {
           case "attack":         dealPhySkillFromEnemyToPlayer(combat, subIt.phyPct, sub); break;
-          case "attackPoison":
+          case "attackPoison": {
+            const ptgt = getEnemyAttackTargetHero(combat);
             dealPhySkillFromEnemyToPlayer(combat, subIt.phyPct, sub);
-            if (!isPartyWipedOut(combat) && (subIt.poisonStacks || 0) > 0) {
-              combat.playerPoison = (combat.playerPoison || 0) + subIt.poisonStacks;
+            if (ptgt && ptgt.alive !== false && (ptgt.hp ?? 0) > 0 && (subIt.poisonStacks || 0) > 0) {
+              addStatusToHero(combat, ptgt, "poison", subIt.poisonStacks);
               playBattleSe("debuff");
-              clog(`毒 ×${subIt.poisonStacks} 付与（自分）`);
+              clog(`${ptgt.name || "ヒーロー"} に毒 ×${subIt.poisonStacks}`);
               renderStatusBadges();
             }
             break;
-          case "attackBleed":
+          }
+          case "attackBleed": {
+            const btgt = getEnemyAttackTargetHero(combat);
             dealPhySkillFromEnemyToPlayer(combat, subIt.phyPct, sub);
-            if (!isPartyWipedOut(combat) && (subIt.bleedStacks || 0) > 0) {
-              combat.playerBleed = (combat.playerBleed || 0) + subIt.bleedStacks;
+            if (btgt && btgt.alive !== false && (btgt.hp ?? 0) > 0 && (subIt.bleedStacks || 0) > 0) {
+              addStatusToHero(combat, btgt, "bleed", subIt.bleedStacks);
               playBattleSe("debuff");
-              clog(`出血 ×${subIt.bleedStacks} 付与（自分）`);
+              clog(`${btgt.name || "ヒーロー"} に出血 ×${subIt.bleedStacks}`);
               renderStatusBadges();
             }
             break;
+          }
           case "attackDouble":
             dealPhySkillFromEnemyToPlayer(combat, subIt.phyPct, sub);
             if (!isPartyWipedOut(combat)) dealPhySkillFromEnemyToPlayer(combat, subIt.phyPct, sub);
