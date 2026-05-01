@@ -77,6 +77,22 @@ export const REGULATIONS = [
       bleedOnAttack: 1, // 1 スタック
     },
   },
+  {
+    id: "absolute",
+    nameJa: "Absolute",
+    iconUrl: CUP_BASE + "1300.png", // 仮: Red と同じ画像 (cups/1305 が無いため流用)
+    color: "#a855f7",
+    descShort: "ユーザー設定 (敵 HP / 敵ダメ / 自 HP / 自ダメ 倍率を任意調整)",
+    // hpFactor / atkFactor は absolute-config.js から runtime に読み込む。
+    // ここの値は他レギュレーションとシグネチャを揃えるためのフォールバック。
+    effects: {
+      hpFactor: 1.0,
+      atkFactor: 1.0,
+      guardPerTurn: 0,
+      bleedOnAttack: 0,
+      isAbsolute: true,
+    },
+  },
 ];
 
 /** id → regulation の検索辞書 */
@@ -86,16 +102,19 @@ export const REGULATION_BY_ID = Object.fromEntries(REGULATIONS.map((r) => [r.id,
 const LS_UNLOCKED = "mct.unlockedRegulations";
 const LS_CURRENT = "mct.currentRegulation";
 
-/** アンロック済みレギュレーション ID 配列をローカルストレージから取得（無ければ ['common']） */
+/** アンロック済みレギュレーション ID 配列をローカルストレージから取得（無ければ ['common', 'absolute']） */
 export function loadUnlockedRegulations() {
+  let arr = ["common", "absolute"]; // Absolute はユーザー設定型のため最初から開放
   try {
     const raw = localStorage.getItem(LS_UNLOCKED);
     if (raw) {
-      const arr = JSON.parse(raw);
-      if (Array.isArray(arr) && arr.length > 0) return arr;
+      const stored = JSON.parse(raw);
+      if (Array.isArray(stored) && stored.length > 0) arr = stored;
     }
   } catch (e) { /* ignore */ }
-  return ["common"];
+  // 既存セーブで absolute が無い場合に補填
+  if (!arr.includes("absolute")) arr = [...arr, "absolute"];
+  return arr;
 }
 
 /** アンロック状態を保存 */
@@ -130,14 +149,16 @@ export function saveCurrentRegulationId(id) {
 
 /**
  * クリア時のアンロック処理。clearedId をクリアした → 次のレギュレーションをアンロック。
+ * Absolute はクリア報酬の対象外（最初から開放）なので、Red の次として絶対扱いしない。
  * @returns {string|null} 新たにアンロックされた ID（なければ null）
  */
 export function unlockNextAfterClear(clearedId) {
   const idx = REGULATIONS.findIndex((r) => r.id === clearedId);
   if (idx < 0 || idx >= REGULATIONS.length - 1) return null;
-  const nextId = REGULATIONS[idx + 1].id;
+  const next = REGULATIONS[idx + 1];
+  if (!next || next.id === "absolute") return null; // Absolute はアンロック対象外
   const cur = loadUnlockedRegulations();
-  if (cur.includes(nextId)) return null;
-  unlockRegulation(nextId);
-  return nextId;
+  if (cur.includes(next.id)) return null;
+  unlockRegulation(next.id);
+  return next.id;
 }
