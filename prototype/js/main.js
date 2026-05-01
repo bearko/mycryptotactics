@@ -732,7 +732,7 @@ function dealPhySkillToEnemy(s, skillPct) {
     total = applyGuardToDamage("enemy", total);
   }
   applyHpDeltaToEnemy(s, target, -total);
-  lungePortrait("player", getActiveHero(s));
+  lungePortrait("player", s._currentCaster ?? s.heroes?.[0]);
   flashPortrait("enemy", target);
   playPortraitEffect("enemy", "hit", target);
   if (total > 0) playBattleSe("hit");
@@ -764,7 +764,7 @@ function dealIntSkillToEnemy(s, minPct, maxPct, forceCrit = false) {
     total = applyGuardToDamage("enemy", total);
   }
   applyHpDeltaToEnemy(s, target, -total);
-  lungePortrait("player", getActiveHero(s));
+  lungePortrait("player", s._currentCaster ?? s.heroes?.[0]);
   flashPortrait("enemy", target);
   playPortraitEffect("enemy", "hit", target);
   if (total > 0) playBattleSe("hit");
@@ -804,10 +804,7 @@ function applyHpDeltaToHero(s, hero, delta) {
   if (s.heroes && hero === s.heroes[0]) {
     s.playerHp = hero.hp;
   }
-  // SPEC-005 Phase 3j: アクティブキャスターが死亡したら次の生存ヒーローへ切替
-  if (hero.alive === false && s.heroes && hero === s.heroes[s.activeHeroIdx ?? 0]) {
-    ensureActiveHeroAlive(s);
-  }
+  // SPEC-006 Phase 4g: アクティブキャスター方式は廃止。caster は毎回カード定義から解決される。
 }
 
 /** 全ヒーロー死亡判定 */
@@ -818,63 +815,10 @@ function isPartyWipedOut(s) {
   return s.heroes.every(h => !h || h.alive === false || (h.hp ?? 0) <= 0);
 }
 
-// ─── SPEC-005 Phase 3j: アクティブキャスター切替 ─────────────────────
-/** 現在の active hero (生存している前提) */
-function getActiveHero(s) {
-  if (!s || !Array.isArray(s.heroes)) return null;
-  return s.heroes[s.activeHeroIdx ?? 0] || null;
-}
-
-/** activeHeroIdx が死亡 / 範囲外なら、生存ヒーロー (前衛優先) へ切り替える */
-function ensureActiveHeroAlive(s) {
-  if (!s || !Array.isArray(s.heroes) || s.heroes.length === 0) return;
-  const cur = s.heroes[s.activeHeroIdx ?? -1];
-  if (cur && cur.alive !== false && (cur.hp ?? 0) > 0) return;
-  // 前衛 → 中衛 → 後衛 の順で生存している最初のヒーローへ
-  for (let i = 0; i < s.heroes.length; i++) {
-    const h = s.heroes[i];
-    if (h && h.alive !== false && (h.hp ?? 0) > 0) {
-      s.activeHeroIdx = i;
-      loadActiveHeroStatsToLegacy(s);
-      return;
-    }
-  }
-}
-
-/** active hero のステを legacy combat.player* に流し込む（card.play() が読む側） */
-function loadActiveHeroStatsToLegacy(s) {
-  const h = getActiveHero(s);
-  if (!h) return;
-  s.playerPhy = h.phy;
-  s.playerInt = h.int;
-  s.playerAgi = h.agi;
-  s.playerPhyBase = h.phyBase ?? h.phy;
-  s.playerIntBase = h.intBase ?? h.int;
-  s.playerAgiBase = h.agiBase ?? h.agi;
-}
-
-/** card.play() が legacy を変更した分を active hero に書き戻す（バフ/デバフ反映） */
-function syncLegacyStatsToActiveHero(s) {
-  const h = getActiveHero(s);
-  if (!h) return;
-  h.phy = s.playerPhy;
-  h.int = s.playerInt;
-  h.agi = s.playerAgi;
-}
-
-/** ユーザー操作: ヒーロー portrait をクリックして交代 */
-function setActiveHero(idx) {
-  if (!combat || !Array.isArray(combat.heroes)) return;
-  if (idx === (combat.activeHeroIdx ?? 0)) return;
-  const target = combat.heroes[idx];
-  if (!target || target.alive === false || (target.hp ?? 0) <= 0) return;
-  // 現キャスターのバフ等を書き戻してから切替
-  syncLegacyStatsToActiveHero(combat);
-  combat.activeHeroIdx = idx;
-  loadActiveHeroStatsToLegacy(combat);
-  clog(`【交代】${target.name || "ヒーロー"} に切替`);
-  renderCombat();
-}
+// SPEC-006 Phase 4g: Phase 3j の active hero 切替方式は完全削除。
+// (setActiveHero / getActiveHero / ensureActiveHeroAlive /
+//  loadActiveHeroStatsToLegacy / syncLegacyStatsToActiveHero / activeHeroIdx)
+// caster はカード定義の caster ロールから毎回 resolveCaster で解決される。
 
 // ─── SPEC-006 Phase 4d: カード単位の caster 解決 ──────────────────────
 // Phase 3j の active hero (ユーザーが選んだヒーロー) ではなく、カード定義の
@@ -1588,7 +1532,8 @@ function startCombatFromMapNode(node) {
     bossPhase, bossDef: isBoss ? bossDef : null,
     isBoss,
   })];
-  combat.activeHeroIdx = 0;
+  // SPEC-006 Phase 4g: Phase 3j active hero 廃止。caster はカード使用時に毎回解決される。
+  combat._currentCaster = null;
 
   // SPEC-005 Phase 3c: 多エネミースポーン (fight ノードのみ。boss / elite は 1 体維持)
   // 単純化のため fight 時は party.length と同数 (最大 3) のエネミーを章プールから補充
@@ -2181,13 +2126,8 @@ function renderCombat() {
     const dead = !e0 || e0.alive === false || (e0.hp ?? combat.enemyHp) <= 0;
     enemyFrontEl.classList.toggle("combatant--dead", dead);
   }
-  // SPEC-005 Phase 3j: アクティブキャスター highlight
-  const activeIdx = combat.activeHeroIdx ?? 0;
-  document.querySelectorAll('.party-slot[data-side="player"] .combatant').forEach((el) => {
-    el.classList.remove("combatant--active");
-  });
-  const activeSlot = document.querySelector(`.party-slot[data-side="player"][data-pos="${activeIdx}"] .combatant`);
-  if (activeSlot && combat.heroes && combat.heroes.length > 1) activeSlot.classList.add("combatant--active");
+  // SPEC-006 Phase 4g: アクティブキャスター highlight (▶ ACTIVE) は廃止。
+  // caster はカード券面右下のアイコン (Phase 4e) で常時表示される。
 
   const handEl = document.getElementById("hand");
   handEl.innerHTML = "";
@@ -4976,11 +4916,9 @@ async function playCard(idx) {
   const caster = resolveCaster(card.caster, combat);
   if (!caster) return; // canPlayCard で除外済みのはずだが念のため
   loadCasterStatsToLegacy(combat, caster);
-  // UI 表示用に activeHeroIdx も caster に同期 (Phase 3j の "▶ ACTIVE" バッジが caster に追従)
-  if (Array.isArray(combat.heroes)) {
-    const idx2 = combat.heroes.indexOf(caster);
-    if (idx2 >= 0) combat.activeHeroIdx = idx2;
-  }
+  // SPEC-006 Phase 4g: deal* helper が読む transient な caster ref
+  // (Phase 3j の activeHeroIdx の代わり。card.play() スコープでのみ有効)
+  combat._currentCaster = caster;
   // SPEC-006 §8.2: ターゲット解決済み配列を ctx に同梱
   // (現状の card.play(s) は ctx を読まないが、Phase 4d 以降で段階的に活用)
   const effectsResolved = (card.effects || []).map(e => ({
@@ -4999,6 +4937,7 @@ async function playCard(idx) {
   card.play(combat, { caster, effectsResolved });
   // SPEC-006 Phase 4d: card.play() で変化した legacy stats を caster に書き戻す
   syncLegacyStatsToCaster(combat, caster);
+  combat._currentCaster = null;
   // SPEC-006 Q4: 使用ヒーロー明示ログ (party 2 体以上時のみ。1 体だと冗長)
   if (combat.heroes && combat.heroes.length > 1) {
     clog(`【${caster.name || "ヒーロー"}】が【${card.extNameJa}】を使用`);
@@ -6778,17 +6717,8 @@ function init() {
     renderCombat();
     await enemyTurn();
   });
-  // SPEC-005 Phase 3j: 味方 portrait をクリックでアクティブキャスター切替
-  const playerSide = document.querySelector(".party-side--player");
-  if (playerSide) {
-    playerSide.addEventListener("click", (ev) => {
-      if (!combat || view !== "combat" || combatInputLocked) return;
-      const slot = ev.target.closest('.party-slot[data-side="player"]');
-      if (!slot) return;
-      const pos = parseInt(slot.dataset.pos, 10);
-      if (Number.isFinite(pos)) setActiveHero(pos);
-    });
-  }
+  // SPEC-006 Phase 4g: 味方 portrait click で active 切替の挙動は廃止。
+  // caster はカード定義から自動解決される (Phase 4d/4e)。
   document.getElementById("btnDeckOpen").addEventListener("click", openDeckModal);
   document.getElementById("deckModalClose").addEventListener("click", closeDeckModal);
   document.getElementById("deckModal").addEventListener("click", (ev) => {
