@@ -3163,7 +3163,8 @@ function init() {
   // 事前に各画面をレンダリング（タイトルが覆うので見えない）
   renderRegulationSelect();
   renderHeroSelect();
-  showView("heroSelect");
+  // 初期 view は regulationSelect: タイトル消失時に一瞬 heroSelect が見える問題を回避
+  showView("regulationSelect");
   // BGM はタイトルクリック時に開始（ブラウザのオートプレイ制限のため init では呼ばない）
 
   // ── ヒーローポートレートタップ → パッシブスキル表示 ──────────────
