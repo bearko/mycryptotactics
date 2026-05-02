@@ -284,7 +284,9 @@ export function applyPassiveTrigger(s, kind, ctx = {}) {
     if (!hero) continue;
     const def = getRegisteredPassive(hero.passiveKey);
     if (!def || def.trigger !== kind) continue;
-    // self.cardPlayed なら caster と一致するヒーローのみ
+    // self.cardPlayed: caster (= カード使用者、card.caster ロールから resolve) と
+    // 一致するヒーローのみ。前衛死亡時は foremost caster が中衛に shift するので、
+    // その場合は中衛の passive が発動する。
     if (kind === "self.cardPlayed" && ctx.caster && hero !== ctx.caster) continue;
     // self.tookDamage なら被弾ヒーローのみ
     if (kind === "self.tookDamage" && ctx.hero && hero !== ctx.hero) continue;
