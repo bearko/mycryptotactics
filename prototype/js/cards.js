@@ -94,7 +94,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
@@ -259,7 +259,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "skl",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
@@ -365,7 +365,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: 攻撃 + 敵 INT ダウン
       effects: [
@@ -476,7 +476,7 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
