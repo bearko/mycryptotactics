@@ -17,7 +17,12 @@ export const CHAPTERS = [
     },
     enemyPool: ['sn-001', 'sn-002', 'sn-003'],
     elitePool: ['sn-e01'],
-    cardPool: ['cd101', 'cd102', 'cd103', 'cd104', 'cd105', 'cd106', 'cd107', 'cd108', 'ext2004'],
+    // SPEC-006 cleanup: MCH 公式エクステに統一 (旧 cd101-cd108 削除)
+    cardPool: [
+      // ノービス系 (ext10xx common): ブレード/マスケット/ペン/カタナ/ブック/アックス/シールド/ホース
+      'ext1001', 'ext1002', 'ext1003', 'ext1006', 'ext1008', 'ext1011', 'ext1010', 'ext1005',
+      'ext2004', // エリートアーマー (uncommon、デッキバリエーション用)
+    ],
     bossId: 'boss-ch1',
     bossRewardGold: 50,
   },
@@ -34,7 +39,11 @@ export const CHAPTERS = [
     },
     enemyPool: ['hl-001', 'hl-002', 'hl-003'],
     elitePool: ['hl-e01'],
-    cardPool: ['cdH01', 'cdH02', 'cdH03', 'cdH04', 'cdH05', 'cdH06'],
+    // SPEC-006 cleanup: MCH 公式エクステに統一 (旧 cdH01-cdH06 削除)
+    cardPool: [
+      // エリート系 (ext20xx uncommon): ブレード/マスケット/ペン/カタナ/ホース/ブック
+      'ext2001', 'ext2002', 'ext2003', 'ext2006', 'ext2005', 'ext2008',
+    ],
     bossId: 'boss-hl',
     bossRewardGold: 70,
   },
@@ -51,7 +60,11 @@ export const CHAPTERS = [
     },
     enemyPool: ['en-301', 'en-302', 'en-303'],
     elitePool: ['en-e01'],
-    cardPool: ['cd301', 'cd302', 'cd303', 'cd304', 'cd305'],
+    // SPEC-006 cleanup: MCH 公式エクステに統一 (旧 cd301-cd305 削除)
+    cardPool: [
+      // ブレイブ系 (ext30xx rare): ブレード/マスケット/ペン/アーマー/カタナ
+      'ext3001', 'ext3002', 'ext3003', 'ext3004', 'ext3006',
+    ],
     bossId: 'boss-ch3',
     bossRewardGold: 100,
   },
@@ -68,7 +81,11 @@ export const CHAPTERS = [
     },
     enemyPool: ['vp-001', 'vp-002', 'vp-003'],
     elitePool: ['vp-e01'],
-    cardPool: ['cd201', 'cd202', 'cd203', 'cd204', 'cd205', 'cd206'],
+    // SPEC-006 cleanup: MCH 公式エクステに統一 (旧 cd201-cd206 削除)
+    cardPool: [
+      // エリート系 (ext20xx uncommon): アックス/ユミ/シールド/リング/カタナ/ブック
+      'ext2011', 'ext2013', 'ext2010', 'ext2009', 'ext2006', 'ext2008',
+    ],
     bossId: 'boss-ch2',
     bossRewardGold: 120,
   },
@@ -86,10 +103,14 @@ export const CHAPTERS = [
     },
     enemyPool: ['tr-001', 'tr-002', 'tr-003'],
     elitePool: ['tr-e01'],
+    // SPEC-006 cleanup: MCH 公式エクステに統一 (旧 cd201-305 / cdH01-04 削除)
     cardPool: [
-      'cd301', 'cd302', 'cd303', 'cd304', 'cd305',
-      'cd201', 'cd202', 'cd203', 'cd204', 'cd205', 'cd206',
-      'cdH01', 'cdH02', 'cdH03', 'cdH04',
+      // ブレイブ系 (rare): ブレード/マスケット/カタナ/ペン/アーマー
+      'ext3001', 'ext3002', 'ext3006', 'ext3003', 'ext3004',
+      // ブレイブ系追加: ホース/アックス/シールド
+      'ext3005', 'ext3011', 'ext3010',
+      // エリート系 (uncommon、章 4 でも継続出現): ブレード/マスケット/ペン
+      'ext2001', 'ext2002', 'ext2003',
     ],
     bossId: 'boss-troy',
     bossRewardGold: 180,
