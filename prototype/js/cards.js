@@ -572,7 +572,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 60-75%" }
@@ -821,7 +821,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 35-45%" }
@@ -842,7 +842,7 @@ function makeCardLibrary(clog, api) {
       cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 20-25%" },
@@ -865,7 +865,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 40-50%" },
@@ -888,7 +888,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 15-20%" },
@@ -1026,7 +1026,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 15-20%" }
@@ -1047,7 +1047,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 10-15%" },
@@ -1091,7 +1091,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 30-40%" },
@@ -1200,7 +1200,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 15-20%" },
@@ -1273,7 +1273,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 35-45%" },
@@ -1382,7 +1382,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 30-30%" },
@@ -1449,7 +1449,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 20-30%" }
@@ -1491,7 +1491,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 40-40%" },
@@ -1535,7 +1535,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "mid",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 0-30%" },
@@ -1558,7 +1558,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 40-50%" },
@@ -1581,7 +1581,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 35-45%" },
@@ -1625,7 +1625,7 @@ function makeCardLibrary(clog, api) {
       cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 13-28%" },
@@ -1648,7 +1648,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 10-20%" }
@@ -1669,7 +1669,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "mid",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 45-55%" },
@@ -1692,7 +1692,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 35-45%" }
@@ -1738,7 +1738,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "self", text: "INT +1" }
@@ -1823,7 +1823,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 35-45%" },
@@ -1846,7 +1846,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 40-50%" }
@@ -1930,7 +1930,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 40-50%" }
@@ -1972,7 +1972,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "mid",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 45-45%" },
@@ -2018,7 +2018,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 35-45%" },
@@ -2087,7 +2087,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 15-25%" }
@@ -2108,7 +2108,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "self", text: "PHY +1" },
@@ -2131,7 +2131,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 35-40%" }
@@ -2173,7 +2173,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -2238,7 +2238,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 8-8%" },
@@ -2305,7 +2305,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 45-45%" },
@@ -2328,7 +2328,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 30-30%" },
@@ -2351,7 +2351,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 35-45%" }
@@ -2418,7 +2418,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 40-50%" },
@@ -2443,7 +2443,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 35-45%" },
@@ -2468,7 +2468,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 20-20%" }
@@ -2537,7 +2537,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 84-84%" },
@@ -2623,7 +2623,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 53-53%" }
@@ -2728,7 +2728,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-55%" },
@@ -2774,7 +2774,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-50%" },
@@ -2841,7 +2841,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 22-22%" },
@@ -2885,7 +2885,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 42-42%" },
@@ -3021,7 +3021,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 15-20%" },
@@ -3109,7 +3109,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 40-40%" },
@@ -3134,7 +3134,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 7-7%" },
@@ -3201,7 +3201,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 38-38%" },
@@ -3358,7 +3358,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 40-65%" }
@@ -3379,7 +3379,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -3400,7 +3400,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 10-35%" },
@@ -3467,7 +3467,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 20-20%" },
@@ -3490,7 +3490,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 12-12%" }
@@ -3553,7 +3553,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 45-55%" }
@@ -3622,7 +3622,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 35-45%" },
@@ -3668,7 +3668,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-55%" },
@@ -3829,7 +3829,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -3850,7 +3850,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 15-20%" }
@@ -3938,7 +3938,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 20-20%" },
@@ -4026,7 +4026,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 25-30%" },
@@ -4049,7 +4049,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 25-30%" },
@@ -4143,7 +4143,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -4206,7 +4206,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 35-35%" },
@@ -4252,7 +4252,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "mid",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 35-45%" }
@@ -4273,7 +4273,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 35-45%" }
@@ -4294,7 +4294,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 20-25%" },
@@ -4359,7 +4359,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 30-40%" }
@@ -4401,7 +4401,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 36-46%" },
@@ -4514,7 +4514,7 @@ function makeCardLibrary(clog, api) {
       cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 22-27%" },
@@ -4537,7 +4537,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 45-55%" },
@@ -4560,7 +4560,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 20-25%" },
@@ -4698,7 +4698,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 15-20%" },
@@ -4742,7 +4742,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 20-25%" }
@@ -4763,7 +4763,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 15-20%" },
@@ -4807,7 +4807,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 35-45%" },
@@ -4830,7 +4830,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 45-55%" }
@@ -4851,7 +4851,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 40-50%" }
@@ -4916,7 +4916,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 20-25%" },
@@ -4987,7 +4987,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 40-50%" },
@@ -5096,7 +5096,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 35-35%" },
@@ -5163,7 +5163,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 25-35%" }
@@ -5205,7 +5205,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 40-40%" },
@@ -5249,7 +5249,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "mid",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 0-40%" },
@@ -5272,7 +5272,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 45-55%" },
@@ -5295,7 +5295,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 40-50%" },
@@ -5339,7 +5339,7 @@ function makeCardLibrary(clog, api) {
       cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 16-31%" },
@@ -5362,7 +5362,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 40-40%" }
@@ -5383,7 +5383,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -5427,7 +5427,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 15-25%" }
@@ -5448,7 +5448,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "mid",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 50-60%" },
@@ -5471,7 +5471,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 40-50%" }
@@ -5517,7 +5517,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "self", text: "INT +1" }
@@ -5603,7 +5603,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 40-50%" },
@@ -5626,7 +5626,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 45-55%" }
@@ -5668,7 +5668,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 50-60%" }
@@ -5710,7 +5710,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 45-55%" }
@@ -5752,7 +5752,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "mid",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 45-45%" },
@@ -5798,7 +5798,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 40-50%" },
@@ -5844,7 +5844,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 15-35%" }
@@ -5909,7 +5909,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 20-30%" }
@@ -5930,7 +5930,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "self", text: "PHY +1" },
@@ -5953,7 +5953,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 40-45%" }
@@ -6037,7 +6037,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -6102,7 +6102,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 10-10%" },
@@ -6169,7 +6169,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 45-45%" },
@@ -6192,7 +6192,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 35-35%" },
@@ -6215,7 +6215,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 40-50%" }
@@ -6282,7 +6282,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 45-55%" },
@@ -6307,7 +6307,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 40-50%" },
@@ -6332,7 +6332,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 20-20%" }
@@ -6402,7 +6402,7 @@ function makeCardLibrary(clog, api) {
       cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 89-89%" },
@@ -6488,7 +6488,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 56-56%" }
@@ -6593,7 +6593,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 55-60%" },
@@ -6639,7 +6639,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 55-55%" },
@@ -6706,7 +6706,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 27-27%" },
@@ -6750,7 +6750,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 47-47%" },
@@ -6886,7 +6886,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 20-25%" },
@@ -6974,7 +6974,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 45-45%" },
@@ -6999,7 +6999,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 10-10%" },
@@ -7066,7 +7066,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 43-43%" },
@@ -7223,7 +7223,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 45-70%" }
@@ -7244,7 +7244,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -7265,7 +7265,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 15-40%" },
@@ -7332,7 +7332,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 25-25%" },
@@ -7355,7 +7355,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 14-14%" }
@@ -7418,7 +7418,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -7487,7 +7487,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 40-50%" },
@@ -7533,7 +7533,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 55-60%" },
@@ -7694,7 +7694,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 55-65%" }
@@ -7715,7 +7715,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 20-25%" }
@@ -7803,7 +7803,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 25-25%" },
@@ -7891,7 +7891,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 30-35%" },
@@ -7914,7 +7914,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 30-35%" },
@@ -8008,7 +8008,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -8071,7 +8071,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 40-40%" },
@@ -8117,7 +8117,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "mid",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 40-50%" }
@@ -8138,7 +8138,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 40-50%" }
@@ -8159,7 +8159,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 25-25%" },
@@ -8224,7 +8224,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 35-45%" }
@@ -8266,7 +8266,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 39-49%" },
@@ -8422,7 +8422,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 35-40%" }
@@ -8506,7 +8506,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "front",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 55-65%" }
@@ -8527,7 +8527,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 45-45%" },
@@ -8550,7 +8550,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 35-40%" }
@@ -8615,7 +8615,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 55-65%" }
@@ -8657,7 +8657,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 45-55%" }
@@ -8678,7 +8678,7 @@ function makeCardLibrary(clog, api) {
       cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 25-30%" },
@@ -8701,7 +8701,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 50-60%" },
@@ -8864,7 +8864,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 20-25%" },
@@ -8908,7 +8908,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 25-30%" }
@@ -8929,7 +8929,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 20-25%" },
@@ -8973,7 +8973,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 40-50%" },
@@ -8996,7 +8996,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 50-60%" }
@@ -9017,7 +9017,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 45-55%" }
@@ -9083,7 +9083,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 25-30%" },
@@ -9154,7 +9154,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 45-55%" },
@@ -9263,7 +9263,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 40-40%" },
@@ -9330,7 +9330,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 30-40%" }
@@ -9372,7 +9372,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 45-45%" },
@@ -9416,7 +9416,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "mid",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 0-55%" },
@@ -9439,7 +9439,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 50-60%" },
@@ -9462,7 +9462,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 45-55%" },
@@ -9506,7 +9506,7 @@ function makeCardLibrary(clog, api) {
       cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 19-34%" },
@@ -9529,7 +9529,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 20-30%" }
@@ -9550,7 +9550,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "mid",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 55-65%" },
@@ -9573,7 +9573,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 45-55%" }
@@ -9619,7 +9619,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "self", text: "INT +2" }
@@ -9705,7 +9705,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 45-55%" },
@@ -9728,7 +9728,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 50-60%" }
@@ -9770,7 +9770,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 50-60%" }
@@ -9812,7 +9812,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -9854,7 +9854,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "mid",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 50-50%" },
@@ -9900,7 +9900,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 45-55%" },
@@ -9969,7 +9969,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 25-35%" }
@@ -9990,7 +9990,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "self", text: "PHY +2" },
@@ -10013,7 +10013,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 45-50%" }
@@ -10076,7 +10076,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -10141,7 +10141,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 12-12%" },
@@ -10208,7 +10208,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-50%" },
@@ -10231,7 +10231,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 40-40%" },
@@ -10254,7 +10254,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 45-55%" }
@@ -10321,7 +10321,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 50-60%" },
@@ -10346,7 +10346,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 45-55%" },
@@ -10371,7 +10371,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 20-20%" }
@@ -10441,7 +10441,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 94-94%" },
@@ -10527,7 +10527,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 59-59%" }
@@ -10632,7 +10632,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 60-65%" },
@@ -10678,7 +10678,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 60-60%" },
@@ -10745,7 +10745,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 32-32%" },
@@ -10789,7 +10789,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 52-52%" },
@@ -10925,7 +10925,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 25-30%" },
@@ -11013,7 +11013,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-50%" },
@@ -11038,7 +11038,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 13-13%" },
@@ -11105,7 +11105,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 48-48%" },
@@ -11262,7 +11262,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 50-75%" }
@@ -11283,7 +11283,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -11304,7 +11304,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 20-45%" },
@@ -11371,7 +11371,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 30-30%" },
@@ -11394,7 +11394,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 16-16%" }
@@ -11457,7 +11457,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 55-65%" }
@@ -11526,7 +11526,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 45-55%" },
@@ -11572,7 +11572,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 60-65%" },
@@ -11733,7 +11733,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 60-70%" }
@@ -11754,7 +11754,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 25-30%" }
@@ -11842,7 +11842,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 25-25%" },
@@ -11930,7 +11930,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 35-40%" },
@@ -11953,7 +11953,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 35-40%" },
@@ -12047,7 +12047,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -12110,7 +12110,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 45-45%" },
@@ -12156,7 +12156,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "mid",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 45-55%" }
@@ -12177,7 +12177,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 45-55%" }
@@ -12198,7 +12198,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 25-30%" },
@@ -12263,7 +12263,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 40-50%" }
@@ -12305,7 +12305,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 42-52%" },
@@ -12463,7 +12463,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 40-45%" },
@@ -12553,7 +12553,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "front",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 60-70%" },
@@ -12599,7 +12599,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 40-45%" },
@@ -12666,7 +12666,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 60-70%" },
@@ -12710,7 +12710,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 50-60%" },
@@ -12756,7 +12756,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 55-65%" },
@@ -12779,7 +12779,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 30-35%" },
@@ -12921,7 +12921,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 25-30%" },
@@ -12986,7 +12986,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 25-30%" },
@@ -13030,7 +13030,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 45-55%" },
@@ -13053,7 +13053,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 55-65%" }
@@ -13074,7 +13074,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -13139,7 +13139,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 30-35%" },
@@ -13216,7 +13216,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" },
@@ -13329,7 +13329,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 50-50%" },
@@ -13396,7 +13396,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 40-50%" }
@@ -13438,7 +13438,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-50%" },
@@ -13482,7 +13482,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "mid",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 0-70%" },
@@ -13505,7 +13505,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 55-65%" },
@@ -13530,7 +13530,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" },
@@ -13578,7 +13578,7 @@ function makeCardLibrary(clog, api) {
       cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 22-37%" },
@@ -13603,7 +13603,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 25-35%" }
@@ -13624,7 +13624,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "mid",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 60-70%" },
@@ -13647,7 +13647,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -13784,7 +13784,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" },
@@ -13807,7 +13807,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 55-65%" }
@@ -13849,7 +13849,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 50-60%" }
@@ -13891,7 +13891,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 55-65%" }
@@ -13933,7 +13933,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "mid",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 50-50%" },
@@ -13979,7 +13979,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" },
@@ -14048,7 +14048,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 30-40%" },
@@ -14071,7 +14071,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "self", text: "PHY +2" },
@@ -14094,7 +14094,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 50-55%" }
@@ -14157,7 +14157,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -14222,7 +14222,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 16-16%" },
@@ -14289,7 +14289,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-50%" },
@@ -14312,7 +14312,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 45-45%" },
@@ -14335,7 +14335,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 50-60%" }
@@ -14402,7 +14402,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 55-65%" },
@@ -14427,7 +14427,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" },
@@ -14452,7 +14452,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 20-20%" }
@@ -14522,7 +14522,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 99-99%" },
@@ -14608,7 +14608,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 62-62%" }
@@ -14713,7 +14713,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 65-70%" },
@@ -14782,7 +14782,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 65-65%" },
@@ -14849,7 +14849,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 37-37%" },
@@ -14893,7 +14893,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 57-57%" },
@@ -15029,7 +15029,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 30-35%" },
@@ -15117,7 +15117,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 55-55%" },
@@ -15142,7 +15142,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 16-16%" },
@@ -15209,7 +15209,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 53-53%" },
@@ -15366,7 +15366,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 55-80%" }
@@ -15387,7 +15387,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -15408,7 +15408,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 25-50%" },
@@ -15431,7 +15431,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 55-55%" },
@@ -15521,7 +15521,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 35-35%" },
@@ -15544,7 +15544,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 18-18%" }
@@ -15607,7 +15607,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 60-70%" }
@@ -15676,7 +15676,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" },
@@ -15722,7 +15722,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 65-70%" },
@@ -15883,7 +15883,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 65-75%" }
@@ -15907,7 +15907,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 30-35%" }
@@ -15995,7 +15995,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 30-30%" },
@@ -16083,7 +16083,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 40-45%" },
@@ -16106,7 +16106,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 40-45%" },
@@ -16200,7 +16200,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -16263,7 +16263,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 50-50%" },
@@ -16309,7 +16309,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "mid",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 50-60%" }
@@ -16330,7 +16330,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -16351,7 +16351,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 30-30%" },
@@ -16416,7 +16416,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 45-55%" }
@@ -16460,7 +16460,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 45-55%" },
@@ -16618,7 +16618,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 45-50%" },
@@ -16708,7 +16708,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "front",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 65-75%" },
@@ -16731,7 +16731,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 45-50%" },
@@ -16798,7 +16798,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 65-75%" },
@@ -16844,7 +16844,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 55-75%" },
@@ -16890,7 +16890,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 60-70%" },
@@ -16913,7 +16913,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 35-40%" },
@@ -17055,7 +17055,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 25-30%" },
@@ -17120,7 +17120,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 30-35%" },
@@ -17164,7 +17164,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" },
@@ -17187,7 +17187,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 60-70%" }
@@ -17208,7 +17208,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 55-65%" }
@@ -17273,7 +17273,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 35-40%" },
@@ -17350,7 +17350,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 55-65%" },
@@ -17463,7 +17463,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 60-60%" },
@@ -17530,7 +17530,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -17572,7 +17572,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 60-60%" },
@@ -17616,7 +17616,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "mid",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 0-80%" },
@@ -17639,7 +17639,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 60-70%" },
@@ -17664,7 +17664,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 55-65%" },
@@ -17712,7 +17712,7 @@ function makeCardLibrary(clog, api) {
       cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 25-40%" },
@@ -17737,7 +17737,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 30-40%" }
@@ -17758,7 +17758,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "mid",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 65-75%" },
@@ -17781,7 +17781,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 55-65%" }
@@ -17918,7 +17918,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 55-65%" },
@@ -17941,7 +17941,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 60-70%" }
@@ -17983,7 +17983,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 50-60%" }
@@ -18025,7 +18025,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 60-70%" }
@@ -18067,7 +18067,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "mid",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 50-50%" },
@@ -18113,7 +18113,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 55-65%" },
@@ -18209,7 +18209,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 35-45%" },
@@ -18232,7 +18232,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "self", text: "PHY +2" },
@@ -18255,7 +18255,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 50-55%" }
@@ -18276,7 +18276,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -18341,7 +18341,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 20-20%" },
@@ -18408,7 +18408,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-50%" },
@@ -18431,7 +18431,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-50%" },
@@ -18454,7 +18454,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 55-65%" }
@@ -18521,7 +18521,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 60-70%" },
@@ -18546,7 +18546,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 55-65%" },
@@ -18571,7 +18571,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 20-20%" }
@@ -18640,7 +18640,7 @@ function makeCardLibrary(clog, api) {
       cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 104-104%" },
@@ -18726,7 +18726,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 65-65%" }
@@ -18831,7 +18831,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 30-30%" },
@@ -18900,7 +18900,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 70-70%" },
@@ -18967,7 +18967,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 42-42%" },
@@ -19011,7 +19011,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 62-62%" },
@@ -19147,7 +19147,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 35-40%" },
@@ -19235,7 +19235,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 60-60%" },
@@ -19260,7 +19260,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 20-20%" },
@@ -19327,7 +19327,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 58-58%" },
@@ -19484,7 +19484,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 60-85%" }
@@ -19505,7 +19505,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -19526,7 +19526,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 30-55%" },
@@ -19549,7 +19549,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" },
@@ -19618,7 +19618,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 40-40%" },
@@ -19641,7 +19641,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 20-20%" }
@@ -19704,7 +19704,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 65-75%" }
@@ -19773,7 +19773,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 55-65%" },
@@ -19819,7 +19819,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 70-75%" },
@@ -19980,7 +19980,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 70-80%" }
@@ -20001,7 +20001,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 35-40%" }
@@ -20089,7 +20089,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 30-30%" },
@@ -20177,7 +20177,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 45-50%" },
@@ -20200,7 +20200,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 45-50%" },
@@ -20294,7 +20294,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -20357,7 +20357,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 55-55%" },
@@ -20403,7 +20403,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "mid",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 55-65%" }
@@ -20424,7 +20424,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 55-65%" }
@@ -20445,7 +20445,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 30-35%" },
@@ -20510,7 +20510,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -20554,7 +20554,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 50-60%" },
