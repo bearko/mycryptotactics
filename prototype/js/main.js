@@ -2127,40 +2127,66 @@ function startPlayerTurn() {
   combat.playerGuard = 0;  // legacy mirror (heroes[0])
   combat.damageReducedThisTurn = false;
 
-  // SPEC-006 Phase 4f: 毒ティックを per-hero (生存ヒーロー個別に判定 + ダメージ + FX)
+  // SPEC-006 Phase 4f + β1 修正: 毒 / 出血 ティックを per-hero (生存ヒーロー個別)
+  // 旧: 毒のみ tick、出血は PHY 攻撃時のボーナスのみ → 出血ダメージが入らないと報告
+  // 新: 出血も tick (= stacks ダメージ /turn) + サブ敵対応
   if (Array.isArray(combat.heroes)) {
     for (const hero of combat.heroes) {
       if (!hero || hero.alive === false || (hero.hp ?? 0) <= 0) continue;
-      const dmg = hero.poison || 0;
-      if (dmg <= 0) continue;
-      applyHpDeltaToHero(combat, hero, -dmg);
+      const pDmg = hero.poison || 0;
+      const bDmg = hero.bleed  || 0;
+      if (pDmg <= 0 && bDmg <= 0) continue;
+      const total = pDmg + bDmg;
+      applyHpDeltaToHero(combat, hero, -total);
       flashPortrait("player", hero);
       playPortraitEffect("player", "debuff", hero);
-      clog(`${hero.name || "ヒーロー"} 毒ダメージ ${dmg}`);
+      if (pDmg > 0) clog(`${hero.name || "ヒーロー"} 毒ダメージ ${pDmg}`);
+      if (bDmg > 0) clog(`${hero.name || "ヒーロー"} 出血ダメージ ${bDmg}`);
       checkResurrection(combat);
       if (isPartyWipedOut(combat)) { endCombatLoss(); return; }
     }
-  } else if ((combat.playerPoison || 0) > 0) {
-    // ヒーロー配列が無いレガシー経路 (フォールバック、現状未到達)
-    const dmg = combat.playerPoison;
-    combat.playerHp = Math.max(0, combat.playerHp - dmg);
+  } else if ((combat.playerPoison || 0) > 0 || (combat.playerBleed || 0) > 0) {
+    // レガシー経路 (heroes 配列なし、現状未到達)
+    const total = (combat.playerPoison || 0) + (combat.playerBleed || 0);
+    combat.playerHp = Math.max(0, combat.playerHp - total);
     flashPortrait("player");
     playPortraitEffect("player", "debuff");
-    clog(`毒ダメージ（自分）${dmg}`);
+    clog(`毒+出血ダメージ（自分）${total}`);
     checkResurrection(combat);
     if (isPartyWipedOut(combat)) { endCombatLoss(); return; }
   }
-  // 毒ティック（敵 - 前衛のみ。combat.enemyPoison は従来仕様の単一インスタンス）
-  if ((combat.enemyPoison || 0) > 0) {
-    const dmg = combat.enemyPoison;
-    combat.enemyHp = Math.max(0, combat.enemyHp - dmg);
-    if (combat.enemies?.[0]) {
-      combat.enemies[0].hp = combat.enemyHp;
-      if (combat.enemies[0].hp <= 0) combat.enemies[0].alive = false;
+
+  // 毒 / 出血 ティック（敵）— combat.enemies を全件 iterate (サブ敵含む)
+  // 前衛 (enemies[0]) は legacy combat.enemyPoison/Bleed と enemies[0].poison/bleed を
+  // 二重持ちのため、大きい方を採用 (addPoisonToEnemy 等が legacy 側に書き込むケースに対応)
+  if (Array.isArray(combat.enemies) && combat.enemies.length > 0) {
+    for (let i = 0; i < combat.enemies.length; i++) {
+      const enemy = combat.enemies[i];
+      if (!enemy || enemy.alive === false || (enemy.hp ?? 0) <= 0) continue;
+      let pDmg = enemy.poison || 0;
+      let bDmg = enemy.bleed  || 0;
+      if (i === 0) {
+        // 前衛は legacy 値とマージ (どちらか一方にしか書き込まれていないケース対応)
+        pDmg = Math.max(pDmg, combat.enemyPoison || 0);
+        bDmg = Math.max(bDmg, combat.enemyBleed  || 0);
+      }
+      if (pDmg <= 0 && bDmg <= 0) continue;
+      const total = pDmg + bDmg;
+      applyHpDeltaToEnemy(combat, enemy, -total);
+      if (i === 0) combat.enemyHp = enemy.hp;  // legacy mirror
+      flashPortrait("enemy", enemy);
+      playPortraitEffect("enemy", "debuff", enemy);
+      if (pDmg > 0) clog(`${enemy.name || "敵"} 毒ダメージ ${pDmg}`);
+      if (bDmg > 0) clog(`${enemy.name || "敵"} 出血ダメージ ${bDmg}`);
     }
-    flashPortrait("enemy", combat.enemies?.[0]);
-    playPortraitEffect("enemy", "debuff", combat.enemies?.[0]);
-    clog(`毒ダメージ（敵）${dmg}`);
+    if (areAllEnemiesDefeated(combat)) { endCombatWin(); return; }
+  } else if ((combat.enemyPoison || 0) > 0 || (combat.enemyBleed || 0) > 0) {
+    // フォールバック (enemies 配列なし、現状未到達)
+    const total = (combat.enemyPoison || 0) + (combat.enemyBleed || 0);
+    combat.enemyHp = Math.max(0, combat.enemyHp - total);
+    flashPortrait("enemy");
+    playPortraitEffect("enemy", "debuff");
+    clog(`毒+出血ダメージ（敵）${total}`);
     if (areAllEnemiesDefeated(combat)) { endCombatWin(); return; }
   }
 
