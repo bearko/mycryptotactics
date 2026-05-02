@@ -930,6 +930,19 @@ function syncLegacyStatsToCaster(s, caster) {
   caster.vulnerable = s.playerVulnerable ?? 0;
 }
 
+/** SPEC-006 Phase 4f UI fix: caster swap が終わった後、legacy combat.player* を
+ *  heroes[0] (前衛 = LEADER) の値に戻す。これがないと renderCombat が
+ *  combat.playerHp 等をキャスター (中衛/後衛) のままで前衛 HP として表示してしまい、
+ *  「前衛が死んでるのに HP が回復したように見える」UI バグが起きる。
+ *  敵攻撃計算が combat.player* を defender (foremost) として読む経路もあるため、
+ *  カードプレイ後は heroes[0] の値に戻すのが既定状態。 */
+function restoreLegacyToFront(s) {
+  if (!s) return;
+  const front = s.heroes?.[0];
+  if (!front) return;
+  loadCasterStatsToLegacy(s, front);
+}
+
 function dealPhySkillFromEnemyToPlayer(s, skillPct, caster) {
   // Phase 3b: 敵攻撃は foremost living hero を対象に
   const target = getEnemyAttackTargetHero(s);
@@ -2648,6 +2661,11 @@ function renderCombat() {
 // ─── 甲斐姫パッシブ（浪切）非同期ヘルパー ────────────────────────
 async function applyKaihimePassive(s) {
   if (LEADER.passiveKey !== 'kaihime') return;
+  // 死亡した前衛 (kaihime) のパッシブは発動しない
+  const front = s.heroes?.[0];
+  if (!front || front.alive === false || (front.hp ?? 0) <= 0) return;
+  // SPEC-006 Phase 4j: PassiveDef 登録済みなら runtime に任せて重複発動を回避
+  if (getRegisteredPassive('kaihime')) return;
   if (areAllEnemiesDefeated(s)) return;
   if (Math.random() >= 0.5) return;
 
@@ -2671,6 +2689,11 @@ async function applyKaihimePassive(s) {
 async function applyZhangPassive(s) {
   if (!s._zhangCounterPending) return;
   s._zhangCounterPending = false;
+  // 死亡した前衛 (zhang) のパッシブは発動しない
+  const front = s.heroes?.[0];
+  if (!front || front.alive === false || (front.hp ?? 0) <= 0) return;
+  // SPEC-006 Phase 4j: PassiveDef 登録済みなら runtime に任せて重複発動を回避
+  if (getRegisteredPassive('zhang')) return;
   if (isPartyWipedOut(s) || areAllEnemiesDefeated(s)) return;
 
   const counterDmg = Math.max(1, Math.floor(s.playerPhy * 0.2));
@@ -5336,6 +5359,8 @@ async function playCard(idx) {
   card.play(combat, { caster, effectsResolved });
   // SPEC-006 Phase 4d: card.play() で変化した legacy stats を caster に書き戻す
   syncLegacyStatsToCaster(combat, caster);
+  // SPEC-006 Phase 4f UI fix: legacy 表示用に combat.player* を前衛 (heroes[0]) に戻す
+  restoreLegacyToFront(combat);
   combat._currentCaster = null;
   // SPEC-006 Q4: 使用ヒーロー明示ログ (party 2 体以上時のみ。1 体だと冗長)
   if (combat.heroes && combat.heroes.length > 1) {
@@ -7579,10 +7604,16 @@ function closeDeckModal() {
 function init() {
   document.getElementById("btnEndTurn").addEventListener("click", async () => {
     if (!combat || view !== "combat" || combatInputLocked) return;
-    combat.hand.forEach((c) => combat.discardPile.push(c));
-    combat.hand = [];
-    renderCombat();
-    await enemyTurn();
+    // 連打で enemyTurn() が二重実行されるのを防止 (敵攻撃の重複判定 + 手札補充の二重発生)
+    combatInputLocked = true;
+    try {
+      combat.hand.forEach((c) => combat.discardPile.push(c));
+      combat.hand = [];
+      renderCombat();
+      await enemyTurn();
+    } finally {
+      combatInputLocked = false;
+    }
   });
   // SPEC-006 Phase 4g: 味方 portrait click で active 切替の挙動は廃止。
   // caster はカード定義から自動解決される (Phase 4d/4e)。
