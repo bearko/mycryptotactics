@@ -57,6 +57,47 @@ export function _debugListPassivesWithNotes() {
 // self.hpBelow / party.hpBelow / enemy.hpBelow / self.statRatioAbove /
 // enemy.cardPlayed
 
+// ─── trigger 別バランス倍率 (β1 仕様) ─────────────────────────────
+// self.cardPlayed は毎カードごと発動するためそのまま 1x。
+// 発動機会の少ない trigger は元 DB 数値だけでは弱すぎるので倍率で底上げ。
+// 倍率は damage coef / heal coef / buffStat value / addGuard|addShield /
+// applyStatus stacks / drawCards / addEnergy 等の数値フィールドに乗る。
+// (revive.coef.hpRatio や閾値系の threshold には適用しない)
+export const TRIGGER_BUFF_MULTIPLIER = {
+  "combat.started":      3,  // バトル開始時 (1 戦闘 1 回 限定がほとんど)
+  "self.tookDamage":     2,  // 被ダメージ後 (確率発動が多い)
+  "self.hpBelow":        4,  // HP 低下トリガ
+  "party.hpBelow":       4,
+  "enemy.hpBelow":       4,
+  "self.statRatioAbove": 4,  // ステ比トリガ (パラメータ低下系の代替分類)
+  "self.died":           5,  // 死亡時 (1 戦闘 1 回)
+  "self.cardPlayed":     1,  // カード使用後 (発動機会多 → そのまま)
+  "enemy.cardPlayed":    1,  // 敵カード使用後 (発動機会多)
+};
+
+/** effect の数値フィールドを倍率適用 (元 effect は破壊しない) */
+function multiplyEffect(effect, mult) {
+  if (!effect || mult === 1 || !Number.isFinite(mult)) return effect;
+  const out = { ...effect };
+  // revive はバランスではなく機構なので倍率適用しない
+  if (out.action === "revive") return out;
+  if (out.coef && typeof out.coef === "object") {
+    const newCoef = {};
+    for (const [k, v] of Object.entries(out.coef)) {
+      newCoef[k] = (typeof v === "number") ? v * mult : v;
+    }
+    out.coef = newCoef;
+  }
+  if (typeof out.value === "number") out.value = out.value * mult;
+  if (typeof out.pct === "number") out.pct = out.pct * mult;
+  if (typeof out.stacks === "number") out.stacks = Math.max(1, Math.round(out.stacks * mult));
+  return out;
+}
+
+function multiplierFor(triggerKind) {
+  return TRIGGER_BUFF_MULTIPLIER[triggerKind] ?? 1;
+}
+
 // ─── trigger ごとのフィルタ ─────────────────────────────────────────
 
 /** trigger と現在の戦闘状態を見て発動可否を判定 */
@@ -157,12 +198,13 @@ export function applyPassiveTrigger(s, kind, ctx = {}) {
     if (kind === "self.died" && ctx.hero && hero !== ctx.hero) continue;
     if (!shouldFire(s, hero, def, ctx)) continue;
 
-    // 発動: cutin → effects 順次実行
+    // 発動: cutin → effects 順次実行 (trigger 別倍率を適用)
     if (def.cutinSkillName && _effectHandlers?.showCutin) {
       _effectHandlers.showCutin(hero, def.cutinSkillName);
     }
+    const mult = multiplierFor(def.trigger);
     for (const effect of def.effects || []) {
-      applyPassiveEffect(s, hero, effect);
+      applyPassiveEffect(s, hero, multiplyEffect(effect, mult));
     }
     markTriggered(hero, def);
   }
@@ -193,9 +235,10 @@ export async function applyPassiveTriggerAsync(s, kind, ctx = {}) {
         _effectHandlers.showCutin(hero, def.cutinSkillName);
       }
     }
-    // 2. effects 順次実行
+    // 2. effects 順次実行 (trigger 別倍率を適用)
+    const mult = multiplierFor(def.trigger);
     for (const effect of def.effects || []) {
-      applyPassiveEffect(s, hero, effect);
+      applyPassiveEffect(s, hero, multiplyEffect(effect, mult));
     }
     markTriggered(hero, def);
   }
@@ -213,8 +256,9 @@ export function checkPassiveThresholds(s, hero) {
   if (def.cutinSkillName && _effectHandlers?.showCutin) {
     _effectHandlers.showCutin(hero, def.cutinSkillName);
   }
+  const mult = multiplierFor(def.trigger);
   for (const effect of def.effects || []) {
-    applyPassiveEffect(s, hero, effect);
+    applyPassiveEffect(s, hero, multiplyEffect(effect, mult));
   }
   markTriggered(hero, def);
 }
