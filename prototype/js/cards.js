@@ -98,7 +98,7 @@ function makeCardLibrary(clog, api) {
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 25-30%" },
+        { target: "enemy.all", text: "INTダメ 25-30%" },
         { target: "enemy.foremost", text: "敵INT -2" }
       ],
       effectSummaryLines(s) {
@@ -113,7 +113,7 @@ function makeCardLibrary(clog, api) {
         return [`敵1体に ${d} ダメージ（INT ${25}〜${30}%）`, "敵の INT を 2 下げる"];
       },
       play(s) {
-        api.dealIntSkillToEnemy(s, 25, 30);
+        api.dealIntSkillToAllEnemies(s, 25, 30);
         s.enemyInt = Math.max(1, s.enemyInt - 2);
         se("debuff");
         fx("enemy", "debuff");
@@ -480,7 +480,7 @@ function makeCardLibrary(clog, api) {
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 35-45%" },
+        { target: "enemy.all", text: "INTダメ 35-45%" },
         { target: "enemy.foremost", text: "敵INT -3" }
       ],
       effectSummaryLines(s) {
@@ -495,7 +495,7 @@ function makeCardLibrary(clog, api) {
         return [`敵1体に ${d} ダメージ（INT ${35}〜${45}%）`, "敵の INT を 3 下げる"];
       },
       play(s) {
-        api.dealIntSkillToEnemy(s, 35, 45);
+        api.dealIntSkillToAllEnemies(s, 35, 45);
         s.enemyInt = Math.max(1, s.enemyInt - 3);
         se("debuff");
         fx("enemy", "debuff");
@@ -797,19 +797,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 25-30%" },
-        { target: "enemy.foremost", text: "敵AGI -1" }
+        { target: "enemy.all", text: "PHYダメ 25-30%" },
+        { target: "enemy.foremost", text: "敵AGI -1" },
+        { target: "enemy.all", text: "出血 ×1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 25, 30)}`, "AGI\u3000-1（敵）"]; },
       peekHelpKeys() { return ["agi"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 25, 30)} ダメージ（PHY 25〜30%）`, "敵の AGI を -1"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 25, 30);
+        api.dealPhySkillToAllEnemies(s, 25, 30);
         s.enemyAgi = Math.max(1, s.enemyAgi + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        api.addBleedToAllEnemies(s, 1);
       },
     },
     ext1013: {
@@ -841,19 +843,23 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 2,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 20-25%" },
-        { target: "enemy.foremost", text: "PHYダメ 20-25%" }
+        { target: "enemy.all", text: "PHYダメ 20-25%" },
+        { target: "enemy.all", text: "PHYダメ 20-25%" },
+        { target: "enemy.all", text: "出血 ×1" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines() { return [`敵にダメージ ×2`]; },
       peekHelpKeys() { return []; },
       previewLines() { return [`敵1体に PHY 20〜25% × 2 回ダメージ`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 20, 25);
-        if (s.enemyHp > 0) api.dealPhySkillToEnemy(s, 20, 25);
+        api.dealPhySkillToAllEnemies(s, 20, 25);
+        if (s.enemyHp > 0) api.dealPhySkillToAllEnemies(s, 20, 25);
+        api.addBleedToAllEnemies(s, 1);
+        api.drawCards(s, 1);
       },
     },
     ext1015: {
@@ -887,19 +893,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 0,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 15-20%" },
-        { target: "enemy.foremost", text: "毒 ×1" }
+        { target: "enemy.all", text: "INTダメ 15-20%" },
+        { target: "enemy.foremost", text: "毒 ×1" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 15, 20)}`, "毒 ×1（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 15, 20)} ダメージ（INT 15〜20%・1v1=単体）`, "敵に毒 ×1 付与"]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 15, 20);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 15, 20);
         api.addPoisonToEnemy(s, 1);
+        api.drawCards(s, 1);
       },
     },
     ext1017: {
@@ -979,19 +987,23 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 20-25%" },
-        { target: "self", text: "AGI +1" }
+        { target: "enemy.all", text: "PHYダメ 20-25%" },
+        { target: "self", text: "AGI +1" },
+        { target: "enemy.all", text: "出血 ×1" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 20, 25)}`, "AGI\u3000+1"]; },
       peekHelpKeys() { return ["agi"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 20, 25)} ダメージ（PHY 20〜25%）`, "AGI を +1"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 20, 25);
+        api.dealPhySkillToAllEnemies(s, 20, 25);
         s.playerAgi += 1;
+        api.addBleedToAllEnemies(s, 1);
+        api.drawCards(s, 1);
       },
     },
     ext1021: {
@@ -1025,17 +1037,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 15-20%" }
+        { target: "enemy.all", text: "PHYダメ 15-20%" },
+        { target: "enemy.all", text: "出血 ×1" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 15, 20)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 15, 20)} ダメージ（PHY 15〜20%）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 15, 20);
+        api.dealPhySkillToAllEnemies(s, 15, 20);
+        api.addBleedToAllEnemies(s, 1);
+        api.drawCards(s, 1);
       },
     },
     ext1025: {
@@ -1046,19 +1062,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 0,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 10-15%" },
-        { target: "enemy.foremost", text: "出血 ×1" }
+        { target: "enemy.all", text: "INTダメ 10-15%" },
+        { target: "enemy.foremost", text: "出血 ×1" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 10, 15)}`, "出血 ×1（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 10, 15)} ダメージ（INT 10〜15%）`, "敵に出血 ×1 付与"]; },
       play(s) {
-        api.dealIntSkillToEnemy(s, 10, 15);
+        api.dealIntSkillToAllEnemies(s, 10, 15);
         api.addBleedToEnemy(s, 1);
+        api.drawCards(s, 1);
       },
     },
     ext1026: {
@@ -1199,19 +1217,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 0,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 15-20%" },
-        { target: "self", text: "HP回復 INT10-10%" }
+        { target: "enemy.all", text: "INTダメ 15-20%" },
+        { target: "self", text: "HP回復 INT10-10%" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 15, 20)}`, "HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 10, 10)]; },
       peekHelpKeys() { return ["hp"]; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 15, 20)} ダメージ（INT 15〜20%・1v1=単体）`, `HP を回復係数 10〜10% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 10, 10)}）`]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 15, 20);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 15, 20);
         api.healPlayerFromIntSkill(s, 10, 10);
+        api.drawCards(s, 1);
       },
     },
     ext1033: {
@@ -1318,17 +1338,19 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 25-30%" }
+        { target: "enemy.all", text: "PHYダメ 25-30%" },
+        { target: "enemy.all", text: "出血 ×1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 25, 30)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 25, 30)} ダメージ（PHY 25〜30%）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 25, 30);
+        api.dealPhySkillToAllEnemies(s, 25, 30);
+        api.addBleedToAllEnemies(s, 1);
       },
     },
     ext1038: {
@@ -1339,17 +1361,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 20-20%" }
+        { target: "enemy.all", text: "PHYダメ 20-20%" },
+        { target: "enemy.all", text: "出血 ×1" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 20, 20)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 20, 20)} ダメージ（PHY 20〜20%）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 20, 20);
+        api.dealPhySkillToAllEnemies(s, 20, 20);
+        api.addBleedToAllEnemies(s, 1);
+        api.drawCards(s, 1);
       },
     },
     ext1039: {
@@ -1381,19 +1407,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 30-30%" },
-        { target: "enemy.foremost", text: "敵PHY -1" }
+        { target: "enemy.all", text: "PHYダメ 30-30%" },
+        { target: "enemy.foremost", text: "敵PHY -1" },
+        { target: "enemy.all", text: "出血 ×1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 30, 30)}`, "PHY\u3000-1（敵）"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 30, 30)} ダメージ（PHY 30〜30%）`, "敵の PHY を -1"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 30, 30);
+        api.dealPhySkillToAllEnemies(s, 30, 30);
         s.enemyPhy = Math.max(1, s.enemyPhy + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        api.addBleedToAllEnemies(s, 1);
       },
     },
     ext1041: {
@@ -1425,19 +1453,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 20-30%" },
-        { target: "enemy.foremost", text: "毒 ×1" }
+        { target: "enemy.all", text: "PHYダメ 20-30%" },
+        { target: "enemy.foremost", text: "毒 ×1" },
+        { target: "enemy.all", text: "出血 ×1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 20, 30)}`, "毒 ×1（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 20, 30)} ダメージ（PHY 20〜30%）`, "敵に毒 ×1 付与"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 20, 30);
+        api.dealPhySkillToAllEnemies(s, 20, 30);
         api.addPoisonToEnemy(s, 1);
+        api.addBleedToAllEnemies(s, 1);
       },
     },
     ext1043: {
@@ -1448,17 +1478,17 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 0,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 20-30%" }
+        { target: "enemy.all", text: "INTダメ 20-30%" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 20, 30)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 20, 30)} ダメージ（INT 20〜30%・1v1=単体）`]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 20, 30);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 20, 30);
       },
     },
     ext1044: {
@@ -1513,17 +1543,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 15-20%" }
+        { target: "enemy.all", text: "PHYダメ 15-20%" },
+        { target: "enemy.all", text: "出血 ×1" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 15, 20)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 15, 20)} ダメージ（PHY 15〜20%）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 15, 20);
+        api.dealPhySkillToAllEnemies(s, 15, 20);
+        api.addBleedToAllEnemies(s, 1);
+        api.drawCards(s, 1);
       },
     },
     ext1047: {
@@ -1534,19 +1568,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "mid",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 0-30%" },
-        { target: "enemy.foremost", text: "INTダメ 0-30%" }
+        { target: "enemy.all", text: "PHYダメ 0-30%" },
+        { target: "enemy.all", text: "INTダメ 0-30%" },
+        { target: "enemy.all", text: "出血 ×1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 0, 30)}`, `敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 0, 30)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 0, 30)} ダメージ（PHY 0〜30%）`, `敵1体に ${estIntHit(s.playerInt, s.enemyInt, 0, 30)} ダメージ（INT 0〜30%）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 0, 30);
+        api.dealPhySkillToAllEnemies(s, 0, 30);
         api.dealIntSkillToEnemy(s, 0, 30);
+        api.addBleedToAllEnemies(s, 1);
       },
     },
     ext1048: {
@@ -1624,19 +1660,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 2,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 13-28%" },
-        { target: "enemy.foremost", text: "PHYダメ 13-28%" }
+        { target: "enemy.all", text: "PHYダメ 13-28%" },
+        { target: "enemy.all", text: "PHYダメ 13-28%" },
+        { target: "enemy.all", text: "出血 ×1" }
       ],
       effectSummaryLines() { return [`敵にダメージ ×2`]; },
       peekHelpKeys() { return []; },
       previewLines() { return [`敵1体に PHY 13〜28% × 2 回ダメージ`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 13, 28);
-        if (s.enemyHp > 0) api.dealPhySkillToEnemy(s, 13, 28);
+        api.dealPhySkillToAllEnemies(s, 13, 28);
+        if (s.enemyHp > 0) api.dealPhySkillToAllEnemies(s, 13, 28);
+        api.addBleedToAllEnemies(s, 1);
       },
     },
     ext1055: {
@@ -1647,17 +1685,19 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 0,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 10-20%" }
+        { target: "enemy.all", text: "INTダメ 10-20%" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 10, 20)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 10, 20)} ダメージ（INT 10〜20%）`]; },
       play(s) {
-        api.dealIntSkillToEnemy(s, 10, 20);
+        api.dealIntSkillToAllEnemies(s, 10, 20);
+        api.drawCards(s, 1);
       },
     },
     ext1056: {
@@ -2063,19 +2103,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 25-30%" },
-        { target: "self", text: "PHY +1" }
+        { target: "enemy.all", text: "PHYダメ 25-30%" },
+        { target: "self", text: "PHY +1" },
+        { target: "enemy.all", text: "出血 ×1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 25, 30)}`, "PHY\u3000+1"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 25, 30)} ダメージ（PHY 25〜30%）`, "PHY を +1"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 25, 30);
+        api.dealPhySkillToAllEnemies(s, 25, 30);
         s.playerPhy += 1;
+        api.addBleedToAllEnemies(s, 1);
       },
     },
     ext1080: {
@@ -2086,17 +2128,19 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 0,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 15-25%" }
+        { target: "enemy.all", text: "INTダメ 15-25%" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 15, 25)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 15, 25)} ダメージ（INT 15〜25%・1v1=単体）`]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 15, 25);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 15, 25);
+        api.drawCards(s, 1);
       },
     },
     ext1081: {
@@ -2237,21 +2281,25 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 8-8%" },
+        { target: "enemy.all", text: "PHYダメ 8-8%" },
         { target: "enemy.foremost", text: "敵INT -1" },
-        { target: "enemy.foremost", text: "毒 ×1" }
+        { target: "enemy.foremost", text: "毒 ×1" },
+        { target: "enemy.all", text: "出血 ×1" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 8, 8)}`, "INT\u3000-1（敵）", "毒 ×1（敵）"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 8, 8)} ダメージ（PHY 8〜8%）`, "敵の INT を -1", "敵に毒 ×1 付与"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 8, 8);
+        api.dealPhySkillToAllEnemies(s, 8, 8);
         s.enemyInt = Math.max(1, s.enemyInt + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
         api.addPoisonToEnemy(s, 1);
+        api.addBleedToAllEnemies(s, 1);
+        api.drawCards(s, 1);
       },
     },
     ext1090: {
@@ -2327,18 +2375,18 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 30-30%" },
+        { target: "enemy.all", text: "INTダメ 30-30%" },
         { target: "self", text: "AGI +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 30, 30)}`, "AGI\u3000+1"]; },
       peekHelpKeys() { return ["agi"]; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 30, 30)} ダメージ（INT 30〜30%）`, "AGI を +1"]; },
       play(s) {
-        api.dealIntSkillToEnemy(s, 30, 30);
+        api.dealIntSkillToAllEnemies(s, 30, 30);
         s.playerAgi += 1;
       },
     },
@@ -2467,17 +2515,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 20-20%" }
+        { target: "enemy.all", text: "PHYダメ 20-20%" },
+        { target: "enemy.all", text: "出血 ×1" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 20, 20)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 20, 20)} ダメージ（PHY 20〜20%）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 20, 20);
+        api.dealPhySkillToAllEnemies(s, 20, 20);
+        api.addBleedToAllEnemies(s, 1);
+        api.drawCards(s, 1);
       },
     },
     ext1100: {
@@ -2559,17 +2611,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 16-16%" }
+        { target: "enemy.all", text: "PHYダメ 16-16%" },
+        { target: "enemy.all", text: "出血 ×1" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 16, 16)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 16, 16)} ダメージ（PHY 16〜16%）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 16, 16);
+        api.dealPhySkillToAllEnemies(s, 16, 16);
+        api.addBleedToAllEnemies(s, 1);
+        api.drawCards(s, 1);
       },
     },
     ext1105: {
@@ -2796,17 +2852,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 23-23%" }
+        { target: "enemy.all", text: "PHYダメ 23-23%" },
+        { target: "enemy.all", text: "出血 ×1" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 23, 23)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 23, 23)} ダメージ（PHY 23〜23%）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 23, 23);
+        api.dealPhySkillToAllEnemies(s, 23, 23);
+        api.addBleedToAllEnemies(s, 1);
+        api.drawCards(s, 1);
       },
     },
     ext1117: {
@@ -2840,19 +2900,23 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 22-22%" },
-        { target: "enemy.foremost", text: "敵INT -2" }
+        { target: "enemy.all", text: "PHYダメ 22-22%" },
+        { target: "enemy.foremost", text: "敵INT -2" },
+        { target: "enemy.all", text: "出血 ×1" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 22, 22)}`, "INT\u3000-2（敵）"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 22, 22)} ダメージ（PHY 22〜22%）`, "敵の INT を -2"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 22, 22);
+        api.dealPhySkillToAllEnemies(s, 22, 22);
         s.enemyInt = Math.max(1, s.enemyInt + (-2)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        api.addBleedToAllEnemies(s, 1);
+        api.drawCards(s, 1);
       },
     },
     ext1119: {
@@ -2997,19 +3061,23 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 15-20%" },
-        { target: "self", text: "PHY +1" }
+        { target: "enemy.all", text: "PHYダメ 15-20%" },
+        { target: "self", text: "PHY +1" },
+        { target: "enemy.all", text: "出血 ×1" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 15, 20)}`, "PHY\u3000+1"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 15, 20)} ダメージ（PHY 15〜20%）`, "PHY を +1"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 15, 20);
+        api.dealPhySkillToAllEnemies(s, 15, 20);
         s.playerPhy += 1;
+        api.addBleedToAllEnemies(s, 1);
+        api.drawCards(s, 1);
       },
     },
     ext1126: {
@@ -3020,19 +3088,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 15-20%" },
-        { target: "self", text: "INT +1" }
+        { target: "enemy.all", text: "INTダメ 15-20%" },
+        { target: "self", text: "INT +1" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 15, 20)}`, "INT\u3000+1"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 15, 20)} ダメージ（INT 15〜20%・1v1=単体）`, "INT を +1"]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 15, 20);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 15, 20);
         s.playerInt += 1;
+        api.drawCards(s, 1);
       },
     },
     ext1127: {
@@ -3064,19 +3134,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 30-35%" },
-        { target: "enemy.foremost", text: "INTダメ 30-35%" }
+        { target: "enemy.all", text: "PHYダメ 30-35%" },
+        { target: "enemy.all", text: "INTダメ 30-35%" },
+        { target: "enemy.all", text: "出血 ×1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 30, 35)}`, `敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 30, 35)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 30, 35)} ダメージ（PHY 30〜35%）`, `敵1体に ${estIntHit(s.playerInt, s.enemyInt, 30, 35)} ダメージ（INT 30〜35%）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 30, 35);
+        api.dealPhySkillToAllEnemies(s, 30, 35);
         api.dealIntSkillToEnemy(s, 30, 35);
+        api.addBleedToAllEnemies(s, 1);
       },
     },
     ext1129: {
@@ -3133,19 +3205,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 7-7%" },
-        { target: "enemy.foremost", text: "毒 ×1" }
+        { target: "enemy.all", text: "INTダメ 7-7%" },
+        { target: "enemy.foremost", text: "毒 ×1" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 7, 7)}`, "毒 ×1（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 7, 7)} ダメージ（INT 7〜7%・1v1=単体）`, "敵に毒 ×1 付与"]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 7, 7);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 7, 7);
         api.addPoisonToEnemy(s, 1);
+        api.drawCards(s, 1);
       },
     },
     ext1132: {
@@ -3399,18 +3473,18 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 0,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 10-35%" },
+        { target: "enemy.all", text: "INTダメ 10-35%" },
         { target: "enemy.foremost", text: "毒 ×1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 10, 35)}`, "毒 ×1（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 10, 35)} ダメージ（INT 10〜35%）`, "敵に毒 ×1 付与"]; },
       play(s) {
-        api.dealIntSkillToEnemy(s, 10, 35);
+        api.dealIntSkillToAllEnemies(s, 10, 35);
         api.addPoisonToEnemy(s, 1);
       },
     },
@@ -3443,19 +3517,23 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 20-20%" },
-        { target: "enemy.foremost", text: "毒 ×1" }
+        { target: "enemy.all", text: "PHYダメ 20-20%" },
+        { target: "enemy.foremost", text: "毒 ×1" },
+        { target: "enemy.all", text: "出血 ×1" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 20, 20)}`, "毒 ×1（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 20, 20)} ダメージ（PHY 20〜20%）`, "敵に毒 ×1 付与"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 20, 20);
+        api.dealPhySkillToAllEnemies(s, 20, 20);
         api.addPoisonToEnemy(s, 1);
+        api.addBleedToAllEnemies(s, 1);
+        api.drawCards(s, 1);
       },
     },
     ext1149: {
@@ -3466,19 +3544,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 0,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 20-20%" },
-        { target: "enemy.foremost", text: "毒 ×1" }
+        { target: "enemy.all", text: "INTダメ 20-20%" },
+        { target: "enemy.foremost", text: "毒 ×1" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 20, 20)}`, "毒 ×1（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 20, 20)} ダメージ（INT 20〜20%・1v1=単体）`, "敵に毒 ×1 付与"]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 20, 20);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 20, 20);
         api.addPoisonToEnemy(s, 1);
+        api.drawCards(s, 1);
       },
     },
     ext1150: {
@@ -3489,17 +3569,19 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 12-12%" }
+        { target: "enemy.all", text: "INTダメ 12-12%" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 12, 12)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 12, 12)} ダメージ（INT 12〜12%・1v1=単体）`]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 12, 12);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 12, 12);
+        api.drawCards(s, 1);
       },
     },
     ext1151: {
@@ -3849,17 +3931,19 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 0,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 15-20%" }
+        { target: "enemy.all", text: "INTダメ 15-20%" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 15, 20)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 15, 20)} ダメージ（INT 15〜20%・1v1=単体）`]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 15, 20);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 15, 20);
+        api.drawCards(s, 1);
       },
     },
     ext1170: {
@@ -3937,21 +4021,23 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 20-20%" },
+        { target: "enemy.all", text: "INTダメ 20-20%" },
         { target: "enemy.foremost", text: "出血 ×1" },
-        { target: "enemy.foremost", text: "毒 ×1" }
+        { target: "enemy.foremost", text: "毒 ×1" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 20, 20)}`, "出血 ×1（敵）", "毒 ×1（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 20, 20)} ダメージ（INT 20〜20%）`, "敵に出血 ×1 付与", "敵に毒 ×1 付与"]; },
       play(s) {
-        api.dealIntSkillToEnemy(s, 20, 20);
+        api.dealIntSkillToAllEnemies(s, 20, 20);
         api.addBleedToEnemy(s, 1);
         api.addPoisonToEnemy(s, 1);
+        api.drawCards(s, 1);
       },
     },
     ext1174: {
@@ -4025,19 +4111,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 25-30%" },
-        { target: "self", text: "PHY +1" }
+        { target: "enemy.all", text: "PHYダメ 25-30%" },
+        { target: "self", text: "PHY +1" },
+        { target: "enemy.all", text: "出血 ×1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 25, 30)}`, "PHY\u3000+1"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 25, 30)} ダメージ（PHY 25〜30%）`, "PHY を +1"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 25, 30);
+        api.dealPhySkillToAllEnemies(s, 25, 30);
         s.playerPhy += 1;
+        api.addBleedToAllEnemies(s, 1);
       },
     },
     ext1178: {
@@ -4048,18 +4136,18 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 25-30%" },
+        { target: "enemy.all", text: "INTダメ 25-30%" },
         { target: "self", text: "INT +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 25, 30)}`, "INT\u3000+1"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 25, 30)} ダメージ（INT 25〜30%）`, "INT を +1"]; },
       play(s) {
-        api.dealIntSkillToEnemy(s, 25, 30);
+        api.dealIntSkillToAllEnemies(s, 25, 30);
         s.playerInt += 1;
       },
     },
@@ -4205,21 +4293,23 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 35-35%" },
+        { target: "enemy.all", text: "PHYダメ 35-35%" },
         { target: "self", text: "PHY +3" },
-        { target: "enemy.foremost", text: "敵AGI -2" }
+        { target: "enemy.foremost", text: "敵AGI -2" },
+        { target: "enemy.all", text: "出血 ×1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 35, 35)}`, "PHY\u3000+3", "AGI\u3000-2（敵）"]; },
       peekHelpKeys() { return ["phy", "agi"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 35, 35)} ダメージ（PHY 35〜35%）`, "PHY を +3", "敵の AGI を -2"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 35, 35);
+        api.dealPhySkillToAllEnemies(s, 35, 35);
         s.playerPhy += 3;
         s.enemyAgi = Math.max(1, s.enemyAgi + (-2)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        api.addBleedToAllEnemies(s, 1);
       },
     },
     ext1186: {
@@ -4293,19 +4383,23 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 20-25%" },
-        { target: "enemy.foremost", text: "INTダメ 20-25%" }
+        { target: "enemy.all", text: "PHYダメ 20-25%" },
+        { target: "enemy.all", text: "INTダメ 20-25%" },
+        { target: "enemy.all", text: "出血 ×1" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 20, 25)}`, `敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 20, 25)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 20, 25)} ダメージ（PHY 20〜25%）`, `敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 20, 25)} ダメージ（INT 20〜25%・1v1=単体）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 20, 25);
+        api.dealPhySkillToAllEnemies(s, 20, 25);
         api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 20, 25);
+        api.addBleedToAllEnemies(s, 1);
+        api.drawCards(s, 1);
       },
     },
     ext1190: {
@@ -4467,19 +4561,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 27-32%" },
-        { target: "enemy.foremost", text: "敵AGI -1" }
+        { target: "enemy.all", text: "PHYダメ 27-32%" },
+        { target: "enemy.foremost", text: "敵AGI -1" },
+        { target: "enemy.all", text: "出血 ×1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 27, 32)}`, "AGI\u3000-1（敵）"]; },
       peekHelpKeys() { return ["agi"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 27, 32)} ダメージ（PHY 27〜32%）`, "敵の AGI を -1"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 27, 32);
+        api.dealPhySkillToAllEnemies(s, 27, 32);
         s.enemyAgi = Math.max(1, s.enemyAgi + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        api.addBleedToAllEnemies(s, 1);
       },
     },
     ext2012: {
@@ -4513,19 +4609,23 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 2,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 22-27%" },
-        { target: "enemy.foremost", text: "PHYダメ 22-27%" }
+        { target: "enemy.all", text: "PHYダメ 22-27%" },
+        { target: "enemy.all", text: "PHYダメ 22-27%" },
+        { target: "enemy.all", text: "出血 ×1" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines() { return [`敵にダメージ ×2`]; },
       peekHelpKeys() { return []; },
       previewLines() { return [`敵1体に PHY 22〜27% × 2 回ダメージ`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 22, 27);
-        if (s.enemyHp > 0) api.dealPhySkillToEnemy(s, 22, 27);
+        api.dealPhySkillToAllEnemies(s, 22, 27);
+        if (s.enemyHp > 0) api.dealPhySkillToAllEnemies(s, 22, 27);
+        api.addBleedToAllEnemies(s, 1);
+        api.drawCards(s, 1);
       },
     },
     ext2015: {
@@ -4559,19 +4659,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 0,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 20-25%" },
-        { target: "enemy.foremost", text: "毒 ×1" }
+        { target: "enemy.all", text: "INTダメ 20-25%" },
+        { target: "enemy.foremost", text: "毒 ×1" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 20, 25)}`, "毒 ×1（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 20, 25)} ダメージ（INT 20〜25%・1v1=単体）`, "敵に毒 ×1 付与"]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 20, 25);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 20, 25);
         api.addPoisonToEnemy(s, 1);
+        api.drawCards(s, 1);
       },
     },
     ext2017: {
@@ -4651,19 +4753,23 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 25-30%" },
-        { target: "self", text: "AGI +1" }
+        { target: "enemy.all", text: "PHYダメ 25-30%" },
+        { target: "self", text: "AGI +1" },
+        { target: "enemy.all", text: "出血 ×1" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 25, 30)}`, "AGI\u3000+1"]; },
       peekHelpKeys() { return ["agi"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 25, 30)} ダメージ（PHY 25〜30%）`, "AGI を +1"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 25, 30);
+        api.dealPhySkillToAllEnemies(s, 25, 30);
         s.playerAgi += 1;
+        api.addBleedToAllEnemies(s, 1);
+        api.drawCards(s, 1);
       },
     },
     ext2021: {
@@ -4741,17 +4847,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 20-25%" }
+        { target: "enemy.all", text: "PHYダメ 20-25%" },
+        { target: "enemy.all", text: "出血 ×1" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 20, 25)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 20, 25)} ダメージ（PHY 20〜25%）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 20, 25);
+        api.dealPhySkillToAllEnemies(s, 20, 25);
+        api.addBleedToAllEnemies(s, 1);
+        api.drawCards(s, 1);
       },
     },
     ext2025: {
@@ -4762,19 +4872,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 0,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 15-20%" },
-        { target: "enemy.foremost", text: "出血 ×1" }
+        { target: "enemy.all", text: "INTダメ 15-20%" },
+        { target: "enemy.foremost", text: "出血 ×1" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 15, 20)}`, "出血 ×1（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 15, 20)} ダメージ（INT 15〜20%）`, "敵に出血 ×1 付与"]; },
       play(s) {
-        api.dealIntSkillToEnemy(s, 15, 20);
+        api.dealIntSkillToAllEnemies(s, 15, 20);
         api.addBleedToEnemy(s, 1);
+        api.drawCards(s, 1);
       },
     },
     ext2026: {
@@ -4915,19 +5027,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 20-25%" },
-        { target: "self", text: "HP回復 INT10-10%" }
+        { target: "enemy.all", text: "INTダメ 20-25%" },
+        { target: "self", text: "HP回復 INT10-10%" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 20, 25)}`, "HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 10, 10)]; },
       peekHelpKeys() { return ["hp"]; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 20, 25)} ダメージ（INT 20〜25%・1v1=単体）`, `HP を回復係数 10〜10% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 10, 10)}）`]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 20, 25);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 20, 25);
         api.healPlayerFromIntSkill(s, 10, 10);
+        api.drawCards(s, 1);
       },
     },
     ext2033: {
@@ -5032,17 +5146,19 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 27-32%" }
+        { target: "enemy.all", text: "PHYダメ 27-32%" },
+        { target: "enemy.all", text: "出血 ×1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 27, 32)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 27, 32)} ダメージ（PHY 27〜32%）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 27, 32);
+        api.dealPhySkillToAllEnemies(s, 27, 32);
+        api.addBleedToAllEnemies(s, 1);
       },
     },
     ext2038: {
@@ -5053,17 +5169,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 20-20%" }
+        { target: "enemy.all", text: "PHYダメ 20-20%" },
+        { target: "enemy.all", text: "出血 ×1" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 20, 20)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 20, 20)} ダメージ（PHY 20〜20%）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 20, 20);
+        api.dealPhySkillToAllEnemies(s, 20, 20);
+        api.addBleedToAllEnemies(s, 1);
+        api.drawCards(s, 1);
       },
     },
     ext2039: {
@@ -5095,19 +5215,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 35-35%" },
-        { target: "enemy.foremost", text: "敵PHY -1" }
+        { target: "enemy.all", text: "PHYダメ 35-35%" },
+        { target: "enemy.foremost", text: "敵PHY -1" },
+        { target: "enemy.all", text: "出血 ×1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 35, 35)}`, "PHY\u3000-1（敵）"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 35, 35)} ダメージ（PHY 35〜35%）`, "敵の PHY を -1"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 35, 35);
+        api.dealPhySkillToAllEnemies(s, 35, 35);
         s.enemyPhy = Math.max(1, s.enemyPhy + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        api.addBleedToAllEnemies(s, 1);
       },
     },
     ext2041: {
@@ -5139,19 +5261,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 20-40%" },
-        { target: "enemy.foremost", text: "毒 ×1" }
+        { target: "enemy.all", text: "PHYダメ 20-40%" },
+        { target: "enemy.foremost", text: "毒 ×1" },
+        { target: "enemy.all", text: "出血 ×1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 20, 40)}`, "毒 ×1（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 20, 40)} ダメージ（PHY 20〜40%）`, "敵に毒 ×1 付与"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 20, 40);
+        api.dealPhySkillToAllEnemies(s, 20, 40);
         api.addPoisonToEnemy(s, 1);
+        api.addBleedToAllEnemies(s, 1);
       },
     },
     ext2043: {
@@ -5162,17 +5286,17 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 0,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 25-35%" }
+        { target: "enemy.all", text: "INTダメ 25-35%" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 25, 35)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 25, 35)} ダメージ（INT 25〜35%・1v1=単体）`]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 25, 35);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 25, 35);
       },
     },
     ext2044: {
@@ -5227,17 +5351,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 20-25%" }
+        { target: "enemy.all", text: "PHYダメ 20-25%" },
+        { target: "enemy.all", text: "出血 ×1" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 20, 25)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 20, 25)} ダメージ（PHY 20〜25%）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 20, 25);
+        api.dealPhySkillToAllEnemies(s, 20, 25);
+        api.addBleedToAllEnemies(s, 1);
+        api.drawCards(s, 1);
       },
     },
     ext2047: {
@@ -5248,19 +5376,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "mid",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 0-40%" },
-        { target: "enemy.foremost", text: "INTダメ 0-40%" }
+        { target: "enemy.all", text: "PHYダメ 0-40%" },
+        { target: "enemy.all", text: "INTダメ 0-40%" },
+        { target: "enemy.all", text: "出血 ×1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 0, 40)}`, `敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 0, 40)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 0, 40)} ダメージ（PHY 0〜40%）`, `敵1体に ${estIntHit(s.playerInt, s.enemyInt, 0, 40)} ダメージ（INT 0〜40%）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 0, 40);
+        api.dealPhySkillToAllEnemies(s, 0, 40);
         api.dealIntSkillToEnemy(s, 0, 40);
+        api.addBleedToAllEnemies(s, 1);
       },
     },
     ext2048: {
@@ -5338,19 +5468,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 2,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 16-31%" },
-        { target: "enemy.foremost", text: "PHYダメ 16-31%" }
+        { target: "enemy.all", text: "PHYダメ 16-31%" },
+        { target: "enemy.all", text: "PHYダメ 16-31%" },
+        { target: "enemy.all", text: "出血 ×1" }
       ],
       effectSummaryLines() { return [`敵にダメージ ×2`]; },
       peekHelpKeys() { return []; },
       previewLines() { return [`敵1体に PHY 16〜31% × 2 回ダメージ`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 16, 31);
-        if (s.enemyHp > 0) api.dealPhySkillToEnemy(s, 16, 31);
+        api.dealPhySkillToAllEnemies(s, 16, 31);
+        if (s.enemyHp > 0) api.dealPhySkillToAllEnemies(s, 16, 31);
+        api.addBleedToAllEnemies(s, 1);
       },
     },
     ext2052: {
@@ -5426,17 +5558,19 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 0,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 15-25%" }
+        { target: "enemy.all", text: "INTダメ 15-25%" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 15, 25)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 15, 25)} ダメージ（INT 15〜25%）`]; },
       play(s) {
-        api.dealIntSkillToEnemy(s, 15, 25);
+        api.dealIntSkillToAllEnemies(s, 15, 25);
+        api.drawCards(s, 1);
       },
     },
     ext2056: {
@@ -5885,19 +6019,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 25-30%" },
-        { target: "self", text: "PHY +1" }
+        { target: "enemy.all", text: "PHYダメ 25-30%" },
+        { target: "self", text: "PHY +1" },
+        { target: "enemy.all", text: "出血 ×1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 25, 30)}`, "PHY\u3000+1"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 25, 30)} ダメージ（PHY 25〜30%）`, "PHY を +1"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 25, 30);
+        api.dealPhySkillToAllEnemies(s, 25, 30);
         s.playerPhy += 1;
+        api.addBleedToAllEnemies(s, 1);
       },
     },
     ext2080: {
@@ -5908,17 +6044,19 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 0,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 20-30%" }
+        { target: "enemy.all", text: "INTダメ 20-30%" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 20, 30)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 20, 30)} ダメージ（INT 20〜30%・1v1=単体）`]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 20, 30);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 20, 30);
+        api.drawCards(s, 1);
       },
     },
     ext2081: {
@@ -6101,21 +6239,25 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 10-10%" },
+        { target: "enemy.all", text: "PHYダメ 10-10%" },
         { target: "enemy.foremost", text: "敵INT -1" },
-        { target: "enemy.foremost", text: "毒 ×1" }
+        { target: "enemy.foremost", text: "毒 ×1" },
+        { target: "enemy.all", text: "出血 ×1" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 10, 10)}`, "INT\u3000-1（敵）", "毒 ×1（敵）"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 10, 10)} ダメージ（PHY 10〜10%）`, "敵の INT を -1", "敵に毒 ×1 付与"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 10, 10);
+        api.dealPhySkillToAllEnemies(s, 10, 10);
         s.enemyInt = Math.max(1, s.enemyInt + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
         api.addPoisonToEnemy(s, 1);
+        api.addBleedToAllEnemies(s, 1);
+        api.drawCards(s, 1);
       },
     },
     ext2090: {
@@ -6191,18 +6333,18 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 35-35%" },
+        { target: "enemy.all", text: "INTダメ 35-35%" },
         { target: "self", text: "AGI +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 35, 35)}`, "AGI\u3000+1"]; },
       peekHelpKeys() { return ["agi"]; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 35, 35)} ダメージ（INT 35〜35%）`, "AGI を +1"]; },
       play(s) {
-        api.dealIntSkillToEnemy(s, 35, 35);
+        api.dealIntSkillToAllEnemies(s, 35, 35);
         s.playerAgi += 1;
       },
     },
@@ -6331,17 +6473,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 20-20%" }
+        { target: "enemy.all", text: "PHYダメ 20-20%" },
+        { target: "enemy.all", text: "出血 ×1" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 20, 20)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 20, 20)} ダメージ（PHY 20〜20%）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 20, 20);
+        api.dealPhySkillToAllEnemies(s, 20, 20);
+        api.addBleedToAllEnemies(s, 1);
+        api.drawCards(s, 1);
       },
     },
     ext2100: {
@@ -6424,17 +6570,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 19-19%" }
+        { target: "enemy.all", text: "PHYダメ 19-19%" },
+        { target: "enemy.all", text: "出血 ×1" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 19, 19)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 19, 19)} ダメージ（PHY 19〜19%）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 19, 19);
+        api.dealPhySkillToAllEnemies(s, 19, 19);
+        api.addBleedToAllEnemies(s, 1);
+        api.drawCards(s, 1);
       },
     },
     ext2105: {
@@ -6661,17 +6811,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 26-26%" }
+        { target: "enemy.all", text: "PHYダメ 26-26%" },
+        { target: "enemy.all", text: "出血 ×1" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 26, 26)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 26, 26)} ダメージ（PHY 26〜26%）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 26, 26);
+        api.dealPhySkillToAllEnemies(s, 26, 26);
+        api.addBleedToAllEnemies(s, 1);
+        api.drawCards(s, 1);
       },
     },
     ext2117: {
@@ -6705,19 +6859,23 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 27-27%" },
-        { target: "enemy.foremost", text: "敵INT -3" }
+        { target: "enemy.all", text: "PHYダメ 27-27%" },
+        { target: "enemy.foremost", text: "敵INT -3" },
+        { target: "enemy.all", text: "出血 ×1" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 27, 27)}`, "INT\u3000-3（敵）"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 27, 27)} ダメージ（PHY 27〜27%）`, "敵の INT を -3"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 27, 27);
+        api.dealPhySkillToAllEnemies(s, 27, 27);
         s.enemyInt = Math.max(1, s.enemyInt + (-3)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        api.addBleedToAllEnemies(s, 1);
+        api.drawCards(s, 1);
       },
     },
     ext2119: {
@@ -6862,19 +7020,23 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 20-25%" },
-        { target: "self", text: "PHY +2" }
+        { target: "enemy.all", text: "PHYダメ 20-25%" },
+        { target: "self", text: "PHY +2" },
+        { target: "enemy.all", text: "出血 ×1" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 20, 25)}`, "PHY\u3000+2"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 20, 25)} ダメージ（PHY 20〜25%）`, "PHY を +2"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 20, 25);
+        api.dealPhySkillToAllEnemies(s, 20, 25);
         s.playerPhy += 2;
+        api.addBleedToAllEnemies(s, 1);
+        api.drawCards(s, 1);
       },
     },
     ext2126: {
@@ -6885,19 +7047,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 20-25%" },
-        { target: "self", text: "INT +2" }
+        { target: "enemy.all", text: "INTダメ 20-25%" },
+        { target: "self", text: "INT +2" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 20, 25)}`, "INT\u3000+2"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 20, 25)} ダメージ（INT 20〜25%・1v1=単体）`, "INT を +2"]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 20, 25);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 20, 25);
         s.playerInt += 2;
+        api.drawCards(s, 1);
       },
     },
     ext2127: {
@@ -6929,19 +7093,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 35-35%" },
-        { target: "enemy.foremost", text: "INTダメ 35-35%" }
+        { target: "enemy.all", text: "PHYダメ 35-35%" },
+        { target: "enemy.all", text: "INTダメ 35-35%" },
+        { target: "enemy.all", text: "出血 ×1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 35, 35)}`, `敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 35, 35)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 35, 35)} ダメージ（PHY 35〜35%）`, `敵1体に ${estIntHit(s.playerInt, s.enemyInt, 35, 35)} ダメージ（INT 35〜35%）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 35, 35);
+        api.dealPhySkillToAllEnemies(s, 35, 35);
         api.dealIntSkillToEnemy(s, 35, 35);
+        api.addBleedToAllEnemies(s, 1);
       },
     },
     ext2129: {
@@ -6998,19 +7164,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 10-10%" },
-        { target: "enemy.foremost", text: "毒 ×1" }
+        { target: "enemy.all", text: "INTダメ 10-10%" },
+        { target: "enemy.foremost", text: "毒 ×1" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 10, 10)}`, "毒 ×1（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 10, 10)} ダメージ（INT 10〜10%・1v1=単体）`, "敵に毒 ×1 付与"]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 10, 10);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 10, 10);
         api.addPoisonToEnemy(s, 1);
+        api.drawCards(s, 1);
       },
     },
     ext2132: {
@@ -7264,18 +7432,18 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 0,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 15-40%" },
+        { target: "enemy.all", text: "INTダメ 15-40%" },
         { target: "enemy.foremost", text: "毒 ×1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 15, 40)}`, "毒 ×1（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 15, 40)} ダメージ（INT 15〜40%）`, "敵に毒 ×1 付与"]; },
       play(s) {
-        api.dealIntSkillToEnemy(s, 15, 40);
+        api.dealIntSkillToAllEnemies(s, 15, 40);
         api.addPoisonToEnemy(s, 1);
       },
     },
@@ -7308,19 +7476,23 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 25-25%" },
-        { target: "enemy.foremost", text: "毒 ×1" }
+        { target: "enemy.all", text: "PHYダメ 25-25%" },
+        { target: "enemy.foremost", text: "毒 ×1" },
+        { target: "enemy.all", text: "出血 ×1" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 25, 25)}`, "毒 ×1（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 25, 25)} ダメージ（PHY 25〜25%）`, "敵に毒 ×1 付与"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 25, 25);
+        api.dealPhySkillToAllEnemies(s, 25, 25);
         api.addPoisonToEnemy(s, 1);
+        api.addBleedToAllEnemies(s, 1);
+        api.drawCards(s, 1);
       },
     },
     ext2149: {
@@ -7331,19 +7503,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 0,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 25-25%" },
-        { target: "enemy.foremost", text: "毒 ×1" }
+        { target: "enemy.all", text: "INTダメ 25-25%" },
+        { target: "enemy.foremost", text: "毒 ×1" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 25, 25)}`, "毒 ×1（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 25, 25)} ダメージ（INT 25〜25%・1v1=単体）`, "敵に毒 ×1 付与"]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 25, 25);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 25, 25);
         api.addPoisonToEnemy(s, 1);
+        api.drawCards(s, 1);
       },
     },
     ext2150: {
@@ -7354,17 +7528,19 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 14-14%" }
+        { target: "enemy.all", text: "INTダメ 14-14%" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 14, 14)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 14, 14)} ダメージ（INT 14〜14%・1v1=単体）`]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 14, 14);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 14, 14);
+        api.drawCards(s, 1);
       },
     },
     ext2151: {
@@ -7714,17 +7890,19 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 0,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 20-25%" }
+        { target: "enemy.all", text: "INTダメ 20-25%" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 20, 25)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 20, 25)} ダメージ（INT 20〜25%・1v1=単体）`]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 20, 25);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 20, 25);
+        api.drawCards(s, 1);
       },
     },
     ext2170: {
@@ -7802,21 +7980,23 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 25-25%" },
+        { target: "enemy.all", text: "INTダメ 25-25%" },
         { target: "enemy.foremost", text: "出血 ×1" },
-        { target: "enemy.foremost", text: "毒 ×1" }
+        { target: "enemy.foremost", text: "毒 ×1" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 25, 25)}`, "出血 ×1（敵）", "毒 ×1（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 25, 25)} ダメージ（INT 25〜25%）`, "敵に出血 ×1 付与", "敵に毒 ×1 付与"]; },
       play(s) {
-        api.dealIntSkillToEnemy(s, 25, 25);
+        api.dealIntSkillToAllEnemies(s, 25, 25);
         api.addBleedToEnemy(s, 1);
         api.addPoisonToEnemy(s, 1);
+        api.drawCards(s, 1);
       },
     },
     ext2174: {
@@ -7890,19 +8070,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 30-35%" },
-        { target: "self", text: "PHY +1" }
+        { target: "enemy.all", text: "PHYダメ 30-35%" },
+        { target: "self", text: "PHY +1" },
+        { target: "enemy.all", text: "出血 ×1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 30, 35)}`, "PHY\u3000+1"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 30, 35)} ダメージ（PHY 30〜35%）`, "PHY を +1"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 30, 35);
+        api.dealPhySkillToAllEnemies(s, 30, 35);
         s.playerPhy += 1;
+        api.addBleedToAllEnemies(s, 1);
       },
     },
     ext2178: {
@@ -7913,18 +8095,18 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 30-35%" },
+        { target: "enemy.all", text: "INTダメ 30-35%" },
         { target: "self", text: "INT +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 30, 35)}`, "INT\u3000+1"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 30, 35)} ダメージ（INT 30〜35%）`, "INT を +1"]; },
       play(s) {
-        api.dealIntSkillToEnemy(s, 30, 35);
+        api.dealIntSkillToAllEnemies(s, 30, 35);
         s.playerInt += 1;
       },
     },
@@ -8070,21 +8252,23 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 40-40%" },
+        { target: "enemy.all", text: "PHYダメ 40-40%" },
         { target: "self", text: "PHY +3" },
-        { target: "enemy.foremost", text: "敵AGI -3" }
+        { target: "enemy.foremost", text: "敵AGI -3" },
+        { target: "enemy.all", text: "出血 ×1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 40, 40)}`, "PHY\u3000+3", "AGI\u3000-3（敵）"]; },
       peekHelpKeys() { return ["phy", "agi"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 40, 40)} ダメージ（PHY 40〜40%）`, "PHY を +3", "敵の AGI を -3"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 40, 40);
+        api.dealPhySkillToAllEnemies(s, 40, 40);
         s.playerPhy += 3;
         s.enemyAgi = Math.max(1, s.enemyAgi + (-3)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        api.addBleedToAllEnemies(s, 1);
       },
     },
     ext2186: {
@@ -8158,19 +8342,23 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 25-25%" },
-        { target: "enemy.foremost", text: "INTダメ 25-25%" }
+        { target: "enemy.all", text: "PHYダメ 25-25%" },
+        { target: "enemy.all", text: "INTダメ 25-25%" },
+        { target: "enemy.all", text: "出血 ×1" },
+        { target: "self", text: "ドロー +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 25, 25)}`, `敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 25, 25)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 25, 25)} ダメージ（PHY 25〜25%）`, `敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 25, 25)} ダメージ（INT 25〜25%・1v1=単体）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 25, 25);
+        api.dealPhySkillToAllEnemies(s, 25, 25);
         api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 25, 25);
+        api.addBleedToAllEnemies(s, 1);
+        api.drawCards(s, 1);
       },
     },
     ext2190: {
@@ -8421,17 +8609,17 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 35-40%" }
+        { target: "enemy.all", text: "INTダメ 35-40%" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 35, 40)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 35, 40)} ダメージ（INT 35〜40%・1v1=単体）`]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 35, 40);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 35, 40);
       },
     },
     ext3003: {
@@ -8553,13 +8741,15 @@ function makeCardLibrary(clog, api) {
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 35-40%" }
+        { target: "enemy.foremost", text: "INTダメ 35-40%" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 35, 40)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 35, 40)} ダメージ（INT 35〜40%・1v1=単体）`]; },
       play(s) {
         api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 35, 40);
+        api.drawCards(s, 2);
       },
     },
     ext3009: {
@@ -8591,19 +8781,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 30-35%" },
-        { target: "enemy.foremost", text: "敵AGI -1" }
+        { target: "enemy.all", text: "PHYダメ 30-35%" },
+        { target: "enemy.foremost", text: "敵AGI -1" },
+        { target: "enemy.all", text: "出血 ×2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 30, 35)}`, "AGI\u3000-1（敵）"]; },
       peekHelpKeys() { return ["agi"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 30, 35)} ダメージ（PHY 30〜35%）`, "敵の AGI を -1"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 30, 35);
+        api.dealPhySkillToAllEnemies(s, 30, 35);
         s.enemyAgi = Math.max(1, s.enemyAgi + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        api.addBleedToAllEnemies(s, 2);
       },
     },
     ext3011: {
@@ -8677,19 +8869,23 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 2,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 25-30%" },
-        { target: "enemy.foremost", text: "PHYダメ 25-30%" }
+        { target: "enemy.all", text: "PHYダメ 25-30%" },
+        { target: "enemy.all", text: "PHYダメ 25-30%" },
+        { target: "enemy.all", text: "出血 ×2" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines() { return [`敵にダメージ ×2`]; },
       peekHelpKeys() { return []; },
       previewLines() { return [`敵1体に PHY 25〜30% × 2 回ダメージ`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 25, 30);
-        if (s.enemyHp > 0) api.dealPhySkillToEnemy(s, 25, 30);
+        api.dealPhySkillToAllEnemies(s, 25, 30);
+        if (s.enemyHp > 0) api.dealPhySkillToAllEnemies(s, 25, 30);
+        api.addBleedToAllEnemies(s, 2);
+        api.drawCards(s, 2);
       },
     },
     ext3015: {
@@ -8723,20 +8919,22 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       // SPEC-006 Phase 4i: INT 最高ヒーロー (賢者) が巻物を読み上げる
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 25-30%" },
-        { target: "enemy.foremost", text: "毒 ×2" }
+        { target: "enemy.all", text: "INTダメ 25-30%" },
+        { target: "enemy.foremost", text: "毒 ×2" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 25, 30)}`, "毒 ×2（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 25, 30)} ダメージ（INT 25〜30%・1v1=単体）`, "敵に毒 ×2 付与"]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 25, 30);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 25, 30);
         api.addPoisonToEnemy(s, 2);
+        api.drawCards(s, 2);
       },
     },
     ext3017: {
@@ -8817,19 +9015,23 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 30-35%" },
-        { target: "self", text: "AGI +1" }
+        { target: "enemy.all", text: "PHYダメ 30-35%" },
+        { target: "self", text: "AGI +1" },
+        { target: "enemy.all", text: "出血 ×2" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 30, 35)}`, "AGI\u3000+1"]; },
       peekHelpKeys() { return ["agi"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 30, 35)} ダメージ（PHY 30〜35%）`, "AGI を +1"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 30, 35);
+        api.dealPhySkillToAllEnemies(s, 30, 35);
         s.playerAgi += 1;
+        api.addBleedToAllEnemies(s, 2);
+        api.drawCards(s, 2);
       },
     },
     ext3021: {
@@ -8907,17 +9109,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 25-30%" }
+        { target: "enemy.all", text: "PHYダメ 25-30%" },
+        { target: "enemy.all", text: "出血 ×2" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 25, 30)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 25, 30)} ダメージ（PHY 25〜30%）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 25, 30);
+        api.dealPhySkillToAllEnemies(s, 25, 30);
+        api.addBleedToAllEnemies(s, 2);
+        api.drawCards(s, 2);
       },
     },
     ext3025: {
@@ -8928,19 +9134,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 20-25%" },
-        { target: "enemy.foremost", text: "出血 ×2" }
+        { target: "enemy.all", text: "INTダメ 20-25%" },
+        { target: "enemy.foremost", text: "出血 ×2" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 20, 25)}`, "出血 ×2（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 20, 25)} ダメージ（INT 20〜25%）`, "敵に出血 ×2 付与"]; },
       play(s) {
-        api.dealIntSkillToEnemy(s, 20, 25);
+        api.dealIntSkillToAllEnemies(s, 20, 25);
         api.addBleedToEnemy(s, 2);
+        api.drawCards(s, 2);
       },
     },
     ext3026: {
@@ -9082,19 +9290,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 2,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 25-30%" },
-        { target: "self", text: "HP回復 INT10-10%" }
+        { target: "enemy.all", text: "INTダメ 25-30%" },
+        { target: "self", text: "HP回復 INT10-10%" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 25, 30)}`, "HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 10, 10)]; },
       peekHelpKeys() { return ["hp"]; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 25, 30)} ダメージ（INT 25〜30%・1v1=単体）`, `HP を回復係数 10〜10% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 10, 10)}）`]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 25, 30);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 25, 30);
         api.healPlayerFromIntSkill(s, 10, 10);
+        api.drawCards(s, 2);
       },
     },
     ext3033: {
@@ -9199,17 +9409,19 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 30-35%" }
+        { target: "enemy.all", text: "PHYダメ 30-35%" },
+        { target: "enemy.all", text: "出血 ×2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 30, 35)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 30, 35)} ダメージ（PHY 30〜35%）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 30, 35);
+        api.dealPhySkillToAllEnemies(s, 30, 35);
+        api.addBleedToAllEnemies(s, 2);
       },
     },
     ext3038: {
@@ -9220,17 +9432,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 20-20%" }
+        { target: "enemy.all", text: "PHYダメ 20-20%" },
+        { target: "enemy.all", text: "出血 ×2" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 20, 20)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 20, 20)} ダメージ（PHY 20〜20%）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 20, 20);
+        api.dealPhySkillToAllEnemies(s, 20, 20);
+        api.addBleedToAllEnemies(s, 2);
+        api.drawCards(s, 2);
       },
     },
     ext3039: {
@@ -9262,19 +9478,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 40-40%" },
-        { target: "enemy.foremost", text: "敵PHY -1" }
+        { target: "enemy.all", text: "PHYダメ 40-40%" },
+        { target: "enemy.foremost", text: "敵PHY -1" },
+        { target: "enemy.all", text: "出血 ×2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 40, 40)}`, "PHY\u3000-1（敵）"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 40, 40)} ダメージ（PHY 40〜40%）`, "敵の PHY を -1"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 40, 40);
+        api.dealPhySkillToAllEnemies(s, 40, 40);
         s.enemyPhy = Math.max(1, s.enemyPhy + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        api.addBleedToAllEnemies(s, 2);
       },
     },
     ext3041: {
@@ -9306,19 +9524,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 25-45%" },
-        { target: "enemy.foremost", text: "毒 ×2" }
+        { target: "enemy.all", text: "PHYダメ 25-45%" },
+        { target: "enemy.foremost", text: "毒 ×2" },
+        { target: "enemy.all", text: "出血 ×2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 25, 45)}`, "毒 ×2（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 25, 45)} ダメージ（PHY 25〜45%）`, "敵に毒 ×2 付与"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 25, 45);
+        api.dealPhySkillToAllEnemies(s, 25, 45);
         api.addPoisonToEnemy(s, 2);
+        api.addBleedToAllEnemies(s, 2);
       },
     },
     ext3043: {
@@ -9329,17 +9549,17 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 30-40%" }
+        { target: "enemy.all", text: "INTダメ 30-40%" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 30, 40)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 30, 40)} ダメージ（INT 30〜40%・1v1=単体）`]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 30, 40);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 30, 40);
       },
     },
     ext3044: {
@@ -9394,17 +9614,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 25-30%" }
+        { target: "enemy.all", text: "PHYダメ 25-30%" },
+        { target: "enemy.all", text: "出血 ×2" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 25, 30)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 25, 30)} ダメージ（PHY 25〜30%）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 25, 30);
+        api.dealPhySkillToAllEnemies(s, 25, 30);
+        api.addBleedToAllEnemies(s, 2);
+        api.drawCards(s, 2);
       },
     },
     ext3047: {
@@ -9415,19 +9639,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "mid",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 0-55%" },
-        { target: "enemy.foremost", text: "INTダメ 0-55%" }
+        { target: "enemy.all", text: "PHYダメ 0-55%" },
+        { target: "enemy.all", text: "INTダメ 0-55%" },
+        { target: "enemy.all", text: "出血 ×2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 0, 55)}`, `敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 0, 55)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 0, 55)} ダメージ（PHY 0〜55%）`, `敵1体に ${estIntHit(s.playerInt, s.enemyInt, 0, 55)} ダメージ（INT 0〜55%）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 0, 55);
+        api.dealPhySkillToAllEnemies(s, 0, 55);
         api.dealIntSkillToEnemy(s, 0, 55);
+        api.addBleedToAllEnemies(s, 2);
       },
     },
     ext3048: {
@@ -9505,19 +9731,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 2,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 19-34%" },
-        { target: "enemy.foremost", text: "PHYダメ 19-34%" }
+        { target: "enemy.all", text: "PHYダメ 19-34%" },
+        { target: "enemy.all", text: "PHYダメ 19-34%" },
+        { target: "enemy.all", text: "出血 ×2" }
       ],
       effectSummaryLines() { return [`敵にダメージ ×2`]; },
       peekHelpKeys() { return []; },
       previewLines() { return [`敵1体に PHY 19〜34% × 2 回ダメージ`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 19, 34);
-        if (s.enemyHp > 0) api.dealPhySkillToEnemy(s, 19, 34);
+        api.dealPhySkillToAllEnemies(s, 19, 34);
+        if (s.enemyHp > 0) api.dealPhySkillToAllEnemies(s, 19, 34);
+        api.addBleedToAllEnemies(s, 2);
       },
     },
     ext3055: {
@@ -9528,17 +9756,19 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 20-30%" }
+        { target: "enemy.all", text: "INTダメ 20-30%" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 20, 30)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 20, 30)} ダメージ（INT 20〜30%）`]; },
       play(s) {
-        api.dealIntSkillToEnemy(s, 20, 30);
+        api.dealIntSkillToAllEnemies(s, 20, 30);
+        api.drawCards(s, 2);
       },
     },
     ext3056: {
@@ -9945,19 +10175,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 30-35%" },
-        { target: "self", text: "PHY +1" }
+        { target: "enemy.all", text: "PHYダメ 30-35%" },
+        { target: "self", text: "PHY +1" },
+        { target: "enemy.all", text: "出血 ×2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 30, 35)}`, "PHY\u3000+1"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 30, 35)} ダメージ（PHY 30〜35%）`, "PHY を +1"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 30, 35);
+        api.dealPhySkillToAllEnemies(s, 30, 35);
         s.playerPhy += 1;
+        api.addBleedToAllEnemies(s, 2);
       },
     },
     ext3080: {
@@ -9968,17 +10200,19 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 25-35%" }
+        { target: "enemy.all", text: "INTダメ 25-35%" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 25, 35)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 25, 35)} ダメージ（INT 25〜35%・1v1=単体）`]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 25, 35);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 25, 35);
+        api.drawCards(s, 2);
       },
     },
     ext3081: {
@@ -10140,21 +10374,25 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 12-12%" },
+        { target: "enemy.all", text: "PHYダメ 12-12%" },
         { target: "enemy.foremost", text: "敵INT -1" },
-        { target: "enemy.foremost", text: "毒 ×2" }
+        { target: "enemy.foremost", text: "毒 ×2" },
+        { target: "enemy.all", text: "出血 ×2" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 12, 12)}`, "INT\u3000-1（敵）", "毒 ×2（敵）"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 12, 12)} ダメージ（PHY 12〜12%）`, "敵の INT を -1", "敵に毒 ×2 付与"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 12, 12);
+        api.dealPhySkillToAllEnemies(s, 12, 12);
         s.enemyInt = Math.max(1, s.enemyInt + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
         api.addPoisonToEnemy(s, 2);
+        api.addBleedToAllEnemies(s, 2);
+        api.drawCards(s, 2);
       },
     },
     ext3090: {
@@ -10230,18 +10468,18 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 40-40%" },
+        { target: "enemy.all", text: "INTダメ 40-40%" },
         { target: "self", text: "AGI +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 40, 40)}`, "AGI\u3000+1"]; },
       peekHelpKeys() { return ["agi"]; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 40, 40)} ダメージ（INT 40〜40%）`, "AGI を +1"]; },
       play(s) {
-        api.dealIntSkillToEnemy(s, 40, 40);
+        api.dealIntSkillToAllEnemies(s, 40, 40);
         s.playerAgi += 1;
       },
     },
@@ -10370,17 +10608,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 20-20%" }
+        { target: "enemy.all", text: "PHYダメ 20-20%" },
+        { target: "enemy.all", text: "出血 ×2" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 20, 20)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 20, 20)} ダメージ（PHY 20〜20%）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 20, 20);
+        api.dealPhySkillToAllEnemies(s, 20, 20);
+        api.addBleedToAllEnemies(s, 2);
+        api.drawCards(s, 2);
       },
     },
     ext3100: {
@@ -10463,17 +10705,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 22-22%" }
+        { target: "enemy.all", text: "PHYダメ 22-22%" },
+        { target: "enemy.all", text: "出血 ×2" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 22, 22)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 22, 22)} ダメージ（PHY 22〜22%）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 22, 22);
+        api.dealPhySkillToAllEnemies(s, 22, 22);
+        api.addBleedToAllEnemies(s, 2);
+        api.drawCards(s, 2);
       },
     },
     ext3105: {
@@ -10700,17 +10946,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 29-29%" }
+        { target: "enemy.all", text: "PHYダメ 29-29%" },
+        { target: "enemy.all", text: "出血 ×2" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 29, 29)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 29, 29)} ダメージ（PHY 29〜29%）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 29, 29);
+        api.dealPhySkillToAllEnemies(s, 29, 29);
+        api.addBleedToAllEnemies(s, 2);
+        api.drawCards(s, 2);
       },
     },
     ext3117: {
@@ -10744,19 +10994,23 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 32-32%" },
-        { target: "enemy.foremost", text: "敵INT -4" }
+        { target: "enemy.all", text: "PHYダメ 32-32%" },
+        { target: "enemy.foremost", text: "敵INT -4" },
+        { target: "enemy.all", text: "出血 ×2" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 32, 32)}`, "INT\u3000-4（敵）"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 32, 32)} ダメージ（PHY 32〜32%）`, "敵の INT を -4"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 32, 32);
+        api.dealPhySkillToAllEnemies(s, 32, 32);
         s.enemyInt = Math.max(1, s.enemyInt + (-4)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        api.addBleedToAllEnemies(s, 2);
+        api.drawCards(s, 2);
       },
     },
     ext3119: {
@@ -10901,19 +11155,23 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 25-30%" },
-        { target: "self", text: "PHY +2" }
+        { target: "enemy.all", text: "PHYダメ 25-30%" },
+        { target: "self", text: "PHY +2" },
+        { target: "enemy.all", text: "出血 ×2" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 25, 30)}`, "PHY\u3000+2"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 25, 30)} ダメージ（PHY 25〜30%）`, "PHY を +2"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 25, 30);
+        api.dealPhySkillToAllEnemies(s, 25, 30);
         s.playerPhy += 2;
+        api.addBleedToAllEnemies(s, 2);
+        api.drawCards(s, 2);
       },
     },
     ext3126: {
@@ -10924,19 +11182,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 25-30%" },
-        { target: "self", text: "INT +2" }
+        { target: "enemy.all", text: "INTダメ 25-30%" },
+        { target: "self", text: "INT +2" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 25, 30)}`, "INT\u3000+2"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 25, 30)} ダメージ（INT 25〜30%・1v1=単体）`, "INT を +2"]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 25, 30);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 25, 30);
         s.playerInt += 2;
+        api.drawCards(s, 2);
       },
     },
     ext3127: {
@@ -10968,19 +11228,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 35-40%" },
-        { target: "enemy.foremost", text: "INTダメ 35-40%" }
+        { target: "enemy.all", text: "PHYダメ 35-40%" },
+        { target: "enemy.all", text: "INTダメ 35-40%" },
+        { target: "enemy.all", text: "出血 ×2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)}`, `敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 35, 40)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)} ダメージ（PHY 35〜40%）`, `敵1体に ${estIntHit(s.playerInt, s.enemyInt, 35, 40)} ダメージ（INT 35〜40%）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 35, 40);
+        api.dealPhySkillToAllEnemies(s, 35, 40);
         api.dealIntSkillToEnemy(s, 35, 40);
+        api.addBleedToAllEnemies(s, 2);
       },
     },
     ext3129: {
@@ -11037,19 +11299,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 13-13%" },
-        { target: "enemy.foremost", text: "毒 ×2" }
+        { target: "enemy.all", text: "INTダメ 13-13%" },
+        { target: "enemy.foremost", text: "毒 ×2" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 13, 13)}`, "毒 ×2（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 13, 13)} ダメージ（INT 13〜13%・1v1=単体）`, "敵に毒 ×2 付与"]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 13, 13);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 13, 13);
         api.addPoisonToEnemy(s, 2);
+        api.drawCards(s, 2);
       },
     },
     ext3132: {
@@ -11303,18 +11567,18 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 20-45%" },
+        { target: "enemy.all", text: "INTダメ 20-45%" },
         { target: "enemy.foremost", text: "毒 ×2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 20, 45)}`, "毒 ×2（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 20, 45)} ダメージ（INT 20〜45%）`, "敵に毒 ×2 付与"]; },
       play(s) {
-        api.dealIntSkillToEnemy(s, 20, 45);
+        api.dealIntSkillToAllEnemies(s, 20, 45);
         api.addPoisonToEnemy(s, 2);
       },
     },
@@ -11347,19 +11611,23 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 30-30%" },
-        { target: "enemy.foremost", text: "毒 ×2" }
+        { target: "enemy.all", text: "PHYダメ 30-30%" },
+        { target: "enemy.foremost", text: "毒 ×2" },
+        { target: "enemy.all", text: "出血 ×2" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 30, 30)}`, "毒 ×2（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 30, 30)} ダメージ（PHY 30〜30%）`, "敵に毒 ×2 付与"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 30, 30);
+        api.dealPhySkillToAllEnemies(s, 30, 30);
         api.addPoisonToEnemy(s, 2);
+        api.addBleedToAllEnemies(s, 2);
+        api.drawCards(s, 2);
       },
     },
     ext3149: {
@@ -11370,19 +11638,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 30-30%" },
-        { target: "enemy.foremost", text: "毒 ×2" }
+        { target: "enemy.all", text: "INTダメ 30-30%" },
+        { target: "enemy.foremost", text: "毒 ×2" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 30, 30)}`, "毒 ×2（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 30, 30)} ダメージ（INT 30〜30%・1v1=単体）`, "敵に毒 ×2 付与"]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 30, 30);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 30, 30);
         api.addPoisonToEnemy(s, 2);
+        api.drawCards(s, 2);
       },
     },
     ext3150: {
@@ -11393,17 +11663,19 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 16-16%" }
+        { target: "enemy.all", text: "INTダメ 16-16%" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 16, 16)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 16, 16)} ダメージ（INT 16〜16%・1v1=単体）`]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 16, 16);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 16, 16);
+        api.drawCards(s, 2);
       },
     },
     ext3151: {
@@ -11753,17 +12025,19 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 25-30%" }
+        { target: "enemy.all", text: "INTダメ 25-30%" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 25, 30)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 25, 30)} ダメージ（INT 25〜30%・1v1=単体）`]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 25, 30);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 25, 30);
+        api.drawCards(s, 2);
       },
     },
     ext3170: {
@@ -11841,21 +12115,23 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 25-25%" },
+        { target: "enemy.all", text: "INTダメ 25-25%" },
         { target: "enemy.foremost", text: "出血 ×2" },
-        { target: "enemy.foremost", text: "毒 ×2" }
+        { target: "enemy.foremost", text: "毒 ×2" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 25, 25)}`, "出血 ×2（敵）", "毒 ×2（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 25, 25)} ダメージ（INT 25〜25%）`, "敵に出血 ×2 付与", "敵に毒 ×2 付与"]; },
       play(s) {
-        api.dealIntSkillToEnemy(s, 25, 25);
+        api.dealIntSkillToAllEnemies(s, 25, 25);
         api.addBleedToEnemy(s, 2);
         api.addPoisonToEnemy(s, 2);
+        api.drawCards(s, 2);
       },
     },
     ext3174: {
@@ -11929,19 +12205,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 35-40%" },
-        { target: "self", text: "PHY +1" }
+        { target: "enemy.all", text: "PHYダメ 35-40%" },
+        { target: "self", text: "PHY +1" },
+        { target: "enemy.all", text: "出血 ×2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)}`, "PHY\u3000+1"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)} ダメージ（PHY 35〜40%）`, "PHY を +1"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 35, 40);
+        api.dealPhySkillToAllEnemies(s, 35, 40);
         s.playerPhy += 1;
+        api.addBleedToAllEnemies(s, 2);
       },
     },
     ext3178: {
@@ -11952,18 +12230,18 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 35-40%" },
+        { target: "enemy.all", text: "INTダメ 35-40%" },
         { target: "self", text: "INT +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 35, 40)}`, "INT\u3000+1"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 35, 40)} ダメージ（INT 35〜40%）`, "INT を +1"]; },
       play(s) {
-        api.dealIntSkillToEnemy(s, 35, 40);
+        api.dealIntSkillToAllEnemies(s, 35, 40);
         s.playerInt += 1;
       },
     },
@@ -12109,21 +12387,23 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 45-45%" },
+        { target: "enemy.all", text: "PHYダメ 45-45%" },
         { target: "self", text: "PHY +3" },
-        { target: "enemy.foremost", text: "敵AGI -4" }
+        { target: "enemy.foremost", text: "敵AGI -4" },
+        { target: "enemy.all", text: "出血 ×2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 45, 45)}`, "PHY\u3000+3", "AGI\u3000-4（敵）"]; },
       peekHelpKeys() { return ["phy", "agi"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 45, 45)} ダメージ（PHY 45〜45%）`, "PHY を +3", "敵の AGI を -4"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 45, 45);
+        api.dealPhySkillToAllEnemies(s, 45, 45);
         s.playerPhy += 3;
         s.enemyAgi = Math.max(1, s.enemyAgi + (-4)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        api.addBleedToAllEnemies(s, 2);
       },
     },
     ext3186: {
@@ -12197,19 +12477,23 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 25-30%" },
-        { target: "enemy.foremost", text: "INTダメ 25-30%" }
+        { target: "enemy.all", text: "PHYダメ 25-30%" },
+        { target: "enemy.all", text: "INTダメ 25-30%" },
+        { target: "enemy.all", text: "出血 ×2" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 25, 30)}`, `敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 25, 30)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 25, 30)} ダメージ（PHY 25〜30%）`, `敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 25, 30)} ダメージ（INT 25〜30%・1v1=単体）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 25, 30);
+        api.dealPhySkillToAllEnemies(s, 25, 30);
         api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 25, 30);
+        api.addBleedToAllEnemies(s, 2);
+        api.drawCards(s, 2);
       },
     },
     ext3190: {
@@ -12462,18 +12746,18 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 40-45%" },
+        { target: "enemy.all", text: "INTダメ 40-45%" },
         { target: "self", text: "INT +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 40, 45)}`, "INT\u3000+1"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 40, 45)} ダメージ（INT 40〜45%・1v1=単体）`, "INT を +1"]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 40, 45);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 40, 45);
         s.playerInt += 1;
       },
     },
@@ -12603,7 +12887,8 @@ function makeCardLibrary(clog, api) {
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 40-45%" },
-        { target: "enemy.foremost", text: "敵INT -1" }
+        { target: "enemy.foremost", text: "敵INT -1" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 40, 45)}`, "INT\u3000-1（敵）"]; },
       peekHelpKeys() { return ["int"]; },
@@ -12611,6 +12896,7 @@ function makeCardLibrary(clog, api) {
       play(s) {
         api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 40, 45);
         s.enemyInt = Math.max(1, s.enemyInt + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        api.drawCards(s, 2);
       },
     },
     ext4009: {
@@ -12642,19 +12928,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 32-37%" },
-        { target: "enemy.foremost", text: "敵AGI -1" }
+        { target: "enemy.all", text: "PHYダメ 32-37%" },
+        { target: "enemy.foremost", text: "敵AGI -1" },
+        { target: "enemy.all", text: "出血 ×3" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 32, 37)}`, "AGI\u3000-1（敵）"]; },
       peekHelpKeys() { return ["agi"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 32, 37)} ダメージ（PHY 32〜37%）`, "敵の AGI を -1"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 32, 37);
+        api.dealPhySkillToAllEnemies(s, 32, 37);
         s.enemyAgi = Math.max(1, s.enemyAgi + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        api.addBleedToAllEnemies(s, 3);
       },
     },
     ext4011: {
@@ -12732,19 +13020,23 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 2,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 30-35%" },
-        { target: "enemy.foremost", text: "PHYダメ 30-35%" }
+        { target: "enemy.all", text: "PHYダメ 30-35%" },
+        { target: "enemy.all", text: "PHYダメ 30-35%" },
+        { target: "enemy.all", text: "出血 ×3" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines() { return [`敵にダメージ ×2`]; },
       peekHelpKeys() { return []; },
       previewLines() { return [`敵1体に PHY 30〜35% × 2 回ダメージ`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 30, 35);
-        if (s.enemyHp > 0) api.dealPhySkillToEnemy(s, 30, 35);
+        api.dealPhySkillToAllEnemies(s, 30, 35);
+        if (s.enemyHp > 0) api.dealPhySkillToAllEnemies(s, 30, 35);
+        api.addBleedToAllEnemies(s, 3);
+        api.drawCards(s, 2);
       },
     },
     ext4015: {
@@ -12778,19 +13070,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 2,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 30-35%" },
-        { target: "enemy.foremost", text: "毒 ×3" }
+        { target: "enemy.all", text: "INTダメ 30-35%" },
+        { target: "enemy.foremost", text: "毒 ×3" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 30, 35)}`, "毒 ×3（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 30, 35)} ダメージ（INT 30〜35%・1v1=単体）`, "敵に毒 ×3 付与"]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 30, 35);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 30, 35);
         api.addPoisonToEnemy(s, 3);
+        api.drawCards(s, 2);
       },
     },
     ext4017: {
@@ -12874,19 +13168,23 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 35-40%" },
-        { target: "self", text: "AGI +1" }
+        { target: "enemy.all", text: "PHYダメ 35-40%" },
+        { target: "self", text: "AGI +1" },
+        { target: "enemy.all", text: "出血 ×3" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)}`, "AGI\u3000+1"]; },
       peekHelpKeys() { return ["agi"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)} ダメージ（PHY 35〜40%）`, "AGI を +1"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 35, 40);
+        api.dealPhySkillToAllEnemies(s, 35, 40);
         s.playerAgi += 1;
+        api.addBleedToAllEnemies(s, 3);
+        api.drawCards(s, 2);
       },
     },
     ext4021: {
@@ -12964,17 +13262,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 30-35%" }
+        { target: "enemy.all", text: "PHYダメ 30-35%" },
+        { target: "enemy.all", text: "出血 ×3" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 30, 35)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 30, 35)} ダメージ（PHY 30〜35%）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 30, 35);
+        api.dealPhySkillToAllEnemies(s, 30, 35);
+        api.addBleedToAllEnemies(s, 3);
+        api.drawCards(s, 2);
       },
     },
     ext4025: {
@@ -12985,19 +13287,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 2,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 25-30%" },
-        { target: "enemy.foremost", text: "出血 ×3" }
+        { target: "enemy.all", text: "INTダメ 25-30%" },
+        { target: "enemy.foremost", text: "出血 ×3" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 25, 30)}`, "出血 ×3（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 25, 30)} ダメージ（INT 25〜30%）`, "敵に出血 ×3 付与"]; },
       play(s) {
-        api.dealIntSkillToEnemy(s, 25, 30);
+        api.dealIntSkillToAllEnemies(s, 25, 30);
         api.addBleedToEnemy(s, 3);
+        api.drawCards(s, 2);
       },
     },
     ext4026: {
@@ -13138,21 +13442,23 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 2,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 30-35%" },
+        { target: "enemy.all", text: "INTダメ 30-35%" },
         { target: "self", text: "HP回復 INT10-10%" },
-        { target: "self", text: "INT +1" }
+        { target: "self", text: "INT +1" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 30, 35)}`, "HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 10, 10), "INT\u3000+1"]; },
       peekHelpKeys() { return ["hp", "int"]; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 30, 35)} ダメージ（INT 30〜35%・1v1=単体）`, `HP を回復係数 10〜10% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 10, 10)}）`, "INT を +1"]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 30, 35);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 30, 35);
         api.healPlayerFromIntSkill(s, 10, 10);
         s.playerInt += 1;
+        api.drawCards(s, 2);
       },
     },
     ext4033: {
@@ -13263,19 +13569,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 32-37%" },
-        { target: "self", text: "PHY +1" }
+        { target: "enemy.all", text: "PHYダメ 32-37%" },
+        { target: "self", text: "PHY +1" },
+        { target: "enemy.all", text: "出血 ×3" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 32, 37)}`, "PHY\u3000+1"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 32, 37)} ダメージ（PHY 32〜37%）`, "PHY を +1"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 32, 37);
+        api.dealPhySkillToAllEnemies(s, 32, 37);
         s.playerPhy += 1;
+        api.addBleedToAllEnemies(s, 3);
       },
     },
     ext4038: {
@@ -13286,17 +13594,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 20-20%" }
+        { target: "enemy.all", text: "PHYダメ 20-20%" },
+        { target: "enemy.all", text: "出血 ×3" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 20, 20)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 20, 20)} ダメージ（PHY 20〜20%）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 20, 20);
+        api.dealPhySkillToAllEnemies(s, 20, 20);
+        api.addBleedToAllEnemies(s, 3);
+        api.drawCards(s, 2);
       },
     },
     ext4039: {
@@ -13328,19 +13640,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 50-50%" },
-        { target: "enemy.foremost", text: "敵PHY -1" }
+        { target: "enemy.all", text: "PHYダメ 50-50%" },
+        { target: "enemy.foremost", text: "敵PHY -1" },
+        { target: "enemy.all", text: "出血 ×3" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 50)}`, "PHY\u3000-1（敵）"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 50)} ダメージ（PHY 50〜50%）`, "敵の PHY を -1"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 50, 50);
+        api.dealPhySkillToAllEnemies(s, 50, 50);
         s.enemyPhy = Math.max(1, s.enemyPhy + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        api.addBleedToAllEnemies(s, 3);
       },
     },
     ext4041: {
@@ -13372,19 +13686,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 30-50%" },
-        { target: "enemy.foremost", text: "毒 ×3" }
+        { target: "enemy.all", text: "PHYダメ 30-50%" },
+        { target: "enemy.foremost", text: "毒 ×3" },
+        { target: "enemy.all", text: "出血 ×3" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 30, 50)}`, "毒 ×3（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 30, 50)} ダメージ（PHY 30〜50%）`, "敵に毒 ×3 付与"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 30, 50);
+        api.dealPhySkillToAllEnemies(s, 30, 50);
         api.addPoisonToEnemy(s, 3);
+        api.addBleedToAllEnemies(s, 3);
       },
     },
     ext4043: {
@@ -13395,17 +13711,17 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 2,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 40-50%" }
+        { target: "enemy.all", text: "INTダメ 40-50%" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 40, 50)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 40, 50)} ダメージ（INT 40〜50%・1v1=単体）`]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 40, 50);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 40, 50);
       },
     },
     ext4044: {
@@ -13460,17 +13776,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 30-35%" }
+        { target: "enemy.all", text: "PHYダメ 30-35%" },
+        { target: "enemy.all", text: "出血 ×3" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 30, 35)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 30, 35)} ダメージ（PHY 30〜35%）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 30, 35);
+        api.dealPhySkillToAllEnemies(s, 30, 35);
+        api.addBleedToAllEnemies(s, 3);
+        api.drawCards(s, 2);
       },
     },
     ext4047: {
@@ -13481,19 +13801,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "mid",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 0-70%" },
-        { target: "enemy.foremost", text: "INTダメ 0-70%" }
+        { target: "enemy.all", text: "PHYダメ 0-70%" },
+        { target: "enemy.all", text: "INTダメ 0-70%" },
+        { target: "enemy.all", text: "出血 ×3" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 0, 70)}`, `敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 0, 70)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 0, 70)} ダメージ（PHY 0〜70%）`, `敵1体に ${estIntHit(s.playerInt, s.enemyInt, 0, 70)} ダメージ（INT 0〜70%）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 0, 70);
+        api.dealPhySkillToAllEnemies(s, 0, 70);
         api.dealIntSkillToEnemy(s, 0, 70);
+        api.addBleedToAllEnemies(s, 3);
       },
     },
     ext4048: {
@@ -13577,21 +13899,23 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 2,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 22-37%" },
-        { target: "enemy.foremost", text: "PHYダメ 22-37%" },
-        { target: "enemy.foremost", text: "敵AGI -1" }
+        { target: "enemy.all", text: "PHYダメ 22-37%" },
+        { target: "enemy.all", text: "PHYダメ 22-37%" },
+        { target: "enemy.foremost", text: "敵AGI -1" },
+        { target: "enemy.all", text: "出血 ×3" }
       ],
       effectSummaryLines() { return [`敵にダメージ ×2`, "AGI\u3000-1（敵）"]; },
       peekHelpKeys() { return ["agi"]; },
       previewLines() { return [`敵1体に PHY 22〜37% × 2 回ダメージ`, "敵の AGI を -1"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 22, 37);
-        if (s.enemyHp > 0) api.dealPhySkillToEnemy(s, 22, 37);
+        api.dealPhySkillToAllEnemies(s, 22, 37);
+        if (s.enemyHp > 0) api.dealPhySkillToAllEnemies(s, 22, 37);
         s.enemyAgi = Math.max(1, s.enemyAgi + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        api.addBleedToAllEnemies(s, 3);
       },
     },
     ext4055: {
@@ -13602,17 +13926,19 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 2,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 25-35%" }
+        { target: "enemy.all", text: "INTダメ 25-35%" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 25, 35)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 25, 35)} ダメージ（INT 25〜35%）`]; },
       play(s) {
-        api.dealIntSkillToEnemy(s, 25, 35);
+        api.dealIntSkillToAllEnemies(s, 25, 35);
+        api.drawCards(s, 2);
       },
     },
     ext4056: {
@@ -14024,19 +14350,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 30-35%" },
-        { target: "self", text: "PHY +1" }
+        { target: "enemy.all", text: "PHYダメ 30-35%" },
+        { target: "self", text: "PHY +1" },
+        { target: "enemy.all", text: "出血 ×3" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 30, 35)}`, "PHY\u3000+1"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 30, 35)} ダメージ（PHY 30〜35%）`, "PHY を +1"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 30, 35);
+        api.dealPhySkillToAllEnemies(s, 30, 35);
         s.playerPhy += 1;
+        api.addBleedToAllEnemies(s, 3);
       },
     },
     ext4080: {
@@ -14047,19 +14375,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 2,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 30-40%" },
-        { target: "self", text: "AGI +1" }
+        { target: "enemy.all", text: "INTダメ 30-40%" },
+        { target: "self", text: "AGI +1" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 30, 40)}`, "AGI\u3000+1"]; },
       peekHelpKeys() { return ["agi"]; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 30, 40)} ダメージ（INT 30〜40%・1v1=単体）`, "AGI を +1"]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 30, 40);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 30, 40);
         s.playerAgi += 1;
+        api.drawCards(s, 2);
       },
     },
     ext4081: {
@@ -14221,21 +14551,25 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 16-16%" },
+        { target: "enemy.all", text: "PHYダメ 16-16%" },
         { target: "enemy.foremost", text: "敵INT -1" },
-        { target: "enemy.foremost", text: "毒 ×3" }
+        { target: "enemy.foremost", text: "毒 ×3" },
+        { target: "enemy.all", text: "出血 ×3" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 16, 16)}`, "INT\u3000-1（敵）", "毒 ×3（敵）"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 16, 16)} ダメージ（PHY 16〜16%）`, "敵の INT を -1", "敵に毒 ×3 付与"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 16, 16);
+        api.dealPhySkillToAllEnemies(s, 16, 16);
         s.enemyInt = Math.max(1, s.enemyInt + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
         api.addPoisonToEnemy(s, 3);
+        api.addBleedToAllEnemies(s, 3);
+        api.drawCards(s, 2);
       },
     },
     ext4090: {
@@ -14311,18 +14645,18 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 45-45%" },
+        { target: "enemy.all", text: "INTダメ 45-45%" },
         { target: "self", text: "AGI +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 45, 45)}`, "AGI\u3000+2"]; },
       peekHelpKeys() { return ["agi"]; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 45, 45)} ダメージ（INT 45〜45%）`, "AGI を +2"]; },
       play(s) {
-        api.dealIntSkillToEnemy(s, 45, 45);
+        api.dealIntSkillToAllEnemies(s, 45, 45);
         s.playerAgi += 2;
       },
     },
@@ -14451,17 +14785,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 20-20%" }
+        { target: "enemy.all", text: "PHYダメ 20-20%" },
+        { target: "enemy.all", text: "出血 ×3" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 20, 20)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 20, 20)} ダメージ（PHY 20〜20%）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 20, 20);
+        api.dealPhySkillToAllEnemies(s, 20, 20);
+        api.addBleedToAllEnemies(s, 3);
+        api.drawCards(s, 2);
       },
     },
     ext4100: {
@@ -14544,17 +14882,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 25-25%" }
+        { target: "enemy.all", text: "PHYダメ 25-25%" },
+        { target: "enemy.all", text: "出血 ×3" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 25, 25)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 25, 25)} ダメージ（PHY 25〜25%）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 25, 25);
+        api.dealPhySkillToAllEnemies(s, 25, 25);
+        api.addBleedToAllEnemies(s, 3);
+        api.drawCards(s, 2);
       },
     },
     ext4105: {
@@ -14804,17 +15146,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 32-32%" }
+        { target: "enemy.all", text: "PHYダメ 32-32%" },
+        { target: "enemy.all", text: "出血 ×3" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 32, 32)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 32, 32)} ダメージ（PHY 32〜32%）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 32, 32);
+        api.dealPhySkillToAllEnemies(s, 32, 32);
+        api.addBleedToAllEnemies(s, 3);
+        api.drawCards(s, 2);
       },
     },
     ext4117: {
@@ -14848,19 +15194,23 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 37-37%" },
-        { target: "enemy.foremost", text: "敵INT -5" }
+        { target: "enemy.all", text: "PHYダメ 37-37%" },
+        { target: "enemy.foremost", text: "敵INT -5" },
+        { target: "enemy.all", text: "出血 ×3" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 37, 37)}`, "INT\u3000-5（敵）"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 37, 37)} ダメージ（PHY 37〜37%）`, "敵の INT を -5"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 37, 37);
+        api.dealPhySkillToAllEnemies(s, 37, 37);
         s.enemyInt = Math.max(1, s.enemyInt + (-5)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        api.addBleedToAllEnemies(s, 3);
+        api.drawCards(s, 2);
       },
     },
     ext4119: {
@@ -15005,19 +15355,23 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 30-35%" },
-        { target: "self", text: "PHY +2" }
+        { target: "enemy.all", text: "PHYダメ 30-35%" },
+        { target: "self", text: "PHY +2" },
+        { target: "enemy.all", text: "出血 ×3" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 30, 35)}`, "PHY\u3000+2"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 30, 35)} ダメージ（PHY 30〜35%）`, "PHY を +2"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 30, 35);
+        api.dealPhySkillToAllEnemies(s, 30, 35);
         s.playerPhy += 2;
+        api.addBleedToAllEnemies(s, 3);
+        api.drawCards(s, 2);
       },
     },
     ext4126: {
@@ -15028,19 +15382,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 30-35%" },
-        { target: "self", text: "INT +2" }
+        { target: "enemy.all", text: "INTダメ 30-35%" },
+        { target: "self", text: "INT +2" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 30, 35)}`, "INT\u3000+2"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 30, 35)} ダメージ（INT 30〜35%・1v1=単体）`, "INT を +2"]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 30, 35);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 30, 35);
         s.playerInt += 2;
+        api.drawCards(s, 2);
       },
     },
     ext4127: {
@@ -15072,19 +15428,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 40-40%" },
-        { target: "enemy.foremost", text: "INTダメ 40-40%" }
+        { target: "enemy.all", text: "PHYダメ 40-40%" },
+        { target: "enemy.all", text: "INTダメ 40-40%" },
+        { target: "enemy.all", text: "出血 ×3" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 40, 40)}`, `敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 40, 40)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 40, 40)} ダメージ（PHY 40〜40%）`, `敵1体に ${estIntHit(s.playerInt, s.enemyInt, 40, 40)} ダメージ（INT 40〜40%）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 40, 40);
+        api.dealPhySkillToAllEnemies(s, 40, 40);
         api.dealIntSkillToEnemy(s, 40, 40);
+        api.addBleedToAllEnemies(s, 3);
       },
     },
     ext4129: {
@@ -15141,19 +15499,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 16-16%" },
-        { target: "enemy.foremost", text: "毒 ×3" }
+        { target: "enemy.all", text: "INTダメ 16-16%" },
+        { target: "enemy.foremost", text: "毒 ×3" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 16, 16)}`, "毒 ×3（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 16, 16)} ダメージ（INT 16〜16%・1v1=単体）`, "敵に毒 ×3 付与"]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 16, 16);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 16, 16);
         api.addPoisonToEnemy(s, 3);
+        api.drawCards(s, 2);
       },
     },
     ext4132: {
@@ -15407,18 +15767,18 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 2,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 25-50%" },
+        { target: "enemy.all", text: "INTダメ 25-50%" },
         { target: "enemy.foremost", text: "毒 ×3" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 25, 50)}`, "毒 ×3（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 25, 50)} ダメージ（INT 25〜50%）`, "敵に毒 ×3 付与"]; },
       play(s) {
-        api.dealIntSkillToEnemy(s, 25, 50);
+        api.dealIntSkillToAllEnemies(s, 25, 50);
         api.addPoisonToEnemy(s, 3);
       },
     },
@@ -15497,19 +15857,23 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 35-35%" },
-        { target: "enemy.foremost", text: "毒 ×3" }
+        { target: "enemy.all", text: "PHYダメ 35-35%" },
+        { target: "enemy.foremost", text: "毒 ×3" },
+        { target: "enemy.all", text: "出血 ×3" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 35, 35)}`, "毒 ×3（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 35, 35)} ダメージ（PHY 35〜35%）`, "敵に毒 ×3 付与"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 35, 35);
+        api.dealPhySkillToAllEnemies(s, 35, 35);
         api.addPoisonToEnemy(s, 3);
+        api.addBleedToAllEnemies(s, 3);
+        api.drawCards(s, 2);
       },
     },
     ext4149: {
@@ -15520,19 +15884,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 2,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 35-35%" },
-        { target: "enemy.foremost", text: "毒 ×3" }
+        { target: "enemy.all", text: "INTダメ 35-35%" },
+        { target: "enemy.foremost", text: "毒 ×3" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 35, 35)}`, "毒 ×3（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 35, 35)} ダメージ（INT 35〜35%・1v1=単体）`, "敵に毒 ×3 付与"]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 35, 35);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 35, 35);
         api.addPoisonToEnemy(s, 3);
+        api.drawCards(s, 2);
       },
     },
     ext4150: {
@@ -15543,17 +15909,19 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 18-18%" }
+        { target: "enemy.all", text: "INTダメ 18-18%" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 18, 18)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 18, 18)} ダメージ（INT 18〜18%・1v1=単体）`]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 18, 18);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 18, 18);
+        api.drawCards(s, 2);
       },
     },
     ext4151: {
@@ -15906,17 +16274,19 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 2,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 30-35%" }
+        { target: "enemy.all", text: "INTダメ 30-35%" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 30, 35)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 30, 35)} ダメージ（INT 30〜35%・1v1=単体）`]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 30, 35);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 30, 35);
+        api.drawCards(s, 2);
       },
     },
     ext4170: {
@@ -15994,21 +16364,23 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 30-30%" },
+        { target: "enemy.all", text: "INTダメ 30-30%" },
         { target: "enemy.foremost", text: "出血 ×3" },
-        { target: "enemy.foremost", text: "毒 ×3" }
+        { target: "enemy.foremost", text: "毒 ×3" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 30, 30)}`, "出血 ×3（敵）", "毒 ×3（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 30, 30)} ダメージ（INT 30〜30%）`, "敵に出血 ×3 付与", "敵に毒 ×3 付与"]; },
       play(s) {
-        api.dealIntSkillToEnemy(s, 30, 30);
+        api.dealIntSkillToAllEnemies(s, 30, 30);
         api.addBleedToEnemy(s, 3);
         api.addPoisonToEnemy(s, 3);
+        api.drawCards(s, 2);
       },
     },
     ext4174: {
@@ -16082,19 +16454,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 40-45%" },
-        { target: "self", text: "PHY +1" }
+        { target: "enemy.all", text: "PHYダメ 40-45%" },
+        { target: "self", text: "PHY +1" },
+        { target: "enemy.all", text: "出血 ×3" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 40, 45)}`, "PHY\u3000+1"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 40, 45)} ダメージ（PHY 40〜45%）`, "PHY を +1"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 40, 45);
+        api.dealPhySkillToAllEnemies(s, 40, 45);
         s.playerPhy += 1;
+        api.addBleedToAllEnemies(s, 3);
       },
     },
     ext4178: {
@@ -16105,18 +16479,18 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 40-45%" },
+        { target: "enemy.all", text: "INTダメ 40-45%" },
         { target: "self", text: "INT +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 40, 45)}`, "INT\u3000+1"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 40, 45)} ダメージ（INT 40〜45%）`, "INT を +1"]; },
       play(s) {
-        api.dealIntSkillToEnemy(s, 40, 45);
+        api.dealIntSkillToAllEnemies(s, 40, 45);
         s.playerInt += 1;
       },
     },
@@ -16262,21 +16636,23 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 50-50%" },
+        { target: "enemy.all", text: "PHYダメ 50-50%" },
         { target: "self", text: "PHY +3" },
-        { target: "enemy.foremost", text: "敵AGI -5" }
+        { target: "enemy.foremost", text: "敵AGI -5" },
+        { target: "enemy.all", text: "出血 ×3" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 50)}`, "PHY\u3000+3", "AGI\u3000-5（敵）"]; },
       peekHelpKeys() { return ["phy", "agi"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 50)} ダメージ（PHY 50〜50%）`, "PHY を +3", "敵の AGI を -5"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 50, 50);
+        api.dealPhySkillToAllEnemies(s, 50, 50);
         s.playerPhy += 3;
         s.enemyAgi = Math.max(1, s.enemyAgi + (-5)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        api.addBleedToAllEnemies(s, 3);
       },
     },
     ext4186: {
@@ -16350,19 +16726,23 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 30-30%" },
-        { target: "enemy.foremost", text: "INTダメ 30-30%" }
+        { target: "enemy.all", text: "PHYダメ 30-30%" },
+        { target: "enemy.all", text: "INTダメ 30-30%" },
+        { target: "enemy.all", text: "出血 ×3" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 30, 30)}`, `敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 30, 30)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 30, 30)} ダメージ（PHY 30〜30%）`, `敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 30, 30)} ダメージ（INT 30〜30%・1v1=単体）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 30, 30);
+        api.dealPhySkillToAllEnemies(s, 30, 30);
         api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 30, 30);
+        api.addBleedToAllEnemies(s, 3);
+        api.drawCards(s, 2);
       },
     },
     ext4190: {
@@ -16617,18 +16997,18 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 45-50%" },
+        { target: "enemy.all", text: "INTダメ 45-50%" },
         { target: "self", text: "INT +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 45, 50)}`, "INT\u3000+1"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 45, 50)} ダメージ（INT 45〜50%・1v1=単体）`, "INT を +1"]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 45, 50);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 45, 50);
         s.playerInt += 1;
       },
     },
@@ -16735,7 +17115,8 @@ function makeCardLibrary(clog, api) {
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 45-50%" },
-        { target: "enemy.foremost", text: "敵INT -1" }
+        { target: "enemy.foremost", text: "敵INT -1" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 45, 50)}`, "INT\u3000-1（敵）"]; },
       peekHelpKeys() { return ["int"]; },
@@ -16743,6 +17124,7 @@ function makeCardLibrary(clog, api) {
       play(s) {
         api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 45, 50);
         s.enemyInt = Math.max(1, s.enemyInt + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        api.drawCards(s, 2);
       },
     },
     ext5009: {
@@ -16774,19 +17156,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 35-40%" },
-        { target: "enemy.foremost", text: "敵AGI -1" }
+        { target: "enemy.all", text: "PHYダメ 35-40%" },
+        { target: "enemy.foremost", text: "敵AGI -1" },
+        { target: "enemy.all", text: "出血 ×4" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)}`, "AGI\u3000-1（敵）"]; },
       peekHelpKeys() { return ["agi"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)} ダメージ（PHY 35〜40%）`, "敵の AGI を -1"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 35, 40);
+        api.dealPhySkillToAllEnemies(s, 35, 40);
         s.enemyAgi = Math.max(1, s.enemyAgi + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        api.addBleedToAllEnemies(s, 4);
       },
     },
     ext5011: {
@@ -16866,19 +17250,23 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 2,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 30-40%" },
-        { target: "enemy.foremost", text: "PHYダメ 30-40%" }
+        { target: "enemy.all", text: "PHYダメ 30-40%" },
+        { target: "enemy.all", text: "PHYダメ 30-40%" },
+        { target: "enemy.all", text: "出血 ×4" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines() { return [`敵にダメージ ×2`]; },
       peekHelpKeys() { return []; },
       previewLines() { return [`敵1体に PHY 30〜40% × 2 回ダメージ`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 30, 40);
-        if (s.enemyHp > 0) api.dealPhySkillToEnemy(s, 30, 40);
+        api.dealPhySkillToAllEnemies(s, 30, 40);
+        if (s.enemyHp > 0) api.dealPhySkillToAllEnemies(s, 30, 40);
+        api.addBleedToAllEnemies(s, 4);
+        api.drawCards(s, 2);
       },
     },
     ext5015: {
@@ -16912,19 +17300,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 2,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 35-40%" },
-        { target: "enemy.foremost", text: "毒 ×4" }
+        { target: "enemy.all", text: "INTダメ 35-40%" },
+        { target: "enemy.foremost", text: "毒 ×4" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 35, 40)}`, "毒 ×4（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 35, 40)} ダメージ（INT 35〜40%・1v1=単体）`, "敵に毒 ×4 付与"]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 35, 40);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 35, 40);
         api.addPoisonToEnemy(s, 4);
+        api.drawCards(s, 2);
       },
     },
     ext5017: {
@@ -17008,19 +17398,23 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 35-40%" },
-        { target: "self", text: "AGI +1" }
+        { target: "enemy.all", text: "PHYダメ 35-40%" },
+        { target: "self", text: "AGI +1" },
+        { target: "enemy.all", text: "出血 ×4" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)}`, "AGI\u3000+1"]; },
       peekHelpKeys() { return ["agi"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)} ダメージ（PHY 35〜40%）`, "AGI を +1"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 35, 40);
+        api.dealPhySkillToAllEnemies(s, 35, 40);
         s.playerAgi += 1;
+        api.addBleedToAllEnemies(s, 4);
+        api.drawCards(s, 2);
       },
     },
     ext5021: {
@@ -17098,17 +17492,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 35-40%" }
+        { target: "enemy.all", text: "PHYダメ 35-40%" },
+        { target: "enemy.all", text: "出血 ×4" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)} ダメージ（PHY 35〜40%）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 35, 40);
+        api.dealPhySkillToAllEnemies(s, 35, 40);
+        api.addBleedToAllEnemies(s, 4);
+        api.drawCards(s, 2);
       },
     },
     ext5025: {
@@ -17119,19 +17517,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 2,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 30-35%" },
-        { target: "enemy.foremost", text: "出血 ×4" }
+        { target: "enemy.all", text: "INTダメ 30-35%" },
+        { target: "enemy.foremost", text: "出血 ×4" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 30, 35)}`, "出血 ×4（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 30, 35)} ダメージ（INT 30〜35%）`, "敵に出血 ×4 付与"]; },
       play(s) {
-        api.dealIntSkillToEnemy(s, 30, 35);
+        api.dealIntSkillToAllEnemies(s, 30, 35);
         api.addBleedToEnemy(s, 4);
+        api.drawCards(s, 2);
       },
     },
     ext5026: {
@@ -17272,21 +17672,23 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 35-40%" },
+        { target: "enemy.all", text: "INTダメ 35-40%" },
         { target: "self", text: "HP回復 INT10-10%" },
-        { target: "self", text: "INT +1" }
+        { target: "self", text: "INT +1" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 35, 40)}`, "HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 10, 10), "INT\u3000+1"]; },
       peekHelpKeys() { return ["hp", "int"]; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 35, 40)} ダメージ（INT 35〜40%・1v1=単体）`, `HP を回復係数 10〜10% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 10, 10)}）`, "INT を +1"]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 35, 40);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 35, 40);
         api.healPlayerFromIntSkill(s, 10, 10);
         s.playerInt += 1;
+        api.drawCards(s, 2);
       },
     },
     ext5033: {
@@ -17397,19 +17799,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 35-40%" },
-        { target: "self", text: "PHY +1" }
+        { target: "enemy.all", text: "PHYダメ 35-40%" },
+        { target: "self", text: "PHY +1" },
+        { target: "enemy.all", text: "出血 ×4" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)}`, "PHY\u3000+1"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)} ダメージ（PHY 35〜40%）`, "PHY を +1"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 35, 40);
+        api.dealPhySkillToAllEnemies(s, 35, 40);
         s.playerPhy += 1;
+        api.addBleedToAllEnemies(s, 4);
       },
     },
     ext5038: {
@@ -17420,17 +17824,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 20-20%" }
+        { target: "enemy.all", text: "PHYダメ 20-20%" },
+        { target: "enemy.all", text: "出血 ×4" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 20, 20)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 20, 20)} ダメージ（PHY 20〜20%）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 20, 20);
+        api.dealPhySkillToAllEnemies(s, 20, 20);
+        api.addBleedToAllEnemies(s, 4);
+        api.drawCards(s, 2);
       },
     },
     ext5039: {
@@ -17462,19 +17870,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 60-60%" },
-        { target: "enemy.foremost", text: "敵PHY -1" }
+        { target: "enemy.all", text: "PHYダメ 60-60%" },
+        { target: "enemy.foremost", text: "敵PHY -1" },
+        { target: "enemy.all", text: "出血 ×4" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 60, 60)}`, "PHY\u3000-1（敵）"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 60, 60)} ダメージ（PHY 60〜60%）`, "敵の PHY を -1"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 60, 60);
+        api.dealPhySkillToAllEnemies(s, 60, 60);
         s.enemyPhy = Math.max(1, s.enemyPhy + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        api.addBleedToAllEnemies(s, 4);
       },
     },
     ext5041: {
@@ -17506,19 +17916,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 40-60%" },
-        { target: "enemy.foremost", text: "毒 ×4" }
+        { target: "enemy.all", text: "PHYダメ 40-60%" },
+        { target: "enemy.foremost", text: "毒 ×4" },
+        { target: "enemy.all", text: "出血 ×4" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 40, 60)}`, "毒 ×4（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 40, 60)} ダメージ（PHY 40〜60%）`, "敵に毒 ×4 付与"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 40, 60);
+        api.dealPhySkillToAllEnemies(s, 40, 60);
         api.addPoisonToEnemy(s, 4);
+        api.addBleedToAllEnemies(s, 4);
       },
     },
     ext5043: {
@@ -17529,17 +17941,17 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 2,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 50-60%" }
+        { target: "enemy.all", text: "INTダメ 50-60%" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 60)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 50, 60)} ダメージ（INT 50〜60%・1v1=単体）`]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 50, 60);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 50, 60);
       },
     },
     ext5044: {
@@ -17594,17 +18006,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 35-40%" }
+        { target: "enemy.all", text: "PHYダメ 35-40%" },
+        { target: "enemy.all", text: "出血 ×4" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)} ダメージ（PHY 35〜40%）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 35, 40);
+        api.dealPhySkillToAllEnemies(s, 35, 40);
+        api.addBleedToAllEnemies(s, 4);
+        api.drawCards(s, 2);
       },
     },
     ext5047: {
@@ -17615,19 +18031,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "mid",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 0-80%" },
-        { target: "enemy.foremost", text: "INTダメ 0-80%" }
+        { target: "enemy.all", text: "PHYダメ 0-80%" },
+        { target: "enemy.all", text: "INTダメ 0-80%" },
+        { target: "enemy.all", text: "出血 ×4" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 0, 80)}`, `敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 0, 80)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 0, 80)} ダメージ（PHY 0〜80%）`, `敵1体に ${estIntHit(s.playerInt, s.enemyInt, 0, 80)} ダメージ（INT 0〜80%）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 0, 80);
+        api.dealPhySkillToAllEnemies(s, 0, 80);
         api.dealIntSkillToEnemy(s, 0, 80);
+        api.addBleedToAllEnemies(s, 4);
       },
     },
     ext5048: {
@@ -17711,21 +18129,23 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 2,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 25-40%" },
-        { target: "enemy.foremost", text: "PHYダメ 25-40%" },
-        { target: "enemy.foremost", text: "敵AGI -1" }
+        { target: "enemy.all", text: "PHYダメ 25-40%" },
+        { target: "enemy.all", text: "PHYダメ 25-40%" },
+        { target: "enemy.foremost", text: "敵AGI -1" },
+        { target: "enemy.all", text: "出血 ×4" }
       ],
       effectSummaryLines() { return [`敵にダメージ ×2`, "AGI\u3000-1（敵）"]; },
       peekHelpKeys() { return ["agi"]; },
       previewLines() { return [`敵1体に PHY 25〜40% × 2 回ダメージ`, "敵の AGI を -1"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 25, 40);
-        if (s.enemyHp > 0) api.dealPhySkillToEnemy(s, 25, 40);
+        api.dealPhySkillToAllEnemies(s, 25, 40);
+        if (s.enemyHp > 0) api.dealPhySkillToAllEnemies(s, 25, 40);
         s.enemyAgi = Math.max(1, s.enemyAgi + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        api.addBleedToAllEnemies(s, 4);
       },
     },
     ext5055: {
@@ -17736,17 +18156,19 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 2,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 30-40%" }
+        { target: "enemy.all", text: "INTダメ 30-40%" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 30, 40)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 30, 40)} ダメージ（INT 30〜40%）`]; },
       play(s) {
-        api.dealIntSkillToEnemy(s, 30, 40);
+        api.dealIntSkillToAllEnemies(s, 30, 40);
+        api.drawCards(s, 2);
       },
     },
     ext5056: {
@@ -18185,19 +18607,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 35-40%" },
-        { target: "self", text: "PHY +1" }
+        { target: "enemy.all", text: "PHYダメ 35-40%" },
+        { target: "self", text: "PHY +1" },
+        { target: "enemy.all", text: "出血 ×4" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)}`, "PHY\u3000+1"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)} ダメージ（PHY 35〜40%）`, "PHY を +1"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 35, 40);
+        api.dealPhySkillToAllEnemies(s, 35, 40);
         s.playerPhy += 1;
+        api.addBleedToAllEnemies(s, 4);
       },
     },
     ext5080: {
@@ -18208,19 +18632,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 2,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 35-45%" },
-        { target: "self", text: "AGI +1" }
+        { target: "enemy.all", text: "INTダメ 35-45%" },
+        { target: "self", text: "AGI +1" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 35, 45)}`, "AGI\u3000+1"]; },
       peekHelpKeys() { return ["agi"]; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 35, 45)} ダメージ（INT 35〜45%・1v1=単体）`, "AGI を +1"]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 35, 45);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 35, 45);
         s.playerAgi += 1;
+        api.drawCards(s, 2);
       },
     },
     ext5081: {
@@ -18340,21 +18766,25 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 20-20%" },
+        { target: "enemy.all", text: "PHYダメ 20-20%" },
         { target: "enemy.foremost", text: "敵INT -1" },
-        { target: "enemy.foremost", text: "毒 ×4" }
+        { target: "enemy.foremost", text: "毒 ×4" },
+        { target: "enemy.all", text: "出血 ×4" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 20, 20)}`, "INT\u3000-1（敵）", "毒 ×4（敵）"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 20, 20)} ダメージ（PHY 20〜20%）`, "敵の INT を -1", "敵に毒 ×4 付与"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 20, 20);
+        api.dealPhySkillToAllEnemies(s, 20, 20);
         s.enemyInt = Math.max(1, s.enemyInt + (-1)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
         api.addPoisonToEnemy(s, 4);
+        api.addBleedToAllEnemies(s, 4);
+        api.drawCards(s, 2);
       },
     },
     ext5090: {
@@ -18430,18 +18860,18 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 50-50%" },
+        { target: "enemy.all", text: "INTダメ 50-50%" },
         { target: "self", text: "AGI +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 50)}`, "AGI\u3000+2"]; },
       peekHelpKeys() { return ["agi"]; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 50, 50)} ダメージ（INT 50〜50%）`, "AGI を +2"]; },
       play(s) {
-        api.dealIntSkillToEnemy(s, 50, 50);
+        api.dealIntSkillToAllEnemies(s, 50, 50);
         s.playerAgi += 2;
       },
     },
@@ -18570,17 +19000,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 20-20%" }
+        { target: "enemy.all", text: "PHYダメ 20-20%" },
+        { target: "enemy.all", text: "出血 ×4" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 20, 20)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 20, 20)} ダメージ（PHY 20〜20%）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 20, 20);
+        api.dealPhySkillToAllEnemies(s, 20, 20);
+        api.addBleedToAllEnemies(s, 4);
+        api.drawCards(s, 2);
       },
     },
     ext5100: {
@@ -18662,17 +19096,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 28-28%" }
+        { target: "enemy.all", text: "PHYダメ 28-28%" },
+        { target: "enemy.all", text: "出血 ×4" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 28, 28)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 28, 28)} ダメージ（PHY 28〜28%）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 28, 28);
+        api.dealPhySkillToAllEnemies(s, 28, 28);
+        api.addBleedToAllEnemies(s, 4);
+        api.drawCards(s, 2);
       },
     },
     ext5105: {
@@ -18922,17 +19360,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 35-35%" }
+        { target: "enemy.all", text: "PHYダメ 35-35%" },
+        { target: "enemy.all", text: "出血 ×4" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 35, 35)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 35, 35)} ダメージ（PHY 35〜35%）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 35, 35);
+        api.dealPhySkillToAllEnemies(s, 35, 35);
+        api.addBleedToAllEnemies(s, 4);
+        api.drawCards(s, 2);
       },
     },
     ext5117: {
@@ -18966,19 +19408,23 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 42-42%" },
-        { target: "enemy.foremost", text: "敵INT -6" }
+        { target: "enemy.all", text: "PHYダメ 42-42%" },
+        { target: "enemy.foremost", text: "敵INT -6" },
+        { target: "enemy.all", text: "出血 ×4" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 42, 42)}`, "INT\u3000-6（敵）"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 42, 42)} ダメージ（PHY 42〜42%）`, "敵の INT を -6"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 42, 42);
+        api.dealPhySkillToAllEnemies(s, 42, 42);
         s.enemyInt = Math.max(1, s.enemyInt + (-6)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        api.addBleedToAllEnemies(s, 4);
+        api.drawCards(s, 2);
       },
     },
     ext5119: {
@@ -19123,19 +19569,23 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 35-40%" },
-        { target: "self", text: "PHY +3" }
+        { target: "enemy.all", text: "PHYダメ 35-40%" },
+        { target: "self", text: "PHY +3" },
+        { target: "enemy.all", text: "出血 ×4" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)}`, "PHY\u3000+3"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 35, 40)} ダメージ（PHY 35〜40%）`, "PHY を +3"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 35, 40);
+        api.dealPhySkillToAllEnemies(s, 35, 40);
         s.playerPhy += 3;
+        api.addBleedToAllEnemies(s, 4);
+        api.drawCards(s, 2);
       },
     },
     ext5126: {
@@ -19146,19 +19596,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 35-40%" },
-        { target: "self", text: "INT +3" }
+        { target: "enemy.all", text: "INTダメ 35-40%" },
+        { target: "self", text: "INT +3" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 35, 40)}`, "INT\u3000+3"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 35, 40)} ダメージ（INT 35〜40%・1v1=単体）`, "INT を +3"]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 35, 40);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 35, 40);
         s.playerInt += 3;
+        api.drawCards(s, 2);
       },
     },
     ext5127: {
@@ -19190,19 +19642,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 40-45%" },
-        { target: "enemy.foremost", text: "INTダメ 40-45%" }
+        { target: "enemy.all", text: "PHYダメ 40-45%" },
+        { target: "enemy.all", text: "INTダメ 40-45%" },
+        { target: "enemy.all", text: "出血 ×4" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 40, 45)}`, `敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 40, 45)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 40, 45)} ダメージ（PHY 40〜45%）`, `敵1体に ${estIntHit(s.playerInt, s.enemyInt, 40, 45)} ダメージ（INT 40〜45%）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 40, 45);
+        api.dealPhySkillToAllEnemies(s, 40, 45);
         api.dealIntSkillToEnemy(s, 40, 45);
+        api.addBleedToAllEnemies(s, 4);
       },
     },
     ext5129: {
@@ -19259,19 +19713,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 20-20%" },
-        { target: "enemy.foremost", text: "毒 ×4" }
+        { target: "enemy.all", text: "INTダメ 20-20%" },
+        { target: "enemy.foremost", text: "毒 ×4" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 20, 20)}`, "毒 ×4（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 20, 20)} ダメージ（INT 20〜20%・1v1=単体）`, "敵に毒 ×4 付与"]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 20, 20);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 20, 20);
         api.addPoisonToEnemy(s, 4);
+        api.drawCards(s, 2);
       },
     },
     ext5132: {
@@ -19525,18 +19981,18 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 2,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 30-55%" },
+        { target: "enemy.all", text: "INTダメ 30-55%" },
         { target: "enemy.foremost", text: "毒 ×4" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 30, 55)}`, "毒 ×4（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 30, 55)} ダメージ（INT 30〜55%・1v1=単体）`, "敵に毒 ×4 付与"]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 30, 55);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 30, 55);
         api.addPoisonToEnemy(s, 4);
       },
     },
@@ -19594,19 +20050,23 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 40-40%" },
-        { target: "enemy.foremost", text: "毒 ×4" }
+        { target: "enemy.all", text: "PHYダメ 40-40%" },
+        { target: "enemy.foremost", text: "毒 ×4" },
+        { target: "enemy.all", text: "出血 ×4" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 40, 40)}`, "毒 ×4（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 40, 40)} ダメージ（PHY 40〜40%）`, "敵に毒 ×4 付与"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 40, 40);
+        api.dealPhySkillToAllEnemies(s, 40, 40);
         api.addPoisonToEnemy(s, 4);
+        api.addBleedToAllEnemies(s, 4);
+        api.drawCards(s, 2);
       },
     },
     ext5149: {
@@ -19617,19 +20077,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 2,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 40-40%" },
-        { target: "enemy.foremost", text: "毒 ×4" }
+        { target: "enemy.all", text: "INTダメ 40-40%" },
+        { target: "enemy.foremost", text: "毒 ×4" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 40, 40)}`, "毒 ×4（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 40, 40)} ダメージ（INT 40〜40%・1v1=単体）`, "敵に毒 ×4 付与"]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 40, 40);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 40, 40);
         api.addPoisonToEnemy(s, 4);
+        api.drawCards(s, 2);
       },
     },
     ext5150: {
@@ -19640,17 +20102,19 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 20-20%" }
+        { target: "enemy.all", text: "INTダメ 20-20%" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 20, 20)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 20, 20)} ダメージ（INT 20〜20%・1v1=単体）`]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 20, 20);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 20, 20);
+        api.drawCards(s, 2);
       },
     },
     ext5151: {
@@ -20000,17 +20464,19 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 2,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 35-40%" }
+        { target: "enemy.all", text: "INTダメ 35-40%" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 35, 40)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 35, 40)} ダメージ（INT 35〜40%・1v1=単体）`]; },
       play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 35, 40);
+        api.playBattleSe("area"); api.dealIntSkillToAllEnemies(s, 35, 40);
+        api.drawCards(s, 2);
       },
     },
     ext5170: {
@@ -20088,21 +20554,23 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 30-30%" },
+        { target: "enemy.all", text: "INTダメ 30-30%" },
         { target: "enemy.foremost", text: "出血 ×4" },
-        { target: "enemy.foremost", text: "毒 ×4" }
+        { target: "enemy.foremost", text: "毒 ×4" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 30, 30)}`, "出血 ×4（敵）", "毒 ×4（敵）"]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 30, 30)} ダメージ（INT 30〜30%）`, "敵に出血 ×4 付与", "敵に毒 ×4 付与"]; },
       play(s) {
-        api.dealIntSkillToEnemy(s, 30, 30);
+        api.dealIntSkillToAllEnemies(s, 30, 30);
         api.addBleedToEnemy(s, 4);
         api.addPoisonToEnemy(s, 4);
+        api.drawCards(s, 2);
       },
     },
     ext5174: {
@@ -20176,19 +20644,21 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 45-50%" },
-        { target: "self", text: "PHY +1" }
+        { target: "enemy.all", text: "PHYダメ 45-50%" },
+        { target: "self", text: "PHY +1" },
+        { target: "enemy.all", text: "出血 ×4" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 45, 50)}`, "PHY\u3000+1"]; },
       peekHelpKeys() { return ["phy"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 45, 50)} ダメージ（PHY 45〜50%）`, "PHY を +1"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 45, 50);
+        api.dealPhySkillToAllEnemies(s, 45, 50);
         s.playerPhy += 1;
+        api.addBleedToAllEnemies(s, 4);
       },
     },
     ext5178: {
@@ -20199,18 +20669,18 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "INTダメ 45-50%" },
+        { target: "enemy.all", text: "INTダメ 45-50%" },
         { target: "self", text: "INT +1" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 45, 50)}`, "INT\u3000+1"]; },
       peekHelpKeys() { return ["int"]; },
       previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 45, 50)} ダメージ（INT 45〜50%）`, "INT を +1"]; },
       play(s) {
-        api.dealIntSkillToEnemy(s, 45, 50);
+        api.dealIntSkillToAllEnemies(s, 45, 50);
         s.playerInt += 1;
       },
     },
@@ -20356,21 +20826,23 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 55-55%" },
+        { target: "enemy.all", text: "PHYダメ 55-55%" },
         { target: "self", text: "PHY +3" },
-        { target: "enemy.foremost", text: "敵AGI -6" }
+        { target: "enemy.foremost", text: "敵AGI -6" },
+        { target: "enemy.all", text: "出血 ×4" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 55, 55)}`, "PHY\u3000+3", "AGI\u3000-6（敵）"]; },
       peekHelpKeys() { return ["phy", "agi"]; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 55, 55)} ダメージ（PHY 55〜55%）`, "PHY を +3", "敵の AGI を -6"]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 55, 55);
+        api.dealPhySkillToAllEnemies(s, 55, 55);
         s.playerPhy += 3;
         s.enemyAgi = Math.max(1, s.enemyAgi + (-6)); api.playBattleSe("debuff"); api.portraitFx("enemy", "debuff");
+        api.addBleedToAllEnemies(s, 4);
       },
     },
     ext5186: {
@@ -20444,19 +20916,23 @@ function makeCardLibrary(clog, api) {
       skillIcon: "phy.png",
       cost: 1,
       type: "atk",
-      target: "enemy.foremost",
+      target: "enemy.all",
       caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
-        { target: "enemy.foremost", text: "PHYダメ 30-35%" },
-        { target: "enemy.foremost", text: "INTダメ 30-35%" }
+        { target: "enemy.all", text: "PHYダメ 30-35%" },
+        { target: "enemy.all", text: "INTダメ 30-35%" },
+        { target: "enemy.all", text: "出血 ×4" },
+        { target: "self", text: "ドロー +2" }
       ],
       effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 30, 35)}`, `敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 30, 35)}`]; },
       peekHelpKeys() { return []; },
       previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 30, 35)} ダメージ（PHY 30〜35%）`, `敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 30, 35)} ダメージ（INT 30〜35%・1v1=単体）`]; },
       play(s) {
-        api.dealPhySkillToEnemy(s, 30, 35);
+        api.dealPhySkillToAllEnemies(s, 30, 35);
         api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 30, 35);
+        api.addBleedToAllEnemies(s, 4);
+        api.drawCards(s, 2);
       },
     },
     ext5190: {
