@@ -82,6 +82,7 @@ import {
   applyPassiveTriggerAsync,
   checkPassiveThresholds,
   getRegisteredPassive,
+  multiplyPassiveDescription,
 } from "./passive-runtime.js";
 import { SAMPLE_PASSIVES } from "./passives-sample.js";
 import { PASSIVES } from "./passives-generated.js";
@@ -6822,7 +6823,11 @@ function togglePassivePopup() {
   }
   const heroName   = LEADER.nameJa        || "—";
   const skillName  = LEADER.passiveName   || "—";
-  const skillDesc  = LEADER.passiveDesc   || "—";
+  // β1: trigger 別倍率を効果数値に反映した文言で表示
+  const rawDesc    = LEADER.passiveDesc   || "—";
+  const skillDesc  = LEADER.passiveKey
+    ? multiplyPassiveDescription(LEADER.passiveKey, rawDesc)
+    : rawDesc;
   popup.innerHTML =
     `<div class="pp-hero-name">${heroName}</div>` +
     `<div class="pp-skill-name">【${skillName}】</div>` +
@@ -7369,7 +7374,11 @@ function renderHeroSelect() {
       html += `<span>INT ${hero.baseInt}</span>`;
       html += `<span>AGI ${hero.baseAgi}</span>`;
       html += `</div>`;
-      html += `<div class="hs-passive"><span class="hs-passive-name">【${hero.passiveName || '—'}】</span>${hero.passiveDesc}</div>`;
+      // β1: trigger 別倍率を効果数値に反映した文言で表示
+      const heroPassiveDesc = hero.passiveKey
+        ? multiplyPassiveDescription(hero.passiveKey, hero.passiveDesc)
+        : hero.passiveDesc;
+      html += `<div class="hs-passive"><span class="hs-passive-name">【${hero.passiveName || '—'}】</span>${heroPassiveDesc}</div>`;
       html += `</div></div>`;
     });
     html += '</div>';

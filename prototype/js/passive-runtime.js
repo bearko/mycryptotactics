@@ -98,6 +98,100 @@ function multiplierFor(triggerKind) {
   return TRIGGER_BUFF_MULTIPLIER[triggerKind] ?? 1;
 }
 
+// ─── 説明文 (passiveDesc) の数値倍率書き換え ──────────────────────
+// "戦闘開始時に発動・敵にPHYの40%ダメージ" を mult=3 で書き換えると
+// "戦闘開始時に発動・敵にPHYの120%ダメージ" になる。
+// trigger 句 (HP%未満 / 確率% / 1回だけ等) は触らず、effects 部のみ
+// 正規表現置換。stacks 系は最小 1 で四捨五入。
+function rewriteEffectNumbers(body, mult) {
+  if (!body || mult === 1) return body;
+  const round = (n) => Math.round(n);
+  const stack = (n) => Math.max(1, Math.round(n));
+
+  // PHY/INT N% ダメージ — 接頭辞 (敵に / 先頭の敵に / 中衛の敵に等) は match 範囲外。
+  // 「敵に」を起点にすると「先頭の敵に...」も同じ regex が拾うので、別 regex で
+  // ダブルマッチさせない (旧版でこのバグあり、self.tookDamage の zhang が 80% 化していた)
+  body = body.replace(
+    /(敵に(?:PHY|INT)(?:の)?)(\d+)(?:[~〜](\d+))?(%(?:追加)?ダメージ)/g,
+    (_full, p1, lo, hi, p4) => hi
+      ? `${p1}${round(+lo * mult)}〜${round(+hi * mult)}${p4}`
+      : `${p1}${round(+lo * mult)}${p4}`,
+  );
+  // 自身のPHY/INT/AGI を Nアップ
+  body = body.replace(
+    /(自身の(?:PHY|INT|AGI)を)(\d+)(アップ)/g,
+    (_, p1, n, p3) => `${p1}${round(+n * mult)}${p3}`,
+  );
+  // 自身のPHY/INT/AGI+N
+  body = body.replace(
+    /(自身の(?:PHY|INT|AGI))\+(\d+)/g,
+    (_, p1, n) => `${p1}+${round(+n * mult)}`,
+  );
+  // 短縮形: " INT +3" / "PHY +5" (自身の prefix 抜け、e.g. doyle "INT +3")
+  body = body.replace(
+    /(^|[\s・／])(PHY|INT|AGI)\s*\+\s*(\d+)/g,
+    (_, sep, stat, n) => `${sep}${stat} +${round(+n * mult)}`,
+  );
+  // 自身のXを最大YのN%アップ
+  body = body.replace(
+    /(自身の(?:PHY|INT|AGI)を最大(?:PHY|INT|AGI)の)(\d+)(%アップ)/g,
+    (_, p1, n, p3) => `${p1}${round(+n * mult)}${p3}`,
+  );
+  // PHYとINTを互いの値のN%アップ
+  body = body.replace(
+    /(PHYとINTを互いの値の)(\d+)(%アップ)/g,
+    (_, p1, n, p3) => `${p1}${round(+n * mult)}${p3}`,
+  );
+  // 敵のXをN%ダウン
+  body = body.replace(
+    /(敵の(?:PHY|INT|AGI)を)(\d+)(%ダウン)/g,
+    (_, p1, n, p3) => `${p1}${round(+n * mult)}${p3}`,
+  );
+  // 敵のX-N
+  body = body.replace(
+    /(敵の(?:PHY|INT|AGI))-(\d+)/g,
+    (_, p1, n) => `${p1}-${round(+n * mult)}`,
+  );
+  // 敵に毒/出血 ×N 付与 (× は ASCII x も許容)
+  body = body.replace(
+    /(敵に(?:毒|出血)[×x])(\d+)(付与)/g,
+    (_, p1, n, p3) => `${p1}${stack(+n * mult)}${p3}`,
+  );
+  // ガード/シールド +N
+  body = body.replace(
+    /((?:ガード|シールド))\+(\d+)/g,
+    (_, p1, n) => `${p1}+${round(+n * mult)}`,
+  );
+  // HPを最大HPのN%回復
+  body = body.replace(
+    /(HPを最大HPの)(\d+)(%回復)/g,
+    (_, p1, n, p3) => `${p1}${round(+n * mult)}${p3}`,
+  );
+  // HPを回復係数のN(〜N)%回復
+  body = body.replace(
+    /(HPを回復係数の)(\d+)(?:[~〜](\d+))?(%回復)/g,
+    (_, p1, lo, hi, p4) => hi
+      ? `${p1}${round(+lo * mult)}〜${round(+hi * mult)}${p4}`
+      : `${p1}${round(+lo * mult)}${p4}`,
+  );
+  return body;
+}
+
+/** 説明文 (passiveDesc) の効果数値を trigger 倍率で書き換える。
+ *  passiveKey 未登録 / 倍率 1 の場合は元 desc をそのまま返す。 */
+export function multiplyPassiveDescription(passiveKey, desc) {
+  if (!desc) return desc;
+  const def = getRegisteredPassive(passiveKey);
+  if (!def) return desc;
+  const mult = multiplierFor(def.trigger);
+  if (mult === 1) return desc;
+  // 「<trigger 句>に発動・<body>」を分離して body のみ書き換え
+  const m = desc.match(/^(.+?に発動・)(.+)$/);
+  if (m) return m[1] + rewriteEffectNumbers(m[2], mult);
+  // 「に発動・」が無い場合は全体を body と見なす
+  return rewriteEffectNumbers(desc, mult);
+}
+
 // ─── trigger ごとのフィルタ ─────────────────────────────────────────
 
 /** trigger と現在の戦闘状態を見て発動可否を判定 */
