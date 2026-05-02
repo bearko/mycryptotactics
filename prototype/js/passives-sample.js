@@ -2,7 +2,12 @@
  * passives-sample.js — SPEC-006 §18: 動作確認用の手動変換サンプル
  *
  * Phase 4j 完了時には content 担当の codemod 出力 (passives-generated.js) で
- * 全 210 体を一括変換する。本ファイルは runtime の単体動作確認用。
+ * 全 210 体を一括変換する。本 SAMPLE_PASSIVES は手検証済みの 5 体で、
+ * `init()` で PASSIVES の後に register することで上書きする (後勝ち)。
+ *
+ * PassiveDef shape は passive-runtime.js のコメント参照。
+ * notes? フィールドは QA/監査用のメモで runtime は読まない (PR #76 codemod が
+ * fallback 適用箇所に自動で書き込むほか、手動修正時もここに根拠を残せる)。
  *
  * 既存 hardcoded apply*Passive 関数からの変換例:
  * - kaihime, zhang, doyle: 既存 3 体 (legacy → DSL)
@@ -71,5 +76,6 @@ export const SAMPLE_PASSIVES = {
       { target: "self", action: "revive", coef: { hpRatio: 0.20 } },
     ],
     cutinSkillName: "魔王",
+    notes: "PR #52 で hasResurrection フラグから revive action 直接実行に切替 (§18.6.3 case A)。同期実行制約 §18.6.1 で applyHpDeltaToHero 内同期発動",
   },
 };

@@ -1,115 +1,43 @@
 /**
- * gen-passives.js — SPEC-006 §18 Phase 4j codemod
+ * gen-passives.js — SPEC-006 §18 Phase 4j codemod (game CSV 対応版)
  *
- * MCH ヒーロー CSV (Common+Uncommon+Rare+Epic+Legendary 全 210 体)
- * から PassiveDef 宣言形式に変換、`passives-generated.js` を出力。
+ * `prototype/data/heroes.csv` (game 内で使用している正本) から PassiveDef
+ * 宣言形式に変換、`passives-generated.js` を出力。
  *
  * 使い方:
- *   node prototype/tools/gen-passives.js <csv> > prototype/js/passives-generated.js
+ *   node prototype/tools/gen-passives.js prototype/data/heroes.csv > prototype/js/passives-generated.js
  *
- * 既存の gen-{uncommon,rare,epic,legendary}-heroes.js のパース層を流用しつつ、
- * 出力先を「ハードコード関数」ではなく「PassiveDef オブジェクト」に変更。
+ * 履歴:
+ *   v1 (PR #76): MCH 内部 DB 形式の英訳混じり CSV を想定して書かれていたが、
+ *     ゲームの heroes.csv (簡素化された日本語) と phrasing が大幅に異なり
+ *     93 件のヒーローで trigger を誤分類していた (e.g. giraffa が
+ *     self.statRatioAbove に分類され戦闘開始時に発動しない問題)。
+ *   v2 (本ファイル): heroes.csv の実フォーマット
+ *     `<trigger 句>に発動・<effect 1>／<effect 2>...` を直接パース。
  *
- * 対応する trigger 種別 (SPEC-006 §18.1):
- *   combat.started / self.cardPlayed / self.tookDamage / self.died /
- *   self.hpBelow / party.hpBelow / enemy.hpBelow / self.statRatioAbove /
- *   enemy.cardPlayed
- *
- * action 語彙 (Phase 4j HANDOFF 提案):
- *   damage / heal / applyStatus / buffStat /
- *   addGuard / addShield / revive
- *
- * 設計上の簡略化:
- * - 元 DB の {triggerRate} placeholder は実値が無いためレアリティ別の既定値で埋める
- * - ステータス上昇/減少の N% は flat +N にスケール (レアリティ別 cap)
- * - 状態異常 stack 数もレアリティ別 (Common/Uncommon 1, Rare 2, Epic 3, Legendary 4)
- * - 元 DB の派閥 / 位置指定 (前衛/中衛/最後尾 等) は target を foremost か self に統一
+ * CSV カラム:
+ *   heroId,nameJa,rarity,hpMax,basePhy,baseInt,baseAgi,passiveKey,passiveName,passiveDesc
  */
 const fs = require("fs");
 
-// ─── heroId → passiveKey マスタ ────────────────────────────────
-// gen-{uncommon,rare,epic,legendary}-heroes.js の PASSIVE_KEYS を統合 + 1001-1010 の手動キー
-const PASSIVE_KEYS = {
-  // Common 1001-1003 (legacy, 既存実装あり)
-  1001: "doyle", 1002: "kaihime", 1003: "zhang",
-  // Common 1004-1010 (PR #50)
-  1004: "seton", 1005: "inoh", 1006: "pythagoras", 1007: "daejanggeum",
-  1008: "sullivan", 1009: "hercules", 1010: "giraffa",
-  // Uncommon 2001-2053 (PR #52)
-  2001: "wright_brothers", 2002: "spartacus", 2003: "jack_ripper", 2004: "schubert",
-  2005: "grimm", 2006: "archimedes", 2007: "santa", 2008: "schrodinger",
-  2009: "ranmaru", 2010: "kafka", 2011: "sunzi", 2012: "mitsunari",
-  2013: "xuchu", 2014: "yoshinobu", 2015: "montesquieu", 2016: "anastasia",
-  2017: "geronimo", 2018: "chacha", 2019: "kintaro", 2020: "mitsuhide",
-  2021: "shinsaku", 2022: "andersen", 2023: "michelangelo", 2024: "salome",
-  2025: "satoshi", 2026: "hideyoshi", 2027: "aesop", 2028: "chun_sisters",
-  2029: "ikkyu", 2030: "izumo", 2031: "bismarck", 2032: "montgomery",
-  2033: "goethe", 2034: "plato", 2035: "sarutahiko", 2036: "ichiyo",
-  2037: "sunce", 2038: "kiyomori", 2039: "dostoevsky", 2040: "mulan",
-  2041: "franklin", 2042: "gama", 2043: "saizo", 2044: "socrates",
-  2045: "daruma", 2046: "masako", 2047: "aristotle", 2048: "renoir",
-  2049: "chopin", 2050: "ippatsuman", 2051: "armaroid", 2052: "uka",
-  2053: "ramon",
-  // Rare 3001-3054 (PR #55、3033 欠番)
-  3001: "etheremon_red", 3002: "dartagnan", 3003: "gennai", 3004: "mata_hari",
-  3005: "etheremon_blue", 3006: "etheremon_green", 3007: "nero", 3008: "nostradamus",
-  3009: "taikoubou", 3010: "hattori", 3011: "keiji", 3012: "shiro_amakusa",
-  3013: "goemon", 3014: "kanetsugu", 3015: "ivan", 3016: "basho",
-  3017: "sanzo", 3018: "benkei", 3019: "huangzhong", 3020: "diaochan",
-  3021: "valentinus", 3022: "pocahontas", 3023: "sunjian", 3024: "rubens",
-  3025: "yukimura", 3026: "robin_hood", 3027: "yangduanhe", 3028: "monet",
-  3029: "mary_read", 3030: "shakespeare", 3031: "earp", 3032: "bonny",
-  3034: "percival", 3035: "komachi", 3036: "starr", 3037: "magellan",
-  3038: "sasuke", 3039: "lakshmibai", 3040: "gilgamesh", 3041: "raphael",
-  3042: "columbus", 3043: "newton", 3044: "ieyasu", 3045: "hajime",
-  3046: "maria_theresia", 3047: "attila", 3048: "machao", 3049: "dongzhuo",
-  3050: "maeve", 3051: "yoritomo", 3052: "casshern", 3053: "crystal_boy",
-  3054: "douran",
-  // Epic 4001-4061 (PR #58)
-  4001: "zhangfei", 4002: "nightingale", 4003: "beethoven", 4004: "kojiro",
-  4005: "katsu_kaishu", 4006: "billy_kid", 4007: "edison", 4008: "marco_polo",
-  4009: "masamune", 4010: "ouki", 4011: "marx", 4012: "okita",
-  4013: "tchaikovsky", 4014: "antoinette", 4015: "yang_guifei", 4016: "lubu",
-  4017: "curie", 4018: "sunquan", 4019: "kamehameha", 4020: "calamity_jane",
-  4021: "vangogh", 4022: "tomoe", 4023: "zhaoyun", 4024: "yuefei",
-  4025: "shingen", 4026: "caesar", 4027: "hijikata", 4028: "darwin",
-  4029: "yamato_takeru", 4030: "mozart", 4031: "masakado", 4032: "kenshin",
-  4033: "lincoln", 4034: "satoshi_omega", 4035: "kondo", 4036: "blackbeard",
-  4037: "guanyu", 4038: "brynhildr", 4039: "saigo", 4040: "hanxin",
-  4041: "tesla", 4042: "buddha", 4043: "atom", 4044: "fabre",
-  4045: "lancelot", 4046: "rasputin", 4047: "hannibal", 4048: "zhouyu",
-  4049: "xiahoudun", 4050: "simayi", 4051: "rama", 4052: "drake",
-  4053: "tell", 4054: "michizane", 4055: "tadakatsu", 4056: "soseki",
-  4057: "boudica", 4058: "yatterman", 4059: "cobra", 4060: "suzuishi",
-  4061: "tyrfing",
-  // Legendary 5001-5033 (PR #66)
-  5001: "nobunaga", 5002: "napoleon", 5003: "caocao", 5004: "washington",
-  5005: "davinci", 5006: "arthur", 5007: "jeanne", 5008: "ryoma",
-  5009: "liubei", 5010: "einstein", 5011: "himiko", 5012: "bach",
-  5013: "chinggis", 5014: "charlemagne", 5015: "kongming", 5016: "cleopatra",
-  5017: "alexander", 5018: "qinshihuang", 5019: "yoshitsune", 5020: "tutankhamun",
-  5021: "seimei", 5022: "guji", 5023: "richard", 5024: "hokusai",
-  5025: "xiangyu", 5026: "liubang", 5027: "galileo", 5028: "yoichi",
-  5029: "black_prince", 5030: "wuzetian", 5031: "scipio", 5032: "musashi",
-  5033: "yatagarasu",
+// ─── レアリティ別パラメータ ────────────────────────────────────
+const RARITY_BY_LOWER = {
+  common: "Common", uncommon: "Uncommon", rare: "Rare",
+  epic: "Epic", legendary: "Legendary",
 };
-
-// ─── レアリティ別スケーリング ──────────────────────────────
 const RARITY_SCALING = {
-  Common:    { statCap: 3, debuffCap: 2, stackBase: 1 },
-  Uncommon:  { statCap: 5, debuffCap: 4, stackBase: 1 },
-  Rare:      { statCap: 6, debuffCap: 5, stackBase: 2 },
-  Epic:      { statCap: 7, debuffCap: 6, stackBase: 3 },
-  Legendary: { statCap: 9, debuffCap: 7, stackBase: 4 },
+  Common:    { stackBase: 1 },
+  Uncommon:  { stackBase: 1 },
+  Rare:      { stackBase: 2 },
+  Epic:      { stackBase: 3 },
+  Legendary: { stackBase: 4 },
 };
-
-// ─── 既定 triggerRate (元 DB の {triggerRate} placeholder の代替) ────
 const DEFAULT_TRIGGER_RATE = {
   "combat.started": 1.0,
   "self.cardPlayed": 0.4,
   "self.tookDamage": 0.5,
   "self.died": 1.0,
-  "self.hpBelow": 1.0,         // oncePerCombat で実質 1 回
+  "self.hpBelow": 1.0,
   "party.hpBelow": 1.0,
   "enemy.hpBelow": 1.0,
   "self.statRatioAbove": 1.0,
@@ -135,7 +63,6 @@ function parseCsvLine(line) {
   cells.push(cur);
   return cells;
 }
-
 function parseCsv(text) {
   const out = [];
   let buf = "", inQuote = false;
@@ -149,214 +76,251 @@ function parseCsv(text) {
 }
 
 // ─── trigger 検出 ──────────────────────────────────────────────
-function detectTrigger(text) {
-  if (!text) return { kind: "combat.started", oncePerCombat: true };
+// passiveDesc は "<trigger 句>に発動・<effect>...(／<effect>)*" か、
+// たまに "<trigger 句>・<effect>..." (発動 抜け) のことも。
+function splitTriggerAndBody(text) {
+  if (!text) return { triggerPart: "", body: "" };
+  let m = text.match(/^([^・]+?)に発動・(.+)$/);
+  if (m) return { triggerPart: m[1], body: m[2] };
+  m = text.match(/^([^・]+?)・(.+)$/);
+  if (m) return { triggerPart: m[1], body: m[2] };
+  return { triggerPart: text, body: "" };
+}
 
-  if (/敵の誰かがActive Skill/.test(text)) {
-    return { kind: "enemy.cardPlayed", oncePerCombat: false };
+function detectTrigger(passiveDesc) {
+  const { triggerPart, body } = splitTriggerAndBody(passiveDesc);
+  const tp = triggerPart || passiveDesc || "";
+
+  // 確率発動 ("N%の確率で")
+  let triggerRate = null;
+  const rateM = tp.match(/(\d+)\s*%\s*の確率で/);
+  if (rateM) triggerRate = +rateM[1] / 100;
+
+  // 戦闘開始時 / バトル開始時
+  if (/戦闘開始時|バトル開始時/.test(tp)) {
+    return { kind: "combat.started", oncePerCombat: true, triggerRate };
   }
-  if (/Active Skillを使用した後/.test(text)) {
-    return { kind: "self.cardPlayed", oncePerCombat: false };
+  // カード使用後 (スキル / Active Skill / 単独カード)
+  if (/(スキル)?カード使用後|Active\s*Skill\s*を使用した後/i.test(tp)) {
+    return { kind: "self.cardPlayed", oncePerCombat: false, triggerRate };
   }
-  if (/Active Skillでダメージを受けた後/.test(text)) {
-    return { kind: "self.tookDamage", oncePerCombat: false };
+  // 被ダメージ後
+  if (/被ダメージ後|ダメージを受けた後|Active\s*Skill\s*でダメージを受けた後/i.test(tp)) {
+    return { kind: "self.tookDamage", oncePerCombat: false, triggerRate };
   }
-  if (/死亡した後/.test(text)) {
-    return { kind: "self.died", oncePerCombat: true };
+  // HP 閾値: HPが N%(未満|以下)
+  let m = tp.match(/HPが\s*(\d+)\s*%\s*(未満|以下)/);
+  if (m) return { kind: "self.hpBelow", oncePerCombat: true, threshold: +m[1] / 100, triggerRate };
+  // 死亡時 (能動的 trigger; 致死時生存は effect 側で扱う)
+  if (/死亡時|死亡した後/.test(tp)) {
+    return { kind: "self.died", oncePerCombat: true, triggerRate };
   }
-  // HP 閾値 (味方/敵全体は別)
-  let m = text.match(/味方全体のHP合計が\s*(\d+)\s*%未満/);
-  if (m) return { kind: "party.hpBelow", oncePerCombat: true, threshold: +m[1] / 100 };
-  m = text.match(/敵全体のHP合計が\s*(\d+)\s*%未満/);
-  if (m) return { kind: "enemy.hpBelow", oncePerCombat: true, threshold: +m[1] / 100 };
-  m = text.match(/HPが\s*(\d+)\s*%未満/);
-  if (m) return { kind: "self.hpBelow", oncePerCombat: true, threshold: +m[1] / 100 };
-  m = text.match(/合計が元の値の\s*(\d+)\s*%以上/);
-  if (m) return { kind: "self.statRatioAbove", oncePerCombat: true, threshold: +m[1] / 100 };
-  if (/合計が元の値の\s*\d+\s*%未満/.test(text)) {
-    // 例: 3012 天草四郎 (statRatioBelow 簡略化)
-    return { kind: "combat.started", oncePerCombat: true, _note: "self.statRatioBelow → combat.started 簡略化" };
+  // 敵がカード使用 (rare)
+  if (/敵の誰かが.*Active\s*Skill|敵がカード使用|敵がスキル使用/i.test(tp)) {
+    return { kind: "enemy.cardPlayed", oncePerCombat: false, triggerRate };
   }
-  if (/バトル開始時/.test(text)) {
-    return { kind: "combat.started", oncePerCombat: true };
+  // ターン開始時 / ターン終了時 (現状 runtime 未対応 → combat.started fallback)
+  if (/ターン開始時|ターン終了時/.test(tp)) {
+    return { kind: "combat.started", oncePerCombat: true, triggerRate, _note: `${tp.match(/ターン[^時]*時/)[0]} → combat.started 簡略化 (runtime 未対応)` };
   }
-  // 不明 → combat.started fallback
-  return { kind: "combat.started", oncePerCombat: true, _note: "trigger 不明、combat.started 既定値" };
+  // 全文に "戦闘開始時" が含まれていれば fallback
+  if (/戦闘開始時|バトル開始時/.test(passiveDesc)) {
+    return { kind: "combat.started", oncePerCombat: true, triggerRate, _note: "trigger 推定 (text 全体から検出)" };
+  }
+  // 不明 → combat.started (oncePerCombat) fallback
+  return { kind: "combat.started", oncePerCombat: true, _note: `trigger 不明 (${tp}) → combat.started 既定値` };
 }
 
 // ─── 効果テキスト解析 ───────────────────────────────────────────
-function parseEffects(text, rarity) {
+// body は "／" (全角スラッシュ) 区切り。各効果を 1 つずつパース。
+function parseEffects(body, rarity, trig) {
+  const out = [];
+  if (!body) return out;
   const scaling = RARITY_SCALING[rarity] || RARITY_SCALING.Common;
-  const e = {
-    phyDmg: null, intDmg: null, heal: null,
-    selfPhy: 0, selfInt: 0, selfAgi: 0,
-    enemyPhy: 0, enemyInt: 0, enemyAgi: 0,
-    poison: 0, bleed: 0,
-    shield: 0, guard: 0,
-    resurrect: false,
-    repeat: 1,
-  };
-  if (!text) return e;
+  const parts = body.split(/[／/]/).map(s => s.trim()).filter(Boolean);
 
-  // 1v1 ベース: 自身/味方系は self、敵系は enemy.foremost に統一
-  const SELF_PREFIX = "(?:自身|味方全体|先頭の味方|最後尾の味方|中衛の味方|HPが最も低い味方|最大HPが最も低い味方|PHYが最も高い味方|INTが最も高い味方|AGIが最も高い味方)";
-  const ENEMY_PREFIX = "(?:敵全体|先頭の敵|最後尾の敵|中衛の敵|HPが最も低い敵|HPが最も高い敵|最大HPが最も高い敵|PHYが最も高い敵|PHYが最も低い敵|INTが最も高い敵|INTが最も低い敵|AGIが最も高い敵|敵)";
+  for (const raw of parts) {
+    const part = raw.replace(/[\s　]+/g, "");
 
-  // 連続発動回数
-  const repeatM = text.match(/(\d+)回繰り返す/);
-  if (repeatM) e.repeat = +repeatM[1];
-
-  // PHY ダメ
-  const phyRange = text.match(/自身のPHYの(\d+)\s*~\s*(\d+)\s*%\s*ダメージ/);
-  if (phyRange) e.phyDmg = { min: +phyRange[1], max: +phyRange[2] };
-  else {
-    const phySingle = text.match(/自身のPHYの(\d+)\s*%\s*ダメージ/);
-    if (phySingle) e.phyDmg = { min: +phySingle[1], max: +phySingle[1] };
-  }
-
-  // INT ダメ
-  const intRange = text.match(/自身のINTの(\d+)\s*~\s*(\d+)\s*%\s*ダメージ/);
-  if (intRange) e.intDmg = { min: +intRange[1], max: +intRange[2] };
-  else {
-    const intSingle = text.match(/自身のINTの(\d+)\s*%\s*ダメージ/);
-    if (intSingle) e.intDmg = { min: +intSingle[1], max: +intSingle[1] };
-  }
-
-  // 回復係数
-  const healRange = text.match(/回復係数の(\d+)\s*~\s*(\d+)\s*%\s*回復/);
-  if (healRange) e.heal = { min: +healRange[1], max: +healRange[2] };
-  else {
-    const healSingle = text.match(/回復係数の(\d+)\s*%\s*回復/);
-    if (healSingle) e.heal = { min: +healSingle[1], max: +healSingle[1] };
-  }
-
-  // 自己ステ buff
-  function findStatUp(stat) {
-    const re = new RegExp(`${SELF_PREFIX}の${stat}を[^/]*?の(\\d+)\\s*~?\\s*(\\d+)?\\s*%\\s*アップ`);
-    const m = text.match(re);
-    if (!m) return 0;
-    const pct = +m[2] || +m[1];
-    return Math.max(1, Math.min(scaling.statCap, Math.floor(pct / 10)));
-  }
-  e.selfPhy = findStatUp("PHY");
-  e.selfInt = findStatUp("INT");
-  e.selfAgi = findStatUp("AGI");
-  // flat 系: "自身のINTを50アップ" のような表記
-  const flatPhy = text.match(/自身のPHYを(\d+)アップ/);
-  if (flatPhy && !e.selfPhy) e.selfPhy = Math.min(scaling.statCap, Math.max(1, Math.floor(+flatPhy[1] / 10)));
-  const flatInt = text.match(/自身のINTを(\d+)アップ/);
-  if (flatInt && !e.selfInt) e.selfInt = Math.min(scaling.statCap, Math.max(1, Math.floor(+flatInt[1] / 10)));
-  const flatAgi = text.match(/自身のAGIを(\d+)アップ/);
-  if (flatAgi && !e.selfAgi) e.selfAgi = Math.min(scaling.statCap, Math.max(1, Math.floor(+flatAgi[1] / 10)));
-
-  // 敵ステ debuff
-  function findStatDown(stat) {
-    const re = new RegExp(`${ENEMY_PREFIX}の${stat}を[^/]*?の(\\d+)\\s*%\\s*ダウン`);
-    const m = text.match(re);
-    if (!m) return 0;
-    return -Math.max(1, Math.min(scaling.debuffCap, Math.floor(+m[1] / 10)));
-  }
-  e.enemyPhy = findStatDown("PHY");
-  e.enemyInt = findStatDown("INT");
-  e.enemyAgi = findStatDown("AGI");
-
-  // 状態異常
-  if (/毒/.test(text)) e.poison += scaling.stackBase;
-  if (/出血/.test(text)) e.bleed += scaling.stackBase;
-  if (/気絶|睡眠/.test(text)) e.bleed += scaling.stackBase;
-  if (/衰弱|恐怖|呪い|混乱|バインド/.test(text)) e.poison += scaling.stackBase;
-
-  // シールド系
-  if (/自身のシールド|シールド.*付与|シールド.*更新/.test(text)) {
-    e.shield = (rarity === "Legendary" ? 12 : rarity === "Epic" ? 10 : rarity === "Rare" ? 9 : 8);
-  }
-  // バリア / デコイ → ガード
-  if (/バリアを付与|デコイを付与/.test(text)) {
-    e.guard = (rarity === "Legendary" ? 10 : rarity === "Epic" ? 8 : 6);
-  }
-
-  // 復活
-  if (/復活/.test(text)) e.resurrect = true;
-
-  return e;
-}
-
-// ─── PassiveDef 生成 ───────────────────────────────────────────
-function buildPassiveDef(row) {
-  const heroId = +row.id;
-  const passiveKey = PASSIVE_KEYS[heroId];
-  if (!passiveKey) return null; // skip 11xxx duplicates
-  const rarity = row.rarity;
-  const passiveName = row.passive_name_ja;
-  const text = row.passive_text_ja || "";
-  const trig = detectTrigger(text);
-  const e = parseEffects(text, rarity);
-
-  const effects = [];
-
-  // 1v1 では damage/buff/etc の target を foremost か self に正規化
-  if (e.phyDmg) {
-    const avg = (e.phyDmg.min + e.phyDmg.max) / 2 / 100;
-    if (e.repeat > 1) {
-      for (let i = 0; i < e.repeat; i++) {
-        effects.push({ target: "enemy.foremost", action: "damage", coef: { phy: avg } });
+    // ── ダメージ系 ──────────────────────────────────────────
+    // 敵にPHY40%ダメージ / 敵にPHY30〜50%ダメージ / ...×N (繰り返し)
+    let m = part.match(/敵にPHY(?:の)?(\d+)(?:[~〜](\d+))?%ダメージ(?:×(\d+))?/);
+    if (m) {
+      const lo = +m[1], hi = m[2] ? +m[2] : lo, repeat = m[3] ? +m[3] : 1;
+      const coef = ((lo + hi) / 2) / 100;
+      for (let i = 0; i < repeat; i++) {
+        out.push({ target: "enemy.foremost", action: "damage", coef: { phy: coef } });
       }
-    } else {
-      effects.push({ target: "enemy.foremost", action: "damage", coef: { phy: avg } });
+      continue;
     }
-  }
-  if (e.intDmg) {
-    const avg = (e.intDmg.min + e.intDmg.max) / 2 / 100;
-    if (e.repeat > 1) {
-      for (let i = 0; i < e.repeat; i++) {
-        effects.push({ target: "enemy.foremost", action: "damage", coef: { int: avg } });
+    m = part.match(/敵にINT(?:の)?(\d+)(?:[~〜](\d+))?%ダメージ(?:×(\d+))?/);
+    if (m) {
+      const lo = +m[1], hi = m[2] ? +m[2] : lo, repeat = m[3] ? +m[3] : 1;
+      const coef = ((lo + hi) / 2) / 100;
+      for (let i = 0; i < repeat; i++) {
+        out.push({ target: "enemy.foremost", action: "damage", coef: { int: coef } });
       }
-    } else {
-      effects.push({ target: "enemy.foremost", action: "damage", coef: { int: avg } });
+      continue;
     }
+    // 先頭の敵にPHYのN% / 先頭の敵にPHYN%追加ダメージ などのバリエーション
+    m = part.match(/先頭の敵に(?:PHYの|PHY)?(\d+)%(?:追加)?ダメージ/);
+    if (m) {
+      out.push({ target: "enemy.foremost", action: "damage", coef: { phy: +m[1] / 100 } });
+      continue;
+    }
+    m = part.match(/先頭の敵に(?:INTの|INT)?(\d+)%(?:追加)?ダメージ/);
+    if (m) {
+      out.push({ target: "enemy.foremost", action: "damage", coef: { int: +m[1] / 100 } });
+      continue;
+    }
+
+    // ── 状態異常付与 ────────────────────────────────────────
+    m = part.match(/敵に毒[×x](\d+)付与/);
+    if (m) { out.push({ target: "enemy.foremost", action: "applyStatus", status: "poison", stacks: +m[1] }); continue; }
+    m = part.match(/敵に出血[×x](\d+)付与/);
+    if (m) { out.push({ target: "enemy.foremost", action: "applyStatus", status: "bleed", stacks: +m[1] }); continue; }
+
+    // ── 自身ステ加算: 自身のPHY+N / 自身のINTを最大HPの N%アップ ─
+    m = part.match(/自身の(PHY|INT|AGI)\+(\d+)/);
+    if (m) {
+      out.push({ target: "self", action: "buffStat", stat: m[1].toLowerCase(), value: +m[2] });
+      continue;
+    }
+    // 短縮形: "INT +3" / "PHY +5" (自身の prefix 抜け、e.g. doyle "INT +3")
+    m = part.match(/^(PHY|INT|AGI)\s*\+\s*(\d+)$/);
+    if (m) {
+      out.push({ target: "self", action: "buffStat", stat: m[1].toLowerCase(), value: +m[2] });
+      continue;
+    }
+    m = part.match(/自身の(PHY|INT|AGI)を(\d+)アップ/);
+    if (m) {
+      out.push({ target: "self", action: "buffStat", stat: m[1].toLowerCase(), value: +m[2] });
+      continue;
+    }
+    // 自身のINTを最大AGIの30%アップ — 別ステの相対バフ。簡略化として +ceil(stat * pct) を付ける
+    m = part.match(/自身の(PHY|INT|AGI)を最大(PHY|INT|AGI)の(\d+)%アップ/);
+    if (m) {
+      const target = m[1].toLowerCase(), src = m[2].toLowerCase(), pct = +m[3];
+      out.push({ target: "self", action: "buffStatFromOther", stat: target, fromStat: src, pct: pct / 100 });
+      continue;
+    }
+    // PHYとINTを互いの値の N%アップ
+    m = part.match(/PHYとINTを互いの値の(\d+)%アップ/);
+    if (m) {
+      const pct = +m[1] / 100;
+      out.push({ target: "self", action: "buffStatFromOther", stat: "phy", fromStat: "int", pct });
+      out.push({ target: "self", action: "buffStatFromOther", stat: "int", fromStat: "phy", pct });
+      continue;
+    }
+
+    // ── 敵ステ減算: 敵のPHY-N / 敵のAGIを30%ダウン ──────────
+    m = part.match(/敵の(PHY|INT|AGI)-(\d+)/);
+    if (m) {
+      out.push({ target: "enemy.foremost", action: "buffStat", stat: m[1].toLowerCase(), value: -(+m[2]) });
+      continue;
+    }
+    m = part.match(/敵の(PHY|INT|AGI)を(\d+)%ダウン/);
+    if (m) {
+      const pct = +m[2] / 100;
+      out.push({ target: "enemy.foremost", action: "buffStatPct", stat: m[1].toLowerCase(), pct: -pct });
+      continue;
+    }
+
+    // ── ガード / シールド ───────────────────────────────────
+    m = part.match(/ガード\+(\d+)/);
+    if (m) { out.push({ target: "self", action: "addGuard", value: +m[1] }); continue; }
+    m = part.match(/シールド\+(\d+)/);
+    if (m) { out.push({ target: "self", action: "addShield", value: +m[1] }); continue; }
+
+    // ── 回復 ────────────────────────────────────────────────
+    // 自身のHPを最大HPのN%回復 / HPを回復係数のN〜N%回復 / HPを最大HPのN%回復
+    m = part.match(/(?:自身の)?HPを最大HPの(\d+)%回復/);
+    if (m) { out.push({ target: "self", action: "heal", coef: { hpRatio: +m[1] / 100 } }); continue; }
+    m = part.match(/HPを回復係数の(\d+)(?:[~〜](\d+))?%回復/);
+    if (m) {
+      const lo = +m[1], hi = m[2] ? +m[2] : lo;
+      out.push({ target: "self", action: "heal", coef: { int: ((lo + hi) / 2) / 100 } });
+      continue;
+    }
+
+    // ── 致死時生存 (revive) ─────────────────────────────────
+    if (/致死時に1回だけ1HPで生存|1回だけ1HPで生存/.test(part)) {
+      out.push({ target: "self", action: "revive", coef: { hpRatio: 0.01 } });
+      continue;
+    }
+
+    // ── ドロー / 充電 ────────────────────────────────────────
+    m = part.match(/ドロー\s*\+?(\d+)/);
+    if (m) { out.push({ target: "self", action: "drawCards", value: +m[1] }); continue; }
+    m = part.match(/エネルギー\s*\+?(\d+)|充電\s*\+?(\d+)/);
+    if (m) { out.push({ target: "self", action: "addEnergy", value: +(m[1] || m[2]) }); continue; }
+
+    // ── 解析失敗 ────────────────────────────────────────────
+    // 既知の Effect 種別に該当しない部分は notes 用に記録 (out には push しない)
+    out._unparsed = (out._unparsed || []);
+    out._unparsed.push(raw);
   }
-  if (e.heal) {
-    const avg = (e.heal.min + e.heal.max) / 2 / 100;
-    effects.push({ target: "self", action: "heal", coef: { hp: avg } });
-  }
-  if (e.selfPhy) effects.push({ target: "self", action: "buffStat", stat: "phy", value: e.selfPhy });
-  if (e.selfInt) effects.push({ target: "self", action: "buffStat", stat: "int", value: e.selfInt });
-  if (e.selfAgi) effects.push({ target: "self", action: "buffStat", stat: "agi", value: e.selfAgi });
-  if (e.enemyPhy) effects.push({ target: "enemy.foremost", action: "buffStat", stat: "phy", value: e.enemyPhy });
-  if (e.enemyInt) effects.push({ target: "enemy.foremost", action: "buffStat", stat: "int", value: e.enemyInt });
-  if (e.enemyAgi) effects.push({ target: "enemy.foremost", action: "buffStat", stat: "agi", value: e.enemyAgi });
-  if (e.poison) effects.push({ target: "enemy.foremost", action: "applyStatus", status: "poison", stacks: e.poison });
-  if (e.bleed) effects.push({ target: "enemy.foremost", action: "applyStatus", status: "bleed", stacks: e.bleed });
-  if (e.shield) effects.push({ target: "self", action: "addShield", value: e.shield });
-  if (e.guard) effects.push({ target: "self", action: "addGuard", value: e.guard });
-  if (e.resurrect) effects.push({ target: "self", action: "revive", coef: { hpRatio: 0.20 } });
 
   // 効果が 0 件の場合 fallback (PHY+1)
-  if (effects.length === 0) {
-    effects.push({ target: "self", action: "buffStat", stat: "phy", value: 1 });
+  if (out.length === 0) {
+    out.push({ target: "self", action: "buffStat", stat: "phy", value: 1 });
+    out._fallback = true;
   }
+  return out;
+}
 
-  // PassiveDef オブジェクト
+// ─── PassiveDef builder ────────────────────────────────────────
+function buildPassiveDef(row) {
+  const heroId = +row.heroId;
+  const passiveKey = row.passiveKey;
+  if (!passiveKey) return null;
+  const rarity = RARITY_BY_LOWER[(row.rarity || "").toLowerCase()];
+  if (!rarity) return null;
+  const passiveName = row.passiveName;
+  const passiveDesc = row.passiveDesc || "";
+
+  const trig = detectTrigger(passiveDesc);
+  const { body } = splitTriggerAndBody(passiveDesc);
+  const effects = parseEffects(body, rarity, trig);
+
   const def = {
     passiveKey,
     trigger: trig.kind,
-    triggerRate: DEFAULT_TRIGGER_RATE[trig.kind] ?? 1.0,
+    triggerRate: typeof trig.triggerRate === "number" ? trig.triggerRate : (DEFAULT_TRIGGER_RATE[trig.kind] ?? 1.0),
     oncePerCombat: !!trig.oncePerCombat,
   };
   if (trig.threshold != null) def.threshold = trig.threshold;
-  def.effects = effects;
-  def.cutinSkillName = passiveName;
-  // 注記 (簡略化や fallback の根拠)
+  // effects 配列 (符号情報を持たないコピー)
+  def.effects = effects.map(e => ({ ...e }));
+  if (passiveName) def.cutinSkillName = passiveName;
+
+  // notes (簡略化や fallback の根拠)
   const notes = [];
   if (trig._note) notes.push(trig._note);
-  if (effects.length === 1 && effects[0].action === "buffStat" && effects[0].value === 1) {
-    notes.push("元 DB の効果が解析不能 → PHY+1 fallback");
+  if (effects._fallback) notes.push("元 DB の効果を解析できず → PHY+1 fallback");
+  if (effects._unparsed && effects._unparsed.length > 0) {
+    notes.push(`未解析効果: ${effects._unparsed.join(" / ")}`);
   }
   if (notes.length > 0) def.notes = notes.join("; ");
-  return def;
+  return { heroId, def };
 }
 
-// ─── main ───────────────────────────────────────────────────────
+// ─── PassiveDef → 整形 JSON 文字列 ──────────────────────────────
+function stringifyDef(def) {
+  const parts = [];
+  parts.push(`passiveKey: ${JSON.stringify(def.passiveKey)}`);
+  parts.push(`trigger: ${JSON.stringify(def.trigger)}`);
+  parts.push(`triggerRate: ${def.triggerRate}`);
+  parts.push(`oncePerCombat: ${def.oncePerCombat}`);
+  if (def.threshold != null) parts.push(`threshold: ${def.threshold}`);
+  const effLines = (def.effects || []).map(e => "      " + JSON.stringify(e));
+  parts.push("effects: [\n" + effLines.join(",\n") + "\n    ]");
+  if (def.cutinSkillName) parts.push(`cutinSkillName: ${JSON.stringify(def.cutinSkillName)}`);
+  if (def.notes) parts.push(`notes: ${JSON.stringify(def.notes)}`);
+  return "{\n    " + parts.join(",\n    ") + "\n  }";
+}
+
+// ─── main ──────────────────────────────────────────────────────
 function main() {
   const inputPath = process.argv[2];
   if (!inputPath) {
@@ -366,75 +330,52 @@ function main() {
   const raw = fs.readFileSync(inputPath, "utf-8");
   const lines = parseCsv(raw);
   if (lines.length === 0) { console.error("empty CSV"); process.exit(1); }
-  const headers = parseCsvLine(lines[0]);
+  const headers = parseCsvLine(lines[0]).map(h => h.trim());
   const rows = lines.slice(1).map(line => {
+    if (!line.trim()) return null;
     const cells = parseCsvLine(line);
     const obj = {};
-    headers.forEach((h, i) => obj[h] = cells[i] || "");
+    headers.forEach((h, i) => obj[h] = (cells[i] || "").trim());
     return obj;
-  });
+  }).filter(Boolean);
 
-  const targetRarities = new Set(["Common", "Uncommon", "Rare", "Epic", "Legendary"]);
   const defs = [];
-  let skipped = 0;
   for (const row of rows) {
-    if (!targetRarities.has(row.rarity)) continue;
-    const id = +row.id;
-    if (id >= 11001 && id <= 12000) { skipped++; continue; } // 11xxx invisible duplicates
-    const def = buildPassiveDef(row);
-    if (def) defs.push({ heroId: id, def });
+    const result = buildPassiveDef(row);
+    if (result) defs.push(result);
   }
   defs.sort((a, b) => a.heroId - b.heroId);
 
-  // 出力
-  const lines2 = [];
-  lines2.push("/**");
-  lines2.push(" * passives-generated.js — SPEC-006 §18 Phase 4j codemod 出力");
-  lines2.push(" *");
-  lines2.push(` * 全 ${defs.length} 体のヒーローパッシブを宣言形式 PassiveDef に変換。`);
-  lines2.push(" * 元データ: bearko/mycryptoheroes/Data/Heroes/heroes.csv");
-  lines2.push(" * 生成スクリプト: prototype/tools/gen-passives.js");
-  lines2.push(" *");
-  lines2.push(" * 簡略化方針:");
-  lines2.push(" * - 元 DB のパーティ系効果 (前衛/中衛/最後尾) は 1v1 ベースに合わせて self / enemy.foremost に統一");
-  lines2.push(" * - 元 DB の状態異常 (気絶/睡眠/衰弱/恐怖/呪い/混乱/バインド) は出血 / 毒に集約");
-  lines2.push(" * - 元 DB の {triggerRate} placeholder は実値が無いため trigger 種別ごとの既定値で埋める");
-  lines2.push(" * - ステータス上昇 N% は flat +N にスケール (Common/Uncommon/Rare/Epic/Legendary で cap +3/+5/+6/+7/+9)");
-  lines2.push(" * - 状態異常 stack は Common/Uncommon 1, Rare 2, Epic 3, Legendary 4");
-  lines2.push(" *");
-  lines2.push(" * runtime 仕様: prototype/js/passive-runtime.js + SPEC-006 §18.6");
-  lines2.push(" */");
-  lines2.push("");
-  lines2.push("export const PASSIVES = {");
+  const outLines = [];
+  outLines.push("/**");
+  outLines.push(" * passives-generated.js — SPEC-006 §18 Phase 4j codemod 出力 (v2)");
+  outLines.push(" *");
+  outLines.push(` * 全 ${defs.length} 体のヒーローパッシブを宣言形式 PassiveDef に変換。`);
+  outLines.push(" * 元データ: prototype/data/heroes.csv");
+  outLines.push(" * 生成スクリプト: prototype/tools/gen-passives.js");
+  outLines.push(" *");
+  outLines.push(" * 変換方針:");
+  outLines.push(" * - passiveDesc を '<trigger 句>に発動・<effects>' 形式でパース");
+  outLines.push(" * - effects は ／ 区切りで個別パース、解析不能部は notes に記録");
+  outLines.push(" * - 別ステ参照バフ (e.g. INTを最大AGIの30%アップ) は buffStatFromOther action で表現");
+  outLines.push(" * - 状態異常 stack 数は CSV の明示値をそのまま使用");
+  outLines.push(" * - 致死時生存は revive action (hpRatio 0.01) として inline 化");
+  outLines.push(" *");
+  outLines.push(" * runtime 仕様: prototype/js/passive-runtime.js + SPEC-006 §18.6");
+  outLines.push(" */");
+  outLines.push("");
+  outLines.push("export const PASSIVES = {");
 
   for (const { heroId, def } of defs) {
-    lines2.push(`  // heroId: ${heroId}`);
-    lines2.push(`  ${JSON.stringify(def.passiveKey)}: ${stringifyDef(def)},`);
+    outLines.push(`  // heroId: ${heroId}`);
+    outLines.push(`  ${JSON.stringify(def.passiveKey)}: ${stringifyDef(def)},`);
   }
 
-  lines2.push("};");
-  lines2.push("");
+  outLines.push("};");
+  outLines.push("");
 
-  const out = lines2.join("\n");
-  console.log(out);
-
-  console.error(`Generated ${defs.length} PassiveDefs (skipped ${skipped} 11xxx duplicates).`);
-}
-
-/** PassiveDef を 1 行 JSON に整形 (ただし effects は配列を読みやすく) */
-function stringifyDef(def) {
-  const parts = [];
-  parts.push(`passiveKey: ${JSON.stringify(def.passiveKey)}`);
-  parts.push(`trigger: ${JSON.stringify(def.trigger)}`);
-  parts.push(`triggerRate: ${def.triggerRate}`);
-  parts.push(`oncePerCombat: ${def.oncePerCombat}`);
-  if (def.threshold != null) parts.push(`threshold: ${def.threshold}`);
-  // effects は読みやすく
-  const effLines = (def.effects || []).map(e => "      " + JSON.stringify(e));
-  parts.push("effects: [\n" + effLines.join(",\n") + "\n    ]");
-  if (def.cutinSkillName) parts.push(`cutinSkillName: ${JSON.stringify(def.cutinSkillName)}`);
-  if (def.notes) parts.push(`notes: ${JSON.stringify(def.notes)}`);
-  return "{\n    " + parts.join(",\n    ") + "\n  }";
+  console.log(outLines.join("\n"));
+  console.error(`Generated ${defs.length} PassiveDefs.`);
 }
 
 main();

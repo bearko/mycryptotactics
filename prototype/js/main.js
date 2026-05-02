@@ -79,6 +79,7 @@ import {
   registerPassives,
   registerEffectHandlers,
   applyPassiveTrigger,
+  applyPassiveTriggerAsync,
   checkPassiveThresholds,
   getRegisteredPassive,
 } from "./passive-runtime.js";
@@ -374,7 +375,10 @@ function startConfetti() {
  * @param {string} portraitUrl  ヒーロー画像 URL
  * @returns {Promise<void>}  フェードアウト完了で resolve
  */
-function showPassiveCutin(skillName, portraitUrl) {
+// 進行中のパッシブカットイン参照 (タップ/クリックでスキップするため)
+let passiveCutinSkip = null;
+
+function showPassiveCutin(skillName, portraitUrl, opts = {}) {
   const el = document.getElementById("passiveCutin");
   if (!el) return Promise.resolve();
   const skillEl    = document.getElementById("passiveCutinSkill");
@@ -382,7 +386,45 @@ function showPassiveCutin(skillName, portraitUrl) {
   if (skillEl)    skillEl.textContent = skillName;
   if (portraitEl) portraitEl.src      = portraitUrl;
 
+  // 表示時間 (ms)。複数連続表示 (戦闘開始時 multi-hero) では長めにして読める時間を確保
+  const displayMs = typeof opts.displayMs === "number" ? opts.displayMs : 1500;
+
   return new Promise((resolve) => {
+    let resolved = false;
+    let timeoutId = null;
+    let leaveStarted = false;
+
+    // タップ / クリックで即終了 (= スライドアウトを早期発動)
+    function tapSkip() {
+      if (resolved || leaveStarted) return;
+      if (timeoutId) { clearTimeout(timeoutId); timeoutId = null; }
+      startLeave();
+    }
+
+    function startLeave() {
+      if (leaveStarted) return;
+      leaveStarted = true;
+      el.style.transition = "opacity 0.18s ease, transform 0.18s ease";
+      el.style.opacity    = "0";
+      el.style.transform  = "translate(-100%, -50%) skewY(-10deg)";
+      const onDone = () => {
+        if (resolved) return;
+        resolved = true;
+        el.removeEventListener("transitionend", onDone);
+        el.style.display = "none";
+        el.setAttribute("aria-hidden", "true");
+        passiveCutinSkip = null;
+        resolve();
+      };
+      el.addEventListener("transitionend", onDone);
+      // セーフティ: transitionend が発火しないケース (display:none など) のフォールバック
+      setTimeout(onDone, 260);
+    }
+
+    // 既に出ているカットインがあれば先にクリア
+    if (passiveCutinSkip) { passiveCutinSkip(); }
+    passiveCutinSkip = tapSkip;
+
     // リセット：非表示 → 画面外右にセット → 表示
     el.style.transition = "none";
     el.style.opacity    = "0";
@@ -396,19 +438,8 @@ function showPassiveCutin(skillName, portraitUrl) {
         el.style.transition = "opacity 0.14s ease, transform 0.14s ease";
         el.style.opacity    = "1";
         el.style.transform  = "translateY(-50%) skewY(-10deg)";
-
-        // 700ms 表示後にスライドアウト
-        setTimeout(() => {
-          el.style.transition = "opacity 0.22s ease, transform 0.22s ease";
-          el.style.opacity    = "0";
-          el.style.transform  = "translate(-100%, -50%) skewY(-10deg)";
-          el.addEventListener("transitionend", function done() {
-            el.removeEventListener("transitionend", done);
-            el.style.display = "none";
-            el.setAttribute("aria-hidden", "true");
-            resolve();
-          });
-        }, 700);
+        // 表示時間経過後にスライドアウト (タップで早期終了可)
+        timeoutId = setTimeout(startLeave, displayMs);
       });
     });
   });
@@ -1206,6 +1237,54 @@ const PASSIVE_EFFECT_HANDLERS = {
     clog(`【${caster.name || "パッシブ"}】 ${target.name || ""} ${effect.stat.toUpperCase()} ${delta >= 0 ? "+" : ""}${delta}`);
   },
 
+  // buffStatFromOther: 別ステを参照して自身のステを増減 (e.g. INTを最大AGIの30%アップ)
+  buffStatFromOther(s, caster, target, effect) {
+    const field = { phy: "phy", int: "int", agi: "agi" }[effect.stat];
+    const fromField = { phy: "phy", int: "int", agi: "agi" }[effect.fromStat];
+    if (!field || !fromField) return;
+    const pct = +effect.pct || 0;
+    const baseFromField = fromField + "Base";
+    const fromValue = target[baseFromField] ?? target[fromField] ?? 0;
+    const delta = Math.max(1, Math.floor(fromValue * pct));
+    if (!delta) return;
+    target[field] = (target[field] ?? 0) + delta;
+    if (s.heroes?.[0] === target) {
+      if (field === "phy") s.playerPhy = target.phy;
+      else if (field === "int") s.playerInt = target.int;
+      else if (field === "agi") s.playerAgi = target.agi;
+    }
+    playBattleSe("buff");
+    playPortraitEffect("player", "buff", target);
+    clog(`【${caster.name || "パッシブ"}】 ${target.name || ""} ${effect.stat.toUpperCase()} +${delta} (${effect.fromStat.toUpperCase()} の ${Math.round(pct*100)}%)`);
+  },
+
+  // buffStatPct: 対象のステを ±N% 加減 (e.g. 敵のINTを30%ダウン → pct: -0.3)
+  buffStatPct(s, caster, target, effect) {
+    const field = { phy: "phy", int: "int", agi: "agi" }[effect.stat];
+    if (!field) return;
+    const pct = +effect.pct || 0;
+    const cur = target[field] ?? 0;
+    const delta = Math.floor(cur * pct);
+    const sign = delta < 0 ? "" : "+";
+    if (!delta) return;
+    target[field] = Math.max(1, cur + delta);
+    // legacy mirror (target が heroes[0] / enemies[0] のとき)
+    if (s.heroes?.[0] === target) {
+      if (field === "phy") s.playerPhy = target.phy;
+      else if (field === "int") s.playerInt = target.int;
+      else if (field === "agi") s.playerAgi = target.agi;
+    } else if (s.enemies?.[0] === target) {
+      if (field === "phy") s.enemyPhy = target.phy;
+      else if (field === "int") s.enemyInt = target.int;
+      else if (field === "agi") s.enemyAgi = target.agi;
+    }
+    playBattleSe(delta < 0 ? "debuff" : "buff");
+    const fxKind = delta < 0 ? "debuff" : "buff";
+    const side = (s.heroes?.includes && s.heroes.includes(target)) ? "player" : "enemy";
+    playPortraitEffect(side, fxKind, target);
+    clog(`【${caster.name || "パッシブ"}】 ${target.name || ""} ${effect.stat.toUpperCase()} ${sign}${delta} (${Math.round(Math.abs(pct)*100)}%)`);
+  },
+
   // addGuard: ガード付与
   addGuard(s, caster, target, effect) {
     const v = effect.value || 0;
@@ -1278,10 +1357,22 @@ const PASSIVE_EFFECT_HANDLERS = {
   },
 
   // showCutin (effect ではないが、PassiveDef.cutinSkillName のためのフック)
+  // 同期版: clog だけ。実際のカットイン演出は applyPassiveTriggerAsync が
+  // _effectHandlers.showCutinAsync を直接 await して呼び出す。
   showCutin(hero, skillName) {
     clog(`【${skillName}】発動！`);
-    // showPassiveCutin の重い演出を呼びたい場合はここで await できないので
-    // 簡略化として clog のみ。Phase 4j 完成時に必要なら拡張。
+  },
+  // showCutinAsync: applyPassiveTriggerAsync 専用 (await して順次表示)
+  async showCutinAsync(hero, skillName, opts) {
+    clog(`【${skillName}】発動！`);
+    if (!hero || !skillName) return;
+    // hero portrait URL を解決 (heroDef.img が関数なら呼ぶ)
+    let url = "";
+    const heroDef = hero.defId ? HERO_ROSTER.find(h => h.heroId === hero.defId) : null;
+    if (heroDef && typeof heroDef.img === "function") url = heroDef.img();
+    else if (heroDef && heroDef.img) url = heroDef.img;
+    else if (typeof hero.imgUrl === "string") url = hero.imgUrl;
+    await showPassiveCutin(skillName, url, opts);
   },
 };
 
@@ -1869,11 +1960,16 @@ function startCombatFromMapNode(node) {
     clog(`ボスはシールド ${enemyDef.initialShield} を持ちます！`);
   }
   applyHeroPassiveOnCombatStart(combat);
-  // SPEC-006 §18.6: PassiveDef DSL の combat.started trigger を発動
-  // (登録済みの SAMPLE_PASSIVES のみ。既存 hardcoded 関数とは独立に動作)
-  applyPassiveTrigger(combat, "combat.started");
   syncLlExtSlots();
-  startPlayerTurn();
+  // SPEC-006 §18.6: PassiveDef DSL の combat.started trigger を発動
+  // 各ヒーローのカットインを「前衛 → 中衛 → 後衛」の順に sequential 表示するため
+  // async 版を fire-and-forget で起動し、終わってから startPlayerTurn を呼ぶ。
+  // カットイン中は combatInputLocked = true にして手札クリック等を無効化。
+  combatInputLocked = true;
+  applyPassiveTriggerAsync(combat, "combat.started").finally(() => {
+    combatInputLocked = false;
+    startPlayerTurn();
+  });
 }
 
 // ─── 意図テキスト ─────────────────────────────────────────────────
@@ -5349,6 +5445,9 @@ async function playCard(idx) {
   }));
   combat.energy -= card.cost;
   combat.hand.splice(idx, 1);
+  // SPEC-006 UX: フォーカスカードが消費されたのでプレビュー枠 / オーバーレイをクリア
+  clearCardPreview();
+  handFocusedIdx = -1;
   // 消耗カードは exhaustPile へ、通常カードは捨て札へ
   if (card.exhaust) {
     combat.exhaustPile.push(card);
@@ -7623,6 +7722,13 @@ function init() {
     if (ev.target.id === "deckModal") closeDeckModal();
   });
   document.getElementById("cutinOverlay").addEventListener("click", dismissCutin);
+  // パッシブカットインもタップ / クリックでスキップ
+  const passiveCutinEl = document.getElementById("passiveCutin");
+  if (passiveCutinEl) {
+    const skipHandler = () => { if (passiveCutinSkip) passiveCutinSkip(); };
+    passiveCutinEl.addEventListener("click", skipHandler);
+    passiveCutinEl.addEventListener("touchstart", skipHandler, { passive: true });
+  }
   document.getElementById("btnSkipReward").addEventListener("click", () => advanceAfterRewardPick(null));
   document.getElementById("btnLeaveShop").addEventListener("click", () => {
     ensureRunState();

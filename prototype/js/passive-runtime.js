@@ -11,8 +11,23 @@
 import { resolveTargets } from "./targeting.js";
 
 // ─── PassiveDef レジストリ ──────────────────────────────────────────
-// 暫定: 当方の手動変換サンプル + content 担当 codemod 出力 (passives-generated.js) を統合
-// Phase 4j マージ時に passives-generated.js を import して PASSIVES に展開する。
+// PASSIVES (passives-generated.js, codemod 出力 210 体) と SAMPLE_PASSIVES
+// (passives-sample.js, 手動検証 5 体) を init で順に register する。
+// 同 key は後勝ちのため SAMPLE が PASSIVES を上書きする。
+//
+// PassiveDef shape (TypeScript-like 注釈):
+//   {
+//     passiveKey: string,           // ヒーロー識別子 (heroes.json の passiveKey と一致)
+//     trigger: TriggerKind,         // §18.1 の trigger 種別
+//     triggerRate?: number,         // 確率発動 (0.0-1.0)、省略時 1.0
+//     oncePerCombat?: boolean,      // 戦闘中 1 回限定 (default: false)
+//     threshold?: number,           // hpBelow / statRatioAbove の閾値 (0.0-1.0)
+//     effects: PassiveEffect[],     // 発動時の処理列
+//     cutinSkillName?: string,      // カットイン表示名 (省略時はカットインなし)
+//     notes?: string,               // QA/監査用の備考。runtime は読まない (debug only)。
+//                                   //  例: "元 DB の効果が解析不能 → PHY+1 fallback"
+//                                   //      "天草四郎 statRatioBelow → combat.started 代替"
+//   }
 let PASSIVE_REGISTRY = {};
 
 /** PassiveDef を登録 (アプリ起動時に呼ぶ) */
@@ -29,6 +44,13 @@ export function getRegisteredPassive(passiveKey) {
 
 /** デバッグ用: 登録済みパッシブ一覧 */
 export function _debugListPassives() { return Object.keys(PASSIVE_REGISTRY); }
+
+/** デバッグ用: notes 付き PassiveDef を一覧 (QA で fallback 状況を監査する用) */
+export function _debugListPassivesWithNotes() {
+  return Object.entries(PASSIVE_REGISTRY)
+    .filter(([, def]) => def && typeof def.notes === "string" && def.notes.length > 0)
+    .map(([key, def]) => ({ passiveKey: key, notes: def.notes }));
+}
 
 // ─── trigger 種別 (§18.1) ──────────────────────────────────────────
 // combat.started / self.cardPlayed / self.tookDamage / self.died /
@@ -139,6 +161,39 @@ export function applyPassiveTrigger(s, kind, ctx = {}) {
     if (def.cutinSkillName && _effectHandlers?.showCutin) {
       _effectHandlers.showCutin(hero, def.cutinSkillName);
     }
+    for (const effect of def.effects || []) {
+      applyPassiveEffect(s, hero, effect);
+    }
+    markTriggered(hero, def);
+  }
+}
+
+/** applyPassiveTrigger の async 版。
+ *  各ヒーローの cutinSkillName を順次 await 表示してから effects を実行する。
+ *  combat.started のように複数ヒーローのパッシブが同時発動する場面で、
+ *  「前衛 → 中衛 → 後衛」の順にカットインを連続再生したい場合に使う。 */
+export async function applyPassiveTriggerAsync(s, kind, ctx = {}) {
+  if (!s) return;
+  const heroes = s.heroes || [];
+  for (const hero of heroes) {
+    if (!hero) continue;
+    const def = getRegisteredPassive(hero.passiveKey);
+    if (!def || def.trigger !== kind) continue;
+    if (kind === "self.cardPlayed" && ctx.caster && hero !== ctx.caster) continue;
+    if (kind === "self.tookDamage" && ctx.hero && hero !== ctx.hero) continue;
+    if (kind === "self.died" && ctx.hero && hero !== ctx.hero) continue;
+    if (!shouldFire(s, hero, def, ctx)) continue;
+
+    // 1. カットイン表示 (await: showCutinAsync があれば優先)
+    if (def.cutinSkillName) {
+      if (typeof _effectHandlers?.showCutinAsync === "function") {
+        try { await _effectHandlers.showCutinAsync(hero, def.cutinSkillName); }
+        catch (e) { console.error("[passive-runtime] showCutinAsync failed", e); }
+      } else if (typeof _effectHandlers?.showCutin === "function") {
+        _effectHandlers.showCutin(hero, def.cutinSkillName);
+      }
+    }
+    // 2. effects 順次実行
     for (const effect of def.effects || []) {
       applyPassiveEffect(s, hero, effect);
     }
