@@ -86,8 +86,10 @@ function writeSheet_(schema, rows) {
 
   sheet.clear();
   const headers = schema.columns.map(c => c.name);
-  // Pull-only シートはヘッダ色を変えて視覚的に区別 (赤系 = 編集無効)
-  const headerColor = schema.pullOnly ? "#fce4ec" : "#e8eaf6";
+  // ヘッダ色: 通常 = 青、Pull-only = 赤、custom push (extensions) = 黄
+  let headerColor = "#e8eaf6";
+  if (schema.pullOnly) headerColor = "#fce4ec";
+  else if (schema.customPushHandler) headerColor = "#fff3e0";
   sheet.getRange(1, 1, 1, headers.length).setValues([headers]).setFontWeight("bold").setBackground(headerColor);
   sheet.setFrozenRows(1);
 

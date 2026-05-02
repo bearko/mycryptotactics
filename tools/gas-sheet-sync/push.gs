@@ -16,6 +16,94 @@ function pushHeroesAsPR()       { pushSchemasAsPR_([HEROES_SCHEMA], "heroes"); }
 function pushLlExtensionsAsPR() { pushSchemasAsPR_([LL_EXT_SCHEMA], "ll-extensions"); }
 function pushAllToGitHubAsPR()  { pushSchemasAsPR_(ALL_SCHEMAS, "all-sheets"); }
 
+/** extensions 専用 Push (cards.js text の安全フィールドだけ regex で書き戻し)
+ *  ダメージ係数 (play() 関数内) は対象外 — README 参照 */
+function pushExtensionsAsPR() {
+  const ui = SpreadsheetApp.getUi();
+  try {
+    ghAssertPushAllowed_();
+  } catch (e) {
+    ui.alert(e.message);
+    return;
+  }
+
+  const props = ghProps_();
+  // 1. シート読込
+  const ss = SpreadsheetApp.getActive();
+  const sheet = ss.getSheetByName(EXTENSIONS_SCHEMA.sheetName);
+  if (!sheet) { ui.alert("extensions シートがありません。先に Pull を実行してください。"); return; }
+  const last = sheet.getLastRow();
+  if (last < 2) { ui.alert("extensions シートに行がありません。"); return; }
+  const cols = EXTENSIONS_SCHEMA.columns;
+  const rows = sheet.getRange(2, 1, last - 1, cols.length).getValues();
+
+  // 2. 現在の cards.js を fetch
+  const cardsJsBefore = ghFetchRawText(PATH_CARDS_JS, props.base);
+
+  // 3. シート行を反映
+  const { text: cardsJsAfter, summary } = pushExtensionsToCardsJs_(rows, cardsJsBefore);
+  if (cardsJsAfter === cardsJsBefore) {
+    ui.alert("変更なし\nシートと cards.js が一致しているため PR は作成されません。" +
+      (summary.missingExt.length > 0 ? "\n\n[警告] 未知の libraryKey: " + summary.missingExt.slice(0,5).join(",") : ""));
+    return;
+  }
+
+  // 4. lastSyncedSha 比較
+  const headSha = ghGetRefSha(props.base);
+  const lastSyncedSha = getMetaValue_("lastSyncedSha");
+  let staleWarning = "";
+  if (lastSyncedSha && lastSyncedSha !== headSha) {
+    staleWarning = "\n⚠️ pull SHA (" + String(lastSyncedSha).substring(0,7) + ") ≠ main HEAD (" + headSha.substring(0,7) + ")。pull し直し推奨。";
+  }
+
+  // 5. 確認ダイアログ
+  const confirm = ui.alert(
+    "extensions Push 確認",
+    "cards.js に対して " + summary.fieldChanges + " 件のフィールド変更 (" + summary.changed + " カード) が反映されます。\n" +
+    "対象フィールド: extNameJa / skillNameJa / skillIcon / cost / type / target / caster / rarity / effect_*_text\n" +
+    "(ダメージ係数 = play() 内は対象外)\n\n" +
+    "base: " + props.base + staleWarning + "\n\n続行しますか?",
+    ui.ButtonSet.YES_NO,
+  );
+  if (confirm !== ui.Button.YES) return;
+
+  // 6. 新ブランチ作成 + cards.js PUT + PR 作成
+  const ts = Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyyMMdd-HHmmss");
+  const branch = "balance/sheet-sync-extensions-" + ts;
+  ghCreateBranch(branch, headSha);
+  const current = ghGetFile(PATH_CARDS_JS, props.base);
+  ghPutFile(PATH_CARDS_JS, branch, cardsJsAfter, "balance: " + PATH_CARDS_JS + " (sheet sync extensions)", current.sha);
+
+  const title = "balance: シート同期 extensions (" + ts + ")";
+  const body =
+    "Spreadsheet (extensions シート) からの自動 PR — top-level literal フィールドのみ更新\n\n" +
+    "## 変更内訳\n" +
+    "- 変更カード数: " + summary.changed + "\n" +
+    "- 総フィールド変更数: " + summary.fieldChanges + "\n" +
+    (summary.missingExt.length > 0
+      ? "- ⚠️ シートに未知の libraryKey 行 (skip): " + summary.missingExt.length + " 件\n"
+      : "") +
+    "\n## 対象フィールド (Push 対象)\n" +
+    "extNameJa / skillNameJa / skillIcon / cost / type / target / caster / rarity / effect_*_text\n\n" +
+    "## 対象外 (cards.js 直接編集)\n" +
+    "- libraryKey / extId (識別子)\n" +
+    "- effect_*_target (play() 連動のため)\n" +
+    "- ダメージ係数 (play() / effectSummaryLines() / previewLines() 内 hardcoded)\n\n" +
+    "## 実行情報\n" +
+    "- 実行ユーザ: " + (Session.getActiveUser().getEmail() || "(unknown)") + "\n" +
+    "- 実行時刻: " + new Date().toISOString() + "\n" +
+    "- base SHA: " + headSha + "\n" +
+    "- 元 pull SHA: " + (lastSyncedSha || "(未記録)") + "\n";
+  const pr = ghCreatePullRequest(title, branch, props.base, body);
+
+  // 7. 通知
+  setMetaValue_("lastPushAt", new Date().toISOString());
+  setMetaValue_("lastPushBy", Session.getActiveUser().getEmail() || "(unknown)");
+  setMetaValue_("lastPushBranch", branch);
+  setMetaValue_("lastPushPr", pr.html_url);
+  ui.alert("PR 作成完了 (extensions)\n" + pr.html_url + "\n\n" + summary.changed + " カード / " + summary.fieldChanges + " フィールド変更。");
+}
+
 // ─── 内部実装 ───────────────────────────────────────────────────
 
 /** 指定 schema 群を JSON に再構築 → 1 ブランチ 1 PR で push */
