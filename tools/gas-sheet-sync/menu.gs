@@ -8,6 +8,7 @@ function onOpen() {
   SpreadsheetApp.getUi()
     .createMenu("データ同期")
     .addItem("GitHub から最新を取得 (Pull、全シート)", "pullAllFromGitHub")
+    .addItem("extensions だけ Pull (cards.js から、view 専用)", "pullExtensionsOnly")
     .addSeparator()
     .addSubMenu(
       SpreadsheetApp.getUi().createMenu("Push (シートを選んで PR)")
