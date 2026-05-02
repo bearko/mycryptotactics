@@ -6785,7 +6785,7 @@ function openShopUpgradeCard(goldDisp, upgradeBtn) {
     const wrapper = document.createElement("div");
     wrapper.className = "shop-remove-card-wrapper";
 
-    // before → after を横並び表示
+    // before → after を横並び表示 (after はコスト保持後の値で表示)
     const row = document.createElement("div");
     row.className = "craft-upgrade-row";
     const before = buildRewardPickButton(card, mockS);
@@ -6793,7 +6793,9 @@ function openShopUpgradeCard(goldDisp, upgradeBtn) {
     const arrow = document.createElement("span");
     arrow.className = "craft-arrow";
     arrow.textContent = "→";
-    const after = buildRewardPickButton(upgradeDef, mockS);
+    // β1: ランクアップ後はコスト据え置きなので、preview もそれに合わせる
+    const upgradeDefDisplay = { ...upgradeDef, cost: card.cost };
+    const after = buildRewardPickButton(upgradeDefDisplay, mockS);
     after.style.pointerEvents = "none";
     row.appendChild(before);
     row.appendChild(arrow);
@@ -6805,13 +6807,18 @@ function openShopUpgradeCard(goldDisp, upgradeBtn) {
     upBtn.textContent = `ランクアップ (-${SHOP_UPGRADE_COST} GUM)`;
     upBtn.addEventListener("click", () => {
       gold -= SHOP_UPGRADE_COST;
-      // 同じキーの最初の 1 枚をアップグレード後カードに置き換え
+      // 同じキーの最初の 1 枚をアップグレード後カードに置き換え (元カードのコストを保持)
       const replaceIdx = runState.deck.findIndex(c => c.libraryKey === card.libraryKey);
-      if (replaceIdx >= 0) runState.deck[replaceIdx] = copyCard(upgradeKey);
+      if (replaceIdx >= 0) {
+        const originalCost = runState.deck[replaceIdx].cost;
+        const upgraded = copyCard(upgradeKey);
+        upgraded.cost = originalCost;  // β1: ランクアップ後もコスト据え置き (Common ベースは 1 のまま)
+        runState.deck[replaceIdx] = upgraded;
+      }
       if (goldDisp) goldDisp.textContent = String(gold);
       syncResources();
-      clog(`ショップ打ち直し: ${card.extNameJa} → ${upgradeDef.extNameJa}（-${SHOP_UPGRADE_COST} GUM）`);
-      renderNavigator(`「${card.extNameJa}」を「${upgradeDef.extNameJa}」にランクアップしました！強くなりましたね！`);
+      clog(`ショップ打ち直し: ${card.extNameJa} → ${upgradeDef.extNameJa}（-${SHOP_UPGRADE_COST} GUM、コスト据え置き）`);
+      renderNavigator(`「${card.extNameJa}」を「${upgradeDef.extNameJa}」にランクアップしました！コストはそのまま、効果が強くなりましたよ！`);
       runState.shopUpgradeUsed = true;
       setShopUpgradeBtnSoldOut(upgradeBtn);
       overlay.remove();
@@ -7808,15 +7815,21 @@ function openCraftUpgrade() {
     const arrow = document.createElement("span");
     arrow.className = "craft-arrow";
     arrow.textContent = "→";
-    const after = buildRewardPickButton(upgradeDef, mockS);
+    // β1: ランクアップ後はコスト据え置きなので、preview もそれに合わせる
+    const upgradeDefDisplay = { ...upgradeDef, cost: card.cost };
+    const after = buildRewardPickButton(upgradeDefDisplay, mockS);
     after.style.pointerEvents = "none";
 
     const selBtn = document.createElement("button");
     selBtn.className = "action craft-opt-btn";
     selBtn.textContent = "このカードを強化";
     selBtn.addEventListener("click", () => {
-      runState.deck[idx] = copyCard(upgradeKey);
-      clog(`打ち直し: ${card.extNameJa} → ${upgradeDef.extNameJa}`);
+      // β1: 元カードのコストを保持してランクアップ
+      const originalCost = runState.deck[idx].cost;
+      const upgraded = copyCard(upgradeKey);
+      upgraded.cost = originalCost;
+      runState.deck[idx] = upgraded;
+      clog(`打ち直し: ${card.extNameJa} → ${upgradeDef.extNameJa} (コスト ${originalCost} 据え置き)`);
       leaveCraft();
     });
 
