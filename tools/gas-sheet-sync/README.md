@@ -6,8 +6,11 @@
 
 - **Pull (誰でも実行可)**: GitHub main の最新 JSON を取得し、Spreadsheet に流し込む
 - **Push (`bearko.miyamoto@gmail.com` のみ実行可)**: Spreadsheet の内容を JSON に再構築し、新ブランチを切って PR を作成
+  - **シートごとに個別 Push 可**: 「heroes だけ Push」「ll-extensions だけ Push」「全シート Push (1 PR)」をメニューから選択
 - `rarity` 列はプルダウン (common / uncommon / rare / epic / legendary)
 - `_meta` 隠しシートに pull/push の SHA・実行ユーザを記録 → スプレッドシートが古いまま push しないよう警告
+
+> **メモ (この PR から):** ゲーム runtime が `data/*.json` を直接 fetch するようになったので、push 後の `tools/sync.ps1` 実行は**不要**。Push → PR マージ → Vercel 反映だけで完結。
 
 ## 対象 JSON
 

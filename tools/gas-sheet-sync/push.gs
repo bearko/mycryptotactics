@@ -4,10 +4,22 @@
  * 権限チェック: PUSH_ALLOWED_EMAIL に一致するユーザのみ実行可。
  * Pull した時点の SHA (lastSyncedSha) と現在の main HEAD を比較し、
  * ズレていれば warn (force push したいなら Yes で続行)。
+ *
+ * メニューから sheet を選んで個別に Push できるよう、3 つの公開関数を提供:
+ *   - pushHeroesAsPR()         heroes だけ
+ *   - pushLlExtensionsAsPR()   ll-extensions だけ
+ *   - pushAllToGitHubAsPR()    全シート (まとめて 1 PR)
  */
 
-/** メニュー: 全シート push (PR 作成) */
-function pushAllToGitHubAsPR() {
+// ─── 公開エントリ ────────────────────────────────────────────────
+function pushHeroesAsPR()       { pushSchemasAsPR_([HEROES_SCHEMA], "heroes"); }
+function pushLlExtensionsAsPR() { pushSchemasAsPR_([LL_EXT_SCHEMA], "ll-extensions"); }
+function pushAllToGitHubAsPR()  { pushSchemasAsPR_(ALL_SCHEMAS, "all-sheets"); }
+
+// ─── 内部実装 ───────────────────────────────────────────────────
+
+/** 指定 schema 群を JSON に再構築 → 1 ブランチ 1 PR で push */
+function pushSchemasAsPR_(schemas, label) {
   const ui = SpreadsheetApp.getUi();
   try {
     ghAssertPushAllowed_();
@@ -18,7 +30,7 @@ function pushAllToGitHubAsPR() {
 
   // 1. シートから JSON 構築
   const built = [];
-  for (const schema of ALL_SCHEMAS) {
+  for (const schema of schemas) {
     const json = readSheetAsJson_(schema);
     built.push({ schema: schema, jsonStr: prettyJsonString_(json, schema) });
   }
@@ -41,14 +53,14 @@ function pushAllToGitHubAsPR() {
     changedFiles.push({ path: item.schema.jsonPath, jsonStr: item.jsonStr, sha: current.sha });
   }
   if (changedFiles.length === 0) {
-    ui.alert("変更なし\nGitHub の最新と一致しているため PR は作成されません。" + staleWarning);
+    ui.alert("変更なし\n対象シート (" + label + ") の内容が GitHub の最新と一致しているため PR は作成されません。" + staleWarning);
     return;
   }
 
   // 4. 確認
   const fileList = changedFiles.map(f => "  - " + f.path).join("\n");
   const confirm = ui.alert(
-    "Push 確認",
+    "Push 確認 (" + label + ")",
     "以下の " + changedFiles.length + " ファイルを変更して PR を作成します:\n\n" + fileList + "\n\nbase: " + props.base + staleWarning + "\n\n続行しますか?",
     ui.ButtonSet.YES_NO,
   );
@@ -56,18 +68,20 @@ function pushAllToGitHubAsPR() {
 
   // 5. 新ブランチ作成
   const ts = Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyyMMdd-HHmmss");
-  const branch = "balance/sheet-sync-" + ts;
+  const branch = "balance/sheet-sync-" + label + "-" + ts;
   ghCreateBranch(branch, headSha);
 
   // 6. 各ファイル PUT
   for (const f of changedFiles) {
-    ghPutFile(f.path, branch, f.jsonStr, "balance: " + f.path + " (sheet sync)", f.sha);
+    ghPutFile(f.path, branch, f.jsonStr, "balance: " + f.path + " (sheet sync " + label + ")", f.sha);
   }
 
   // 7. PR 作成
-  const title = "balance: シート同期 (" + ts + ")";
+  const title = "balance: シート同期 " + label + " (" + ts + ")";
   const body =
     "Spreadsheet からの自動 PR\n\n" +
+    "## 対象\n" +
+    "シート: " + label + "\n\n" +
     "## 変更ファイル\n" +
     changedFiles.map(f => "- `" + f.path + "`").join("\n") + "\n\n" +
     "## 実行情報\n" +
@@ -82,7 +96,7 @@ function pushAllToGitHubAsPR() {
   setMetaValue_("lastPushBy", Session.getActiveUser().getEmail() || "(unknown)");
   setMetaValue_("lastPushBranch", branch);
   setMetaValue_("lastPushPr", pr.html_url);
-  ui.alert("PR 作成完了\n" + pr.html_url + "\n\n" + changedFiles.length + " ファイル変更。");
+  ui.alert("PR 作成完了 (" + label + ")\n" + pr.html_url + "\n\n" + changedFiles.length + " ファイル変更。");
 }
 
 /** シートを読み JSON 配列に再構築 */

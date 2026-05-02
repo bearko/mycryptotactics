@@ -10,6 +10,7 @@ import {
   LEADER,
   HERO_ROSTER,
   setLeader,
+  loadHeroes,
   ENEMY_IMG,
   EXT_IMG,
   BATTLE_BG,
@@ -28,11 +29,11 @@ import {
   applyDamageThroughShield,
 } from "./battle-mch.js";
 import { initHelp } from "./help.js";
-import { ENEMY_DEFS } from "./enemies.js";
-import { BOSS_DEFS } from "./bosses.js";
+import { ENEMY_DEFS, loadEnemies } from "./enemies.js";
+import { BOSS_DEFS, loadBosses } from "./bosses.js";
 import { CHAPTERS } from "./chapters.js";
 import { generateChapterMap } from "./maps.js";
-import { LL_EXT_POOL } from "./ll-extensions.js";
+import { LL_EXT_POOL, loadLlExtensions } from "./ll-extensions.js";
 import {
   resolveTargets,
   makeHeroUnit,
@@ -7717,7 +7718,19 @@ function closeDeckModal() {
 }
 
 // ─── 初期化 ───────────────────────────────────────────────────────
-function init() {
+async function init() {
+  // 0. data/*.json を runtime fetch (旧 sync_csv_json.js による .js 静的生成は廃止)
+  //    HERO_ROSTER / ENEMY_DEFS / BOSS_DEFS / LL_EXT_POOL は loadXxx() 後に populated
+  try {
+    await Promise.all([loadHeroes(), loadEnemies(), loadBosses(), loadLlExtensions()]);
+    // LEADER 初期値を最初のヒーローに (旧 constants.js のモジュールロード時セットを置き換え)
+    if (HERO_ROSTER.length > 0) setLeader(HERO_ROSTER[0]);
+  } catch (e) {
+    console.error("[init] data load failed", e);
+    alert("データロードに失敗しました: " + e.message);
+    return;
+  }
+
   document.getElementById("btnEndTurn").addEventListener("click", async () => {
     if (!combat || view !== "combat" || combatInputLocked) return;
     // 連打で enemyTurn() が二重実行されるのを防止 (敵攻撃の重複判定 + 手札補充の二重発生)

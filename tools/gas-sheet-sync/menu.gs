@@ -7,12 +7,19 @@
 function onOpen() {
   SpreadsheetApp.getUi()
     .createMenu("データ同期")
-    .addItem("GitHub から最新を取得 (Pull)", "pullAllFromGitHub")
-    .addItem("Spreadsheet を GitHub に PR (Push)", "pushAllToGitHubAsPR")
+    .addItem("GitHub から最新を取得 (Pull、全シート)", "pullAllFromGitHub")
+    .addSeparator()
+    .addSubMenu(
+      SpreadsheetApp.getUi().createMenu("Push (シートを選んで PR)")
+        .addItem("heroes だけ Push", "pushHeroesAsPR")
+        .addItem("ll-extensions だけ Push", "pushLlExtensionsAsPR")
+        .addSeparator()
+        .addItem("全シート Push (1 PR にまとめる)", "pushAllToGitHubAsPR")
+    )
     .addSeparator()
     .addItem("最終同期情報を表示", "showSyncStatus")
     .addItem("Script Properties をチェック", "checkProperties")
-    .toRoot();
+    .addToUi();
 }
 
 function showSyncStatus() {

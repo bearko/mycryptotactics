@@ -2,7 +2,7 @@
  * passives-generated.js — SPEC-006 §18 Phase 4j codemod 出力 (v2)
  *
  * 全 210 体のヒーローパッシブを宣言形式 PassiveDef に変換。
- * 元データ: prototype/data/heroes.csv
+ * 元データ: prototype/data/heroes.json
  * 生成スクリプト: prototype/tools/gen-passives.js
  *
  * 変換方針:
