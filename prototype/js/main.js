@@ -1237,6 +1237,54 @@ const PASSIVE_EFFECT_HANDLERS = {
     clog(`【${caster.name || "パッシブ"}】 ${target.name || ""} ${effect.stat.toUpperCase()} ${delta >= 0 ? "+" : ""}${delta}`);
   },
 
+  // buffStatFromOther: 別ステを参照して自身のステを増減 (e.g. INTを最大AGIの30%アップ)
+  buffStatFromOther(s, caster, target, effect) {
+    const field = { phy: "phy", int: "int", agi: "agi" }[effect.stat];
+    const fromField = { phy: "phy", int: "int", agi: "agi" }[effect.fromStat];
+    if (!field || !fromField) return;
+    const pct = +effect.pct || 0;
+    const baseFromField = fromField + "Base";
+    const fromValue = target[baseFromField] ?? target[fromField] ?? 0;
+    const delta = Math.max(1, Math.floor(fromValue * pct));
+    if (!delta) return;
+    target[field] = (target[field] ?? 0) + delta;
+    if (s.heroes?.[0] === target) {
+      if (field === "phy") s.playerPhy = target.phy;
+      else if (field === "int") s.playerInt = target.int;
+      else if (field === "agi") s.playerAgi = target.agi;
+    }
+    playBattleSe("buff");
+    playPortraitEffect("player", "buff", target);
+    clog(`【${caster.name || "パッシブ"}】 ${target.name || ""} ${effect.stat.toUpperCase()} +${delta} (${effect.fromStat.toUpperCase()} の ${Math.round(pct*100)}%)`);
+  },
+
+  // buffStatPct: 対象のステを ±N% 加減 (e.g. 敵のINTを30%ダウン → pct: -0.3)
+  buffStatPct(s, caster, target, effect) {
+    const field = { phy: "phy", int: "int", agi: "agi" }[effect.stat];
+    if (!field) return;
+    const pct = +effect.pct || 0;
+    const cur = target[field] ?? 0;
+    const delta = Math.floor(cur * pct);
+    const sign = delta < 0 ? "" : "+";
+    if (!delta) return;
+    target[field] = Math.max(1, cur + delta);
+    // legacy mirror (target が heroes[0] / enemies[0] のとき)
+    if (s.heroes?.[0] === target) {
+      if (field === "phy") s.playerPhy = target.phy;
+      else if (field === "int") s.playerInt = target.int;
+      else if (field === "agi") s.playerAgi = target.agi;
+    } else if (s.enemies?.[0] === target) {
+      if (field === "phy") s.enemyPhy = target.phy;
+      else if (field === "int") s.enemyInt = target.int;
+      else if (field === "agi") s.enemyAgi = target.agi;
+    }
+    playBattleSe(delta < 0 ? "debuff" : "buff");
+    const fxKind = delta < 0 ? "debuff" : "buff";
+    const side = (s.heroes?.includes && s.heroes.includes(target)) ? "player" : "enemy";
+    playPortraitEffect(side, fxKind, target);
+    clog(`【${caster.name || "パッシブ"}】 ${target.name || ""} ${effect.stat.toUpperCase()} ${sign}${delta} (${Math.round(Math.abs(pct)*100)}%)`);
+  },
+
   // addGuard: ガード付与
   addGuard(s, caster, target, effect) {
     const v = effect.value || 0;

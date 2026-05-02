@@ -1,16 +1,16 @@
 /**
- * passives-generated.js — SPEC-006 §18 Phase 4j codemod 出力
+ * passives-generated.js — SPEC-006 §18 Phase 4j codemod 出力 (v2)
  *
  * 全 210 体のヒーローパッシブを宣言形式 PassiveDef に変換。
- * 元データ: bearko/mycryptoheroes/Data/Heroes/heroes.csv
+ * 元データ: prototype/data/heroes.csv
  * 生成スクリプト: prototype/tools/gen-passives.js
  *
- * 簡略化方針:
- * - 元 DB のパーティ系効果 (前衛/中衛/最後尾) は 1v1 ベースに合わせて self / enemy.foremost に統一
- * - 元 DB の状態異常 (気絶/睡眠/衰弱/恐怖/呪い/混乱/バインド) は出血 / 毒に集約
- * - 元 DB の {triggerRate} placeholder は実値が無いため trigger 種別ごとの既定値で埋める
- * - ステータス上昇 N% は flat +N にスケール (Common/Uncommon/Rare/Epic/Legendary で cap +3/+5/+6/+7/+9)
- * - 状態異常 stack は Common/Uncommon 1, Rare 2, Epic 3, Legendary 4
+ * 変換方針:
+ * - passiveDesc を '<trigger 句>に発動・<effects>' 形式でパース
+ * - effects は ／ 区切りで個別パース、解析不能部は notes に記録
+ * - 別ステ参照バフ (e.g. INTを最大AGIの30%アップ) は buffStatFromOther action で表現
+ * - 状態異常 stack 数は CSV の明示値をそのまま使用
+ * - 致死時生存は revive action (hpRatio 0.01) として inline 化
  *
  * runtime 仕様: prototype/js/passive-runtime.js + SPEC-006 §18.6
  */
@@ -32,7 +32,7 @@ export const PASSIVES = {
   "kaihime": {
     passiveKey: "kaihime",
     trigger: "self.cardPlayed",
-    triggerRate: 0.4,
+    triggerRate: 0.5,
     oncePerCombat: false,
     effects: [
       {"target":"enemy.foremost","action":"damage","coef":{"phy":0.5}}
@@ -57,32 +57,30 @@ export const PASSIVES = {
     triggerRate: 1,
     oncePerCombat: true,
     effects: [
-      {"target":"enemy.foremost","action":"damage","coef":{"int":0.4}},
-      {"target":"enemy.foremost","action":"applyStatus","status":"bleed","stacks":1}
+      {"target":"enemy.foremost","action":"damage","coef":{"int":0.4}}
     ],
     cutinSkillName: "狼王ロボ"
   },
   // heroId: 1005
   "inoh": {
     passiveKey: "inoh",
-    trigger: "self.died",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
     effects: [
-      {"target":"self","action":"buffStat","stat":"int","value":3}
+      {"target":"self","action":"buffStatFromOther","stat":"int","fromStat":"agi","pct":0.3}
     ],
     cutinSkillName: "大日本沿海輿地全図"
   },
   // heroId: 1006
   "pythagoras": {
     passiveKey: "pythagoras",
-    trigger: "self.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.4,
     effects: [
-      {"target":"self","action":"buffStat","stat":"phy","value":2},
-      {"target":"self","action":"buffStat","stat":"int","value":2}
+      {"target":"self","action":"buffStatFromOther","stat":"phy","fromStat":"int","pct":0.2},
+      {"target":"self","action":"buffStatFromOther","stat":"int","fromStat":"phy","pct":0.2}
     ],
     cutinSkillName: "テトラクテュス"
   },
@@ -90,24 +88,23 @@ export const PASSIVES = {
   "daejanggeum": {
     passiveKey: "daejanggeum",
     trigger: "self.cardPlayed",
-    triggerRate: 0.4,
+    triggerRate: 0.3,
     oncePerCombat: false,
     effects: [
-      {"target":"self","action":"heal","coef":{"hp":0.15}}
+      {"target":"self","action":"heal","coef":{"hpRatio":0.1}}
     ],
     cutinSkillName: "李氏朝鮮、宮廷医女"
   },
   // heroId: 1008
   "sullivan": {
     passiveKey: "sullivan",
-    trigger: "self.tookDamage",
-    triggerRate: 0.5,
-    oncePerCombat: false,
+    trigger: "combat.started",
+    triggerRate: 1,
+    oncePerCombat: true,
     effects: [
-      {"target":"self","action":"buffStat","stat":"phy","value":1}
+      {"target":"self","action":"buffStat","stat":"phy","value":5}
     ],
-    cutinSkillName: "ボストン・ストロング・ボーイ",
-    notes: "元 DB の効果が解析不能 → PHY+1 fallback"
+    cutinSkillName: "ボストン・ストロング・ボーイ"
   },
   // heroId: 1009
   "hercules": {
@@ -116,19 +113,18 @@ export const PASSIVES = {
     triggerRate: 1,
     oncePerCombat: true,
     effects: [
-      {"target":"enemy.foremost","action":"buffStat","stat":"int","value":-2}
+      {"target":"enemy.foremost","action":"buffStatPct","stat":"int","pct":-0.3}
     ],
     cutinSkillName: "ローリングドライバー"
   },
   // heroId: 1010
   "giraffa": {
     passiveKey: "giraffa",
-    trigger: "self.statRatioAbove",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 1.5,
     effects: [
-      {"target":"enemy.foremost","action":"damage","coef":{"phy":0.64}}
+      {"target":"enemy.foremost","action":"damage","coef":{"phy":0.4}}
     ],
     cutinSkillName: "ブルロック"
   },
@@ -141,16 +137,14 @@ export const PASSIVES = {
     effects: [
       {"target":"self","action":"buffStat","stat":"agi","value":1}
     ],
-    cutinSkillName: "ライトフライヤー号",
-    notes: "元 DB の効果が解析不能 → PHY+1 fallback"
+    cutinSkillName: "ライトフライヤー号"
   },
   // heroId: 2002
   "spartacus": {
     passiveKey: "spartacus",
-    trigger: "self.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.6,
     effects: [
       {"target":"enemy.foremost","action":"damage","coef":{"phy":0.4}},
       {"target":"enemy.foremost","action":"damage","coef":{"phy":0.4}},
@@ -173,23 +167,23 @@ export const PASSIVES = {
   // heroId: 2004
   "schubert": {
     passiveKey: "schubert",
-    trigger: "self.died",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
     effects: [
       {"target":"enemy.foremost","action":"applyStatus","status":"bleed","stacks":1},
-      {"target":"self","action":"revive","coef":{"hpRatio":0.2}}
+      {"target":"self","action":"revive","coef":{"hpRatio":0.01}}
     ],
     cutinSkillName: "魔王"
   },
   // heroId: 2005
   "grimm": {
     passiveKey: "grimm",
-    trigger: "self.tookDamage",
-    triggerRate: 0.5,
-    oncePerCombat: false,
+    trigger: "combat.started",
+    triggerRate: 1,
+    oncePerCombat: true,
     effects: [
-      {"target":"self","action":"heal","coef":{"hp":0.1}},
+      {"target":"self","action":"heal","coef":{"int":0.1}},
       {"target":"enemy.foremost","action":"applyStatus","status":"poison","stacks":1}
     ],
     cutinSkillName: "ブレーメンの音楽隊"
@@ -212,27 +206,27 @@ export const PASSIVES = {
     triggerRate: 0.4,
     oncePerCombat: false,
     effects: [
-      {"target":"self","action":"heal","coef":{"hp":0.185}}
+      {"target":"self","action":"heal","coef":{"int":0.185}}
     ],
     cutinSkillName: "プレゼント・フォー・ユー"
   },
   // heroId: 2008
   "schrodinger": {
     passiveKey: "schrodinger",
-    trigger: "self.died",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
     effects: [
       {"target":"self","action":"buffStat","stat":"int","value":2},
       {"target":"self","action":"buffStat","stat":"agi","value":2},
-      {"target":"self","action":"revive","coef":{"hpRatio":0.2}}
+      {"target":"self","action":"revive","coef":{"hpRatio":0.01}}
     ],
     cutinSkillName: "シュレディンガーの猫"
   },
   // heroId: 2009
   "ranmaru": {
     passiveKey: "ranmaru",
-    trigger: "enemy.cardPlayed",
+    trigger: "self.cardPlayed",
     triggerRate: 0.4,
     oncePerCombat: false,
     effects: [
@@ -248,7 +242,7 @@ export const PASSIVES = {
     triggerRate: 1,
     oncePerCombat: true,
     effects: [
-      {"target":"self","action":"heal","coef":{"hp":0.3}},
+      {"target":"self","action":"heal","coef":{"int":0.3}},
       {"target":"self","action":"buffStat","stat":"agi","value":1}
     ],
     cutinSkillName: "変身"
@@ -260,20 +254,19 @@ export const PASSIVES = {
     triggerRate: 1,
     oncePerCombat: true,
     effects: [
-      {"target":"self","action":"buffStat","stat":"phy","value":1}
+      {"target":"enemy.foremost","action":"buffStat","stat":"agi","value":-2}
     ],
-    cutinSkillName: "兵は詭道なり",
-    notes: "元 DB の効果が解析不能 → PHY+1 fallback"
+    cutinSkillName: "兵は詭道なり"
   },
   // heroId: 2012
   "mitsunari": {
     passiveKey: "mitsunari",
-    trigger: "self.statRatioAbove",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 1.15,
     effects: [
-      {"target":"self","action":"buffStat","stat":"phy","value":2}
+      {"target":"self","action":"buffStat","stat":"phy","value":2},
+      {"target":"enemy.foremost","action":"buffStat","stat":"int","value":-4}
     ],
     cutinSkillName: "大一大万大吉"
   },
@@ -319,22 +312,21 @@ export const PASSIVES = {
   // heroId: 2016
   "anastasia": {
     passiveKey: "anastasia",
-    trigger: "self.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.5,
     effects: [
-      {"target":"self","action":"buffStat","stat":"phy","value":1}
+      {"target":"enemy.foremost","action":"damage","coef":{"int":0.45}},
+      {"target":"enemy.foremost","action":"buffStat","stat":"int","value":-4}
     ],
-    cutinSkillName: "幻の生存者",
-    notes: "元 DB の効果が解析不能 → PHY+1 fallback"
+    cutinSkillName: "幻の生存者"
   },
   // heroId: 2017
   "geronimo": {
     passiveKey: "geronimo",
-    trigger: "self.tookDamage",
-    triggerRate: 0.5,
-    oncePerCombat: false,
+    trigger: "combat.started",
+    triggerRate: 1,
+    oncePerCombat: true,
     effects: [
       {"target":"enemy.foremost","action":"buffStat","stat":"int","value":-1}
     ],
@@ -343,10 +335,9 @@ export const PASSIVES = {
   // heroId: 2018
   "chacha": {
     passiveKey: "chacha",
-    trigger: "party.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.6,
     effects: [
       {"target":"self","action":"buffStat","stat":"phy","value":3},
       {"target":"self","action":"addShield","value":8}
@@ -367,10 +358,9 @@ export const PASSIVES = {
   // heroId: 2020
   "mitsuhide": {
     passiveKey: "mitsuhide",
-    trigger: "self.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.3,
     effects: [
       {"target":"enemy.foremost","action":"damage","coef":{"int":0.8}},
       {"target":"enemy.foremost","action":"applyStatus","status":"poison","stacks":1}
@@ -391,10 +381,9 @@ export const PASSIVES = {
   // heroId: 2022
   "andersen": {
     passiveKey: "andersen",
-    trigger: "self.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.6,
     effects: [
       {"target":"enemy.foremost","action":"damage","coef":{"int":0.45}}
     ],
@@ -414,9 +403,9 @@ export const PASSIVES = {
   // heroId: 2024
   "salome": {
     passiveKey: "salome",
-    trigger: "self.tookDamage",
-    triggerRate: 0.5,
-    oncePerCombat: false,
+    trigger: "combat.started",
+    triggerRate: 1,
+    oncePerCombat: true,
     effects: [
       {"target":"self","action":"buffStat","stat":"phy","value":1},
       {"target":"enemy.foremost","action":"applyStatus","status":"poison","stacks":1}
@@ -449,10 +438,9 @@ export const PASSIVES = {
   // heroId: 2027
   "aesop": {
     passiveKey: "aesop",
-    trigger: "self.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.6,
     effects: [
       {"target":"enemy.foremost","action":"buffStat","stat":"agi","value":-4}
     ],
@@ -461,34 +449,33 @@ export const PASSIVES = {
   // heroId: 2028
   "chun_sisters": {
     passiveKey: "chun_sisters",
-    trigger: "enemy.cardPlayed",
+    trigger: "self.cardPlayed",
     triggerRate: 0.4,
     oncePerCombat: false,
     effects: [
-      {"target":"self","action":"buffStat","stat":"phy","value":1}
+      {"target":"enemy.foremost","action":"damage","coef":{"phy":0.45}},
+      {"target":"enemy.foremost","action":"damage","coef":{"int":0.45}}
     ],
-    cutinSkillName: "姉妹の反乱",
-    notes: "元 DB の効果が解析不能 → PHY+1 fallback"
+    cutinSkillName: "姉妹の反乱"
   },
   // heroId: 2029
   "ikkyu": {
     passiveKey: "ikkyu",
-    trigger: "self.died",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
     effects: [
       {"target":"enemy.foremost","action":"damage","coef":{"int":0.4}},
-      {"target":"self","action":"revive","coef":{"hpRatio":0.2}}
+      {"target":"self","action":"revive","coef":{"hpRatio":0.01}}
     ],
     cutinSkillName: "めでたくもあり・めでたくもなし"
   },
   // heroId: 2030
   "izumo": {
     passiveKey: "izumo",
-    trigger: "party.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.6,
     effects: [
       {"target":"enemy.foremost","action":"damage","coef":{"phy":0.45}}
     ],
@@ -519,10 +506,9 @@ export const PASSIVES = {
   // heroId: 2033
   "goethe": {
     passiveKey: "goethe",
-    trigger: "self.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.6,
     effects: [
       {"target":"enemy.foremost","action":"buffStat","stat":"phy","value":-4},
       {"target":"enemy.foremost","action":"applyStatus","status":"poison","stacks":1}
@@ -568,10 +554,9 @@ export const PASSIVES = {
   // heroId: 2037
   "sunce": {
     passiveKey: "sunce",
-    trigger: "self.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.6,
     effects: [
       {"target":"enemy.foremost","action":"damage","coef":{"phy":0.15}},
       {"target":"enemy.foremost","action":"damage","coef":{"phy":0.15}},
@@ -585,23 +570,21 @@ export const PASSIVES = {
   // heroId: 2038
   "kiyomori": {
     passiveKey: "kiyomori",
-    trigger: "self.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.6,
     effects: [
-      {"target":"self","action":"buffStat","stat":"phy","value":1}
+      {"target":"enemy.foremost","action":"damage","coef":{"phy":0.45}},
+      {"target":"enemy.foremost","action":"buffStat","stat":"phy","value":-4}
     ],
-    cutinSkillName: "治承三年の政変",
-    notes: "元 DB の効果が解析不能 → PHY+1 fallback"
+    cutinSkillName: "治承三年の政変"
   },
   // heroId: 2039
   "dostoevsky": {
     passiveKey: "dostoevsky",
-    trigger: "party.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.75,
     effects: [
       {"target":"self","action":"buffStat","stat":"int","value":5},
       {"target":"self","action":"buffStat","stat":"agi","value":3}
@@ -611,10 +594,9 @@ export const PASSIVES = {
   // heroId: 2040
   "mulan": {
     passiveKey: "mulan",
-    trigger: "enemy.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.65,
     effects: [
       {"target":"self","action":"addGuard","value":6}
     ],
@@ -623,7 +605,7 @@ export const PASSIVES = {
   // heroId: 2041
   "franklin": {
     passiveKey: "franklin",
-    trigger: "self.died",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
     effects: [
@@ -647,10 +629,9 @@ export const PASSIVES = {
   // heroId: 2043
   "saizo": {
     passiveKey: "saizo",
-    trigger: "self.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.8,
     effects: [
       {"target":"self","action":"buffStat","stat":"int","value":5},
       {"target":"enemy.foremost","action":"buffStat","stat":"phy","value":-1},
@@ -673,15 +654,13 @@ export const PASSIVES = {
   // heroId: 2045
   "daruma": {
     passiveKey: "daruma",
-    trigger: "enemy.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.65,
     effects: [
-      {"target":"self","action":"buffStat","stat":"phy","value":1}
+      {"target":"enemy.foremost","action":"buffStat","stat":"agi","value":-2}
     ],
-    cutinSkillName: "二入四行論",
-    notes: "元 DB の効果が解析不能 → PHY+1 fallback"
+    cutinSkillName: "二入四行論"
   },
   // heroId: 2046
   "masako": {
@@ -692,16 +671,14 @@ export const PASSIVES = {
     effects: [
       {"target":"self","action":"buffStat","stat":"phy","value":1}
     ],
-    cutinSkillName: "尼将軍",
-    notes: "元 DB の効果が解析不能 → PHY+1 fallback"
+    cutinSkillName: "尼将軍"
   },
   // heroId: 2047
   "aristotle": {
     passiveKey: "aristotle",
-    trigger: "self.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.55,
     effects: [
       {"target":"enemy.foremost","action":"damage","coef":{"int":0.45}}
     ],
@@ -721,9 +698,9 @@ export const PASSIVES = {
   // heroId: 2049
   "chopin": {
     passiveKey: "chopin",
-    trigger: "self.tookDamage",
-    triggerRate: 0.5,
-    oncePerCombat: false,
+    trigger: "combat.started",
+    triggerRate: 1,
+    oncePerCombat: true,
     effects: [
       {"target":"enemy.foremost","action":"buffStat","stat":"agi","value":-1},
       {"target":"enemy.foremost","action":"applyStatus","status":"bleed","stacks":1}
@@ -733,10 +710,9 @@ export const PASSIVES = {
   // heroId: 2050
   "ippatsuman": {
     passiveKey: "ippatsuman",
-    trigger: "self.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.3,
     effects: [
       {"target":"self","action":"buffStat","stat":"phy","value":5},
       {"target":"self","action":"addGuard","value":6}
@@ -769,9 +745,9 @@ export const PASSIVES = {
   // heroId: 2053
   "ramon": {
     passiveKey: "ramon",
-    trigger: "self.tookDamage",
-    triggerRate: 0.5,
-    oncePerCombat: false,
+    trigger: "combat.started",
+    triggerRate: 1,
+    oncePerCombat: true,
     effects: [
       {"target":"enemy.foremost","action":"damage","coef":{"phy":0.55}},
       {"target":"self","action":"buffStat","stat":"phy","value":5}
@@ -781,7 +757,7 @@ export const PASSIVES = {
   // heroId: 3001
   "etheremon_red": {
     passiveKey: "etheremon_red",
-    trigger: "enemy.cardPlayed",
+    trigger: "self.cardPlayed",
     triggerRate: 0.4,
     oncePerCombat: false,
     effects: [
@@ -805,10 +781,9 @@ export const PASSIVES = {
   // heroId: 3003
   "gennai": {
     passiveKey: "gennai",
-    trigger: "self.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.6,
     effects: [
       {"target":"enemy.foremost","action":"damage","coef":{"int":0.4}},
       {"target":"self","action":"buffStat","stat":"int","value":6}
@@ -848,7 +823,7 @@ export const PASSIVES = {
     triggerRate: 0.4,
     oncePerCombat: false,
     effects: [
-      {"target":"self","action":"heal","coef":{"hp":0.3}},
+      {"target":"self","action":"heal","coef":{"int":0.3}},
       {"target":"self","action":"buffStat","stat":"phy","value":5},
       {"target":"self","action":"buffStat","stat":"int","value":5}
     ],
@@ -857,9 +832,9 @@ export const PASSIVES = {
   // heroId: 3007
   "nero": {
     passiveKey: "nero",
-    trigger: "self.tookDamage",
-    triggerRate: 0.5,
-    oncePerCombat: false,
+    trigger: "combat.started",
+    triggerRate: 1,
+    oncePerCombat: true,
     effects: [
       {"target":"self","action":"buffStat","stat":"int","value":5}
     ],
@@ -868,10 +843,9 @@ export const PASSIVES = {
   // heroId: 3008
   "nostradamus": {
     passiveKey: "nostradamus",
-    trigger: "self.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.5,
     effects: [
       {"target":"enemy.foremost","action":"applyStatus","status":"poison","stacks":2}
     ],
@@ -880,10 +854,9 @@ export const PASSIVES = {
   // heroId: 3009
   "taikoubou": {
     passiveKey: "taikoubou",
-    trigger: "self.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.65,
     effects: [
       {"target":"self","action":"buffStat","stat":"int","value":5}
     ],
@@ -892,12 +865,11 @@ export const PASSIVES = {
   // heroId: 3010
   "hattori": {
     passiveKey: "hattori",
-    trigger: "party.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.7,
     effects: [
-      {"target":"self","action":"heal","coef":{"hp":1}}
+      {"target":"self","action":"heal","coef":{"int":1}}
     ],
     cutinSkillName: "伊賀越え"
   },
@@ -910,8 +882,7 @@ export const PASSIVES = {
     effects: [
       {"target":"self","action":"buffStat","stat":"phy","value":1}
     ],
-    cutinSkillName: "戦国一の傾奇者",
-    notes: "元 DB の効果が解析不能 → PHY+1 fallback"
+    cutinSkillName: "戦国一の傾奇者"
   },
   // heroId: 3012
   "shiro_amakusa": {
@@ -920,22 +891,23 @@ export const PASSIVES = {
     triggerRate: 1,
     oncePerCombat: true,
     effects: [
+      {"target":"enemy.foremost","action":"damage","coef":{"phy":0.45}},
+      {"target":"enemy.foremost","action":"damage","coef":{"int":0.45}},
       {"target":"self","action":"buffStat","stat":"phy","value":6},
       {"target":"self","action":"buffStat","stat":"int","value":6},
       {"target":"self","action":"buffStat","stat":"agi","value":6}
     ],
-    cutinSkillName: "島原の乱",
-    notes: "self.statRatioBelow → combat.started 簡略化"
+    cutinSkillName: "島原の乱"
   },
   // heroId: 3013
   "goemon": {
     passiveKey: "goemon",
-    trigger: "self.died",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
     effects: [
       {"target":"enemy.foremost","action":"damage","coef":{"phy":0.2}},
-      {"target":"self","action":"revive","coef":{"hpRatio":0.2}}
+      {"target":"self","action":"revive","coef":{"hpRatio":0.01}}
     ],
     cutinSkillName: "世に盗人の種は尽くまじ"
   },
@@ -956,10 +928,9 @@ export const PASSIVES = {
   // heroId: 3015
   "ivan": {
     passiveKey: "ivan",
-    trigger: "party.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.7,
     effects: [
       {"target":"enemy.foremost","action":"damage","coef":{"int":0.15}},
       {"target":"self","action":"buffStat","stat":"phy","value":2},
@@ -976,8 +947,7 @@ export const PASSIVES = {
     effects: [
       {"target":"self","action":"buffStat","stat":"agi","value":1}
     ],
-    cutinSkillName: "おくのほそ道",
-    notes: "元 DB の効果が解析不能 → PHY+1 fallback"
+    cutinSkillName: "おくのほそ道"
   },
   // heroId: 3017
   "sanzo": {
@@ -988,17 +958,16 @@ export const PASSIVES = {
     effects: [
       {"target":"self","action":"buffStat","stat":"int","value":1}
     ],
-    cutinSkillName: "大唐西域記",
-    notes: "元 DB の効果が解析不能 → PHY+1 fallback"
+    cutinSkillName: "大唐西域記"
   },
   // heroId: 3018
   "benkei": {
     passiveKey: "benkei",
-    trigger: "self.died",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
     effects: [
-      {"target":"self","action":"revive","coef":{"hpRatio":0.2}}
+      {"target":"self","action":"revive","coef":{"hpRatio":0.01}}
     ],
     cutinSkillName: "弁慶の立往生"
   },
@@ -1033,7 +1002,7 @@ export const PASSIVES = {
     triggerRate: 0.4,
     oncePerCombat: false,
     effects: [
-      {"target":"self","action":"heal","coef":{"hp":0.15}}
+      {"target":"self","action":"heal","coef":{"int":0.15}}
     ],
     cutinSkillName: "ヴァレンティヌスの祝福"
   },
@@ -1044,7 +1013,7 @@ export const PASSIVES = {
     triggerRate: 0.4,
     oncePerCombat: false,
     effects: [
-      {"target":"self","action":"heal","coef":{"hp":0.15}},
+      {"target":"self","action":"heal","coef":{"int":0.15}},
       {"target":"enemy.foremost","action":"buffStat","stat":"agi","value":-1}
     ],
     cutinSkillName: "ポウハタンの姫"
@@ -1052,10 +1021,9 @@ export const PASSIVES = {
   // heroId: 3023
   "sunjian": {
     passiveKey: "sunjian",
-    trigger: "party.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.7,
     effects: [
       {"target":"enemy.foremost","action":"damage","coef":{"phy":0.5}},
       {"target":"self","action":"buffStat","stat":"phy","value":6},
@@ -1077,10 +1045,9 @@ export const PASSIVES = {
   // heroId: 3025
   "yukimura": {
     passiveKey: "yukimura",
-    trigger: "party.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.8,
     effects: [
       {"target":"enemy.foremost","action":"buffStat","stat":"phy","value":-5},
       {"target":"enemy.foremost","action":"buffStat","stat":"int","value":-5}
@@ -1095,7 +1062,7 @@ export const PASSIVES = {
     oncePerCombat: false,
     effects: [
       {"target":"enemy.foremost","action":"damage","coef":{"int":0.3}},
-      {"target":"self","action":"heal","coef":{"hp":0.3}},
+      {"target":"self","action":"heal","coef":{"int":0.3}},
       {"target":"self","action":"addGuard","value":6}
     ],
     cutinSkillName: "緑衣の義賊"
@@ -1103,10 +1070,9 @@ export const PASSIVES = {
   // heroId: 3027
   "yangduanhe": {
     passiveKey: "yangduanhe",
-    trigger: "party.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.55,
     effects: [
       {"target":"self","action":"buffStat","stat":"phy","value":4},
       {"target":"self","action":"buffStat","stat":"agi","value":4}
@@ -1127,10 +1093,9 @@ export const PASSIVES = {
   // heroId: 3029
   "mary_read": {
     passiveKey: "mary_read",
-    trigger: "party.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.6,
     effects: [
       {"target":"enemy.foremost","action":"damage","coef":{"phy":1.2}}
     ],
@@ -1151,9 +1116,9 @@ export const PASSIVES = {
   // heroId: 3031
   "earp": {
     passiveKey: "earp",
-    trigger: "self.tookDamage",
-    triggerRate: 0.5,
-    oncePerCombat: false,
+    trigger: "combat.started",
+    triggerRate: 1,
+    oncePerCombat: true,
     effects: [
       {"target":"self","action":"buffStat","stat":"int","value":1},
       {"target":"enemy.foremost","action":"applyStatus","status":"poison","stacks":2}
@@ -1163,10 +1128,9 @@ export const PASSIVES = {
   // heroId: 3032
   "bonny": {
     passiveKey: "bonny",
-    trigger: "party.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.6,
     effects: [
       {"target":"enemy.foremost","action":"damage","coef":{"int":1}},
       {"target":"self","action":"buffStat","stat":"int","value":3}
@@ -1176,12 +1140,11 @@ export const PASSIVES = {
   // heroId: 3034
   "percival": {
     passiveKey: "percival",
-    trigger: "party.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.6,
     effects: [
-      {"target":"self","action":"heal","coef":{"hp":0.6}},
+      {"target":"self","action":"heal","coef":{"int":0.6}},
       {"target":"self","action":"buffStat","stat":"agi","value":5}
     ],
     cutinSkillName: "聖杯探索"
@@ -1189,10 +1152,9 @@ export const PASSIVES = {
   // heroId: 3035
   "komachi": {
     passiveKey: "komachi",
-    trigger: "party.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.8,
     effects: [
       {"target":"self","action":"buffStat","stat":"phy","value":6},
       {"target":"self","action":"buffStat","stat":"int","value":6}
@@ -1213,12 +1175,12 @@ export const PASSIVES = {
   // heroId: 3037
   "magellan": {
     passiveKey: "magellan",
-    trigger: "self.died",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
     effects: [
       {"target":"self","action":"buffStat","stat":"phy","value":2},
-      {"target":"self","action":"revive","coef":{"hpRatio":0.2}}
+      {"target":"self","action":"revive","coef":{"hpRatio":0.01}}
     ],
     cutinSkillName: "受け継がれた世界一周"
   },
@@ -1248,12 +1210,11 @@ export const PASSIVES = {
   // heroId: 3040
   "gilgamesh": {
     passiveKey: "gilgamesh",
-    trigger: "self.statRatioAbove",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 1.5,
     effects: [
-      {"target":"self","action":"heal","coef":{"hp":1}}
+      {"target":"self","action":"heal","coef":{"int":1}}
     ],
     cutinSkillName: "フンババとの戦い"
   },
@@ -1271,22 +1232,20 @@ export const PASSIVES = {
   // heroId: 3042
   "columbus": {
     passiveKey: "columbus",
-    trigger: "party.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.5,
     effects: [
-      {"target":"self","action":"heal","coef":{"hp":0.3}}
+      {"target":"self","action":"heal","coef":{"int":0.3}}
     ],
     cutinSkillName: "西廻り航路の夢"
   },
   // heroId: 3043
   "newton": {
     passiveKey: "newton",
-    trigger: "party.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.8,
     effects: [
       {"target":"self","action":"buffStat","stat":"agi","value":6},
       {"target":"enemy.foremost","action":"buffStat","stat":"agi","value":-5},
@@ -1297,12 +1256,11 @@ export const PASSIVES = {
   // heroId: 3044
   "ieyasu": {
     passiveKey: "ieyasu",
-    trigger: "party.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.5,
     effects: [
-      {"target":"self","action":"heal","coef":{"hp":1}}
+      {"target":"self","action":"heal","coef":{"int":1}}
     ],
     cutinSkillName: "東照大権現"
   },
@@ -1333,9 +1291,9 @@ export const PASSIVES = {
   // heroId: 3047
   "attila": {
     passiveKey: "attila",
-    trigger: "self.tookDamage",
-    triggerRate: 0.5,
-    oncePerCombat: false,
+    trigger: "combat.started",
+    triggerRate: 1,
+    oncePerCombat: true,
     effects: [
       {"target":"self","action":"buffStat","stat":"phy","value":4}
     ],
@@ -1350,16 +1308,16 @@ export const PASSIVES = {
     effects: [
       {"target":"self","action":"buffStat","stat":"phy","value":1}
     ],
-    cutinSkillName: "五虎・左将軍",
-    notes: "元 DB の効果が解析不能 → PHY+1 fallback"
+    cutinSkillName: "五虎・左将軍"
   },
   // heroId: 3049
   "dongzhuo": {
     passiveKey: "dongzhuo",
-    trigger: "enemy.cardPlayed",
+    trigger: "self.cardPlayed",
     triggerRate: 0.4,
     oncePerCombat: false,
     effects: [
+      {"target":"enemy.foremost","action":"buffStat","stat":"agi","value":-5},
       {"target":"enemy.foremost","action":"applyStatus","status":"poison","stacks":2},
       {"target":"self","action":"addGuard","value":6}
     ],
@@ -1368,11 +1326,11 @@ export const PASSIVES = {
   // heroId: 3050
   "maeve": {
     passiveKey: "maeve",
-    trigger: "self.tookDamage",
-    triggerRate: 0.5,
-    oncePerCombat: false,
+    trigger: "combat.started",
+    triggerRate: 1,
+    oncePerCombat: true,
     effects: [
-      {"target":"self","action":"heal","coef":{"hp":0.25}},
+      {"target":"self","action":"heal","coef":{"int":0.25}},
       {"target":"enemy.foremost","action":"buffStat","stat":"phy","value":-3},
       {"target":"enemy.foremost","action":"buffStat","stat":"agi","value":-4}
     ],
@@ -1381,9 +1339,9 @@ export const PASSIVES = {
   // heroId: 3051
   "yoritomo": {
     passiveKey: "yoritomo",
-    trigger: "self.tookDamage",
-    triggerRate: 0.5,
-    oncePerCombat: false,
+    trigger: "combat.started",
+    triggerRate: 1,
+    oncePerCombat: true,
     effects: [
       {"target":"self","action":"buffStat","stat":"phy","value":6}
     ],
@@ -1392,10 +1350,9 @@ export const PASSIVES = {
   // heroId: 3052
   "casshern": {
     passiveKey: "casshern",
-    trigger: "self.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.35,
     effects: [
       {"target":"enemy.foremost","action":"damage","coef":{"int":0.65}}
     ],
@@ -1409,30 +1366,29 @@ export const PASSIVES = {
     oncePerCombat: false,
     effects: [
       {"target":"self","action":"buffStat","stat":"agi","value":1},
-      {"target":"self","action":"addShield","value":9}
+      {"target":"self","action":"addShield","value":8}
     ],
     cutinSkillName: "ライブ・クリスタル"
   },
   // heroId: 3054
   "douran": {
     passiveKey: "douran",
-    trigger: "self.tookDamage",
-    triggerRate: 0.5,
-    oncePerCombat: false,
+    trigger: "combat.started",
+    triggerRate: 1,
+    oncePerCombat: true,
     effects: [
       {"target":"self","action":"buffStat","stat":"phy","value":1}
     ],
-    cutinSkillName: "花魁道中",
-    notes: "元 DB の効果が解析不能 → PHY+1 fallback"
+    cutinSkillName: "花魁道中"
   },
   // heroId: 4001
   "zhangfei": {
     passiveKey: "zhangfei",
-    trigger: "self.died",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
     effects: [
-      {"target":"self","action":"revive","coef":{"hpRatio":0.2}}
+      {"target":"self","action":"revive","coef":{"hpRatio":0.01}}
     ],
     cutinSkillName: "一騎当千"
   },
@@ -1443,17 +1399,16 @@ export const PASSIVES = {
     triggerRate: 0.4,
     oncePerCombat: false,
     effects: [
-      {"target":"self","action":"heal","coef":{"hp":1}}
+      {"target":"self","action":"heal","coef":{"int":1}}
     ],
     cutinSkillName: "白衣の天使"
   },
   // heroId: 4003
   "beethoven": {
     passiveKey: "beethoven",
-    trigger: "self.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.5,
     effects: [
       {"target":"enemy.foremost","action":"buffStat","stat":"phy","value":-2},
       {"target":"enemy.foremost","action":"buffStat","stat":"int","value":-2},
@@ -1470,8 +1425,7 @@ export const PASSIVES = {
     effects: [
       {"target":"self","action":"buffStat","stat":"agi","value":1}
     ],
-    cutinSkillName: "燕返し",
-    notes: "元 DB の効果が解析不能 → PHY+1 fallback"
+    cutinSkillName: "燕返し"
   },
   // heroId: 4005
   "katsu_kaishu": {
@@ -1488,9 +1442,9 @@ export const PASSIVES = {
   // heroId: 4006
   "billy_kid": {
     passiveKey: "billy_kid",
-    trigger: "self.tookDamage",
-    triggerRate: 0.5,
-    oncePerCombat: false,
+    trigger: "combat.started",
+    triggerRate: 1,
+    oncePerCombat: true,
     effects: [
       {"target":"enemy.foremost","action":"damage","coef":{"int":0.4}}
     ],
@@ -1510,13 +1464,13 @@ export const PASSIVES = {
   // heroId: 4008
   "marco_polo": {
     passiveKey: "marco_polo",
-    trigger: "self.died",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
     effects: [
-      {"target":"self","action":"heal","coef":{"hp":0.7}},
+      {"target":"self","action":"heal","coef":{"int":0.7}},
       {"target":"enemy.foremost","action":"buffStat","stat":"phy","value":-4},
-      {"target":"self","action":"revive","coef":{"hpRatio":0.2}}
+      {"target":"self","action":"revive","coef":{"hpRatio":0.01}}
     ],
     cutinSkillName: "東方見聞録"
   },
@@ -1534,7 +1488,7 @@ export const PASSIVES = {
   // heroId: 4010
   "ouki": {
     passiveKey: "ouki",
-    trigger: "self.died",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
     effects: [
@@ -1545,23 +1499,22 @@ export const PASSIVES = {
   // heroId: 4011
   "marx": {
     passiveKey: "marx",
-    trigger: "self.died",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
     effects: [
       {"target":"self","action":"buffStat","stat":"int","value":3},
       {"target":"enemy.foremost","action":"applyStatus","status":"bleed","stacks":3},
-      {"target":"self","action":"revive","coef":{"hpRatio":0.2}}
+      {"target":"self","action":"revive","coef":{"hpRatio":0.01}}
     ],
     cutinSkillName: "資本論"
   },
   // heroId: 4012
   "okita": {
     passiveKey: "okita",
-    trigger: "self.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.5,
     effects: [
       {"target":"enemy.foremost","action":"damage","coef":{"phy":0.5}},
       {"target":"enemy.foremost","action":"damage","coef":{"phy":0.5}},
@@ -1572,12 +1525,12 @@ export const PASSIVES = {
   // heroId: 4013
   "tchaikovsky": {
     passiveKey: "tchaikovsky",
-    trigger: "self.died",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
     effects: [
       {"target":"self","action":"buffStat","stat":"agi","value":3},
-      {"target":"self","action":"revive","coef":{"hpRatio":0.2}}
+      {"target":"self","action":"revive","coef":{"hpRatio":0.01}}
     ],
     cutinSkillName: "白鳥の湖"
   },
@@ -1624,35 +1577,34 @@ export const PASSIVES = {
     triggerRate: 0.4,
     oncePerCombat: false,
     effects: [
-      {"target":"self","action":"heal","coef":{"hp":0.25}},
+      {"target":"self","action":"heal","coef":{"int":0.25}},
       {"target":"self","action":"buffStat","stat":"phy","value":1},
-      {"target":"self","action":"addShield","value":10}
+      {"target":"self","action":"addShield","value":8}
     ],
     cutinSkillName: "プチ・キュリー"
   },
   // heroId: 4018
   "sunquan": {
     passiveKey: "sunquan",
-    trigger: "enemy.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.5,
     effects: [
       {"target":"self","action":"buffStat","stat":"phy","value":2},
       {"target":"self","action":"buffStat","stat":"int","value":2},
       {"target":"self","action":"buffStat","stat":"agi","value":2},
-      {"target":"self","action":"addGuard","value":8}
+      {"target":"self","action":"addGuard","value":6}
     ],
     cutinSkillName: "若き後継者"
   },
   // heroId: 4019
   "kamehameha": {
     passiveKey: "kamehameha",
-    trigger: "self.tookDamage",
-    triggerRate: 0.5,
-    oncePerCombat: false,
+    trigger: "combat.started",
+    triggerRate: 1,
+    oncePerCombat: true,
     effects: [
-      {"target":"self","action":"addShield","value":10}
+      {"target":"self","action":"addShield","value":8}
     ],
     cutinSkillName: "ママラホエ・カナヴィ"
   },
@@ -1684,10 +1636,9 @@ export const PASSIVES = {
   // heroId: 4022
   "tomoe": {
     passiveKey: "tomoe",
-    trigger: "self.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.3,
     effects: [
       {"target":"enemy.foremost","action":"damage","coef":{"phy":0.3}}
     ],
@@ -1696,7 +1647,7 @@ export const PASSIVES = {
   // heroId: 4023
   "zhaoyun": {
     passiveKey: "zhaoyun",
-    trigger: "enemy.cardPlayed",
+    trigger: "self.cardPlayed",
     triggerRate: 0.4,
     oncePerCombat: false,
     effects: [
@@ -1714,16 +1665,14 @@ export const PASSIVES = {
     effects: [
       {"target":"self","action":"buffStat","stat":"phy","value":1}
     ],
-    cutinSkillName: "尽忠報国",
-    notes: "元 DB の効果が解析不能 → PHY+1 fallback"
+    cutinSkillName: "尽忠報国"
   },
   // heroId: 4025
   "shingen": {
     passiveKey: "shingen",
-    trigger: "self.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.4,
     effects: [
       {"target":"self","action":"buffStat","stat":"phy","value":2},
       {"target":"self","action":"buffStat","stat":"agi","value":2}
@@ -1733,12 +1682,12 @@ export const PASSIVES = {
   // heroId: 4026
   "caesar": {
     passiveKey: "caesar",
-    trigger: "self.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.6,
     effects: [
-      {"target":"self","action":"buffStat","stat":"phy","value":3}
+      {"target":"self","action":"buffStat","stat":"phy","value":3},
+      {"target":"enemy.foremost","action":"buffStat","stat":"int","value":-3}
     ],
     cutinSkillName: "来た、見た、勝った"
   },
@@ -1775,8 +1724,7 @@ export const PASSIVES = {
     effects: [
       {"target":"self","action":"buffStat","stat":"phy","value":1}
     ],
-    cutinSkillName: "三種の神器",
-    notes: "元 DB の効果が解析不能 → PHY+1 fallback"
+    cutinSkillName: "三種の神器"
   },
   // heroId: 4030
   "mozart": {
@@ -1787,13 +1735,12 @@ export const PASSIVES = {
     effects: [
       {"target":"self","action":"buffStat","stat":"phy","value":1}
     ],
-    cutinSkillName: "アイネ・クライネ・ナハトムジーク",
-    notes: "self.statRatioBelow → combat.started 簡略化; 元 DB の効果が解析不能 → PHY+1 fallback"
+    cutinSkillName: "アイネ・クライネ・ナハトムジーク"
   },
   // heroId: 4031
   "masakado": {
     passiveKey: "masakado",
-    trigger: "self.died",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
     effects: [
@@ -1805,10 +1752,9 @@ export const PASSIVES = {
   // heroId: 4032
   "kenshin": {
     passiveKey: "kenshin",
-    trigger: "self.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.4,
     effects: [
       {"target":"self","action":"buffStat","stat":"int","value":2},
       {"target":"self","action":"buffStat","stat":"agi","value":2}
@@ -1818,13 +1764,12 @@ export const PASSIVES = {
   // heroId: 4033
   "lincoln": {
     passiveKey: "lincoln",
-    trigger: "party.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.5,
     effects: [
       {"target":"enemy.foremost","action":"damage","coef":{"int":0.45}},
-      {"target":"self","action":"heal","coef":{"hp":0.5}}
+      {"target":"self","action":"heal","coef":{"int":0.5}}
     ],
     cutinSkillName: "奴隷解放宣言"
   },
@@ -1859,7 +1804,8 @@ export const PASSIVES = {
     triggerRate: 0.4,
     oncePerCombat: false,
     effects: [
-      {"target":"self","action":"buffStat","stat":"agi","value":2}
+      {"target":"self","action":"buffStat","stat":"agi","value":2},
+      {"target":"enemy.foremost","action":"buffStat","stat":"agi","value":-2}
     ],
     cutinSkillName: "クイーン・アンズ・リベンジ"
   },
@@ -1878,10 +1824,9 @@ export const PASSIVES = {
   // heroId: 4038
   "brynhildr": {
     passiveKey: "brynhildr",
-    trigger: "self.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.25,
     effects: [
       {"target":"self","action":"buffStat","stat":"phy","value":7},
       {"target":"self","action":"buffStat","stat":"agi","value":7}
@@ -1891,11 +1836,11 @@ export const PASSIVES = {
   // heroId: 4039
   "saigo": {
     passiveKey: "saigo",
-    trigger: "self.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.5,
     effects: [
+      {"target":"enemy.foremost","action":"buffStat","stat":"int","value":-4},
       {"target":"enemy.foremost","action":"applyStatus","status":"bleed","stacks":3}
     ],
     cutinSkillName: "田原坂"
@@ -1903,9 +1848,9 @@ export const PASSIVES = {
   // heroId: 4040
   "hanxin": {
     passiveKey: "hanxin",
-    trigger: "self.tookDamage",
-    triggerRate: 0.5,
-    oncePerCombat: false,
+    trigger: "combat.started",
+    triggerRate: 1,
+    oncePerCombat: true,
     effects: [
       {"target":"enemy.foremost","action":"damage","coef":{"phy":1.2}}
     ],
@@ -1944,16 +1889,14 @@ export const PASSIVES = {
     effects: [
       {"target":"self","action":"buffStat","stat":"phy","value":1}
     ],
-    cutinSkillName: "10万馬力",
-    notes: "元 DB の効果が解析不能 → PHY+1 fallback"
+    cutinSkillName: "10万馬力"
   },
   // heroId: 4044
   "fabre": {
     passiveKey: "fabre",
-    trigger: "self.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.8,
     effects: [
       {"target":"self","action":"buffStat","stat":"phy","value":7}
     ],
@@ -1962,9 +1905,9 @@ export const PASSIVES = {
   // heroId: 4045
   "lancelot": {
     passiveKey: "lancelot",
-    trigger: "self.tookDamage",
-    triggerRate: 0.5,
-    oncePerCombat: false,
+    trigger: "combat.started",
+    triggerRate: 1,
+    oncePerCombat: true,
     effects: [
       {"target":"self","action":"buffStat","stat":"phy","value":1},
       {"target":"self","action":"buffStat","stat":"agi","value":2}
@@ -1980,25 +1923,23 @@ export const PASSIVES = {
     effects: [
       {"target":"self","action":"buffStat","stat":"phy","value":1}
     ],
-    cutinSkillName: "ロシアの怪僧",
-    notes: "元 DB の効果が解析不能 → PHY+1 fallback"
+    cutinSkillName: "ロシアの怪僧"
   },
   // heroId: 4047
   "hannibal": {
     passiveKey: "hannibal",
-    trigger: "enemy.cardPlayed",
+    trigger: "self.cardPlayed",
     triggerRate: 0.4,
     oncePerCombat: false,
     effects: [
       {"target":"self","action":"buffStat","stat":"phy","value":1}
     ],
-    cutinSkillName: "豊穣神バアルの雷光",
-    notes: "元 DB の効果が解析不能 → PHY+1 fallback"
+    cutinSkillName: "豊穣神バアルの雷光"
   },
   // heroId: 4048
   "zhouyu": {
     passiveKey: "zhouyu",
-    trigger: "enemy.cardPlayed",
+    trigger: "self.cardPlayed",
     triggerRate: 0.4,
     oncePerCombat: false,
     effects: [
@@ -2009,10 +1950,9 @@ export const PASSIVES = {
   // heroId: 4049
   "xiahoudun": {
     passiveKey: "xiahoudun",
-    trigger: "self.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.5,
     effects: [
       {"target":"enemy.foremost","action":"damage","coef":{"int":0.35}},
       {"target":"enemy.foremost","action":"damage","coef":{"int":0.35}},
@@ -2024,10 +1964,9 @@ export const PASSIVES = {
   // heroId: 4050
   "simayi": {
     passiveKey: "simayi",
-    trigger: "party.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.5,
     effects: [
       {"target":"self","action":"buffStat","stat":"agi","value":7}
     ],
@@ -2036,10 +1975,9 @@ export const PASSIVES = {
   // heroId: 4051
   "rama": {
     passiveKey: "rama",
-    trigger: "self.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.5,
     effects: [
       {"target":"enemy.foremost","action":"buffStat","stat":"phy","value":-2},
       {"target":"enemy.foremost","action":"buffStat","stat":"int","value":-2},
@@ -2061,9 +1999,9 @@ export const PASSIVES = {
   // heroId: 4053
   "tell": {
     passiveKey: "tell",
-    trigger: "self.tookDamage",
-    triggerRate: 0.5,
-    oncePerCombat: false,
+    trigger: "combat.started",
+    triggerRate: 1,
+    oncePerCombat: true,
     effects: [
       {"target":"enemy.foremost","action":"damage","coef":{"int":1}},
       {"target":"self","action":"buffStat","stat":"int","value":6}
@@ -2073,7 +2011,7 @@ export const PASSIVES = {
   // heroId: 4054
   "michizane": {
     passiveKey: "michizane",
-    trigger: "self.died",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
     effects: [
@@ -2091,7 +2029,7 @@ export const PASSIVES = {
     effects: [
       {"target":"self","action":"buffStat","stat":"phy","value":7},
       {"target":"self","action":"buffStat","stat":"agi","value":7},
-      {"target":"self","action":"addGuard","value":8}
+      {"target":"self","action":"addGuard","value":6}
     ],
     cutinSkillName: "花実兼備"
   },
@@ -2106,21 +2044,18 @@ export const PASSIVES = {
       {"target":"self","action":"buffStat","stat":"int","value":7},
       {"target":"self","action":"buffStat","stat":"agi","value":7}
     ],
-    cutinSkillName: "日月切落、天地粉韲",
-    notes: "self.statRatioBelow → combat.started 簡略化"
+    cutinSkillName: "日月切落、天地粉韲"
   },
   // heroId: 4057
   "boudica": {
     passiveKey: "boudica",
-    trigger: "self.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.7,
     effects: [
       {"target":"self","action":"buffStat","stat":"phy","value":1}
     ],
-    cutinSkillName: "イケニ族の女王",
-    notes: "元 DB の効果が解析不能 → PHY+1 fallback"
+    cutinSkillName: "イケニ族の女王"
   },
   // heroId: 4058
   "yatterman": {
@@ -2165,7 +2100,7 @@ export const PASSIVES = {
     oncePerCombat: false,
     effects: [
       {"target":"enemy.foremost","action":"damage","coef":{"phy":0.225}},
-      {"target":"self","action":"addShield","value":10}
+      {"target":"self","action":"addShield","value":8}
     ],
     cutinSkillName: "ショックトゥキル"
   },
@@ -2200,8 +2135,7 @@ export const PASSIVES = {
     effects: [
       {"target":"self","action":"buffStat","stat":"phy","value":1}
     ],
-    cutinSkillName: "乱世の奸雄",
-    notes: "元 DB の効果が解析不能 → PHY+1 fallback"
+    cutinSkillName: "乱世の奸雄"
   },
   // heroId: 5004
   "washington": {
@@ -2218,10 +2152,9 @@ export const PASSIVES = {
   // heroId: 5005
   "davinci": {
     passiveKey: "davinci",
-    trigger: "self.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.6,
     effects: [
       {"target":"enemy.foremost","action":"damage","coef":{"int":0.8}}
     ],
@@ -2235,20 +2168,20 @@ export const PASSIVES = {
     oncePerCombat: false,
     effects: [
       {"target":"enemy.foremost","action":"damage","coef":{"phy":0.5}},
-      {"target":"self","action":"heal","coef":{"hp":0.3}}
+      {"target":"self","action":"heal","coef":{"int":0.3}}
     ],
     cutinSkillName: "エクスカリバー"
   },
   // heroId: 5007
   "jeanne": {
     passiveKey: "jeanne",
-    trigger: "self.tookDamage",
-    triggerRate: 0.5,
-    oncePerCombat: false,
+    trigger: "combat.started",
+    triggerRate: 1,
+    oncePerCombat: true,
     effects: [
       {"target":"self","action":"buffStat","stat":"phy","value":2},
       {"target":"enemy.foremost","action":"buffStat","stat":"agi","value":-1},
-      {"target":"self","action":"addGuard","value":10}
+      {"target":"self","action":"addGuard","value":6}
     ],
     cutinSkillName: "オルレアンの乙女"
   },
@@ -2260,7 +2193,7 @@ export const PASSIVES = {
     oncePerCombat: false,
     effects: [
       {"target":"enemy.foremost","action":"damage","coef":{"int":0.2}},
-      {"target":"self","action":"heal","coef":{"hp":0.4}},
+      {"target":"self","action":"heal","coef":{"int":0.4}},
       {"target":"self","action":"buffStat","stat":"int","value":1}
     ],
     cutinSkillName: "海援隊"
@@ -2317,9 +2250,9 @@ export const PASSIVES = {
   // heroId: 5013
   "chinggis": {
     passiveKey: "chinggis",
-    trigger: "self.tookDamage",
-    triggerRate: 0.5,
-    oncePerCombat: false,
+    trigger: "combat.started",
+    triggerRate: 1,
+    oncePerCombat: true,
     effects: [
       {"target":"enemy.foremost","action":"damage","coef":{"phy":0.4}}
     ],
@@ -2340,7 +2273,7 @@ export const PASSIVES = {
   // heroId: 5015
   "kongming": {
     passiveKey: "kongming",
-    trigger: "self.died",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
     effects: [
@@ -2354,9 +2287,9 @@ export const PASSIVES = {
   // heroId: 5016
   "cleopatra": {
     passiveKey: "cleopatra",
-    trigger: "self.tookDamage",
-    triggerRate: 0.5,
-    oncePerCombat: false,
+    trigger: "combat.started",
+    triggerRate: 1,
+    oncePerCombat: true,
     effects: [
       {"target":"enemy.foremost","action":"buffStat","stat":"agi","value":-2}
     ],
@@ -2365,7 +2298,7 @@ export const PASSIVES = {
   // heroId: 5017
   "alexander": {
     passiveKey: "alexander",
-    trigger: "self.died",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
     effects: [
@@ -2378,10 +2311,9 @@ export const PASSIVES = {
   // heroId: 5018
   "qinshihuang": {
     passiveKey: "qinshihuang",
-    trigger: "party.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.55,
     effects: [
       {"target":"self","action":"buffStat","stat":"agi","value":9},
       {"target":"enemy.foremost","action":"buffStat","stat":"agi","value":-7}
@@ -2404,10 +2336,9 @@ export const PASSIVES = {
   // heroId: 5020
   "tutankhamun": {
     passiveKey: "tutankhamun",
-    trigger: "self.hpBelow",
+    trigger: "combat.started",
     triggerRate: 1,
     oncePerCombat: true,
-    threshold: 0.5,
     effects: [
       {"target":"enemy.foremost","action":"damage","coef":{"phy":0.8}}
     ],
@@ -2452,11 +2383,11 @@ export const PASSIVES = {
   // heroId: 5024
   "hokusai": {
     passiveKey: "hokusai",
-    trigger: "self.tookDamage",
-    triggerRate: 0.5,
-    oncePerCombat: false,
+    trigger: "combat.started",
+    triggerRate: 1,
+    oncePerCombat: true,
     effects: [
-      {"target":"self","action":"heal","coef":{"hp":0.05}},
+      {"target":"self","action":"heal","coef":{"int":0.05}},
       {"target":"self","action":"buffStat","stat":"phy","value":1},
       {"target":"self","action":"buffStat","stat":"int","value":9}
     ],
@@ -2469,6 +2400,8 @@ export const PASSIVES = {
     triggerRate: 0.4,
     oncePerCombat: false,
     effects: [
+      {"target":"enemy.foremost","action":"damage","coef":{"phy":0.45}},
+      {"target":"enemy.foremost","action":"damage","coef":{"int":0.45}},
       {"target":"self","action":"buffStat","stat":"phy","value":8},
       {"target":"self","action":"buffStat","stat":"int","value":8},
       {"target":"enemy.foremost","action":"buffStat","stat":"phy","value":-3}
@@ -2478,9 +2411,9 @@ export const PASSIVES = {
   // heroId: 5026
   "liubang": {
     passiveKey: "liubang",
-    trigger: "self.tookDamage",
-    triggerRate: 0.5,
-    oncePerCombat: false,
+    trigger: "combat.started",
+    triggerRate: 1,
+    oncePerCombat: true,
     effects: [
       {"target":"enemy.foremost","action":"buffStat","stat":"agi","value":-7}
     ],
@@ -2532,7 +2465,7 @@ export const PASSIVES = {
     effects: [
       {"target":"self","action":"buffStat","stat":"int","value":4},
       {"target":"enemy.foremost","action":"applyStatus","status":"bleed","stacks":4},
-      {"target":"self","action":"addGuard","value":10}
+      {"target":"self","action":"addGuard","value":6}
     ],
     cutinSkillName: "聖神皇帝"
   },
@@ -2543,7 +2476,7 @@ export const PASSIVES = {
     triggerRate: 0.4,
     oncePerCombat: false,
     effects: [
-      {"target":"self","action":"addGuard","value":10}
+      {"target":"self","action":"addGuard","value":6}
     ],
     cutinSkillName: "クイントカントゥス"
   },
@@ -2556,13 +2489,12 @@ export const PASSIVES = {
     effects: [
       {"target":"self","action":"buffStat","stat":"phy","value":1}
     ],
-    cutinSkillName: "二天一流",
-    notes: "元 DB の効果が解析不能 → PHY+1 fallback"
+    cutinSkillName: "二天一流"
   },
   // heroId: 5033
   "yatagarasu": {
     passiveKey: "yatagarasu",
-    trigger: "enemy.cardPlayed",
+    trigger: "self.cardPlayed",
     triggerRate: 0.4,
     oncePerCombat: false,
     effects: [
