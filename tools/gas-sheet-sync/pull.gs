@@ -5,16 +5,15 @@
  * カスタムメニュー「データ同期」→「GitHub から最新を取得 (Pull)」で実行。
  */
 
-/** メニュー: 全シート pull */
+/** メニュー: 全シート pull (extensions も含む) */
 function pullAllFromGitHub() {
   const ui = SpreadsheetApp.getUi();
   try {
     const props = ghProps_();
     const ref = props.base;
     let total = 0;
-    for (const schema of ALL_SCHEMAS) {
-      const json = ghFetchRawJson(schema.jsonPath, ref);
-      const rows = jsonToRows_(json, schema);
+    for (const schema of ALL_PULL_SCHEMAS) {
+      const rows = pullSchemaToRows_(schema, ref);
       writeSheet_(schema, rows);
       total += rows.length;
     }
@@ -28,6 +27,38 @@ function pullAllFromGitHub() {
     ui.alert("Pull 失敗\n" + e.message);
     throw e;
   }
+}
+
+/** メニュー: extensions だけ Pull (cards.js から、view 専用) */
+function pullExtensionsOnly() {
+  const ui = SpreadsheetApp.getUi();
+  try {
+    const props = ghProps_();
+    const ref = props.base;
+    const rows = pullSchemaToRows_(EXTENSIONS_SCHEMA, ref);
+    writeSheet_(EXTENSIONS_SCHEMA, rows);
+    ui.alert(
+      "extensions Pull 完了\n" + rows.length + " 件を取得しました。\n" +
+      "(view 専用シート — このシートは Push 対象外です)\n" +
+      "base ref: " + ref,
+    );
+  } catch (e) {
+    ui.alert("extensions Pull 失敗\n" + e.message);
+    throw e;
+  }
+}
+
+/** schema 1 つ分の行データを取得 (Pull) — JSON / cards.js parse を分岐 */
+function pullSchemaToRows_(schema, ref) {
+  if (schema.sheetName === SHEET_EXT) {
+    // extensions: cards.js を text fetch → parser
+    const text = ghFetchRawText(PATH_CARDS_JS, ref);
+    const entries = parseExtensionsFromCardsJs_(text);
+    return extensionsToRows_(entries);
+  }
+  // 通常 (heroes / ll-extensions): JSON fetch → 配列を行に展開
+  const json = ghFetchRawJson(schema.jsonPath, ref);
+  return jsonToRows_(json, schema);
 }
 
 /** JSON データを 2 次元配列に変換
@@ -55,7 +86,9 @@ function writeSheet_(schema, rows) {
 
   sheet.clear();
   const headers = schema.columns.map(c => c.name);
-  sheet.getRange(1, 1, 1, headers.length).setValues([headers]).setFontWeight("bold").setBackground("#e8eaf6");
+  // Pull-only シートはヘッダ色を変えて視覚的に区別 (赤系 = 編集無効)
+  const headerColor = schema.pullOnly ? "#fce4ec" : "#e8eaf6";
+  sheet.getRange(1, 1, 1, headers.length).setValues([headers]).setFontWeight("bold").setBackground(headerColor);
   sheet.setFrozenRows(1);
 
   if (rows.length > 0) {

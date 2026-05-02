@@ -14,12 +14,21 @@
 
 ## 対象 JSON
 
-| sheet 名 | path |
-|---|---|
-| `heroes` | `prototype/data/heroes.json` (210 件) |
-| `ll-extensions` | `prototype/data/ll-extensions.json` (6 件) |
+| sheet 名 | path | Pull | Push | 件数 |
+|---|---|---|---|---|
+| `heroes` | `prototype/data/heroes.json` | ✓ | ✓ | 202 |
+| `ll-extensions` | `prototype/data/ll-extensions.json` | ✓ | ✓ | 6 |
+| `extensions` | `prototype/js/cards.js` (parse) | ✓ | ✗ | 920 |
 
 `enemies.json` / `bosses.json` は P2 / P3 で対応 (intentRota / phases のネストがあるため別シート分離設計が必要)。
+
+### extensions シートについて
+
+- **view 専用** (Pull-only)。cards.js には `play()` 等の JS 関数本体が含まれるため Push (書き戻し) は危険なので未対応。
+- ヘッダの背景色が赤系 (`#fce4ec`) で他シート (青系) と視覚的に区別。
+- セル編集しても Push には反映されません (Pull で上書き)。
+- カード一覧の閲覧 / フィルタリング / ソート用です。
+- 抽出フィールド: `libraryKey` / `extId` / `extNameJa` / `skillNameJa` / `skillIcon` / `cost` / `type` / `target` / `caster` / `rarity` / `effect_1〜3 (target / text)`
 
 ---
 

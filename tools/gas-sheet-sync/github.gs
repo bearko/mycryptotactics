@@ -78,6 +78,17 @@ function ghFetchRawJson(path, ref) {
   return JSON.parse(res.getContentText());
 }
 
+/** raw.githubusercontent.com から テキストファイル (e.g. cards.js) を取得 */
+function ghFetchRawText(path, ref) {
+  const props = ghProps_();
+  const url = "https://raw.githubusercontent.com/" + props.owner + "/" + props.repo + "/" + (ref || props.base) + "/" + path;
+  const res = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+  if (res.getResponseCode() !== 200) {
+    throw new Error("raw fetch failed: " + url + " (" + res.getResponseCode() + ")");
+  }
+  return res.getContentText();
+}
+
 /** 指定 ref (branch) の HEAD commit SHA を取得 */
 function ghGetRefSha(ref) {
   const props = ghProps_();
