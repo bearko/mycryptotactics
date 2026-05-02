@@ -14,21 +14,41 @@
 
 ## 対象 JSON
 
-| sheet 名 | path | Pull | Push | 件数 |
-|---|---|---|---|---|
-| `heroes` | `prototype/data/heroes.json` | ✓ | ✓ | 202 |
-| `ll-extensions` | `prototype/data/ll-extensions.json` | ✓ | ✓ | 6 |
-| `extensions` | `prototype/js/cards.js` (parse) | ✓ | ✗ | 920 |
+| sheet 名 | path | Pull | Push | 件数 | ヘッダ色 |
+|---|---|---|---|---|---|
+| `heroes` | `prototype/data/heroes.json` | ✓ | ✓ (全フィールド) | 202 | 青 |
+| `ll-extensions` | `prototype/data/ll-extensions.json` | ✓ | ✓ (全フィールド) | 6 | 青 |
+| `extensions` | `prototype/js/cards.js` (parse) | ✓ | ✓ (**安全フィールドのみ**) | 907 | 黄 |
 
 `enemies.json` / `bosses.json` は P2 / P3 で対応 (intentRota / phases のネストがあるため別シート分離設計が必要)。
 
-### extensions シートについて
+### extensions シート (黄色ヘッダ) の Push 仕様
 
-- **view 専用** (Pull-only)。cards.js には `play()` 等の JS 関数本体が含まれるため Push (書き戻し) は危険なので未対応。
-- ヘッダの背景色が赤系 (`#fce4ec`) で他シート (青系) と視覚的に区別。
-- セル編集しても Push には反映されません (Pull で上書き)。
-- カード一覧の閲覧 / フィルタリング / ソート用です。
-- 抽出フィールド: `libraryKey` / `extId` / `extNameJa` / `skillNameJa` / `skillIcon` / `cost` / `type` / `target` / `caster` / `rarity` / `effect_1〜3 (target / text)`
+`extensions` は cards.js (JS コード) の parse 結果なので、JS 関数本体は触らず **データフィールドだけを安全に書き戻し**する設計。
+
+#### Push 対象 (書き戻されるフィールド)
+
+| 列 | 編集可 |
+|---|---|
+| `extNameJa` / `skillNameJa` / `skillIcon` | ✓ |
+| `cost` / `type` / `target` / `caster` | ✓ |
+| `rarity` (`CARD_RARITIES` dict) | ✓ |
+| `effect_1_text` / `effect_2_text` / `effect_3_text` | ✓ (空欄は変更なし) |
+
+#### Push 対象外 (シートで編集しても無視される)
+
+| 列 | 理由 |
+|---|---|
+| `libraryKey` / `extId` | 識別子 (変更不可) |
+| `effect_1_target` / `effect_2_target` / `effect_3_target` | `play()` 関数と連動。不一致になると挙動が崩れるため触らない |
+
+#### 完全に Push 不可な要素 (cards.js を直接編集する必要あり)
+
+- **ダメージ係数** (例: `api.dealPhySkillToEnemy(s, 50, 60)` の 50, 60)
+- **新カードの追加 / 既存カードの削除**
+- **`play()` 関数のロジック変更** (連続攻撃化、状態異常付与、条件分岐など)
+
+これらは cards.js の JS 関数本体に hardcoded のため、Push 経路で触ると壊れます。バランス調整で頻繁に必要になったら、別 SPEC として cards.js の declarative 化を検討してください。
 
 ---
 

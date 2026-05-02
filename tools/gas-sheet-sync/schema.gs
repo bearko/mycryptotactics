@@ -86,17 +86,24 @@ const ENUM_TARGET_SPEC = [
   "all", "all.random",
 ];
 
-/** extensions (cards.js から parse、Pull-only)
- *  cards.js には play() 等の JS 関数本体が含まれるため Push は危険。
- *  本シートは「カードカタログ閲覧用」と位置付ける。
- *  値編集してもボタンを押しても Push 対象には含まれない。
+/** extensions (cards.js から parse / 安全フィールドのみ書き戻し)
  *
- *  視認性のため skillIcon / caster / effect_*_target はプルダウン化。
- *  rarity / type も従来通り enum。 */
+ *  Pull: 全フィールドを表示
+ *  Push: 安全な top-level literal フィールド (extNameJa / skillNameJa /
+ *        skillIcon / cost / type / target / caster) + rarity (CARD_RARITIES dict)
+ *        + effect_*_text (display 文言) のみ書き戻し
+ *  Push しないフィールド:
+ *        - libraryKey / extId (識別子、変更不可)
+ *        - effect_*_target (play() 関数と連動、不一致になると挙動が崩れる)
+ *
+ *  ダメージ係数は play() 関数本体に hardcoded のため Push 不可。
+ *  数値バランス調整は引き続き cards.js を直接編集。
+ *
+ *  視認性のため skillIcon / caster / effect_*_target はプルダウン化。 */
 const EXTENSIONS_SCHEMA = {
   sheetName: SHEET_EXT,
   jsonPath: PATH_CARDS_JS,         // 表示用、実際の fetch は ghFetchRawText 経由
-  pullOnly: true,
+  customPushHandler: "extensions",  // push.gs が分岐するためのキー
   columns: [
     { name: "libraryKey",      type: "string" },
     { name: "extId",           type: "int" },
@@ -117,10 +124,13 @@ const EXTENSIONS_SCHEMA = {
   ],
 };
 
-/** Pull/Push 両対応の標準 schemas (push.gs が使う) */
+/** 標準 JSON push 対応 schemas (push.gs が使う、JSON.stringify でファイル全体上書き) */
 const ALL_SCHEMAS = [HEROES_SCHEMA, LL_EXT_SCHEMA];
 
-/** Pull のみ対応 schemas (extensions 等) を含む全 schema 一覧 (pull.gs が使う) */
+/** customPushHandler を持つ schema の Push は schema 個別ロジックで処理
+ *  (現状 extensions のみ、cards.js text の安全フィールドだけ regex 置換) */
+
+/** 全 Pull schemas (pull.gs が使う) */
 const ALL_PULL_SCHEMAS = [HEROES_SCHEMA, LL_EXT_SCHEMA, EXTENSIONS_SCHEMA];
 
 /** value を type に応じて型変換 (sheet → JSON 用) */
