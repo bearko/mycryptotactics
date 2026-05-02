@@ -160,7 +160,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
-      caster: "rearmost",
+      caster: "foremost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "self", text: "PHY +2" },
