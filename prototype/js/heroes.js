@@ -26,7 +26,7 @@ export const HERO_ROSTER = [
     heroId: 1001,
     nameJa: "コナン・ドイル",
     rarity: "common",
-    hpMax: 85,
+    hpMax: 90,
     basePhy: 7,
     baseInt: 23,
     baseAgi: 8,
