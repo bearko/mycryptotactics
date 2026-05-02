@@ -33,6 +33,7 @@
 | `extNameJa` / `skillNameJa` / `skillIcon` | ✓ |
 | `cost` / `type` / `target` / `caster` | ✓ |
 | `rarity` (`CARD_RARITIES` dict) | ✓ |
+| `series` (`CARD_SERIES` dict) | ✓ (ランクアップチェーンに影響、慎重に) |
 | `effect_1_text` / `effect_2_text` / `effect_3_text` | ✓ (空欄は変更なし) |
 
 #### Push 対象外 (シートで編集しても無視される)

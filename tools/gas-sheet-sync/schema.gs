@@ -115,6 +115,7 @@ const EXTENSIONS_SCHEMA = {
     { name: "target",          type: "enum", options: ENUM_TARGET_SPEC },
     { name: "caster",          type: "enum", options: ENUM_CASTER_ROLE },
     { name: "rarity",          type: "enum", options: ["common", "uncommon", "rare", "epic", "legendary"] },
+    { name: "series",          type: "string" },  // 178 種あり dropdown 不可、ランクアップチェーン計算に使用
     { name: "effect_1_target", type: "enum", options: ENUM_TARGET_SPEC },
     { name: "effect_1_text",   type: "string" },
     { name: "effect_2_target", type: "enum", options: ENUM_TARGET_SPEC },

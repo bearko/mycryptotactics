@@ -14,8 +14,9 @@
 /** raw cards.js テキストから ext エントリ配列を抽出 */
 function parseExtensionsFromCardsJs_(text) {
   const out = [];
-  // まず CARD_RARITIES dict を抽出 (cards.js 末尾)
+  // まず CARD_RARITIES / CARD_SERIES dict を抽出 (cards.js 末尾)
   const rarities = parseCardRarities_(text);
+  const series = parseCardSeries_(text);
 
   // 各 ext エントリのスタートを find: "    ext1234: {"
   const startRe = /^( {4})ext(\d+):\s*\{$/gm;
@@ -34,6 +35,7 @@ function parseExtensionsFromCardsJs_(text) {
     const entry = parseExtBlock_(block);
     if (entry) {
       entry.rarity = rarities[entry.libraryKey] || "";
+      entry.series = series[entry.libraryKey] || "";
       out.push(entry);
     }
   }
@@ -89,6 +91,22 @@ function parseCardRarities_(text) {
   return out;
 }
 
+/** CARD_SERIES dict を抽出して { extKey: seriesName } を返す
+ *  値は日本語文字列で、シングルクォートまたはダブルクォートで囲まれている想定 */
+function parseCardSeries_(text) {
+  const out = {};
+  const m = text.match(/(?:export\s+)?const\s+CARD_SERIES\s*=\s*\{([\s\S]*?)\n\};/);
+  if (!m) return out;
+  const inner = m[1];
+  // ext1001: 'ブレード',  または "..." をキャプチャ
+  const lineRe = /(\w+):\s*['"]((?:[^'"\\]|\\.)*)['"]/g;
+  let lm;
+  while ((lm = lineRe.exec(inner)) !== null) {
+    out[lm[1]] = lm[2].replace(/\\'/g, "'").replace(/\\"/g, '"');
+  }
+  return out;
+}
+
 /** ext エントリ配列を sheet 行 (2 次元配列) に変換
  *  schema.columns 順序 + effects は最大 3 スロットに展開 */
 function extensionsToRows_(entries) {
@@ -105,6 +123,7 @@ function extensionsToRows_(entries) {
       e.target,
       e.caster,
       e.rarity,
+      e.series,
       // effects 最大 3 スロット (target / text 各 2 列ずつ)
       e.effects[0]?.target || "",
       e.effects[0]?.text   || "",
@@ -133,7 +152,7 @@ function pushExtensionsToCardsJs_(rows, cardsJsText) {
     if (!row || row.every(c => c === "" || c === null)) { summary.skipped++; continue; }
     const [
       libraryKey, extId, extNameJa, skillNameJa, skillIcon,
-      cost, type, target, caster, rarity,
+      cost, type, target, caster, rarity, series,
       e1t, e1text, e2t, e2text, e3t, e3text,
     ] = row;
     if (!libraryKey || !String(libraryKey).match(/^ext\d+$/)) { summary.skipped++; continue; }
@@ -171,6 +190,19 @@ function pushExtensionsToCardsJs_(rows, cardsJsText) {
       const before = text.length;
       text = text.replace(rarityRe, `$1'${rarity}'`);
       if (text.length !== before) summary.fieldChanges++;
+    }
+
+    // CARD_SERIES dict の更新 (こちらも別 dict、シングル/ダブルクォート両対応)
+    if (series && String(series).length > 0) {
+      const escaped = String(series).replace(/'/g, "\\'");
+      const seriesRe = new RegExp("(\\b" + libraryKey + ":\\s*)['\"](?:[^'\"\\\\]|\\\\.)*['\"]");
+      const before = text.length;
+      // 全置換ではなく CARD_SERIES dict 内の最初の出現のみ置換
+      // (CARD_RARITIES と extKey が衝突するため、SERIES dict ブロックを抜き出して限定置換)
+      text = updateSeriesEntry_(text, libraryKey, String(series));
+      if (text.length !== before || text.includes(`${libraryKey}: '${escaped}'`)) {
+        summary.fieldChanges++;
+      }
     }
   }
 
@@ -218,6 +250,23 @@ function replaceFieldInt_(block, fieldName, newValue, onChange) {
   if (+m[2] === n) return block;
   if (onChange) onChange();
   return block.replace(re, `$1${n}`);
+}
+
+/** CARD_SERIES dict 内の libraryKey: 'series' 行のみを更新
+ *  CARD_RARITIES と extKey が衝突するためグローバル置換は危険。
+ *  CARD_SERIES dict ブロックを切り出して、その中だけで置換する。 */
+function updateSeriesEntry_(text, libraryKey, newSeries) {
+  const blockRe = /((?:export\s+)?const\s+CARD_SERIES\s*=\s*\{)([\s\S]*?)(\n\};)/;
+  const m = text.match(blockRe);
+  if (!m) return text;  // CARD_SERIES dict が無い (旧 cards.js) → 何もしない
+  const inner = m[2];
+  const escaped = newSeries.replace(/'/g, "\\'");
+  // 行内 ext1234: '...' を find して置換
+  const lineRe = new RegExp("(\\b" + libraryKey + ":\\s*)['\"](?:[^'\"\\\\]|\\\\.)*['\"]");
+  if (!inner.match(lineRe)) return text;  // 該当 entry なし → skip
+  const newInner = inner.replace(lineRe, `$1'${escaped}'`);
+  if (newInner === inner) return text;
+  return text.replace(blockRe, `$1${newInner}$3`);
 }
 
 /** effects: [{target,text}, ...] 配列の text フィールドのみ置換。
