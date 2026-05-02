@@ -80,8 +80,10 @@ import {
   registerEffectHandlers,
   applyPassiveTrigger,
   checkPassiveThresholds,
+  getRegisteredPassive,
 } from "./passive-runtime.js";
 import { SAMPLE_PASSIVES } from "./passives-sample.js";
+import { PASSIVES } from "./passives-generated.js";
 import {
   loadTargetLabels,
   targetLabelText,
@@ -1616,6 +1618,11 @@ function tryEnterMapNode(nodeId) {
     const heal = Math.floor(runState.playerHpMax * 0.35);
     const actualHeal = Math.min(runState.playerHpMax, runState.playerHp + heal) - runState.playerHp;
     runState.playerHp = Math.min(runState.playerHpMax, runState.playerHp + heal);
+    // SPEC-005 Phase 3: 前衛 (party[0]) の hpCurrent も同期 (sync 漏れで次戦闘開始時に
+    // applyHpDeltaToHero が heroes[0].hp = stale 値で playerHp を上書きする問題を回避)
+    if (runState.party && runState.party[0]) {
+      runState.party[0].hpCurrent = runState.playerHp;
+    }
     runState.pathNodeIds.push(nodeId);
     runState.lastMapNodeId = nodeId;
     clog(`休憩で HP+${actualHeal}`);
@@ -2688,6 +2695,10 @@ function applyHeroPassiveOnCombatStart(s) {
   // SPEC-006 Phase 4f: パッシブが書き込む s.player* (guard/shield/bleed/etc.) を
   // パッシブ持ちヒーロー個人 (= heroes[0] = LEADER) に書き戻す
   const passiveHero = s.heroes?.[0];
+  // 死亡した前衛のパッシブは発動しない
+  if (!passiveHero || passiveHero.alive === false || (passiveHero.hp ?? 0) <= 0) return;
+  // SPEC-006 Phase 4j: PassiveDef 登録済みなら runtime に任せて重複発動を回避
+  if (getRegisteredPassive(LEADER.passiveKey)) return;
   if (passiveHero) loadCasterStatsToLegacy(s, passiveHero);
   try {
     switch (LEADER.passiveKey) {
@@ -2826,6 +2837,10 @@ case "zhangfei": applyZhangfeiPassive(s); break;
 async function applyHeroPassiveOnCardUse(s) {
   // SPEC-006 Phase 4f: パッシブが書き込む s.player* を passiveHero (LEADER) に書き戻す
   const passiveHero = s.heroes?.[0];
+  // 死亡した前衛のパッシブは発動しない
+  if (!passiveHero || passiveHero.alive === false || (passiveHero.hp ?? 0) <= 0) return;
+  // SPEC-006 Phase 4j: PassiveDef 登録済みなら runtime に任せて重複発動を回避
+  if (getRegisteredPassive(LEADER.passiveKey)) return;
   if (passiveHero) loadCasterStatsToLegacy(s, passiveHero);
   try {
   switch (LEADER.passiveKey) {
@@ -5609,6 +5624,22 @@ function endCombatWin() {
     enemyInt: combat.enemyInt,
     isBoss,
   };
+
+  // SPEC-005 Phase 3: 戦闘終了時に各ヒーローの HP を runState.party へ書き戻す。
+  // これをしないと次戦闘開始時に runState.party[i].hpCurrent が古い満タン値のままになり、
+  // 結果として全員 HP が回復してしまう。
+  if (runState && Array.isArray(runState.party) && Array.isArray(combat.heroes)) {
+    for (let i = 0; i < runState.party.length; i++) {
+      const member = runState.party[i];
+      const hero = combat.heroes[i];
+      if (!member || !hero) continue;
+      const hpAfter = Math.max(0, Math.min(member.hpMax || hero.hpMax || 0, hero.hp ?? member.hpCurrent ?? 0));
+      member.hpCurrent = hpAfter;
+    }
+    // 前衛の hp は legacy フィールド (runState.playerHp) と一致させる
+    if (runState.party[0]) runState.playerHp = runState.party[0].hpCurrent;
+  }
+
   combat = null;
 
   // ─── LLエクステ ドロップ判定（ホレリス以降、章インデックス >= 1） ───
@@ -7647,9 +7678,11 @@ function init() {
     .then(() => applyCssVariables())
     .catch(err => console.warn("[target-labels] load failed", err));
 
-  // SPEC-006 Phase 4j: passive runtime の effect handler を注入 + サンプル登録
-  // codemod 出力 (passives-generated.js) が来たらここで一括 register に置き換える
+  // SPEC-006 Phase 4j: passive runtime の effect handler を注入
+  // 全 210 体 (passives-generated.js) → 検証済み 5 体 (passives-sample.js) の順で登録。
+  // 同 key は後勝ちなので SAMPLE_PASSIVES が PASSIVES を上書きする。
   registerEffectHandlers(PASSIVE_EFFECT_HANDLERS);
+  registerPassives(PASSIVES);
   registerPassives(SAMPLE_PASSIVES);
 }
 
