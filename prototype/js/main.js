@@ -80,8 +80,10 @@ import {
   registerEffectHandlers,
   applyPassiveTrigger,
   checkPassiveThresholds,
+  getRegisteredPassive,
 } from "./passive-runtime.js";
 import { SAMPLE_PASSIVES } from "./passives-sample.js";
+import { PASSIVES } from "./passives-generated.js";
 import {
   loadTargetLabels,
   targetLabelText,
@@ -928,6 +930,19 @@ function syncLegacyStatsToCaster(s, caster) {
   caster.vulnerable = s.playerVulnerable ?? 0;
 }
 
+/** SPEC-006 Phase 4f UI fix: caster swap が終わった後、legacy combat.player* を
+ *  heroes[0] (前衛 = LEADER) の値に戻す。これがないと renderCombat が
+ *  combat.playerHp 等をキャスター (中衛/後衛) のままで前衛 HP として表示してしまい、
+ *  「前衛が死んでるのに HP が回復したように見える」UI バグが起きる。
+ *  敵攻撃計算が combat.player* を defender (foremost) として読む経路もあるため、
+ *  カードプレイ後は heroes[0] の値に戻すのが既定状態。 */
+function restoreLegacyToFront(s) {
+  if (!s) return;
+  const front = s.heroes?.[0];
+  if (!front) return;
+  loadCasterStatsToLegacy(s, front);
+}
+
 function dealPhySkillFromEnemyToPlayer(s, skillPct, caster) {
   // Phase 3b: 敵攻撃は foremost living hero を対象に
   const target = getEnemyAttackTargetHero(s);
@@ -1616,6 +1631,11 @@ function tryEnterMapNode(nodeId) {
     const heal = Math.floor(runState.playerHpMax * 0.35);
     const actualHeal = Math.min(runState.playerHpMax, runState.playerHp + heal) - runState.playerHp;
     runState.playerHp = Math.min(runState.playerHpMax, runState.playerHp + heal);
+    // SPEC-005 Phase 3: 前衛 (party[0]) の hpCurrent も同期 (sync 漏れで次戦闘開始時に
+    // applyHpDeltaToHero が heroes[0].hp = stale 値で playerHp を上書きする問題を回避)
+    if (runState.party && runState.party[0]) {
+      runState.party[0].hpCurrent = runState.playerHp;
+    }
     runState.pathNodeIds.push(nodeId);
     runState.lastMapNodeId = nodeId;
     clog(`休憩で HP+${actualHeal}`);
@@ -2189,6 +2209,8 @@ function setHandFocusByIndex(idx) {
     s.classList.remove("card-slot--focused", "card-peek--right");
     s.style.setProperty("--peek-lift", "0px");
   });
+  // Card preview cleanup
+  clearCardPreview();
   if (idx >= 0 && idx < slots.length && slots[idx] && !slots[idx].classList.contains("card-slot--disabled")) {
     handFocusedIdx = idx;
     const slot = slots[idx];
@@ -2209,8 +2231,125 @@ function setHandFocusByIndex(idx) {
       const lift = Math.max(0, rect.bottom - (viewH - 8));
       slot.style.setProperty("--peek-lift", lift + "px");
     });
+    // SPEC-006 UX: フォーカスされたカードのターゲットを portrait 上に視覚予告
+    const card = combat?.hand?.[idx];
+    if (card) setCardPreview(card);
   } else {
     handFocusedIdx = -1;
+  }
+}
+
+// ─── SPEC-006 UX: カード hover 時のターゲット preview ──────────────────
+// effects[].target を解決し、対象 portrait に枠ハイライト + 予測値オーバーレイを表示。
+// 計算は battle-mch.js のヘルパを流用 (実プレイ時と同じ式の中央値 = expected)
+
+function clearCardPreview() {
+  document.querySelectorAll(".preview-target-damage, .preview-target-heal, .preview-target-buff, .preview-target-status")
+    .forEach(el => el.classList.remove(
+      "preview-target-damage", "preview-target-heal", "preview-target-buff", "preview-target-status"
+    ));
+  document.querySelectorAll(".preview-overlay").forEach(el => el.remove());
+}
+
+/** 効果テキストを大まかに分類 (damage / heal / buff / status / unknown) */
+function classifyEffectKind(text) {
+  if (!text) return null;
+  const t = String(text);
+  if (/ダメ|ダメージ/.test(t)) return "damage";
+  if (/回復|HP\s*[+＋]/.test(t)) return "heal";
+  if (/毒|出血|脆弱|バインド/.test(t)) return "status";
+  if (/[+＋\-]/.test(t)) return "buff";
+  return null;
+}
+
+/** "50%" / "50-60%" を [lo, hi] に分解 (avg を使う) */
+function parsePercentRange(text) {
+  const m = String(text || "").match(/(\d+)(?:[-〜](\d+))?%/);
+  if (!m) return null;
+  const lo = parseInt(m[1], 10);
+  const hi = m[2] ? parseInt(m[2], 10) : lo;
+  return [lo, hi];
+}
+
+/** 予測ダメ計算 (caster の PHY/INT × 中央値 % × target の cut 後) */
+function predictEffectDamage(card, effect, caster, target) {
+  if (!caster || !target) return 0;
+  const range = parsePercentRange(effect.text);
+  if (!range) return 0;
+  const avg = (range[0] + range[1]) / 2;
+  // PHY か INT 判定: text 内に "INT" あれば INT、それ以外は skillIcon ベース or PHY
+  const isInt = /INT|int/.test(effect.text || "") || /int/i.test(card.skillIcon || "");
+  if (isInt) {
+    const cut = cutRateFromInt(target.int ?? 0);
+    return phyIntDamageAfterCut(caster.int ?? 0, avg, cut);
+  }
+  const cut = cutRateFromPhy(target.phy ?? 0);
+  return phyIntDamageAfterCut(caster.phy ?? 0, avg, cut);
+}
+
+/** 予測回復計算 */
+function predictEffectHeal(effect, caster) {
+  if (!caster) return 0;
+  const range = parsePercentRange(effect.text);
+  if (range) {
+    const avg = (range[0] + range[1]) / 2;
+    const coef = healingCoefficientIntCaster(caster.int ?? 0, caster.phy ?? 0);
+    return Math.max(0, Math.floor((coef * avg) / 100));
+  }
+  // 「+N 回復」のような実数指定
+  const r = String(effect.text || "").match(/[+＋](\d+)/);
+  return r ? parseInt(r[1], 10) : 0;
+}
+
+/** カード focus 時に対象 portrait へ視覚予告を貼る */
+function setCardPreview(card) {
+  if (!combat || !card) return;
+  const caster = resolveCaster(card.caster, combat);
+  if (!caster) return;
+
+  for (const effect of (card.effects || [])) {
+    const kind = classifyEffectKind(effect.text);
+    if (!kind) continue;
+    const targets = resolveTargets(effect.target, caster, combat);
+    if (!targets || targets.length === 0) continue;
+
+    for (const tgt of targets) {
+      if (!tgt || tgt.alive === false) continue;
+      const side = (tgt.side === "enemy") ? "enemy" : "player";
+      const portraitWrap = resolveUnitPortraitWrap(side, tgt);
+      if (!portraitWrap) continue;
+
+      // フレームハイライト
+      const cls = kind === "damage" ? "preview-target-damage"
+                : kind === "status" ? "preview-target-status"
+                : kind === "heal"   ? "preview-target-heal"
+                                    : "preview-target-buff";
+      portraitWrap.classList.add(cls);
+
+      // 予測値オーバーレイ
+      let overlayText = null;
+      let overlayClass = null;
+      if (kind === "damage") {
+        const dmg = predictEffectDamage(card, effect, caster, tgt);
+        if (dmg > 0) { overlayText = `-${dmg}`; overlayClass = "preview-overlay--damage"; }
+      } else if (kind === "heal") {
+        const amt = predictEffectHeal(effect, caster);
+        if (amt > 0) { overlayText = `+${amt}`; overlayClass = "preview-overlay--heal"; }
+      } else if (kind === "status") {
+        // 「毒 ×2」のような文字をそのまま簡略表示
+        overlayText = String(effect.text).replace(/\s+/g, "");
+        overlayClass = "preview-overlay--status";
+      } else if (kind === "buff") {
+        overlayText = String(effect.text).replace(/\s+/g, "");
+        overlayClass = "preview-overlay--buff";
+      }
+      if (overlayText) {
+        const ov = document.createElement("div");
+        ov.className = `preview-overlay ${overlayClass}`;
+        ov.textContent = overlayText;
+        portraitWrap.appendChild(ov);
+      }
+    }
   }
 }
 
@@ -2522,6 +2661,11 @@ function renderCombat() {
 // ─── 甲斐姫パッシブ（浪切）非同期ヘルパー ────────────────────────
 async function applyKaihimePassive(s) {
   if (LEADER.passiveKey !== 'kaihime') return;
+  // 死亡した前衛 (kaihime) のパッシブは発動しない
+  const front = s.heroes?.[0];
+  if (!front || front.alive === false || (front.hp ?? 0) <= 0) return;
+  // SPEC-006 Phase 4j: PassiveDef 登録済みなら runtime に任せて重複発動を回避
+  if (getRegisteredPassive('kaihime')) return;
   if (areAllEnemiesDefeated(s)) return;
   if (Math.random() >= 0.5) return;
 
@@ -2545,6 +2689,11 @@ async function applyKaihimePassive(s) {
 async function applyZhangPassive(s) {
   if (!s._zhangCounterPending) return;
   s._zhangCounterPending = false;
+  // 死亡した前衛 (zhang) のパッシブは発動しない
+  const front = s.heroes?.[0];
+  if (!front || front.alive === false || (front.hp ?? 0) <= 0) return;
+  // SPEC-006 Phase 4j: PassiveDef 登録済みなら runtime に任せて重複発動を回避
+  if (getRegisteredPassive('zhang')) return;
   if (isPartyWipedOut(s) || areAllEnemiesDefeated(s)) return;
 
   const counterDmg = Math.max(1, Math.floor(s.playerPhy * 0.2));
@@ -2569,6 +2718,10 @@ function applyHeroPassiveOnCombatStart(s) {
   // SPEC-006 Phase 4f: パッシブが書き込む s.player* (guard/shield/bleed/etc.) を
   // パッシブ持ちヒーロー個人 (= heroes[0] = LEADER) に書き戻す
   const passiveHero = s.heroes?.[0];
+  // 死亡した前衛のパッシブは発動しない
+  if (!passiveHero || passiveHero.alive === false || (passiveHero.hp ?? 0) <= 0) return;
+  // SPEC-006 Phase 4j: PassiveDef 登録済みなら runtime に任せて重複発動を回避
+  if (getRegisteredPassive(LEADER.passiveKey)) return;
   if (passiveHero) loadCasterStatsToLegacy(s, passiveHero);
   try {
     switch (LEADER.passiveKey) {
@@ -2707,6 +2860,10 @@ case "zhangfei": applyZhangfeiPassive(s); break;
 async function applyHeroPassiveOnCardUse(s) {
   // SPEC-006 Phase 4f: パッシブが書き込む s.player* を passiveHero (LEADER) に書き戻す
   const passiveHero = s.heroes?.[0];
+  // 死亡した前衛のパッシブは発動しない
+  if (!passiveHero || passiveHero.alive === false || (passiveHero.hp ?? 0) <= 0) return;
+  // SPEC-006 Phase 4j: PassiveDef 登録済みなら runtime に任せて重複発動を回避
+  if (getRegisteredPassive(LEADER.passiveKey)) return;
   if (passiveHero) loadCasterStatsToLegacy(s, passiveHero);
   try {
   switch (LEADER.passiveKey) {
@@ -5202,6 +5359,8 @@ async function playCard(idx) {
   card.play(combat, { caster, effectsResolved });
   // SPEC-006 Phase 4d: card.play() で変化した legacy stats を caster に書き戻す
   syncLegacyStatsToCaster(combat, caster);
+  // SPEC-006 Phase 4f UI fix: legacy 表示用に combat.player* を前衛 (heroes[0]) に戻す
+  restoreLegacyToFront(combat);
   combat._currentCaster = null;
   // SPEC-006 Q4: 使用ヒーロー明示ログ (party 2 体以上時のみ。1 体だと冗長)
   if (combat.heroes && combat.heroes.length > 1) {
@@ -5490,6 +5649,22 @@ function endCombatWin() {
     enemyInt: combat.enemyInt,
     isBoss,
   };
+
+  // SPEC-005 Phase 3: 戦闘終了時に各ヒーローの HP を runState.party へ書き戻す。
+  // これをしないと次戦闘開始時に runState.party[i].hpCurrent が古い満タン値のままになり、
+  // 結果として全員 HP が回復してしまう。
+  if (runState && Array.isArray(runState.party) && Array.isArray(combat.heroes)) {
+    for (let i = 0; i < runState.party.length; i++) {
+      const member = runState.party[i];
+      const hero = combat.heroes[i];
+      if (!member || !hero) continue;
+      const hpAfter = Math.max(0, Math.min(member.hpMax || hero.hpMax || 0, hero.hp ?? member.hpCurrent ?? 0));
+      member.hpCurrent = hpAfter;
+    }
+    // 前衛の hp は legacy フィールド (runState.playerHp) と一致させる
+    if (runState.party[0]) runState.playerHp = runState.party[0].hpCurrent;
+  }
+
   combat = null;
 
   // ─── LLエクステ ドロップ判定（ホレリス以降、章インデックス >= 1） ───
@@ -7429,10 +7604,16 @@ function closeDeckModal() {
 function init() {
   document.getElementById("btnEndTurn").addEventListener("click", async () => {
     if (!combat || view !== "combat" || combatInputLocked) return;
-    combat.hand.forEach((c) => combat.discardPile.push(c));
-    combat.hand = [];
-    renderCombat();
-    await enemyTurn();
+    // 連打で enemyTurn() が二重実行されるのを防止 (敵攻撃の重複判定 + 手札補充の二重発生)
+    combatInputLocked = true;
+    try {
+      combat.hand.forEach((c) => combat.discardPile.push(c));
+      combat.hand = [];
+      renderCombat();
+      await enemyTurn();
+    } finally {
+      combatInputLocked = false;
+    }
   });
   // SPEC-006 Phase 4g: 味方 portrait click で active 切替の挙動は廃止。
   // caster はカード定義から自動解決される (Phase 4d/4e)。
@@ -7528,9 +7709,11 @@ function init() {
     .then(() => applyCssVariables())
     .catch(err => console.warn("[target-labels] load failed", err));
 
-  // SPEC-006 Phase 4j: passive runtime の effect handler を注入 + サンプル登録
-  // codemod 出力 (passives-generated.js) が来たらここで一括 register に置き換える
+  // SPEC-006 Phase 4j: passive runtime の effect handler を注入
+  // 全 210 体 (passives-generated.js) → 検証済み 5 体 (passives-sample.js) の順で登録。
+  // 同 key は後勝ちなので SAMPLE_PASSIVES が PASSIVES を上書きする。
   registerEffectHandlers(PASSIVE_EFFECT_HANDLERS);
+  registerPassives(PASSIVES);
   registerPassives(SAMPLE_PASSIVES);
 }
 

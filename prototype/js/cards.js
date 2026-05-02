@@ -709,680 +709,64 @@ function makeCardLibrary(clog, api) {
     // ════════════════════════════════════════
     // 章 1 ── 戦国回廊 カードプール（SPEC-004 §6.4）
     // ════════════════════════════════════════
-    cd101: {
-      libraryKey: "cd101",
-      extId: 1006,
-      extNameJa: "練習用の太刀",
-      skillNameJa: "一刀",
-      skillIcon: "phy.png",
-      cost: 1,
-      type: "atk",
-      target: "enemy.foremost",
-      caster: "foremost",
-      // SPEC-006: auto-derived effects (review needed: no)
-      effects: [
-        { target: "enemy.foremost", text: "PHYダメ 100-100%" }
-      ],
-      effectSummaryLines(s) {
-        const d = estPhyHit(s.playerPhy, s.enemyPhy, 100, 100);
-        return [`敵にダメージ　${d}`];
-      },
-      peekHelpKeys() { return []; },
-      previewLines(s) {
-        const d = estPhyHit(s.playerPhy, s.enemyPhy, 100, 100);
-        return [`敵1体に ${d} ダメージ（PHY 100%）`];
-      },
-      play(s) { api.dealPhySkillToEnemy(s, 100, 100); },
-    },
 
-    cd102: {
-      libraryKey: "cd102",
-      extId: 2011,
-      extNameJa: "アバカスの斧",
-      skillNameJa: "二段斬り",
-      skillIcon: "phy.png",
-      cost: 2,
-      type: "atk",
-      target: "enemy.foremost",
-      caster: "foremost",
-      // SPEC-006: auto-derived effects (review needed: no)
-      effects: [
-        { target: "enemy.foremost", text: "PHYダメ 70-70%" },
-        { target: "enemy.foremost", text: "PHYダメ 70-70%" }
-      ],
-      effectSummaryLines(s) {
-        const d = estPhyHit(s.playerPhy, s.enemyPhy, 70, 70);
-        return [`敵にダメージ　${d} ×2`];
-      },
-      peekHelpKeys() { return []; },
-      previewLines(s) {
-        const d = estPhyHit(s.playerPhy, s.enemyPhy, 70, 70);
-        return [`敵1体に ${d} ×2 ダメージ（PHY 70% を 2 回）`];
-      },
-      play(s) {
-        api.dealPhySkillToEnemy(s, 70, 70);
-        if (s.enemyHp > 0) api.dealPhySkillToEnemy(s, 70, 70);
-      },
-    },
 
-    cd103: {
-      libraryKey: "cd103",
-      extId: 1004,
-      extNameJa: "練習用の胴当て",
-      skillNameJa: "構え",
-      skillIcon: "BUF_phy.png",
-      cost: 1,
-      type: "skl",
-      target: "self",
-      caster: "foremost",
-      // SPEC-006: auto-derived effects (review needed: no)
-      effects: [
-        { target: "self", text: "ガード +6" }
-      ],
-      effectSummaryLines() { return ["ガード　+6"]; },
-      peekHelpKeys() { return ["guard"]; },
-      previewLines() { return ["ガードを 6 得る（このターン中 PHY/INT ダメージ軽減）"]; },
-      play(s) {
-        se("buff"); fx("player", "buff");
-        s.playerGuard += 6;
-        clog("構え: ガード+6");
-      },
-    },
 
-    cd104: {
-      libraryKey: "cd104",
-      extId: 1008,
-      extNameJa: "練習用の教本",
-      skillNameJa: "集中",
-      skillIcon: "int.png",
-      cost: 1,
-      type: "skl",
-      target: "self",
-      caster: "foremost",
-      // SPEC-006: ⚡ +1 (このターンのみ)
-      effects: [
-        { target: "self", text: "⚡ +1 (このターン)" }
-      ],
-      effectSummaryLines() { return ["⚡ +1（このターン）"]; },
-      peekHelpKeys() { return ["energy"]; },
-      previewLines() { return ["このターンのエナジーを 1 増やす"]; },
-      play(s) {
-        se("buff"); fx("player", "buff");
-        s.energy = Math.min(s.energy + 1, (s.energyMax || 3) + 3);
-        clog("集中: ⚡+1");
-      },
-    },
 
-    cd105: {
-      libraryKey: "cd105",
-      extId: 2001,
-      extNameJa: "アバカスの剣",
-      skillNameJa: "一閃",
-      skillIcon: "phy.png",
-      cost: 2,
-      type: "atk",
-      target: "enemy.foremost",
-      caster: "foremost",
-      // SPEC-006: auto-derived effects (review needed: no)
-      effects: [
-        { target: "enemy.foremost", text: "PHYダメ 150-150%" }
-      ],
-      effectSummaryLines(s) {
-        const d = estPhyHit(s.playerPhy, s.enemyPhy, 150, 150);
-        return [`敵にダメージ　${d}`];
-      },
-      peekHelpKeys() { return []; },
-      previewLines(s) {
-        const d = estPhyHit(s.playerPhy, s.enemyPhy, 150, 150);
-        return [`敵1体に ${d} ダメージ（PHY 150%）`];
-      },
-      play(s) { api.dealPhySkillToEnemy(s, 150, 150); },
-    },
 
-    cd106: {
-      libraryKey: "cd106",
-      extId: 2004,
-      extNameJa: "アバカスの戦旗",
-      skillNameJa: "鼓舞",
-      skillIcon: "BUF_phy.png",
-      cost: 1,
-      type: "skl",
-      target: "self",
-      caster: "foremost",
-      // SPEC-006: auto-derived effects (review needed: no)
-      effects: [
-        { target: "self", text: "PHY +3" }
-      ],
-      effectSummaryLines() { return ["PHY　+3（戦闘中ずっと）"]; },
-      peekHelpKeys() { return ["phy"]; },
-      previewLines() { return ["PHY を +3（戦闘中ずっと。次の戦闘では戻る）"]; },
-      play(s) {
-        se("buff"); fx("player", "buff");
-        s.playerPhy += 3;
-        clog("鼓舞: PHY+3");
-      },
-    },
 
-    cd107: {
-      libraryKey: "cd107",
-      extId: 1003,
-      extNameJa: "練習用の薬草",
-      skillNameJa: "治療",
-      skillIcon: "hp.png",
-      cost: 1,
-      type: "skl",
-      target: "self",
-      caster: "foremost",
-      // SPEC-006: HP 回復 (INT+PHY)/2
-      effects: [
-        { target: "self", text: "HP回復 (INT+PHY)÷2" }
-      ],
-      effectSummaryLines(s) {
-        const h = Math.floor((s.playerInt + s.playerPhy) / 2);
-        return [`HP　+${h}`];
-      },
-      peekHelpKeys() { return ["hp"]; },
-      previewLines(s) {
-        const h = Math.floor((s.playerInt + s.playerPhy) / 2);
-        return [`HP を ${h} 回復（(INT+PHY)÷2）`];
-      },
-      play(s) {
-        const heal = Math.floor((s.playerInt + s.playerPhy) / 2);
-        const before = s.playerHp;
-        s.playerHp = Math.min(s.playerHpMax, s.playerHp + heal);
-        if (s.playerHp > before) {
-          se("heal"); fx("player", "heal");
-        }
-        clog(`治療: HP+${s.playerHp - before}`);
-      },
-    },
 
-    cd108: {
-      libraryKey: "cd108",
-      extId: 1023,
-      extNameJa: "アバカスの突角",
-      skillNameJa: "突撃",
-      skillIcon: "phy.png",
-      cost: 0,
-      type: "atk",
-      target: "enemy.foremost",
-      caster: "foremost",
-      // SPEC-006: auto-derived effects (review needed: no)
-      effects: [
-        { target: "enemy.foremost", text: "PHYダメ 60-60%" },
-        { target: "self", text: "次ターン PHY -3" }
-      ],
-      effectSummaryLines(s) {
-        const d = estPhyHit(s.playerPhy, s.enemyPhy, 60, 60);
-        return [`敵にダメージ　${d}`, "次ターン PHY -3"];
-      },
-      peekHelpKeys() { return ["phy"]; },
-      previewLines(s) {
-        const d = estPhyHit(s.playerPhy, s.enemyPhy, 60, 60);
-        return [`敵1体に ${d} ダメージ（PHY 60%）`, "次のターン開始時に PHY が -3 される"];
-      },
-      play(s) {
-        api.dealPhySkillToEnemy(s, 60, 60);
-        s.phyPenaltyNext = (s.phyPenaltyNext || 0) + 3;
-        clog("突撃: 次ターン PHY-3");
-      },
-    },
+
+
+
+
+
+
+
+
 
     // ════════════════════════════════════════
     // 章 1 ── ホレリス カードプール
     // ════════════════════════════════════════
-    cdH01: {
-      libraryKey: "cdH01",
-      extId: 2006,
-      extNameJa: "ホレリスの居合刀",
-      skillNameJa: "抜刀・一閃",
-      skillIcon: "phy.png",
-      cost: 1,
-      type: "atk",
-      target: "enemy.foremost",
-      caster: "foremost",
-      // SPEC-006: auto-derived effects (review needed: no)
-      effects: [
-        { target: "enemy.foremost", text: "PHYダメ 80-80%" }
-      ],
-      exhaust: true,
-      effectSummaryLines(s) {
-        const d = estPhyHit(s.playerPhy, s.enemyPhy, 80, 80);
-        return [`敵にダメージ　${d}`, "【消耗】"];
-      },
-      peekHelpKeys() { return []; },
-      previewLines(s) {
-        const d = estPhyHit(s.playerPhy, s.enemyPhy, 80, 80);
-        return [`敵1体に ${d} ダメージ（PHY 80%）`, "【消耗】使用後、山札に戻らず除外される"];
-      },
-      play(s) { api.dealPhySkillToEnemy(s, 80, 80); },
-    },
 
-    cdH02: {
-      libraryKey: "cdH02",
-      extId: 1002,
-      extNameJa: "ホレリスの速射銃",
-      skillNameJa: "出血弾・速射",
-      skillIcon: "phy.png",
-      cost: 1,
-      type: "atk",
-      target: "enemy.foremost",
-      caster: "foremost",
-      // SPEC-006: auto-derived effects (review needed: no)
-      effects: [
-        { target: "enemy.foremost", text: "PHYダメ 60-60%" },
-        { target: "enemy.foremost", text: "出血 ×1" }
-      ],
-      effectSummaryLines(s) {
-        const d = estPhyHit(s.playerPhy, s.enemyPhy, 60, 60);
-        return [`敵にダメージ　${d}`, "出血　×1（敵）"];
-      },
-      peekHelpKeys() { return []; },
-      previewLines(s) {
-        const d = estPhyHit(s.playerPhy, s.enemyPhy, 60, 60);
-        return [`敵1体に ${d} ダメージ（PHY 60%）`, "敵に出血 ×1 付与"];
-      },
-      play(s) {
-        api.dealPhySkillToEnemy(s, 60, 60);
-        if (s.enemyHp > 0) api.addBleedToEnemy(s, 1);
-      },
-    },
 
-    cdH03: {
-      libraryKey: "cdH03",
-      extId: 2005,
-      extNameJa: "ホレリスの軍馬",
-      skillNameJa: "疾風の構え",
-      skillIcon: "BUF_agi.png",
-      cost: 1,
-      type: "skl",
-      target: "self",
-      caster: "foremost",
-      // SPEC-006: auto-derived effects (review needed: no)
-      effects: [
-        { target: "self", text: "ガード +8" },
-        { target: "self", text: "AGI +2" }
-      ],
-      effectSummaryLines() { return ["ガード　+8", "AGI　+2（戦闘中ずっと）"]; },
-      peekHelpKeys() { return ["guard", "agi"]; },
-      previewLines() {
-        return ["ガードを 8 得る", "AGI を +2（戦闘中ずっと）"];
-      },
-      play(s) {
-        se("buff"); fx("player", "buff");
-        s.playerGuard += 8;
-        s.playerAgi += 2;
-        clog("疾風の構え: ガード+8、AGI+2");
-      },
-    },
 
-    cdH04: {
-      libraryKey: "cdH04",
-      extId: 2003,
-      extNameJa: "ホレリスの霊薬",
-      skillNameJa: "緊急回復",
-      skillIcon: "hp.png",
-      cost: 0,
-      type: "skl",
-      target: "self",
-      caster: "foremost",
-      // SPEC-006: HP 回復 (INT+PHY)/2 + 消耗
-      effects: [
-        { target: "self", text: "HP回復 (INT+PHY)÷2" },
-        { target: "self", text: "【消耗】" }
-      ],
-      exhaust: true,
-      effectSummaryLines(s) {
-        const h = Math.floor((s.playerInt + s.playerPhy) / 2);
-        return [`HP　+${h}`, "【消耗】"];
-      },
-      peekHelpKeys() { return ["hp"]; },
-      previewLines(s) {
-        const h = Math.floor((s.playerInt + s.playerPhy) / 2);
-        return [`HP を ${h} 回復（(INT+PHY)÷2）`, "【消耗】使用後、山札に戻らず除外される"];
-      },
-      play(s) {
-        const heal = Math.floor((s.playerInt + s.playerPhy) / 2);
-        const before = s.playerHp;
-        s.playerHp = Math.min(s.playerHpMax, s.playerHp + heal);
-        if (s.playerHp > before) { se("heal"); fx("player", "heal"); }
-        clog(`緊急回復: HP+${s.playerHp - before}`);
-      },
-    },
 
-    cdH05: {
-      libraryKey: "cdH05",
-      extId: 1013,
-      extNameJa: "ホレリスの連弓",
-      skillNameJa: "連矢",
-      skillIcon: "phy.png",
-      cost: 1,
-      type: "atk",
-      target: "enemy.foremost",
-      caster: "foremost",
-      // SPEC-006: auto-derived effects (review needed: no)
-      effects: [
-        { target: "enemy.foremost", text: "PHYダメ 50-50%" },
-        { target: "enemy.foremost", text: "PHYダメ 50-50%" }
-      ],
-      effectSummaryLines(s) {
-        const d = estPhyHit(s.playerPhy, s.enemyPhy, 50, 50);
-        return [`敵にダメージ　${d} ×2`];
-      },
-      peekHelpKeys() { return []; },
-      previewLines(s) {
-        const d = estPhyHit(s.playerPhy, s.enemyPhy, 50, 50);
-        return [`敵1体に ${d} ×2 ダメージ（PHY 50% を 2 回）`];
-      },
-      play(s) {
-        api.dealPhySkillToEnemy(s, 50, 50);
-        if (s.enemyHp > 0) api.dealPhySkillToEnemy(s, 50, 50);
-      },
-    },
 
-    cdH06: {
-      libraryKey: "cdH06",
-      extId: 2008,
-      extNameJa: "ホレリスの知恵書",
-      skillNameJa: "知識の爆発",
-      skillIcon: "int.png",
-      cost: 2,
-      type: "skl",
-      target: "self",
-      caster: "foremost",
-      // SPEC-006: auto-derived effects (review needed: no)
-      effects: [
-        { target: "self", text: "INT +2" },
-        { target: "self", text: "ドロー +3" }
-      ],
-      effectSummaryLines() { return ["INT　+2（戦闘中ずっと）", "ドロー　3"]; },
-      peekHelpKeys() { return ["int", "draw"]; },
-      previewLines() { return ["INT を +2（戦闘中ずっと）", "カードを 3 枚引く"]; },
-      play(s) {
-        se("buff"); fx("player", "buff");
-        s.playerInt += 2;
-        api.drawCards(s, 3);
-        clog("知識の爆発: INT+2、ドロー3");
-      },
-    },
+
+
+
+
+
+
 
     // ════════════════════════════════════════
     // 章 2 ── 大航海の港 カードプール（SPEC-004 §7.4）
     // ════════════════════════════════════════
-    cd201: {
-      libraryKey: "cd201",
-      extId: 1001,
-      extNameJa: "アタナソフの毒刃",
-      skillNameJa: "毒の刃",
-      skillIcon: "phy.png",
-      cost: 1,
-      type: "atk",
-      target: "enemy.foremost",
-      caster: "foremost",
-      // SPEC-006: auto-derived effects (review needed: no)
-      effects: [
-        { target: "enemy.foremost", text: "PHYダメ 60-60%" },
-        { target: "enemy.foremost", text: "毒 ×2" }
-      ],
-      effectSummaryLines(s) {
-        const d = estPhyHit(s.playerPhy, s.enemyPhy, 60, 60);
-        return [`敵にダメージ　${d}`, "毒　×2（敵）"];
-      },
-      peekHelpKeys() { return []; },
-      previewLines(s) {
-        const d = estPhyHit(s.playerPhy, s.enemyPhy, 60, 60);
-        return [`敵1体に ${d} ダメージ（PHY 60%）`, "敵に毒 ×2 付与（毎ターン 2 ダメージ）"];
-      },
-      play(s) {
-        api.dealPhySkillToEnemy(s, 60, 60);
-        if (s.enemyHp > 0) api.addPoisonToEnemy(s, 2);
-      },
-    },
 
-    cd202: {
-      libraryKey: "cd202",
-      extId: 2013,
-      extNameJa: "アタナソフの長弓",
-      skillNameJa: "エリートスナイプ",
-      skillIcon: "phy.png",
-      cost: 2,
-      type: "atk",
-      target: "enemy.foremost",
-      caster: "foremost",
-      // SPEC-006: auto-derived effects (review needed: no)
-      effects: [
-        { target: "enemy.foremost", text: "PHYダメ 90-90%" },
-        { target: "enemy.foremost", text: "出血 ×2" }
-      ],
-      effectSummaryLines(s) {
-        const d = estPhyHit(s.playerPhy, s.enemyPhy, 90, 90);
-        return [`敵にダメージ　${d}`, "出血　×2（敵）"];
-      },
-      peekHelpKeys() { return []; },
-      previewLines(s) {
-        const d = estPhyHit(s.playerPhy, s.enemyPhy, 90, 90);
-        return [`敵1体に ${d} ダメージ（PHY 90%）`, "敵に出血 ×2 付与（被攻撃時 +2 追加ダメージ）"];
-      },
-      play(s) {
-        api.dealPhySkillToEnemy(s, 90, 90);
-        if (s.enemyHp > 0) api.addBleedToEnemy(s, 2);
-      },
-    },
 
-    cd203: {
-      libraryKey: "cd203",
-      extId: 1003,
-      extNameJa: "アタナソフの解毒草",
-      skillNameJa: "解毒",
-      skillIcon: "hp.png",
-      cost: 0,
-      type: "skl",
-      target: "self",
-      caster: "foremost",
-      // SPEC-006: auto-derived effects (review needed: no)
-      effects: [
-        { target: "self", text: "状態異常解除" }
-      ],
-      effectSummaryLines() { return ["毒・出血 解除（自分）"]; },
-      peekHelpKeys() { return []; },
-      previewLines() { return ["自分の毒スタックと出血スタックをすべて解除する"]; },
-      play(s) { api.clearPlayerDebuffs(s); },
-    },
 
-    cd204: {
-      libraryKey: "cd204",
-      extId: 2004,
-      extNameJa: "アタナソフの戦衣",
-      skillNameJa: "エリートプロテクション",
-      skillIcon: "BUF_phy.png",
-      cost: 2,
-      type: "skl",
-      target: "self",
-      caster: "foremost",
-      // SPEC-006: auto-derived effects (review needed: no)
-      effects: [
-        { target: "self", text: "ガード +12" }
-      ],
-      effectSummaryLines() { return ["ガード　+12"]; },
-      peekHelpKeys() { return ["guard"]; },
-      previewLines() { return ["ガードを 12 得る（このターン中 PHY/INT ダメージ軽減）"]; },
-      play(s) {
-        se("buff"); fx("player", "buff");
-        s.playerGuard += 12;
-        clog("防御陣: ガード+12");
-      },
-    },
 
-    cd205: {
-      libraryKey: "cd205",
-      extId: 2002,
-      extNameJa: "アタナソフの連弾銃",
-      skillNameJa: "エリートショット",
-      skillIcon: "int.png",
-      cost: 1,
-      type: "atk",
-      target: "enemy.foremost",
-      caster: "foremost",
-      // SPEC-006: 3 連撃 (auto-derive 補足)
-      effects: [
-        { target: "enemy.foremost", text: "INTダメ 50% ×3" }
-      ],
-      effectSummaryLines(s) {
-        const d = estIntHit(s.playerInt, s.enemyInt, 50, 50);
-        return [`敵にダメージ　${d} ×3`];
-      },
-      peekHelpKeys() { return []; },
-      previewLines(s) {
-        const d = estIntHit(s.playerInt, s.enemyInt, 50, 50);
-        return [`敵1体に ${d} ×3 ダメージ（INT 50% を 3 回）`];
-      },
-      play(s) {
-        for (let i = 0; i < 3 && s.enemyHp > 0; i++) {
-          api.dealIntSkillToEnemy(s, 50, 50);
-        }
-      },
-    },
 
-    cd206: {
-      libraryKey: "cd206",
-      extId: 1008,
-      extNameJa: "アタナソフの投資帳",
-      skillNameJa: "投資",
-      skillIcon: "int.png",
-      cost: 0,
-      type: "skl",
-      target: "self",
-      caster: "foremost",
-      // SPEC-006: GUM 獲得 (メタ効果、戦闘外通貨)
-      effects: [
-        { target: "self", text: "GUM +20" }
-      ],
-      effectSummaryLines() { return ["GUM　+20"]; },
-      peekHelpKeys() { return []; },
-      previewLines() { return ["ゴールド（GUM）を 20 得る"]; },
-      play(s) { api.addGold(20); },
-    },
+
+
+
+
+
+
 
     // ════════════════════════════════════════
     // 章 3 ── 決定の街 カードプール（SPEC-004 §8.4）
     // ════════════════════════════════════════
-    cd301: {
-      libraryKey: "cd301",
-      extId: 1005,
-      extNameJa: "古代の盾",
-      skillNameJa: "鋼の盾",
-      skillIcon: "BUF_agi.png",
-      cost: 1,
-      type: "skl",
-      target: "self",
-      caster: "foremost",
-      // SPEC-006: auto-derived effects (review needed: no)
-      effects: [
-        { target: "self", text: "シールド +10" }
-      ],
-      effectSummaryLines() { return ["シールド　+10"]; },
-      peekHelpKeys() { return ["shield"]; },
-      previewLines() { return ["シールドを 10 得る（特殊ダメージのみ吸収）"]; },
-      play(s) { api.addPlayerShield(s, 10); },
-    },
 
-    cd302: {
-      libraryKey: "cd302",
-      extId: 1011,
-      extNameJa: "古代の大鎚",
-      skillNameJa: "大鎚",
-      skillIcon: "phy.png",
-      cost: 3,
-      type: "atk",
-      target: "enemy.foremost",
-      caster: "foremost",
-      // SPEC-006: auto-derived effects (review needed: no)
-      effects: [
-        { target: "enemy.foremost", text: "PHYダメ 200-200%" }
-      ],
-      effectSummaryLines(s) {
-        const d = estPhyHit(s.playerPhy, s.enemyPhy, 200, 200);
-        return [`敵にダメージ　${d}`];
-      },
-      peekHelpKeys() { return []; },
-      previewLines(s) {
-        const d = estPhyHit(s.playerPhy, s.enemyPhy, 200, 200);
-        return [`敵1体に ${d} ダメージ（PHY 200%）`];
-      },
-      play(s) { api.dealPhySkillToEnemy(s, 200, 200); },
-    },
 
-    cd303: {
-      libraryKey: "cd303",
-      extId: 2004,
-      extNameJa: "古代の軍旗",
-      skillNameJa: "戦術指揮",
-      skillIcon: "BUF_phy.png",
-      cost: 2,
-      type: "skl",
-      target: "self",
-      caster: "foremost",
-      // SPEC-006: auto-derived effects (review needed: no)
-      effects: [
-        { target: "self", text: "PHY +5" },
-        { target: "self", text: "INT +5" }
-      ],
-      effectSummaryLines() { return ["PHY　+5", "INT　+5（戦闘中ずっと）"]; },
-      peekHelpKeys() { return ["phy", "int"]; },
-      previewLines() { return ["PHY を +5、INT を +5（戦闘中ずっと）"]; },
-      play(s) {
-        se("buff"); fx("player", "buff");
-        s.playerPhy += 5;
-        s.playerInt += 5;
-        clog("戦術指揮: PHY+5、INT+5");
-      },
-    },
 
-    cd304: {
-      libraryKey: "cd304",
-      extId: 1022,
-      extNameJa: "古代の宝珠",
-      skillNameJa: "必殺の閃光",
-      skillIcon: "int.png",
-      cost: 2,
-      type: "atk",
-      target: "enemy.foremost",
-      caster: "foremost",
-      // SPEC-006: auto-derived effects (review needed: no)
-      effects: [
-        { target: "enemy.foremost", text: "INTダメ 130-130% (CRIT固定)" }
-      ],
-      effectSummaryLines(s) {
-        const d = estIntHit(s.playerInt, s.enemyInt, 130, 130);
-        return [`敵にダメージ　${d}`, "クリ確定"];
-      },
-      peekHelpKeys() { return []; },
-      previewLines(s) {
-        const d = estIntHit(s.playerInt, s.enemyInt, 130, 130);
-        return [`敵1体に ${d} ダメージ（INT 130%）`, "クリティカル確定（追加ダメージあり）"];
-      },
-      play(s) { api.dealIntSkillToEnemyCrit(s, 130, 130); },
-    },
 
-    cd305: {
-      libraryKey: "cd305",
-      extId: 1005,
-      extNameJa: "古代の脚甲",
-      skillNameJa: "不屈",
-      skillIcon: "BUF_agi.png",
-      cost: 0,
-      type: "skl",
-      target: "self",
-      caster: "foremost",
-      // SPEC-006: auto-derived effects (review needed: no)
-      effects: [
-        { target: "self", text: "被ダメ半減 (1ターン)" }
-      ],
-      effectSummaryLines() { return ["被ダメージ ½（このターン）"]; },
-      peekHelpKeys() { return ["guard"]; },
-      previewLines() { return ["このターン（ターン終了まで）受けるダメージをすべて半減する"]; },
-      play(s) { api.setDamageReducedThisTurn(s); },
-    },
+
+
+
+
+
 // ─── auto-generated CU extensions (Common+Uncommon, 347 cards) ───
     ext1009: {
       libraryKey: "ext1009",
@@ -21540,38 +20924,9 @@ export const CARD_RARITIES = {
   ext2013: 'uncommon',  // エリートユミ
 
   // ─── 章0 アバカス カードプール ────────────────────────────────────
-  cd101:   'uncommon',  // 一刀（PHY100%）
-  cd102:   'rare',      // 二段斬り（PHY70%×2）
-  cd103:   'common',    // 構え（ガード+6）
-  cd104:   'uncommon',  // 集中（エナジー+1）
-  cd105:   'rare',      // 一閃（PHY150%）
-  cd106:   'uncommon',  // 鼓舞（PHY+3永続）
-  cd107:   'uncommon',  // 治療（HP回復）
-  cd108:   'uncommon',  // 突撃（コスト0+次ターンペナルティ）
-
   // ─── 章1 ホレリス カードプール ────────────────────────────────────
-  cdH01:   'rare',      // 抜刀・一閃（PHY80%・消耗）
-  cdH02:   'uncommon',  // 出血弾・速射（PHY+出血×1）
-  cdH03:   'uncommon',  // 疾風の構え（ガード+8+AGI永続）
-  cdH04:   'rare',      // 緊急回復（コスト0・消耗）
-  cdH05:   'uncommon',  // 連矢（PHY50%×2）
-  cdH06:   'rare',      // 知識の爆発（INT+2+ドロー3）
-
   // ─── 章2 アンティキティラ カードプール ───────────────────────────
-  cd301:   'uncommon',  // 鋼の盾（シールド+10）
-  cd302:   'epic',      // 大鎚（PHY200%）
-  cd303:   'epic',      // 戦術指揮（PHY+5+INT+5永続）
-  cd304:   'rare',      // 必殺の閃光（INT130%クリ確定）
-  cd305:   'rare',      // 不屈（このターン被ダメ半減）
-
-  // ─── 章3 アタナソフ カードプール ─────────────────────────────────
-  cd201:   'uncommon',  // 毒の刃（PHY+毒×2）
-  cd202:   'rare',      // エリートスナイプ（PHY90%+出血×2）
-  cd203:   'common',    // 解毒（コスト0・デバフ解除）
-  cd204:   'rare',      // エリートプロテクション（ガード+12）
-  cd205:   'rare',      // エリートショット（INT×3）
-  cd206:   'uncommon',  // 投資（GUM+20）
-// ─── auto-generated CARD_RARITIES entries ───
+  // ─── 章3 アタナソフ カードプール ─────────────────────────────────// ─── auto-generated CARD_RARITIES entries ───
   ext1009: 'common',
   ext1010: 'common',
   ext1013: 'common',
