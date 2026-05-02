@@ -20873,10 +20873,12 @@ export function createCardRuntime(clog, api) {
     };
   }
   function makeStarterDeck() {
+    // β1: INT 系を増やすため ブレード 5→3、マスケット 0→2 (合計 10 枚は維持)
     const d = [];
-    for (let i = 0; i < 5; i++) d.push(copyCard("ext1001"));
-    for (let i = 0; i < 4; i++) d.push(copyCard("ext1004"));
-    d.push(copyCard("ext1008"));
+    for (let i = 0; i < 3; i++) d.push(copyCard("ext1001")); // ブレード (PHY)
+    for (let i = 0; i < 2; i++) d.push(copyCard("ext1002")); // マスケット (INT)
+    for (let i = 0; i < 4; i++) d.push(copyCard("ext1004")); // アーマー (skl)
+    d.push(copyCard("ext1008")); // ブック (INT + draw + damage)
     return shuffle(d);
   }
   return { CARD_LIBRARY, copyCard, makeStarterDeck };

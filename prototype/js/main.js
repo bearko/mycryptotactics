@@ -1445,6 +1445,10 @@ function advanceToNextChapter() {
 }
 
 // ─── 現在の章カードプール（累積） ───────────────────────────────
+// 旧: 章定義の cardPool を累積。少数の固定カードからのみドロップ。
+// β1: ドロップ多様化のため、CARD_RARITIES から Common/Uncommon を全部対象にし、
+//     章 idx に応じた重みで Common/Uncommon を抽選する pickRewardCards() を新設。
+//     getCumulativeCardPool() は後方互換 (ショップ商品列の生成等) のため残す。
 function getCumulativeCardPool() {
   const pool = [];
   const ci = runState?.chapterIdx ?? 0;
@@ -1452,6 +1456,47 @@ function getCumulativeCardPool() {
     pool.push(...CHAPTERS[i].cardPool);
   }
   return pool;
+}
+
+/** 章 idx に応じて Common/Uncommon の出現確率を返す。
+ *  ch1 (idx 0): Common 100% / Uncommon 0%
+ *  ch2 (idx 1): Common 80%  / Uncommon 20%
+ *  ch3 (idx 2): Common 60%  / Uncommon 40%
+ *  ch4 (idx 3): Common 40%  / Uncommon 60%
+ *  ch5 (idx 4): Common 20%  / Uncommon 80%
+ */
+function rewardRarityWeights() {
+  const ci = runState?.chapterIdx ?? 0;
+  const commonProb = [1.0, 0.8, 0.6, 0.4, 0.2][Math.min(ci, 4)] ?? 0.2;
+  return { commonProb, uncommonProb: 1 - commonProb };
+}
+
+/** ドロップ報酬として count 枚のカード libraryKey を抽選 (重複なし)。
+ *  各 pick で commonProb に従って Common か Uncommon の bucket を選び、
+ *  その bucket からランダム選出。pickWeightedCards に対するドロップ専用 API。 */
+function pickRewardCards(count) {
+  const { commonProb } = rewardRarityWeights();
+  const commons = [];
+  const uncommons = [];
+  for (const [key, rarity] of Object.entries(CARD_RARITIES)) {
+    if (!CARD_LIBRARY[key]) continue;  // 未定義カードは除外
+    if (rarity === "common") commons.push(key);
+    else if (rarity === "uncommon") uncommons.push(key);
+  }
+  // ch1 で uncommons 空相当 (commonProb=1.0) → 自動的に common のみ
+  const picked = new Set();
+  const result = [];
+  let safety = count * 50;
+  while (result.length < count && safety-- > 0) {
+    const fromCommon = (uncommons.length === 0) || (Math.random() < commonProb);
+    const bucket = fromCommon ? commons : uncommons;
+    if (bucket.length === 0) continue;
+    const candidate = bucket[Math.floor(Math.random() * bucket.length)];
+    if (picked.has(candidate)) continue;
+    picked.add(candidate);
+    result.push(candidate);
+  }
+  return result;
 }
 
 // ─── ノード位置 ───────────────────────────────────────────────────
@@ -5728,10 +5773,9 @@ function endCombatWin() {
   gold += earnedGold;
   clog(`勝利！ GUM +${earnedGold}`);
 
-  // 報酬カードプール（累積）
-  const pool = shuffle(getCumulativeCardPool());
-  const picks = pool.slice(0, 3).map((k) => CARD_LIBRARY[k]).filter(Boolean);
-  // picks が 3 未満なら既存カードで補完
+  // 報酬カードプール (β1: Common/Uncommon を章別重みで抽選 — pickRewardCards)
+  const picks = pickRewardCards(3).map((k) => CARD_LIBRARY[k]).filter(Boolean);
+  // 万一 picks が 3 未満ならフォールバック (基本到達しない)
   const fallback = ["ext1002", "ext1005", "ext1003", "ext1006", "ext2001", "ext2004"];
   while (picks.length < 3) {
     const fb = fallback[Math.floor(Math.random() * fallback.length)];
@@ -6494,10 +6538,8 @@ function openShop() {
     playerGuard: 0, playerShield: 0, energyMax: 3, energy: 3,
   };
 
-  // 章の累積カードプールからショップ商品を選ぶ
-  const poolKeys = shuffle(getCumulativeCardPool());
-  const shopKeys = poolKeys.slice(0, 4);
-  // 少なければ既存カードで補完
+  // β1: ショップ商品も Common/Uncommon を章別重みで抽選
+  const shopKeys = pickRewardCards(4);
   const staticOffers = ["ext2001", "ext2004", "ext1022", "ext1002"];
   while (shopKeys.length < 4) shopKeys.push(staticOffers[shopKeys.length]);
 
@@ -6577,12 +6619,36 @@ function openShop() {
   removeSection.appendChild(removeBtn);
   list.parentElement.appendChild(removeSection);
 
+  // ─── カードランクアップセクション (β1) ────────────────────────────
+  // 同じく 1 ショップ訪問につき 1 回まで
+  runState.shopUpgradeUsed = false;
+
+  const upgradeSection = document.createElement("div");
+  upgradeSection.className = "shop-remove-section";  // 既存スタイルを流用
+  const upgradeTitle = document.createElement("div");
+  upgradeTitle.className = "shop-remove-title";
+  upgradeTitle.textContent = `カードランクアップ（${SHOP_UPGRADE_COST} GUM）`;
+  upgradeSection.appendChild(upgradeTitle);
+  const upgradeDesc = document.createElement("div");
+  upgradeDesc.className = "shop-remove-desc";
+  upgradeDesc.textContent = "デッキ内のノービスカードを1枚選んでエリートにランクアップします（クラフトの打ち直し相当）。1 ショップ訪問につき 1 枚まで。";
+  upgradeSection.appendChild(upgradeDesc);
+
+  const upgradeBtn = document.createElement("button");
+  upgradeBtn.type = "button";
+  upgradeBtn.className = "shop-remove-btn action";
+  upgradeBtn.textContent = "カードをランクアップする";
+  upgradeBtn.addEventListener("click", () => openShopUpgradeCard(goldDisp, upgradeBtn));
+  upgradeSection.appendChild(upgradeBtn);
+  list.parentElement.appendChild(upgradeSection);
+
   // マイのメッセージ（ショップ入店時）
   renderNavigator("エクステンションを購入してデッキを強化しましょう！GUMに余裕があるなら積極的に買いましょう！");
 }
 
 // ─── ショップ カード破棄 ──────────────────────────────────────────
 const SHOP_REMOVE_COST = 50;
+const SHOP_UPGRADE_COST = 100;
 function setShopRemoveBtnSoldOut(btn) {
   if (!btn) return;
   btn.disabled = true;
@@ -6657,6 +6723,100 @@ function openShopRemoveCard(goldDisp, removeBtn) {
       overlay.remove();
     });
     wrapper.appendChild(delBtn);
+    cardListEl.appendChild(wrapper);
+  });
+}
+
+// ─── ショップ カードランクアップ (β1) ────────────────────────────
+function setShopUpgradeBtnSoldOut(btn) {
+  if (!btn) return;
+  btn.disabled = true;
+  btn.classList.add("sold-out");
+  btn.textContent = "売り切れ（このショップでは使用済み）";
+}
+function openShopUpgradeCard(goldDisp, upgradeBtn) {
+  ensureRunState();
+  if (runState.shopUpgradeUsed) {
+    renderNavigator("このショップではすでにランクアップを 1 回使用しています");
+    setShopUpgradeBtnSoldOut(upgradeBtn);
+    return;
+  }
+  if (gold < SHOP_UPGRADE_COST) {
+    renderNavigator(`GUM が足りません（必要: ${SHOP_UPGRADE_COST} GUM）`);
+    return;
+  }
+  // アップグレード可能なカード (CARD_UPGRADE_SERIES に登録あり)
+  const upgradeable = runState.deck
+    .map((c, idx) => ({ card: c, idx }))
+    .filter(({ card }) => CARD_UPGRADE_SERIES[card.libraryKey]);
+
+  if (upgradeable.length === 0) {
+    renderNavigator("ランクアップできるノービスカードがデッキにありません");
+    return;
+  }
+
+  // モーダルオーバーレイ (破棄と同じパターン)
+  const overlay = document.createElement("div");
+  overlay.className = "shop-remove-overlay";
+  overlay.innerHTML = `<div class="shop-remove-modal">
+    <div class="shop-remove-modal-title">ランクアップするカードを選んでください</div>
+    <div class="shop-remove-card-list" id="shopUpgradeCardList"></div>
+    <button class="shop-remove-cancel" id="shopUpgradeCancel">キャンセル</button>
+  </div>`;
+  document.getElementById("shopView").appendChild(overlay);
+  document.getElementById("shopUpgradeCancel").addEventListener("click", () => overlay.remove());
+
+  const mockS = {
+    playerPhy: LEADER.basePhy, playerInt: LEADER.baseInt, playerAgi: LEADER.baseAgi,
+    enemyPhy: 14, enemyInt: 8,
+    playerHp: runState.playerHp, playerHpMax: runState.playerHpMax,
+    playerGuard: 0, playerShield: 0, energyMax: 3, energy: 3,
+  };
+
+  const cardListEl = document.getElementById("shopUpgradeCardList");
+  const seen = new Set();
+  upgradeable.forEach(({ card, idx }) => {
+    if (seen.has(card.libraryKey)) return; // 重複は代表 1 枚のみ
+    seen.add(card.libraryKey);
+    const upgradeKey = CARD_UPGRADE_SERIES[card.libraryKey];
+    const upgradeDef = CARD_LIBRARY[upgradeKey];
+    if (!upgradeDef) return;
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "shop-remove-card-wrapper";
+
+    // before → after を横並び表示
+    const row = document.createElement("div");
+    row.className = "craft-upgrade-row";
+    const before = buildRewardPickButton(card, mockS);
+    before.style.pointerEvents = "none";
+    const arrow = document.createElement("span");
+    arrow.className = "craft-arrow";
+    arrow.textContent = "→";
+    const after = buildRewardPickButton(upgradeDef, mockS);
+    after.style.pointerEvents = "none";
+    row.appendChild(before);
+    row.appendChild(arrow);
+    row.appendChild(after);
+    wrapper.appendChild(row);
+
+    const upBtn = document.createElement("button");
+    upBtn.className = "action shop-remove-confirm-btn";
+    upBtn.textContent = `ランクアップ (-${SHOP_UPGRADE_COST} GUM)`;
+    upBtn.addEventListener("click", () => {
+      gold -= SHOP_UPGRADE_COST;
+      // 同じキーの最初の 1 枚をアップグレード後カードに置き換え
+      const replaceIdx = runState.deck.findIndex(c => c.libraryKey === card.libraryKey);
+      if (replaceIdx >= 0) runState.deck[replaceIdx] = copyCard(upgradeKey);
+      if (goldDisp) goldDisp.textContent = String(gold);
+      syncResources();
+      clog(`ショップ打ち直し: ${card.extNameJa} → ${upgradeDef.extNameJa}（-${SHOP_UPGRADE_COST} GUM）`);
+      renderNavigator(`「${card.extNameJa}」を「${upgradeDef.extNameJa}」にランクアップしました！強くなりましたね！`);
+      runState.shopUpgradeUsed = true;
+      setShopUpgradeBtnSoldOut(upgradeBtn);
+      overlay.remove();
+    });
+    wrapper.appendChild(upBtn);
     cardListEl.appendChild(wrapper);
   });
 }
@@ -7572,8 +7732,8 @@ function openCraftGetCard() {
   if (!el) return;
   ensureRunState();
 
-  const poolKeys = shuffle(getCumulativeCardPool());
-  const offerKeys = poolKeys.slice(0, 3);
+  // β1: クラフト獲得も Common/Uncommon を章別重みで抽選
+  const offerKeys = pickRewardCards(3);
   const mockS = {
     playerPhy: LEADER.basePhy, playerInt: LEADER.baseInt, playerAgi: LEADER.baseAgi,
     enemyPhy: 14, enemyInt: 8,
