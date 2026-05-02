@@ -4,7 +4,7 @@
     "nameJa": "甲斐姫",
     "rarity": "common",
     "hpMax": 70,
-    "basePhy": 10,
+    "basePhy": 9,
     "baseInt": 8,
     "baseAgi": 12,
     "passiveKey": "kaihime",
