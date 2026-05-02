@@ -21,7 +21,7 @@
 | 4f | per-hero state 化 + legacy 廃止 | P0 | ✅ **完了** (legacy 完全廃止は Phase 4g) | guard/shield/poison/bleed/vulnerable を heroes[i] 個別に。swap 拡張、damage 吸収を target hero 経由、毒 tick・guard reset を per-hero、敵攻撃の状態異常付与を target hero 個別に。Status badges UI もサブ portrait に展開 |
 | 4g | Phase 3j 撤去 | P0 | ✅ **完了** | setActiveHero / getActiveHero / ensureActiveHeroAlive / loadActiveHeroStatsToLegacy / syncLegacyStatsToActiveHero / activeHeroIdx を全削除。portrait click handler + ▶ ACTIVE バッジ + hover lift CSS も撤去。getActiveHero 利用箇所は transient な `combat._currentCaster` (playCard スコープ) に置換 |
 | 4h | バトル外カード券面 effects ベース統一 + caster ロール表示 | P1 | ✅ **完了** | buildRewardPickButton (リワード/デッキ/ショップ/クラフト共通) と showOwnedDeckPeek を effects 配列 + caster ロールラベル ベースに更新。バトル外は具体ヒーロー portrait は出さず「先頭」「前衛」等のロール pill のみ表示 |
-| 4i | 945 カード手動 caster 再指定 | P2 | **デモ完了 (5 ペア)** | ext9001-9005 を新設して 5 種の caster ロール (front/highest_int/highest_phy/back/highest_hp) をデモ。chapter 1 cardPool に組み込み。受け入れ基準「5 対以上の差別化ペア」達成 |
+| 4i | 945 カード手動 caster 再指定 | P2 | **デモ完了 (5 件)** | 既存 MCH カード 5 件の caster を変更: ノービスカタナ→front / アックス→highest_phy / ウィズダムスクロール→highest_int / ウィズダムゴブレット→back / ブレイブカブト→highest_hp。MCH アセット縛りを維持しつつ 5 種の caster ロールをカバー |
 | 4j | パッシブ trigger DSL 統合 (codemod) | P0 | **runtime 完成、codemod 出力待ち** | passive-runtime.js + 12 種 effect handler + 5 件サンプル変換完了。content 担当の codemod 出力 (210 関数 → PassiveDef) を待って既存 hardcoded 関数を全削除 |
 
 ### 完了済みフェーズの動作確認済み事項 (Phase 4a-4d)
