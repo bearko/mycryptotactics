@@ -5349,6 +5349,9 @@ async function playCard(idx) {
   }));
   combat.energy -= card.cost;
   combat.hand.splice(idx, 1);
+  // SPEC-006 UX: フォーカスカードが消費されたのでプレビュー枠 / オーバーレイをクリア
+  clearCardPreview();
+  handFocusedIdx = -1;
   // 消耗カードは exhaustPile へ、通常カードは捨て札へ
   if (card.exhaust) {
     combat.exhaustPile.push(card);

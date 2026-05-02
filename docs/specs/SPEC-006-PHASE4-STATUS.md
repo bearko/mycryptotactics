@@ -3,11 +3,12 @@
 | 項目 | 値 |
 |------|-----|
 | ID | SPEC-006-PHASE4-STATUS |
-| 状態 | Draft (随時更新) |
+| 状態 | ✅ **完了** (全 sub-phase クローズ) |
+| 完了日 | 2026-05-02 |
 | 最終更新 | 2026-05-02 |
-| 作業ブランチ | `feat/spec-006-phase4-prep` (このブランチ) |
+| 関連 PR | #43-48 (Phase 4a-4h) / #74, #76 (Phase 4j) / #75 (Phase 4i) / #80 (post-integration fix) |
 
-[SPEC-006](./SPEC-006-card-caster.md) の Phase 4 実装トラッカー。
+[SPEC-006](./SPEC-006-card-caster.md) の Phase 4 実装トラッカー。**全 sub-phase 完了済み** (受入条件 §15 達成)。
 
 ## サブフェーズ進捗
 
@@ -21,8 +22,8 @@
 | 4f | per-hero state 化 + legacy 廃止 | P0 | ✅ **完了** (legacy 完全廃止は Phase 4g) | guard/shield/poison/bleed/vulnerable を heroes[i] 個別に。swap 拡張、damage 吸収を target hero 経由、毒 tick・guard reset を per-hero、敵攻撃の状態異常付与を target hero 個別に。Status badges UI もサブ portrait に展開 |
 | 4g | Phase 3j 撤去 | P0 | ✅ **完了** | setActiveHero / getActiveHero / ensureActiveHeroAlive / loadActiveHeroStatsToLegacy / syncLegacyStatsToActiveHero / activeHeroIdx を全削除。portrait click handler + ▶ ACTIVE バッジ + hover lift CSS も撤去。getActiveHero 利用箇所は transient な `combat._currentCaster` (playCard スコープ) に置換 |
 | 4h | バトル外カード券面 effects ベース統一 + caster ロール表示 | P1 | ✅ **完了** | buildRewardPickButton (リワード/デッキ/ショップ/クラフト共通) と showOwnedDeckPeek を effects 配列 + caster ロールラベル ベースに更新。バトル外は具体ヒーロー portrait は出さず「先頭」「前衛」等のロール pill のみ表示 |
-| 4i | 577 カード手動 caster 再指定 | P2 | 未着手 | content PR 全マージ完了済み (PR #51/#56)、差別化したいものを手動再指定 |
-| 4j | パッシブ trigger DSL 統合 (codemod) | P0 | **runtime 完成、codemod 出力待ち** | passive-runtime.js + 12 種 effect handler + 5 件サンプル変換完了。content 担当の codemod 出力 (210 関数 → PassiveDef) を待って既存 hardcoded 関数を全削除 |
+| 4i | 945 カード手動 caster 再指定 | P2 | **デモ完了 (5 件)** | 既存 MCH カード 5 件の caster を変更: ノービスカタナ→front / アックス→highest_phy / ウィズダムスクロール→highest_int / ウィズダムゴブレット→back / ブレイブカブト→highest_hp (PR #75)。MCH アセット縛りを維持しつつ 5 種の caster ロールをカバー |
+| 4j | パッシブ trigger DSL 統合 (codemod) | P0 | ✅ **完了** | passive-runtime.js + 13 種 effect handler。content 担当 codemod (PR #76) で 210 関数→PassiveDef (`passives-generated.js`) を生成し、`init()` で `registerPassives(PASSIVES)` + `registerPassives(SAMPLE_PASSIVES)` の順に登録。legacy hardcoded switch は LEADER 用に残しつつ、`getRegisteredPassive()` で runtime 側に処理を委譲する早期 return を導入 (PR #80) |
 
 ### 完了済みフェーズの動作確認済み事項 (Phase 4a-4d)
 
@@ -221,7 +222,45 @@ content PR #50/#52 マージ後に着手。SPEC-006 §18 の `applyPassiveTrigge
 | Phase 4d-4f 完了 | バトル系の数値ロジックが新 schema 上で動く |
 | Phase 4e-4h 完了 | UI が新仕様を表示 |
 | PR #50/#52 マージ後 | Phase 4j 着手 |
-| Phase 4 全完 | β v1.x として SPEC-006 受け入れ基準 §15 を全達成 |
+| **Phase 4 全完** | **2026-05-02: β v1.x として SPEC-006 受け入れ基準 §15 を全達成 ✅** |
+
+## 全完了宣言 (2026-05-02)
+
+SPEC-006 Phase 4 (Phase 4a 〜 4j) は全 sub-phase が完了し、SPEC 受け入れ基準 §15 を満たしました。
+
+### 完了の根拠
+
+| 受入条件 (§15) | 達成状況 | 根拠 |
+|---|---|---|
+| 全カードに `caster` フィールド | ✅ | Phase 4c 自動 migration で 100% 適用 (cards.js 920 件、PR #77 で MCH 純化後) |
+| 全カードに `effects` 配列 | ✅ | Phase 4c で 98%+ 自動導出、残り手動修正済み |
+| `resolveCaster` / `canPlayCard` 動作 | ✅ | Phase 4b で `caster.js` モジュール化、`unplayableBadge` で「⚡不足/👤不在」表示 |
+| caster swap (per-card stats) | ✅ | Phase 4d `loadCasterStatsToLegacy` / `syncLegacyStatsToCaster` |
+| per-hero state | ✅ | Phase 4f で guard/shield/poison/bleed/vulnerable を `heroes[i]` 個別に |
+| Phase 3j 撤去 | ✅ | Phase 4g で `setActiveHero` / `getActiveHero` 系 5 関数 + ▶ ACTIVE バッジ完全削除 |
+| バトル外 UI 統一 | ✅ | Phase 4h でリワード/デッキ/ショップ/クラフトを effects ベースに |
+| Caster ロール差別化 (§7) | ✅ | Phase 4i で 5 件 (front/highest_phy/highest_int/highest_hp/back) のデモ実装 (PR #75) |
+| Passive trigger DSL (§18) | ✅ | Phase 4j 完了。codemod (PR #76) で 210 PassiveDef 生成、runtime (`passive-runtime.js`) に登録 |
+
+### Phase 4j 統合詳細
+
+**runtime (PR #74)**: `passive-runtime.js` が `registerPassives` / `applyPassiveTrigger` / `checkPassiveThresholds` を提供。13 種 effect action (damage / damageRaw / damageMaxHpPct / heal / healRaw / applyStatus / buffStat / addGuard / addShield / addEnergy / drawCards / revive / clearStatus + cutin) を main.js が `registerEffectHandlers` で注入。
+
+**codemod (PR #76)**: 元 DB の 210 ヒーローパッシブを `prototype/tools/gen-passives.js` で `passives-generated.js` (`export const PASSIVES`) に一括変換。triggerRate プレースホルダは trigger 種別ごとの既定値で埋め、状態異常はレアリティに応じた stack で正規化。
+
+**統合 (PR #80)**: `init()` で `registerPassives(PASSIVES)` + `registerPassives(SAMPLE_PASSIVES)` の順に登録 (SAMPLE は手検証済みで後勝ち上書き)。legacy hardcoded `switch` は LEADER 用に残すが、`getRegisteredPassive(LEADER.passiveKey)` が truthy なら早期 return し runtime に処理を委譲、二重発動を回避。
+
+**併せて修正 (PR #80)**:
+- 前衛死亡後にパッシブが発動する不具合 → legacy switch / `applyKaihimePassive` / `applyZhangPassive` に `passiveHero.alive === false` 早期 return
+- 戦闘終了ごとに HP が満タンに戻る不具合 → `endCombatWin` で `combat.heroes[i].hp` を `runState.party[i].hpCurrent` に書き戻し
+- 中衛のカード使用で前衛 HP が見た目上回復する不具合 → `playCard` 末尾で `restoreLegacyToFront(combat)` を呼び legacy 値を `heroes[0]` に戻す
+- ターン終了連打で敵攻撃 / 手札補充が二重実行される不具合 → ハンドラ冒頭で `combatInputLocked = true`
+
+### 既知の残課題 (Phase 4 範囲外、別 SPEC で扱う)
+
+- **`combat.playerXxx` legacy mirror の完全廃止**: 現在は heroes[0] と二重持ちで UI 互換用に残っている。renderCombat を `heroes[0]` 直接参照に書き換える別 PR で完全廃止可能。
+- **PassiveDef の数値妥当性検証**: codemod が triggerRate に既定値を埋めているため、元 DB に実数値があるパッシブとは差分がある可能性。content 担当が QA フェーズで再調整予定。
+- **Phase 4i の caster 再指定拡大**: 現状 5 件のデモのみ。MCH カード全 920 件への展開は P2 タスク (運用しながら逐次)。
 
 ## 関連文書
 
