@@ -7074,8 +7074,12 @@ function openRankingSubmitModal() {
   confirmBtn.addEventListener("click", onConfirm);
 }
 
+/** ランキング画面を開く前の画面を覚えておき、戻るボタンで復帰するために保持 */
+let _rankingReturnView = null;
+
 /** ランキング画面を開く */
 async function openRankingView() {
+  if (view !== "ranking") _rankingReturnView = view;
   showView("ranking");
   await renderRankingView();
 }
@@ -7138,7 +7142,11 @@ async function renderRankingView() {
       filterEl.addEventListener("change", () => renderRankingView());
     }
     el.querySelector("[data-rk-refresh]")?.addEventListener("click", () => renderRankingView());
-    el.querySelector("[data-rk-back]")?.addEventListener("click", () => showView("title"));
+    el.querySelector("[data-rk-back]")?.addEventListener("click", () => {
+      const target = _rankingReturnView || "map";
+      _rankingReturnView = null;
+      showView(target);
+    });
     el.querySelector("[data-rk-save-apiurl]")?.addEventListener("click", () => {
       const input = el.querySelector("[data-rk-apiurl]");
       if (!input) return;
