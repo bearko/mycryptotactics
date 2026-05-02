@@ -708,18 +708,6 @@
     "passiveDesc": "戦闘開始時に発動・敵のAGI-1／敵に出血×1付与"
   },
   {
-    "heroId": 2050,
-    "nameJa": "イッパツマン & 逆転王",
-    "rarity": "uncommon",
-    "hpMax": 85,
-    "basePhy": 16,
-    "baseInt": 6,
-    "baseAgi": 13,
-    "passiveKey": "ippatsuman",
-    "passiveName": "逆転王、見参!!",
-    "passiveDesc": "戦闘開始時に発動・自身のPHY+5／ガード+6"
-  },
-  {
     "heroId": 2051,
     "nameJa": "アーマロイド・レディ",
     "rarity": "uncommon",
@@ -1356,30 +1344,6 @@
     "passiveDesc": "戦闘開始時に発動・自身のPHY+6"
   },
   {
-    "heroId": 3052,
-    "nameJa": "キャシャーン & フレンダー",
-    "rarity": "rare",
-    "hpMax": 90,
-    "basePhy": 12,
-    "baseInt": 18,
-    "baseAgi": 10,
-    "passiveKey": "casshern",
-    "passiveName": "超破壊光線",
-    "passiveDesc": "戦闘開始時に発動・敵にINT60〜70%ダメージ"
-  },
-  {
-    "heroId": 3053,
-    "nameJa": "クリスタル・ボーイ",
-    "rarity": "rare",
-    "hpMax": 90,
-    "basePhy": 9,
-    "baseInt": 9,
-    "baseAgi": 22,
-    "passiveKey": "crystal_boy",
-    "passiveName": "ライブ・クリスタル",
-    "passiveDesc": "カード使用後に発動・自身のAGI+1／シールド+8"
-  },
-  {
     "heroId": 3054,
     "nameJa": "DOURAN",
     "rarity": "rare",
@@ -1884,30 +1848,6 @@
     "passiveDesc": "カード使用後に発動・自身のPHY+3／敵に毒×3付与"
   },
   {
-    "heroId": 4042,
-    "nameJa": "ブッダ",
-    "rarity": "epic",
-    "hpMax": 120,
-    "basePhy": 7,
-    "baseInt": 20,
-    "baseAgi": 7,
-    "passiveKey": "buddha",
-    "passiveName": "悟り",
-    "passiveDesc": "戦闘開始時に発動・自身のINT+1／自身のAGI+2"
-  },
-  {
-    "heroId": 4043,
-    "nameJa": "鉄腕アトム",
-    "rarity": "epic",
-    "hpMax": 95,
-    "basePhy": 18,
-    "baseInt": 11,
-    "baseAgi": 19,
-    "passiveKey": "atom",
-    "passiveName": "10万馬力",
-    "passiveDesc": "カード使用後に発動・自身のPHY+1"
-  },
-  {
     "heroId": 4044,
     "nameJa": "ファーブル",
     "rarity": "epic",
@@ -2076,30 +2016,6 @@
     "passiveDesc": "戦闘開始時・自身のPHY+1（DBに無い効果のため代替）"
   },
   {
-    "heroId": 4058,
-    "nameJa": "ヤッターマン1号 & 2号",
-    "rarity": "epic",
-    "hpMax": 95,
-    "basePhy": 11,
-    "baseInt": 11,
-    "baseAgi": 25,
-    "passiveKey": "yatterman",
-    "passiveName": "ケンダマジック & シビレステッキ",
-    "passiveDesc": "カード使用後に発動・敵にINT25〜25%ダメージ／敵に出血×3付与"
-  },
-  {
-    "heroId": 4059,
-    "nameJa": "コブラ",
-    "rarity": "epic",
-    "hpMax": 95,
-    "basePhy": 7,
-    "baseInt": 22,
-    "baseAgi": 21,
-    "passiveKey": "cobra",
-    "passiveName": "サイコガン",
-    "passiveDesc": "カード使用後に発動・自身のINT+6"
-  },
-  {
     "heroId": 4060,
     "nameJa": "SUZUISHI",
     "rarity": "epic",
@@ -2110,18 +2026,6 @@
     "passiveKey": "suzuishi",
     "passiveName": "鳴響止水",
     "passiveDesc": "カード使用後に発動・敵にPHY30〜30%ダメージ／自身のPHY+7"
-  },
-  {
-    "heroId": 4061,
-    "nameJa": "ティルフィング[PK Alterna]",
-    "rarity": "epic",
-    "hpMax": 95,
-    "basePhy": 24,
-    "baseInt": 7,
-    "baseAgi": 18,
-    "passiveKey": "tyrfing",
-    "passiveName": "ショックトゥキル",
-    "passiveDesc": "カード使用後に発動・敵にPHY20〜25%ダメージ／シールド+8"
   },
   {
     "heroId": 5001,
