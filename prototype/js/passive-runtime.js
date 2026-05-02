@@ -168,6 +168,39 @@ export function applyPassiveTrigger(s, kind, ctx = {}) {
   }
 }
 
+/** applyPassiveTrigger の async 版。
+ *  各ヒーローの cutinSkillName を順次 await 表示してから effects を実行する。
+ *  combat.started のように複数ヒーローのパッシブが同時発動する場面で、
+ *  「前衛 → 中衛 → 後衛」の順にカットインを連続再生したい場合に使う。 */
+export async function applyPassiveTriggerAsync(s, kind, ctx = {}) {
+  if (!s) return;
+  const heroes = s.heroes || [];
+  for (const hero of heroes) {
+    if (!hero) continue;
+    const def = getRegisteredPassive(hero.passiveKey);
+    if (!def || def.trigger !== kind) continue;
+    if (kind === "self.cardPlayed" && ctx.caster && hero !== ctx.caster) continue;
+    if (kind === "self.tookDamage" && ctx.hero && hero !== ctx.hero) continue;
+    if (kind === "self.died" && ctx.hero && hero !== ctx.hero) continue;
+    if (!shouldFire(s, hero, def, ctx)) continue;
+
+    // 1. カットイン表示 (await: showCutinAsync があれば優先)
+    if (def.cutinSkillName) {
+      if (typeof _effectHandlers?.showCutinAsync === "function") {
+        try { await _effectHandlers.showCutinAsync(hero, def.cutinSkillName); }
+        catch (e) { console.error("[passive-runtime] showCutinAsync failed", e); }
+      } else if (typeof _effectHandlers?.showCutin === "function") {
+        _effectHandlers.showCutin(hero, def.cutinSkillName);
+      }
+    }
+    // 2. effects 順次実行
+    for (const effect of def.effects || []) {
+      applyPassiveEffect(s, hero, effect);
+    }
+    markTriggered(hero, def);
+  }
+}
+
 /** HP/statRatio 系の閾値ベース trigger を hero 状態変化のたびにチェック
  *  (applyHpDeltaToHero などから呼ぶ) */
 export function checkPassiveThresholds(s, hero) {
