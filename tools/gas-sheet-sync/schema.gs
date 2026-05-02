@@ -47,30 +47,72 @@ const LL_EXT_SCHEMA = {
   ],
 };
 
+// ─── 共通 enum 定義 (extensions / heroes / 他で使い回す) ──────────
+
+/** skillIcon enum (cards.js で使用中の 10 種) */
+const ENUM_SKILL_ICON = [
+  "phy.png", "int.png", "hp.png", "guard.png",
+  "BUF_phy.png", "BUF_int.png", "BUF_agi.png",
+  "DBF_phy.png", "DBF_int.png", "DBF_agi.png",
+];
+
+/** caster enum (caster.js で定義の CasterRole 全 8 種) */
+const ENUM_CASTER_ROLE = [
+  "front", "mid", "back",
+  "foremost", "rearmost",
+  "highest_phy", "highest_int", "highest_hp",
+];
+
+/** TargetSpec enum (target-labels.js で定義の全 29 種) */
+const ENUM_TARGET_SPEC = [
+  "self",
+  // 味方 (固定位置)
+  "ally.front", "ally.mid", "ally.back",
+  // 味方 (動的)
+  "ally.foremost", "ally.rearmost",
+  "ally.all", "ally.random",
+  "ally.highest_phy", "ally.lowest_phy",
+  "ally.highest_int", "ally.lowest_int",
+  "ally.highest_hp",  "ally.lowest_hp",
+  // 敵 (固定位置)
+  "enemy.front", "enemy.mid", "enemy.back",
+  // 敵 (動的)
+  "enemy.foremost", "enemy.rearmost",
+  "enemy.all", "enemy.random",
+  "enemy.highest_phy", "enemy.lowest_phy",
+  "enemy.highest_int", "enemy.lowest_int",
+  "enemy.highest_hp",  "enemy.lowest_hp",
+  // 全体 (クロス陣営)
+  "all", "all.random",
+];
+
 /** extensions (cards.js から parse、Pull-only)
  *  cards.js には play() 等の JS 関数本体が含まれるため Push は危険。
  *  本シートは「カードカタログ閲覧用」と位置付ける。
- *  値編集してもボタンを押しても Push 対象には含まれない。 */
+ *  値編集してもボタンを押しても Push 対象には含まれない。
+ *
+ *  視認性のため skillIcon / caster / effect_*_target はプルダウン化。
+ *  rarity / type も従来通り enum。 */
 const EXTENSIONS_SCHEMA = {
   sheetName: SHEET_EXT,
   jsonPath: PATH_CARDS_JS,         // 表示用、実際の fetch は ghFetchRawText 経由
   pullOnly: true,
   columns: [
-    { name: "libraryKey",     type: "string" },
-    { name: "extId",          type: "int" },
-    { name: "extNameJa",      type: "string" },
-    { name: "skillNameJa",    type: "string" },
-    { name: "skillIcon",      type: "string" },
-    { name: "cost",           type: "int" },
-    { name: "type",           type: "enum", options: ["atk", "skl", "power"] },
-    { name: "target",         type: "string" },
-    { name: "caster",         type: "string" },
-    { name: "rarity",         type: "enum", options: ["common", "uncommon", "rare", "epic", "legendary"] },
-    { name: "effect_1_target", type: "string" },
+    { name: "libraryKey",      type: "string" },
+    { name: "extId",           type: "int" },
+    { name: "extNameJa",       type: "string" },
+    { name: "skillNameJa",     type: "string" },
+    { name: "skillIcon",       type: "enum", options: ENUM_SKILL_ICON },
+    { name: "cost",            type: "int" },
+    { name: "type",            type: "enum", options: ["atk", "skl", "power"] },
+    { name: "target",          type: "enum", options: ENUM_TARGET_SPEC },
+    { name: "caster",          type: "enum", options: ENUM_CASTER_ROLE },
+    { name: "rarity",          type: "enum", options: ["common", "uncommon", "rare", "epic", "legendary"] },
+    { name: "effect_1_target", type: "enum", options: ENUM_TARGET_SPEC },
     { name: "effect_1_text",   type: "string" },
-    { name: "effect_2_target", type: "string" },
+    { name: "effect_2_target", type: "enum", options: ENUM_TARGET_SPEC },
     { name: "effect_2_text",   type: "string" },
-    { name: "effect_3_target", type: "string" },
+    { name: "effect_3_target", type: "enum", options: ENUM_TARGET_SPEC },
     { name: "effect_3_text",   type: "string" },
   ],
 };
