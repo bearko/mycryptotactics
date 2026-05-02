@@ -827,6 +827,94 @@ function dealPhySkillToEnemyRange(s, minPct, maxPct) {
   dealPhySkillToEnemy(s, randomSkillRatePct(minPct, maxPct));
 }
 
+// β1 弱攻撃テコ入れ: enemy.all 用 PHY 攻撃ヘルパ
+// dealPhySkillToEnemy を「対象を foremost ではなく生存全敵」にループ展開した版。
+// バランス上、各敵に同 skillPct % のダメ。出血/ガード/シールド/CRIT は従来通り
+// per-target 計算 (dealPhySkillToEnemy 内のロジックを敵毎に再評価)。
+function dealPhySkillToAllEnemiesRange(s, minPct, maxPct) {
+  const skillPct = randomSkillRatePct(minPct, maxPct);
+  const enemies = (s && Array.isArray(s.enemies)) ? s.enemies.slice() : [];
+  if (enemies.length === 0) return;
+  // foremost 1 体の従来関数を、対象を差し替えながら順次呼ぶのは煩雑なので、
+  // インライン展開 (dealPhySkillToEnemy のロジックを敵 iterate)
+  const cut = cutRateFromPhy(s.enemyPhy);
+  let totalDamageSum = 0;
+  for (const target of enemies) {
+    if (!target || target.alive === false || (target.hp ?? 0) <= 0) continue;
+    let base = phyIntDamageAfterCut(s.playerPhy, skillPct, cut);
+    let critBonus = 0;
+    if (rollCrit(critRateFromAgi(s.playerAgi))) {
+      critBonus = criticalBonusDamage(s.playerPhyBase, skillPct, s.enemyPhyBase, "phy");
+    }
+    let vuln = (target === s.enemies?.[0]) ? (s.enemyVulnerable || 0) : 0;
+    let total = base + critBonus + vuln;
+    if (target === s.enemies?.[0]) s.enemyVulnerable = 0;
+    // 出血 (前衛は legacy enemyBleed、サブ敵は per-target.bleed)
+    const bleed = (target === s.enemies?.[0]) ? Math.max((s.enemyBleed || 0), (target.bleed || 0)) : (target.bleed || 0);
+    if (bleed > 0) total += bleed;
+    // ガード (前衛のみ legacy)
+    if (target === s.enemies?.[0]) total = applyGuardToDamage("enemy", total);
+    total = applyPlayerDmgMult(total);
+    applyHpDeltaToEnemy(s, target, -total);
+    flashPortrait("enemy", target);
+    playPortraitEffect("enemy", "hit", target);
+    if (critBonus > 0) spawnCritDisplay("enemy", total);
+    totalDamageSum += total;
+  }
+  lungePortrait("player", s._currentCaster ?? s.heroes?.[0]);
+  if (totalDamageSum > 0) playBattleSe("hit");
+  clog(`PHY全体攻撃 ${skillPct}% → 合計ダメ ${totalDamageSum}`);
+}
+
+function dealIntSkillToAllEnemiesRange(s, minPct, maxPct, forceCrit = false) {
+  const skillPct = randomSkillRatePct(minPct, maxPct);
+  const enemies = (s && Array.isArray(s.enemies)) ? s.enemies.slice() : [];
+  if (enemies.length === 0) return;
+  const cut = cutRateFromInt(s.enemyInt);
+  let totalDamageSum = 0;
+  for (const target of enemies) {
+    if (!target || target.alive === false || (target.hp ?? 0) <= 0) continue;
+    let base = phyIntDamageAfterCut(s.playerInt, skillPct, cut);
+    let critBonus = 0;
+    if (forceCrit || rollCrit(critRateFromAgi(s.playerAgi))) {
+      critBonus = criticalBonusDamage(s.playerIntBase, skillPct, s.enemyIntBase, "int");
+    }
+    let total = base + critBonus;
+    if (target === s.enemies?.[0]) total = applyGuardToDamage("enemy", total);
+    total = applyPlayerDmgMult(total);
+    applyHpDeltaToEnemy(s, target, -total);
+    flashPortrait("enemy", target);
+    playPortraitEffect("enemy", "hit", target);
+    if (critBonus > 0) spawnCritDisplay("enemy", total);
+    totalDamageSum += total;
+  }
+  lungePortrait("player", s._currentCaster ?? s.heroes?.[0]);
+  if (totalDamageSum > 0) playBattleSe("hit");
+  clog(`INT全体攻撃 ${skillPct}% → 合計ダメ ${totalDamageSum}`);
+}
+
+// β1 弱攻撃テコ入れ: 全敵に出血付与
+function addBleedToAllEnemies(s, stacks) {
+  const enemies = (s && Array.isArray(s.enemies)) ? s.enemies.slice() : [];
+  if (enemies.length === 0) {
+    // legacy フォールバック (sub-enemy 配列なし)
+    s.enemyBleed = (s.enemyBleed || 0) + stacks;
+    playBattleSe("debuff");
+    clog(`出血 ×${stacks} 付与（敵）`);
+    return;
+  }
+  for (const enemy of enemies) {
+    if (!enemy || enemy.alive === false || (enemy.hp ?? 0) <= 0) continue;
+    enemy.bleed = (enemy.bleed || 0) + stacks;
+    playPortraitEffect("enemy", "debuff", enemy);
+  }
+  // 前衛の legacy mirror も更新
+  if (enemies[0]) s.enemyBleed = enemies[0].bleed || 0;
+  playBattleSe("debuff");
+  clog(`出血 ×${stacks} 付与（敵全体）`);
+  renderStatusBadges();
+}
+
 function dealIntSkillToEnemy(s, minPct, maxPct, forceCrit = false) {
   const target = getPlayerAttackTargetEnemy(s);
   const skillPct = randomSkillRatePct(minPct, maxPct);
@@ -1090,6 +1178,10 @@ const battleApi = {
   dealPhySkillToEnemy: (s, a, b) => dealPhySkillToEnemyRange(s, a, b),
   dealIntSkillToEnemy: (s, a, b) => dealIntSkillToEnemy(s, a, b, false),
   dealIntSkillToEnemyCrit: (s, a, b) => dealIntSkillToEnemy(s, a, b, true),
+  // β1 弱攻撃テコ入れ: enemy.all 用ヘルパ
+  dealPhySkillToAllEnemies: (s, a, b) => dealPhySkillToAllEnemiesRange(s, a, b),
+  dealIntSkillToAllEnemies: (s, a, b) => dealIntSkillToAllEnemiesRange(s, a, b, false),
+  addBleedToAllEnemies,
   healPlayerFromIntSkill,
   drawCards,
   playBattleSe,
