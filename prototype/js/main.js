@@ -766,10 +766,12 @@ function getPlayerAttackTargetEnemy(s) {
   return foremostAlive(s.enemies) || s.enemies[0] || null;
 }
 
-/** 敵 HP を更新し、必要に応じて legacy フィールドを同期 */
+/** 敵 HP を更新し、必要に応じて legacy フィールドを同期。HP は [0, hpMax] にクランプ。 */
 function applyHpDeltaToEnemy(s, enemy, delta) {
   if (!enemy) return;
-  enemy.hp = Math.max(0, (enemy.hp ?? 0) + delta);
+  const newHp = (enemy.hp ?? 0) + delta;
+  const cap = enemy.hpMax ?? newHp;
+  enemy.hp = Math.max(0, Math.min(cap, newHp));
   if (enemy.hp <= 0) enemy.alive = false;
   if (s.enemies && enemy === s.enemies[0]) {
     s.enemyHp = enemy.hp;
@@ -873,11 +875,14 @@ function getEnemyAttackTargetHero(s) {
   return tgt || s.heroes[0] || null;
 }
 
-/** ヒーローユニットの hp / alive を更新し、必要に応じて legacy フィールドを同期する。 */
+/** ヒーローユニットの hp / alive を更新し、必要に応じて legacy フィールドを同期する。
+ *  HP は [0, hpMax] にクランプ (回復で上限超えを防止)。 */
 function applyHpDeltaToHero(s, hero, delta) {
   if (!hero) return;
   const wasAlive = hero.alive !== false && (hero.hp ?? 0) > 0;
-  hero.hp = Math.max(0, (hero.hp ?? 0) + delta);
+  const newHp = (hero.hp ?? 0) + delta;
+  const cap = hero.hpMax ?? newHp;
+  hero.hp = Math.max(0, Math.min(cap, newHp));
   if (hero.hp <= 0) hero.alive = false;
   // heroes[0] (前衛) なら legacy combat.playerHp と同期
   if (s.heroes && hero === s.heroes[0]) {
