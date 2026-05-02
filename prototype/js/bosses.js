@@ -8,7 +8,7 @@ export const BOSS_DEFS = {
   'boss-ch1': {
     id: 'boss-ch1',
     name: 'ゴースト・上杉謙信',
-    hp: 55, phy: 17, int: 6, agi: 6, imgId: 425,
+    hp: 57, phy: 17, int: 6, agi: 6, imgId: 425,
     initialShield: 0,
     intentRota: [
       { kind: 'guard', value: 12 },
@@ -33,13 +33,13 @@ export const BOSS_DEFS = {
   'boss-ch2': {
     id: 'boss-ch2',
     name: 'ゴースト・ナポレオン',
-    hp: 138, phy: 20, int: 14, agi: 8, imgId: 445,
+    hp: 145, phy: 24, int: 16, agi: 8, imgId: 445,
     initialShield: 0,
     intentRota: [
-      { kind: 'attackPoison', phyPct: 105, poisonStacks: 2 },
+      { kind: 'attackPoison', phyPct: 110, poisonStacks: 2 },
       { kind: 'guard', value: 14 },
-      { kind: 'attackIntDouble', intPct: 105 },
-      { kind: 'special', pct: 22 },
+      { kind: 'attackIntDouble', intPct: 110 },
+      { kind: 'special', pct: 26 },
       { kind: 'buffSelf', phyAdd: 4, intAdd: 3 },
     ],
   },
@@ -76,7 +76,7 @@ export const BOSS_DEFS = {
   'boss-troy': {
     id: 'boss-troy',
     name: 'ディープ・ヨシュカ',
-    hp: 240, phy: 27, int: 22, agi: 14, imgId: 171,
+    hp: 320, phy: 33, int: 28, agi: 14, imgId: 171,
     initialShield: 0,
     phases: [
       {
