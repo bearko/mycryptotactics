@@ -189,7 +189,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ノービスホース",
       skillNameJa: "ノービスチャージ",
       skillIcon: "BUF_agi.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -572,7 +572,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 60-75%" }
@@ -661,7 +661,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "エリートホース",
       skillNameJa: "エリートチャージ",
       skillIcon: "BUF_agi.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -821,7 +821,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 35-45%" }
@@ -842,7 +842,7 @@ function makeCardLibrary(clog, api) {
       cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 20-25%" },
@@ -865,7 +865,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 40-50%" },
@@ -888,7 +888,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 15-20%" },
@@ -929,7 +929,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "カブト",
       skillNameJa: "デバインプロテクション",
       skillIcon: "BUF_phy.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "self",
       caster: "rearmost",
@@ -1026,7 +1026,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 15-20%" }
@@ -1047,7 +1047,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 10-15%" },
@@ -1091,7 +1091,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 30-40%" },
@@ -1132,7 +1132,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "リボルバー",
       skillNameJa: "ファニングショット",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 0,
       type: "atk",
       target: "enemy.foremost",
       caster: "highest_int",
@@ -1200,7 +1200,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 15-20%" },
@@ -1273,7 +1273,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 35-45%" },
@@ -1382,7 +1382,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 30-30%" },
@@ -1446,10 +1446,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "グレープ",
       skillNameJa: "ボルドー",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 0,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 20-30%" }
@@ -1467,7 +1467,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "セージ",
       skillNameJa: "ハーブティー",
       skillIcon: "DBF_phy.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -1491,7 +1491,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 40-40%" },
@@ -1535,7 +1535,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "mid",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 0-30%" },
@@ -1558,7 +1558,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 40-50%" },
@@ -1578,10 +1578,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "アルケブス",
       skillNameJa: "狙撃兵",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 0,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 35-45%" },
@@ -1625,7 +1625,7 @@ function makeCardLibrary(clog, api) {
       cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 13-28%" },
@@ -1645,10 +1645,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "とっておきのアイスクリーム",
       skillNameJa: "アイスクリームの恨みを受けよ！",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 0,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 10-20%" }
@@ -1669,7 +1669,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "mid",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 45-55%" },
@@ -1689,10 +1689,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ワンド",
       skillNameJa: "スイング",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 0,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 35-45%" }
@@ -1735,10 +1735,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ハット",
       skillNameJa: "エレガンス",
       skillIcon: "BUF_int.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "self",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "self", text: "INT +1" }
@@ -1778,7 +1778,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ピエロ",
       skillNameJa: "ジャグリング",
       skillIcon: "DBF_phy.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -1799,7 +1799,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "フルート",
       skillNameJa: "フラジオレット",
       skillIcon: "DBF_phy.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -1823,7 +1823,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 35-45%" },
@@ -1846,7 +1846,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 40-50%" }
@@ -1864,7 +1864,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ホルン",
       skillNameJa: "ゲシュトップフト",
       skillIcon: "DBF_agi.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -1930,7 +1930,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 40-50%" }
@@ -1972,7 +1972,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "mid",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 45-45%" },
@@ -2018,7 +2018,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 35-45%" },
@@ -2084,10 +2084,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ホーキ",
       skillNameJa: "スイープ",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 0,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 15-25%" }
@@ -2105,10 +2105,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ヨロイ",
       skillNameJa: "シュラウド",
       skillIcon: "BUF_phy.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "self",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "self", text: "PHY +1" },
@@ -2131,7 +2131,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 35-40%" }
@@ -2149,7 +2149,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "バイナンスチャリティメダル",
       skillNameJa: "バイナンスチャリティの御加護",
       skillIcon: "guard.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -2173,7 +2173,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -2238,7 +2238,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 8-8%" },
@@ -2305,7 +2305,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 45-45%" },
@@ -2328,7 +2328,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 30-30%" },
@@ -2351,7 +2351,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 35-45%" }
@@ -2392,7 +2392,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ベルト",
       skillNameJa: "ドミネイト",
       skillIcon: "DBF_int.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -2418,7 +2418,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 40-50%" },
@@ -2443,7 +2443,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 35-45%" },
@@ -2468,7 +2468,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 20-20%" }
@@ -2537,7 +2537,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 84-84%" },
@@ -2578,7 +2578,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "鏡",
       skillNameJa: "レディエイション",
       skillIcon: "DBF_phy.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -2599,7 +2599,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "待合せ場所のモアイ像",
       skillNameJa: "ぐらふぁい島の観光名所に来ています",
       skillIcon: "DBF_phy.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -2623,7 +2623,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 53-53%" }
@@ -2641,7 +2641,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "お手伝いゴーレム",
       skillNameJa: "ちゃぶ台返しちゃった",
       skillIcon: "DBF_phy.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -2662,7 +2662,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "すかる",
       skillNameJa: "旗揚げ",
       skillIcon: "DBF_phy.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -2704,7 +2704,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "懐中時計",
       skillNameJa: "クロックワーク",
       skillIcon: "guard.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -2728,7 +2728,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-55%" },
@@ -2748,7 +2748,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "パロットエッグ",
       skillNameJa: "ぴよぴよ",
       skillIcon: "BUF_agi.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -2774,7 +2774,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-50%" },
@@ -2841,7 +2841,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 22-22%" },
@@ -2885,7 +2885,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 42-42%" },
@@ -2905,7 +2905,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "みにロケット",
       skillNameJa: "ベビーランス",
       skillIcon: "guard.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -3021,7 +3021,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 15-20%" },
@@ -3109,7 +3109,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 40-40%" },
@@ -3134,7 +3134,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 7-7%" },
@@ -3154,7 +3154,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "リミュラス",
       skillNameJa: "白亜の光",
       skillIcon: "guard.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -3201,7 +3201,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 38-38%" },
@@ -3244,7 +3244,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "べびーとる",
       skillNameJa: "じまんのツノ",
       skillIcon: "guard.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -3265,7 +3265,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ハチミツ",
       skillNameJa: "ハニートラップ",
       skillIcon: "BUF_agi.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -3311,7 +3311,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "放浪紋白",
       skillNameJa: "ちゅるちゅる",
       skillIcon: "guard.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -3358,7 +3358,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 40-65%" }
@@ -3379,7 +3379,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -3400,7 +3400,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 10-35%" },
@@ -3420,7 +3420,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "シールドシステム",
       skillNameJa: "シールドジェネレーター",
       skillIcon: "guard.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -3467,7 +3467,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 20-20%" },
@@ -3487,10 +3487,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ランタン",
       skillNameJa: "コンバスチョン",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 0,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 12-12%" }
@@ -3508,7 +3508,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ハンバーガー",
       skillNameJa: "とろけるチーズの魔法",
       skillIcon: "DBF_phy.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -3550,10 +3550,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "木製パンジャンドラム",
       skillNameJa: "ローリングウェポン",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 0,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 45-55%" }
@@ -3622,7 +3622,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 35-45%" },
@@ -3668,7 +3668,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-55%" },
@@ -3713,7 +3713,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ミニアクアリウム",
       skillNameJa: "流体制御",
       skillIcon: "DBF_phy.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -3734,7 +3734,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "サイバーソード",
       skillNameJa: "ファイナルギャンビット",
       skillIcon: "BUF_phy.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -3757,7 +3757,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "マンドラゴラの種",
       skillNameJa: "呪われし種子",
       skillIcon: "DBF_agi.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -3829,7 +3829,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -3847,10 +3847,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "カエルの標本",
       skillNameJa: "両生の知恵の雨",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 0,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 15-20%" }
@@ -3938,7 +3938,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 20-20%" },
@@ -3981,7 +3981,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "幼獣の小角",
       skillNameJa: "ホーンオーラ",
       skillIcon: "guard.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -4002,7 +4002,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "いちごカップケーキ",
       skillNameJa: "甘酸っぱい",
       skillIcon: "DBF_phy.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -4026,7 +4026,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 25-30%" },
@@ -4049,7 +4049,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 25-30%" },
@@ -4069,7 +4069,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ネズミ捕り",
       skillNameJa: "ノックアウト・トラップ",
       skillIcon: "DBF_int.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -4094,7 +4094,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "子猫&草じゃらし",
       skillNameJa: "ゴロゴロ惑乱",
       skillIcon: "DBF_agi.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -4119,7 +4119,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "こっくりさん",
       skillNameJa: "肩が凝る",
       skillIcon: "guard.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -4143,7 +4143,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -4206,7 +4206,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 35-35%" },
@@ -4228,7 +4228,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ひよこスネーク",
       skillNameJa: "獣翼アップリフト",
       skillIcon: "guard.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -4252,7 +4252,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "mid",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 35-45%" }
@@ -4270,10 +4270,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ブーメラン",
       skillNameJa: "リターンシュート",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 0,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 35-45%" }
@@ -4294,7 +4294,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 20-25%" },
@@ -4356,10 +4356,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "チャクラム",
       skillNameJa: "マインドオービット",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 0,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 30-40%" }
@@ -4401,7 +4401,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 36-46%" },
@@ -4514,7 +4514,7 @@ function makeCardLibrary(clog, api) {
       cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 22-27%" },
@@ -4537,7 +4537,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 45-55%" },
@@ -4560,7 +4560,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 20-25%" },
@@ -4601,7 +4601,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "エリートカブト",
       skillNameJa: "エリートデバインプロテクション",
       skillIcon: "BUF_phy.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -4698,7 +4698,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 15-20%" },
@@ -4742,7 +4742,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 20-25%" }
@@ -4763,7 +4763,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 15-20%" },
@@ -4807,7 +4807,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 35-45%" },
@@ -4830,7 +4830,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 45-55%" }
@@ -4851,7 +4851,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 40-50%" }
@@ -4916,7 +4916,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 20-25%" },
@@ -4987,7 +4987,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 40-50%" },
@@ -5096,7 +5096,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 35-35%" },
@@ -5163,7 +5163,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 25-35%" }
@@ -5181,7 +5181,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "エリートセージ",
       skillNameJa: "エリートハーブティー",
       skillIcon: "DBF_phy.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -5205,7 +5205,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 40-40%" },
@@ -5249,7 +5249,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "mid",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 0-40%" },
@@ -5272,7 +5272,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 45-55%" },
@@ -5295,7 +5295,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 40-50%" },
@@ -5339,7 +5339,7 @@ function makeCardLibrary(clog, api) {
       cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 16-31%" },
@@ -5362,7 +5362,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 40-40%" }
@@ -5383,7 +5383,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -5427,7 +5427,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 15-25%" }
@@ -5448,7 +5448,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "mid",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 50-60%" },
@@ -5471,7 +5471,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 40-50%" }
@@ -5514,10 +5514,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "エリートハット",
       skillNameJa: "エリートエレガンス",
       skillIcon: "BUF_int.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "self",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "self", text: "INT +1" }
@@ -5558,7 +5558,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "エリートピエロ",
       skillNameJa: "エリートジャグリング",
       skillIcon: "DBF_phy.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -5579,7 +5579,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "エリートフルート",
       skillNameJa: "エリートフラジオレット",
       skillIcon: "DBF_phy.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -5603,7 +5603,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 40-50%" },
@@ -5626,7 +5626,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 45-55%" }
@@ -5644,7 +5644,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "エリートホルン",
       skillNameJa: "エリートゲシュトップフト",
       skillIcon: "DBF_agi.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -5668,7 +5668,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 50-60%" }
@@ -5710,7 +5710,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 45-55%" }
@@ -5752,7 +5752,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "mid",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 45-45%" },
@@ -5798,7 +5798,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 40-50%" },
@@ -5844,7 +5844,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 15-35%" }
@@ -5909,7 +5909,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 20-30%" }
@@ -5927,10 +5927,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "エリートヨロイ",
       skillNameJa: "エリートシュラウド",
       skillIcon: "BUF_phy.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "self",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "self", text: "PHY +1" },
@@ -5953,7 +5953,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 40-45%" }
@@ -6013,7 +6013,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "エリートバイナンスチャリティメダル",
       skillNameJa: "エリートバイナンスチャリティの御加護",
       skillIcon: "guard.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -6037,7 +6037,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -6102,7 +6102,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 10-10%" },
@@ -6169,7 +6169,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 45-45%" },
@@ -6192,7 +6192,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 35-35%" },
@@ -6215,7 +6215,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 40-50%" }
@@ -6256,7 +6256,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "エリートベルト",
       skillNameJa: "エリートドミネイト",
       skillIcon: "DBF_int.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -6282,7 +6282,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 45-55%" },
@@ -6307,7 +6307,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 40-50%" },
@@ -6332,7 +6332,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 20-20%" }
@@ -6402,7 +6402,7 @@ function makeCardLibrary(clog, api) {
       cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 89-89%" },
@@ -6443,7 +6443,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "エリート鏡",
       skillNameJa: "エリートレディエイション",
       skillIcon: "DBF_phy.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -6464,7 +6464,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ぐらふぁい島モアイの目覚",
       skillNameJa: "ぐらふぁい島の霊力開花",
       skillIcon: "DBF_phy.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -6488,7 +6488,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 56-56%" }
@@ -6506,7 +6506,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ゴーレムソルジャー",
       skillNameJa: "悪魔の囁き",
       skillIcon: "DBF_phy.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -6527,7 +6527,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "エリートスカル",
       skillNameJa: "メアリーおいろけの術",
       skillIcon: "DBF_phy.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -6569,7 +6569,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "エリート懐中時計",
       skillNameJa: "エリートクロックワーク",
       skillIcon: "guard.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -6593,7 +6593,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 55-60%" },
@@ -6613,7 +6613,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "パロパロ",
       skillNameJa: "つがいの囀り",
       skillIcon: "BUF_agi.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -6639,7 +6639,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 55-55%" },
@@ -6706,7 +6706,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 27-27%" },
@@ -6750,7 +6750,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 47-47%" },
@@ -6770,7 +6770,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "実はミサイル",
       skillNameJa: "マスク砲",
       skillIcon: "guard.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -6886,7 +6886,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 20-25%" },
@@ -6974,7 +6974,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 45-45%" },
@@ -6999,7 +6999,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 10-10%" },
@@ -7019,7 +7019,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "エリートリミュラス",
       skillNameJa: "ジュラの光",
       skillIcon: "guard.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -7066,7 +7066,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 43-43%" },
@@ -7109,7 +7109,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ちびーとる",
       skillNameJa: "森いちばんのツノ",
       skillIcon: "guard.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -7130,7 +7130,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ハッチ",
       skillNameJa: "ママは何処",
       skillIcon: "BUF_agi.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -7176,7 +7176,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "虹彩紋桃",
       skillNameJa: "すごいちゅるちゅる",
       skillIcon: "guard.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -7223,7 +7223,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 45-70%" }
@@ -7244,7 +7244,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -7265,7 +7265,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 15-40%" },
@@ -7285,7 +7285,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "エリートシールドシステム",
       skillNameJa: "エリートシールドジェネレーター",
       skillIcon: "guard.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -7332,7 +7332,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 25-25%" },
@@ -7355,7 +7355,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 14-14%" }
@@ -7373,7 +7373,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "フィッシュサンド",
       skillNameJa: "さわやか海の恵みサンド",
       skillIcon: "DBF_phy.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -7418,7 +7418,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -7487,7 +7487,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 40-50%" },
@@ -7533,7 +7533,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 55-60%" },
@@ -7578,7 +7578,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "金魚鉢",
       skillNameJa: "エリート流体制御",
       skillIcon: "DBF_phy.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -7599,7 +7599,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "エリートサイバーソード",
       skillNameJa: "エリートファイナルギャンビット",
       skillIcon: "BUF_phy.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -7622,7 +7622,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "マンドラゴラベビー",
       skillNameJa: "呪いの泣き声",
       skillIcon: "DBF_agi.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -7694,7 +7694,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 55-65%" }
@@ -7715,7 +7715,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 20-25%" }
@@ -7803,7 +7803,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 25-25%" },
@@ -7846,7 +7846,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ジャッカロープホーン",
       skillNameJa: "エリートホーンオーラ",
       skillIcon: "guard.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -7867,7 +7867,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ストロベリースポンジケーキ",
       skillNameJa: "エリート甘酸っぱい",
       skillIcon: "DBF_phy.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -7891,7 +7891,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 30-35%" },
@@ -7914,7 +7914,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 30-35%" },
@@ -7934,7 +7934,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "籠罠",
       skillNameJa: "エリートノックアウト・トラップ",
       skillIcon: "DBF_int.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -7959,7 +7959,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "三毛猫&レトロじゃらし",
       skillNameJa: "エリートゴロゴロ惑乱",
       skillIcon: "DBF_agi.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -7984,7 +7984,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "低級精霊召喚セット",
       skillNameJa: "低位の霊圧",
       skillIcon: "guard.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -8008,7 +8008,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -8071,7 +8071,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 40-40%" },
@@ -8093,7 +8093,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ハトねこ",
       skillNameJa: "エリート獣翼アップリフト",
       skillIcon: "guard.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -8117,7 +8117,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "mid",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 40-50%" }
@@ -8138,7 +8138,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 40-50%" }
@@ -8159,7 +8159,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 25-25%" },
@@ -8224,7 +8224,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 35-45%" }
@@ -8266,7 +8266,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 39-49%" },
@@ -8334,7 +8334,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "クラブシェル",
       skillNameJa: "硬度250Hv",
       skillIcon: "guard.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -8355,7 +8355,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "人知超越の鍵",
       skillNameJa: "シンギュラリティ",
       skillIcon: "DBF_phy.png",
-      cost: 1,
+      cost: 0,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -8419,10 +8419,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ブレイブマスケット",
       skillNameJa: "ブレイブショット",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 35-40%" }
@@ -8506,7 +8506,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "front",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 55-65%" }
@@ -8524,10 +8524,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "キューティー・九尾",
       skillNameJa: "キューティー・九尾",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 45-45%" },
@@ -8547,10 +8547,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ウィズダムブック",
       skillNameJa: "ウィズダムリーディング",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 35-40%" }
@@ -8615,7 +8615,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 55-65%" }
@@ -8657,7 +8657,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 45-55%" }
@@ -8678,7 +8678,7 @@ function makeCardLibrary(clog, api) {
       cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 25-30%" },
@@ -8701,7 +8701,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 50-60%" },
@@ -8721,7 +8721,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ウィズダムスクロール",
       skillNameJa: "ウィズダムタクティクス",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 2,
       type: "atk",
       target: "enemy.foremost",
       // SPEC-006 Phase 4i: INT 最高ヒーロー (賢者) が巻物を読み上げる
@@ -8861,10 +8861,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ウィズダムドラゴン",
       skillNameJa: "ウィズダムフクリュウ",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 20-25%" },
@@ -8908,7 +8908,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 25-30%" }
@@ -8926,10 +8926,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ウィズダムモンキー",
       skillNameJa: "ウィズダムサルヂエ",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 20-25%" },
@@ -8970,10 +8970,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ウィズダムドッグ",
       skillNameJa: "ウィズダムリョウケン",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 40-50%" },
@@ -8996,7 +8996,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 50-60%" }
@@ -9014,10 +9014,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ウィズダムリボルバー",
       skillNameJa: "ウィズダムファニングショット",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 45-55%" }
@@ -9080,10 +9080,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ウィズダムセンス",
       skillNameJa: "ウィズダムシラビョウシ",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 25-30%" },
@@ -9151,10 +9151,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ウィズダムボウガン",
       skillNameJa: "ウィズダムサイレントシュート",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 45-55%" },
@@ -9263,7 +9263,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 40-40%" },
@@ -9327,10 +9327,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ウィズダムグレープ",
       skillNameJa: "ウィズダムボルドー",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 30-40%" }
@@ -9369,10 +9369,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ウィズダムブルーベリー",
       skillNameJa: "ウィズダムインクベリー",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 45-45%" },
@@ -9416,7 +9416,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "mid",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 0-55%" },
@@ -9439,7 +9439,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 50-60%" },
@@ -9459,10 +9459,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ウィズダムアルケブス",
       skillNameJa: "ウィズダム狙撃兵",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 45-55%" },
@@ -9506,7 +9506,7 @@ function makeCardLibrary(clog, api) {
       cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 19-34%" },
@@ -9526,10 +9526,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "とっておきのシュークリーム",
       skillNameJa: "シュークリームの恨みを受けよ！",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 20-30%" }
@@ -9550,7 +9550,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "mid",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 55-65%" },
@@ -9570,10 +9570,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ウィズダムワンド",
       skillNameJa: "ウィズダムスイング",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 45-55%" }
@@ -9619,7 +9619,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "self", text: "INT +2" }
@@ -9702,10 +9702,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ウィズダムハープ",
       skillNameJa: "ウィズダムオクターブ",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 45-55%" },
@@ -9728,7 +9728,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 50-60%" }
@@ -9770,7 +9770,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 50-60%" }
@@ -9809,10 +9809,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ウィズダムニコ",
       skillNameJa: "ウィズダム洛陽",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -9854,7 +9854,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "mid",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 50-50%" },
@@ -9897,10 +9897,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ウィズダムハンドカノン",
       skillNameJa: "ウィズダム火槍術・舞破",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 45-55%" },
@@ -9966,10 +9966,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "魔女のホーキ",
       skillNameJa: "ウィッチスイープ",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 25-35%" }
@@ -9990,7 +9990,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "self", text: "PHY +2" },
@@ -10013,7 +10013,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 45-50%" }
@@ -10073,10 +10073,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ステラアンモナイト",
       skillNameJa: "ウィズダム螺旋",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -10141,7 +10141,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 12-12%" },
@@ -10205,10 +10205,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ステゴキッズ",
       skillNameJa: "はじめてのおつかい",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-50%" },
@@ -10228,10 +10228,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ウィズダムメガロドン",
       skillNameJa: "シャークトルネード",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 40-40%" },
@@ -10254,7 +10254,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 45-55%" }
@@ -10321,7 +10321,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 50-60%" },
@@ -10343,10 +10343,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ウィズダムギョク",
       skillNameJa: "ウィズダムフォーチュン",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 45-55%" },
@@ -10371,7 +10371,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 20-20%" }
@@ -10438,10 +10438,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "攻符　三柱陣",
       skillNameJa: "三方封滅",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 94-94%" },
@@ -10524,10 +10524,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "アンティキティラの貴婦像",
       skillNameJa: "ディープラーニング レディー・フィンガー",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 59-59%" }
@@ -10629,10 +10629,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "シルフ",
       skillNameJa: "風の光",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 60-65%" },
@@ -10675,10 +10675,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "Senmu V-RED",
       skillNameJa: "専務が全部やる",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 60-60%" },
@@ -10745,7 +10745,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 32-32%" },
@@ -10786,10 +10786,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "フォーチュン ペガサス",
       skillNameJa: "幸せを運ぶ翼",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 52-52%" },
@@ -10922,10 +10922,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "鋭氷の王位継承者コールド",
       skillNameJa: "ウィズダムアイシクル",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 25-30%" },
@@ -11010,10 +11010,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ウィズダムレーザーガン",
       skillNameJa: "ウィズダムプラズマショット",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-50%" },
@@ -11035,10 +11035,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "バッタ商人",
       skillNameJa: "千客万来",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 13-13%" },
@@ -11105,7 +11105,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 48-48%" },
@@ -11262,7 +11262,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 50-75%" }
@@ -11280,10 +11280,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "サンドイッチボックス",
       skillNameJa: "みんなでワイワイ",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -11301,10 +11301,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "魔力で動く天球儀",
       skillNameJa: "無意識の深淵",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 20-45%" },
@@ -11368,10 +11368,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "RYUZAN.int",
       skillNameJa: "ウィズダムRYUブレス",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 30-30%" },
@@ -11391,10 +11391,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "鬼灯ランタン",
       skillNameJa: "活力の残炎",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 16-16%" }
@@ -11454,10 +11454,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "白磁のパンジャンドラム",
       skillNameJa: "ブレイブローリングウェポン",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 55-65%" }
@@ -11523,10 +11523,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "アンティークコンパス",
       skillNameJa: "ウィズダムマグナビゲート",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 45-55%" },
@@ -11569,10 +11569,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ウィズダムサイバースタッフ",
       skillNameJa: "ウィズダムエナジーコンバート",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 60-65%" },
@@ -11730,10 +11730,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "バレエ・オルゴール",
       skillNameJa: "バレエメロディ・ラウンド",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 60-70%" }
@@ -11751,10 +11751,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "メデューサの目玉標本",
       skillNameJa: "石化の視線波動",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 25-30%" }
@@ -11839,10 +11839,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "雪の結晶のタリスマン",
       skillNameJa: "ウィズダムファントムシュート",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 25-25%" },
@@ -11930,7 +11930,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 35-40%" },
@@ -11950,10 +11950,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ウィズダムマジックカード",
       skillNameJa: "ウィズダムマジックチャント",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 35-40%" },
@@ -12044,10 +12044,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "持ち運びハウス",
       skillNameJa: "ウィズダム箱庭リノベーション",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -12110,7 +12110,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 45-45%" },
@@ -12156,7 +12156,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "mid",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 45-55%" }
@@ -12174,10 +12174,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ウィズダムブーメラン",
       skillNameJa: "ウィズダムリターンシュート",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 45-55%" }
@@ -12198,7 +12198,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 25-30%" },
@@ -12260,10 +12260,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ウィズダムチャクラム",
       skillNameJa: "ウィズダムマインドオービット",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 40-50%" }
@@ -12305,7 +12305,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 42-52%" },
@@ -12460,10 +12460,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "三銃士のマスケット",
       skillNameJa: "三銃士の一斉射撃",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 40-45%" },
@@ -12529,7 +12529,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "赤兎馬",
       skillNameJa: "一日千里",
       skillIcon: "guard.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -12553,7 +12553,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "front",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 60-70%" },
@@ -12596,10 +12596,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "罪と罰",
       skillNameJa: "現代の予言書",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 40-45%" },
@@ -12666,7 +12666,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 60-70%" },
@@ -12686,7 +12686,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ETHEREMON-SIBERIZEN",
       skillNameJa: "頼んだぞ!シベリゼン!",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
       caster: "foremost",
@@ -12710,7 +12710,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 50-60%" },
@@ -12756,7 +12756,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 55-65%" },
@@ -12776,10 +12776,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "兵法書",
       skillNameJa: "五事七計",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 30-35%" },
@@ -12822,7 +12822,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "諏訪法性兜",
       skillNameJa: "軍神の加護",
       skillIcon: "BUF_phy.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -12918,10 +12918,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ワイバーン",
       skillNameJa: "ドラゴンクエイク",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 25-30%" },
@@ -12983,10 +12983,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "シルバーバック",
       skillNameJa: "古老の知恵",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 25-30%" },
@@ -13027,10 +13027,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "モロッサス",
       skillNameJa: "ドッグファイト",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 45-55%" },
@@ -13053,7 +13053,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 55-65%" }
@@ -13071,10 +13071,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ドラグーン",
       skillNameJa: "荒野の一撃",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -13136,10 +13136,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "舞扇",
       skillNameJa: "棟梁の舞",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 30-35%" },
@@ -13213,10 +13213,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "クロスボウ",
       skillNameJa: "アップルシューター",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" },
@@ -13329,7 +13329,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 50-50%" },
@@ -13393,10 +13393,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "怒りの葡萄",
       skillNameJa: "ナパ・バレー",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 40-50%" }
@@ -13414,7 +13414,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ホワイトセージ",
       skillNameJa: "スマッジング",
       skillIcon: "DBF_phy.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -13435,10 +13435,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ハイブッシュ",
       skillNameJa: "アルカロイド",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-50%" },
@@ -13482,7 +13482,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "mid",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 0-70%" },
@@ -13505,7 +13505,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 55-65%" },
@@ -13527,10 +13527,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "八咫烏",
       skillNameJa: "雑賀衆",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" },
@@ -13578,7 +13578,7 @@ function makeCardLibrary(clog, api) {
       cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 22-37%" },
@@ -13600,10 +13600,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "とっておきのレアチーズケーキ",
       skillNameJa: "レアチーズケーキの恨みを受けよ！",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 25-35%" }
@@ -13624,7 +13624,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "mid",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 60-70%" },
@@ -13644,10 +13644,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ジェーズル",
       skillNameJa: "聖体礼儀",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -13737,7 +13737,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "アルルカン",
       skillNameJa: "ワイルドカード",
       skillIcon: "BUF_agi.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -13760,7 +13760,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "コマンチェスピリット",
       skillNameJa: "狩人の恋唄",
       skillIcon: "DBF_phy.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -13781,10 +13781,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ダビデのリラ",
       skillNameJa: "神変浄化の音色",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" },
@@ -13807,7 +13807,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 55-65%" }
@@ -13825,7 +13825,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ショファール",
       skillNameJa: "ローシュ・ハッシャーナー",
       skillIcon: "DBF_agi.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -13849,7 +13849,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 50-60%" }
@@ -13888,10 +13888,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "馬頭二胡",
       skillNameJa: "義に背き恩を忘るれば、天人ともに戮すべし",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 55-65%" }
@@ -13933,7 +13933,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "mid",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 50-50%" },
@@ -13976,10 +13976,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "国崩し",
       skillNameJa: "砲尾装填式砲",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" },
@@ -14045,10 +14045,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "流星のホーキ",
       skillNameJa: "シューティング・スター",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 30-40%" },
@@ -14068,10 +14068,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "銀糸威当世小札",
       skillNameJa: "戦国甲冑",
       skillIcon: "BUF_phy.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "self",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "self", text: "PHY +2" },
@@ -14094,7 +14094,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 50-55%" }
@@ -14154,10 +14154,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ノストセラス",
       skillNameJa: "アンモーンの角",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -14222,7 +14222,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 16-16%" },
@@ -14286,10 +14286,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "草樹の守護",
       skillNameJa: "樹の種火",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-50%" },
@@ -14309,10 +14309,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "スカルドメガロ",
       skillNameJa: "バミューダギャングスター",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 45-45%" },
@@ -14335,7 +14335,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 50-60%" }
@@ -14376,7 +14376,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "チャンピオンベルト",
       skillNameJa: "頂点の覇気",
       skillIcon: "DBF_int.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -14402,7 +14402,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 55-65%" },
@@ -14424,10 +14424,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "カルデアの玉",
       skillNameJa: "月神の目",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" },
@@ -14452,7 +14452,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 20-20%" }
@@ -14519,10 +14519,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "召符　鳳凰炎来",
       skillNameJa: "業焔乱舞",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 99-99%" },
@@ -14563,7 +14563,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "照魔鏡",
       skillNameJa: "やみうつし",
       skillIcon: "DBF_phy.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -14584,7 +14584,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "モアイ艦長",
       skillNameJa: "極上！レーザー砲",
       skillIcon: "DBF_phy.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -14605,10 +14605,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "アタナソフの頭足髑髏",
       skillNameJa: "スパミング クイーンニーナ",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 62-62%" }
@@ -14626,7 +14626,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "聖域の守護者",
       skillNameJa: "静寂の雷撃",
       skillIcon: "DBF_phy.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -14647,7 +14647,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "呪詛の髑髏",
       skillNameJa: "レブルグラッジ",
       skillIcon: "DBF_phy.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -14689,7 +14689,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "白兎の魔法時計",
       skillNameJa: "不思議への誘い",
       skillIcon: "guard.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -14710,10 +14710,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "蝶の魔王",
       skillNameJa: "闇の光",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 65-70%" },
@@ -14733,7 +14733,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "アドミラルパロット",
       skillNameJa: "空と海に響く号令",
       skillIcon: "BUF_agi.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -14779,10 +14779,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "MZ-Phantom",
       skillNameJa: "#教えてBCG",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 65-65%" },
@@ -14849,7 +14849,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 37-37%" },
@@ -14890,10 +14890,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "紫雲の天馬",
       skillNameJa: "妖馬飛翔",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 57-57%" },
@@ -14913,7 +14913,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "草コイン回収船",
       skillNameJa: "0x0f77121166D977bf0ddd6445E8844d844087dc99",
       skillIcon: "guard.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -15026,10 +15026,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "慈愛の氷雪王妃クイーンスノー&ベビー",
       skillNameJa: "慈愛の雪崩",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 30-35%" },
@@ -15114,10 +15114,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "レーザーブラスター",
       skillNameJa: "連射レーザー",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 55-55%" },
@@ -15139,10 +15139,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "バッタ野武士",
       skillNameJa: "不撓不屈",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 16-16%" },
@@ -15162,7 +15162,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ゴールデンリミュラス",
       skillNameJa: "シルルの光",
       skillIcon: "guard.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -15209,7 +15209,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 53-53%" },
@@ -15252,7 +15252,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "クイーンアネイラ",
       skillNameJa: "ネッソスの血",
       skillIcon: "guard.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -15273,7 +15273,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "キラービー",
       skillNameJa: "恐怖指数99",
       skillIcon: "BUF_agi.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -15319,7 +15319,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "深淵艶紫",
       skillNameJa: "天害蠱毒",
       skillIcon: "guard.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -15366,7 +15366,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 55-80%" }
@@ -15384,10 +15384,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "華やか二段重箱",
       skillNameJa: "春ルンルン",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -15405,10 +15405,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "古代機工三球儀",
       skillNameJa: "日月星辰",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 25-50%" },
@@ -15428,10 +15428,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "余市町赤ワイン",
       skillNameJa: "ヴィニュロン",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 55-55%" },
@@ -15474,7 +15474,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "天津神の石碑",
       skillNameJa: "高天原のとばり",
       skillIcon: "guard.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -15518,10 +15518,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "RYUOU.int",
       skillNameJa: "RYUプロミネンス",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 35-35%" },
@@ -15541,10 +15541,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "魔界の扉",
       skillNameJa: "深淵の燈",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 18-18%" }
@@ -15562,7 +15562,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ダブルにゃんバーガー",
       skillNameJa: "二倍楽しむ、猫型バーガー！",
       skillIcon: "DBF_phy.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -15604,10 +15604,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "自律型パンジャンドラム",
       skillNameJa: "ノトーリアス・ウェポン",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 60-70%" }
@@ -15673,10 +15673,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "終末の羅針盤",
       skillNameJa: "終焉を告げる針",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" },
@@ -15719,10 +15719,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "コキュートススタッフ",
       skillNameJa: "マジックトランスフューザー",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 65-70%" },
@@ -15767,7 +15767,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "月明かりのハンギングアクアリウム",
       skillNameJa: "月影の波動",
       skillIcon: "DBF_phy.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -15788,7 +15788,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ステュクス",
       skillNameJa: "冥界の大河",
       skillIcon: "BUF_phy.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -15811,7 +15811,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "マンドラゴラ賢者",
       skillNameJa: "呪術の叡智",
       skillIcon: "DBF_agi.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -15880,10 +15880,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ハープを弾く貴婦人",
       skillNameJa: "リーガルハープ・ラプソディ",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 65-75%" }
@@ -15904,10 +15904,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "シーサーペントの尾ビレ標本",
       skillNameJa: "深海の渦潮思念",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 30-35%" }
@@ -15992,10 +15992,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "黒蜘蛛のタリスマン",
       skillNameJa: "幻影蜘蛛",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 30-30%" },
@@ -16038,7 +16038,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "魔獣の大角",
       skillNameJa: "魔獣の妖気",
       skillIcon: "guard.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -16059,7 +16059,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "王族のいちごタルト",
       skillNameJa: "高貴なる甘味",
       skillIcon: "DBF_phy.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -16083,7 +16083,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 40-45%" },
@@ -16103,10 +16103,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "マジックカード：闇",
       skillNameJa: "呪詠・漆黒",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 40-45%" },
@@ -16126,7 +16126,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "地雷",
       skillNameJa: "伏爆の罠",
       skillIcon: "DBF_int.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -16151,7 +16151,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "長毛猫&釣り竿じゃらし",
       skillNameJa: "ふゎしねぃしょん",
       skillIcon: "DBF_agi.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -16176,7 +16176,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "デモンズボード",
       skillNameJa: "アビサル・アトラクション",
       skillIcon: "guard.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -16197,10 +16197,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "お屋敷",
       skillNameJa: "可憐で雄大な邸園",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -16263,7 +16263,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 50-50%" },
@@ -16285,7 +16285,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "オウルモンキー",
       skillNameJa: "ニュクストリクス・シミウス",
       skillIcon: "guard.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -16309,7 +16309,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "mid",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 50-60%" }
@@ -16327,10 +16327,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "帝国式機工回旋鏢",
       skillNameJa: "機工旋刃",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -16351,7 +16351,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 30-30%" },
@@ -16413,10 +16413,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "帝国式機光戦輪ウロボロス",
       skillNameJa: "無限の循環",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 45-55%" }
@@ -16460,7 +16460,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 45-55%" },
@@ -16528,7 +16528,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "AC-130 ガンシップ",
       skillNameJa: "エンジェルフレア",
       skillIcon: "guard.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -16549,7 +16549,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "女王蟹",
       skillNameJa: "女王の威厳",
       skillIcon: "DBF_phy.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -16615,10 +16615,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "グランダルメ",
       skillNameJa: "グランダルメ一斉射撃",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 45-50%" },
@@ -16684,7 +16684,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ブケファロス",
       skillNameJa: "神託の軍馬",
       skillIcon: "guard.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -16708,7 +16708,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "front",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 65-75%" },
@@ -16728,10 +16728,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "アトランティコ手稿",
       skillNameJa: "万能人の遺稿",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 45-50%" },
@@ -16798,7 +16798,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 65-75%" },
@@ -16818,7 +16818,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ETHEREMON-ZEDAKAZM",
       skillNameJa: "トドメだ!ゼダカン!",
       skillIcon: "DBF_phy.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -16844,7 +16844,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 55-75%" },
@@ -16890,7 +16890,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 60-70%" },
@@ -16910,10 +16910,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "大唐西域記",
       skillNameJa: "求法の旅",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 35-40%" },
@@ -16956,7 +16956,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "弦月形鍬形兜",
       skillNameJa: "星界の加護",
       skillIcon: "BUF_phy.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -17052,10 +17052,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "金龍",
       skillNameJa: "龍王の息吹",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 25-30%" },
@@ -17117,10 +17117,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "狒々",
       skillNameJa: "白羽の矢",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 30-35%" },
@@ -17161,10 +17161,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "しっぺい太郎",
       skillNameJa: "猿神退治",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" },
@@ -17187,7 +17187,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 60-70%" }
@@ -17205,10 +17205,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "モデル１",
       skillNameJa: "幕末志士の一射",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 55-65%" }
@@ -17270,10 +17270,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "白羽根太極",
       skillNameJa: "策士の舞",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 35-40%" },
@@ -17347,10 +17347,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "バリスタ",
       skillNameJa: "崩城の一撃",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 55-65%" },
@@ -17463,7 +17463,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 60-60%" },
@@ -17527,10 +17527,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "バッカスグレープ",
       skillNameJa: "テュルソスの杖",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -17548,7 +17548,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "大帝のセージ",
       skillNameJa: "シャルルマーニュハーブ",
       skillIcon: "DBF_phy.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -17569,10 +17569,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "先住民の叡智",
       skillNameJa: "太古のドライベリー",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 60-60%" },
@@ -17616,7 +17616,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "mid",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 0-80%" },
@@ -17639,7 +17639,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 60-70%" },
@@ -17661,10 +17661,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "雨夜手拍子",
       skillNameJa: "毛利秀包の号令",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 55-65%" },
@@ -17712,7 +17712,7 @@ function makeCardLibrary(clog, api) {
       cost: 2,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 25-40%" },
@@ -17734,10 +17734,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "とっておきのフルーツパフェ",
       skillNameJa: "フルーツパフェの恨みを受けよ！",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 30-40%" }
@@ -17758,7 +17758,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "mid",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 65-75%" },
@@ -17778,10 +17778,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ケーリュケイオン",
       skillNameJa: "友好の証",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 55-65%" }
@@ -17871,7 +17871,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ジョーカー",
       skillNameJa: "死神は最後に笑う",
       skillIcon: "BUF_agi.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -17894,7 +17894,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "クリシュナのバーンスリー",
       skillNameJa: "バガヴァッド・ギーター",
       skillIcon: "DBF_phy.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -17915,10 +17915,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ヴェガ",
       skillNameJa: "織女星の蒼き煌めき",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 55-65%" },
@@ -17941,7 +17941,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 60-70%" }
@@ -17959,7 +17959,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ギャラルホルン",
       skillNameJa: "世界の終焉を告げる魔笛",
       skillIcon: "DBF_agi.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -17983,7 +17983,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 50-60%" }
@@ -18022,10 +18022,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "龍頭二胡",
       skillNameJa: "ラストエンペラー",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 60-70%" }
@@ -18067,7 +18067,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "mid",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 50-50%" },
@@ -18110,10 +18110,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "宝貝火尖鎗",
       skillNameJa: "哪吒太子の焔撃",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 55-65%" },
@@ -18206,10 +18206,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "自由のホーキ",
       skillNameJa: "アンリーシュ",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 35-45%" },
@@ -18229,10 +18229,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "赤糸威大鎧",
       skillNameJa: "雀躍虎哮",
       skillIcon: "BUF_phy.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "self",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "self", text: "PHY +2" },
@@ -18255,7 +18255,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 50-55%" }
@@ -18273,10 +18273,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "カリュブディス",
       skillNameJa: "海の神秘",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -18341,7 +18341,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 20-20%" },
@@ -18405,10 +18405,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "太古の再臨",
       skillNameJa: "セージファイヤー",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-50%" },
@@ -18428,10 +18428,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "海賊要塞メガロディアス",
       skillNameJa: "トレジャーオブユニバース",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-50%" },
@@ -18454,7 +18454,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 55-65%" }
@@ -18495,7 +18495,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "メギンギョルズ",
       skillNameJa: "プリペアー・ラグナロク",
       skillIcon: "DBF_int.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -18521,7 +18521,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 60-70%" },
@@ -18543,10 +18543,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "龍玉",
       skillNameJa: "チンターマニ",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 55-65%" },
@@ -18571,7 +18571,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 20-20%" }
@@ -18637,10 +18637,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "降神召符　青龍雷臨",
       skillNameJa: "天地召雷",
       skillIcon: "int.png",
-      cost: 2,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 104-104%" },
@@ -18681,7 +18681,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "浄玻璃鏡",
       skillNameJa: "ビハーヴァ・カルマ",
       skillIcon: "DBF_phy.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -18702,7 +18702,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "財宝ゴールデンモアイ",
       skillNameJa: "金箱レースの極意",
       skillIcon: "DBF_phy.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -18723,10 +18723,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ホレリスの黄金像",
       skillNameJa: "リファクタリング バイオレットキング",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 65-65%" }
@@ -18744,7 +18744,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "女神像レム",
       skillNameJa: "一滴の涙",
       skillIcon: "DBF_phy.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -18765,7 +18765,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "大海賊の秘宝",
       skillNameJa: "We are the chicken pirates!",
       skillIcon: "DBF_phy.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -18807,7 +18807,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "王妃の黄金時計",
       skillNameJa: "命の刻限",
       skillIcon: "guard.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -18828,10 +18828,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ティターニア",
       skillNameJa: "誇り高き輝き",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 30-30%" },
@@ -18851,7 +18851,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ジュエルパロット",
       skillNameJa: "宝石の囀り",
       skillIcon: "BUF_agi.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -18897,10 +18897,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "Nob-Phoenix",
       skillNameJa: "Master of Ocean",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 70-70%" },
@@ -18967,7 +18967,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 42-42%" },
@@ -19008,10 +19008,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "天翔神馬",
       skillNameJa: "神雷纏いし輝翼",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 62-62%" },
@@ -19031,7 +19031,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "宇宙船セージ号",
       skillNameJa: "To the moon",
       skillIcon: "guard.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -19144,10 +19144,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "絶対零度ゴールデンスノーマン",
       skillNameJa: "黄金氷河期",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 35-40%" },
@@ -19232,10 +19232,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "メギド",
       skillNameJa: "神火",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 60-60%" },
@@ -19257,10 +19257,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "バッタ聖人",
       skillNameJa: "古今無双",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 20-20%" },
@@ -19280,7 +19280,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "フルアーマーリミュラス",
       skillNameJa: "カンブリアの光",
       skillIcon: "guard.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -19327,7 +19327,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 58-58%" },
@@ -19370,7 +19370,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "キングヘラクレス",
       skillNameJa: "十二の功業",
       skillIcon: "guard.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -19391,7 +19391,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "女王バチ",
       skillNameJa: "女王様とお呼び！！",
       skillIcon: "BUF_agi.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -19437,7 +19437,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "終焉鳳炎",
       skillNameJa: "終末の幻炎",
       skillIcon: "guard.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -19484,7 +19484,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 60-85%" }
@@ -19502,10 +19502,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "豪華絢爛五段重箱",
       skillNameJa: "満開キラキラ",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -19523,10 +19523,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "宇宙観測スフィア",
       skillNameJa: "無窮の最果て",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 30-55%" },
@@ -19546,10 +19546,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "余市の宝〜北海道余市町名産ワイン〜",
       skillNameJa: "テロワール～1227～",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" },
@@ -19571,7 +19571,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "アメノミナカヌシ",
       skillNameJa: "天地開闢の守護",
       skillIcon: "guard.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -19615,10 +19615,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "RYUJIN.int",
       skillNameJa: "RYUフレイムブラスト",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 40-40%" },
@@ -19638,10 +19638,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "天界の煌石",
       skillNameJa: "ステラー・ステア",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 20-20%" }
@@ -19659,7 +19659,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "スプリームにゃんバーガーセット",
       skillNameJa: "究極の猫好きグルメ体験！",
       skillIcon: "DBF_phy.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -19701,10 +19701,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "クリプトパンジャンドラム",
       skillNameJa: "ホイール・オブ・フォーチュン",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 65-75%" }
@@ -19770,10 +19770,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "フォーチュンロケーター",
       skillNameJa: "明導",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 55-65%" },
@@ -19816,10 +19816,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "ニルヴァーナ",
       skillNameJa: "アークリンクマトリックス",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 70-75%" },
@@ -19864,7 +19864,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "マジカルラウンドアクアリウム",
       skillNameJa: "魔法の水流",
       skillIcon: "DBF_phy.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -19885,7 +19885,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "アーカーシャ",
       skillNameJa: "虚空閃",
       skillIcon: "BUF_phy.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -19908,7 +19908,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "マンドラゴラキング",
       skillNameJa: "呪王の咆哮",
       skillIcon: "DBF_agi.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -19977,10 +19977,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "メリーオルゴーラウンド",
       skillNameJa: "メロディゴーランド",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 70-80%" }
@@ -19998,10 +19998,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "レッドドラゴンの右腕標本",
       skillNameJa: "竜炎知識の解放",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 35-40%" }
@@ -20086,10 +20086,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "古代竜のタリスマン",
       skillNameJa: "幻龍の咆哮",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 30-30%" },
@@ -20132,7 +20132,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "精霊王の巻き角",
       skillNameJa: "精霊王の神気",
       skillIcon: "guard.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -20153,7 +20153,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "妖精の森の山盛りベリータルト",
       skillNameJa: "ベリーの饗宴",
       skillIcon: "DBF_phy.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -20177,7 +20177,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 45-50%" },
@@ -20197,10 +20197,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "マジックカード：光輝",
       skillNameJa: "コスモ・ノヴァ",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 45-50%" },
@@ -20220,7 +20220,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "トロイの木馬",
       skillNameJa: "ホロウ・ギフト",
       skillIcon: "DBF_int.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -20245,7 +20245,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "大型猫&虹蛇じゃらし",
       skillNameJa: "虹色の幻惑",
       skillIcon: "DBF_agi.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "enemy.foremost",
       caster: "foremost",
@@ -20270,7 +20270,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "セラフィックボード",
       skillNameJa: "天降の威圧",
       skillIcon: "guard.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -20291,10 +20291,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "お城",
       skillNameJa: "エクスクイジット・ミニ・ランパート",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -20357,7 +20357,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 55-55%" },
@@ -20379,7 +20379,7 @@ function makeCardLibrary(clog, api) {
       extNameJa: "スケールホーク",
       skillNameJa: "アイギスケイル・アクシグリフ",
       skillIcon: "guard.png",
-      cost: 1,
+      cost: 2,
       type: "skl",
       target: "self",
       caster: "foremost",
@@ -20403,7 +20403,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "mid",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 55-65%" }
@@ -20421,10 +20421,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "クレセントムーン",
       skillNameJa: "エターナル・リカーブ",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 55-65%" }
@@ -20445,7 +20445,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "rearmost",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 30-35%" },
@@ -20507,10 +20507,10 @@ function makeCardLibrary(clog, api) {
       extNameJa: "スダルシャナ",
       skillNameJa: "刻の輪",
       skillIcon: "int.png",
-      cost: 1,
+      cost: 3,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 50-60%" }
@@ -20554,7 +20554,7 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 50-60%" },
