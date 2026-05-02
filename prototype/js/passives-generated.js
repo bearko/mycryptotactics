@@ -1,7 +1,7 @@
 /**
  * passives-generated.js — SPEC-006 §18 Phase 4j codemod 出力 (v2)
  *
- * 全 210 体のヒーローパッシブを宣言形式 PassiveDef に変換。
+ * 全 202 体のヒーローパッシブを宣言形式 PassiveDef に変換。
  * 元データ: prototype/data/heroes.json
  * 生成スクリプト: prototype/tools/gen-passives.js
  *
@@ -707,18 +707,6 @@ export const PASSIVES = {
     ],
     cutinSkillName: "ワルツ9番 告別"
   },
-  // heroId: 2050
-  "ippatsuman": {
-    passiveKey: "ippatsuman",
-    trigger: "combat.started",
-    triggerRate: 1,
-    oncePerCombat: true,
-    effects: [
-      {"target":"self","action":"buffStat","stat":"phy","value":5},
-      {"target":"self","action":"addGuard","value":6}
-    ],
-    cutinSkillName: "逆転王、見参!!"
-  },
   // heroId: 2051
   "armaroid": {
     passiveKey: "armaroid",
@@ -1347,29 +1335,6 @@ export const PASSIVES = {
     ],
     cutinSkillName: "天下の草創"
   },
-  // heroId: 3052
-  "casshern": {
-    passiveKey: "casshern",
-    trigger: "combat.started",
-    triggerRate: 1,
-    oncePerCombat: true,
-    effects: [
-      {"target":"enemy.foremost","action":"damage","coef":{"int":0.65}}
-    ],
-    cutinSkillName: "超破壊光線"
-  },
-  // heroId: 3053
-  "crystal_boy": {
-    passiveKey: "crystal_boy",
-    trigger: "self.cardPlayed",
-    triggerRate: 0.4,
-    oncePerCombat: false,
-    effects: [
-      {"target":"self","action":"buffStat","stat":"agi","value":1},
-      {"target":"self","action":"addShield","value":8}
-    ],
-    cutinSkillName: "ライブ・クリスタル"
-  },
   // heroId: 3054
   "douran": {
     passiveKey: "douran",
@@ -1868,29 +1833,6 @@ export const PASSIVES = {
     ],
     cutinSkillName: "テスラコイル"
   },
-  // heroId: 4042
-  "buddha": {
-    passiveKey: "buddha",
-    trigger: "combat.started",
-    triggerRate: 1,
-    oncePerCombat: true,
-    effects: [
-      {"target":"self","action":"buffStat","stat":"int","value":1},
-      {"target":"self","action":"buffStat","stat":"agi","value":2}
-    ],
-    cutinSkillName: "悟り"
-  },
-  // heroId: 4043
-  "atom": {
-    passiveKey: "atom",
-    trigger: "self.cardPlayed",
-    triggerRate: 0.4,
-    oncePerCombat: false,
-    effects: [
-      {"target":"self","action":"buffStat","stat":"phy","value":1}
-    ],
-    cutinSkillName: "10万馬力"
-  },
   // heroId: 4044
   "fabre": {
     passiveKey: "fabre",
@@ -2057,29 +1999,6 @@ export const PASSIVES = {
     ],
     cutinSkillName: "イケニ族の女王"
   },
-  // heroId: 4058
-  "yatterman": {
-    passiveKey: "yatterman",
-    trigger: "self.cardPlayed",
-    triggerRate: 0.4,
-    oncePerCombat: false,
-    effects: [
-      {"target":"enemy.foremost","action":"damage","coef":{"int":0.25}},
-      {"target":"enemy.foremost","action":"applyStatus","status":"bleed","stacks":3}
-    ],
-    cutinSkillName: "ケンダマジック & シビレステッキ"
-  },
-  // heroId: 4059
-  "cobra": {
-    passiveKey: "cobra",
-    trigger: "self.cardPlayed",
-    triggerRate: 0.4,
-    oncePerCombat: false,
-    effects: [
-      {"target":"self","action":"buffStat","stat":"int","value":6}
-    ],
-    cutinSkillName: "サイコガン"
-  },
   // heroId: 4060
   "suzuishi": {
     passiveKey: "suzuishi",
@@ -2091,18 +2010,6 @@ export const PASSIVES = {
       {"target":"self","action":"buffStat","stat":"phy","value":7}
     ],
     cutinSkillName: "鳴響止水"
-  },
-  // heroId: 4061
-  "tyrfing": {
-    passiveKey: "tyrfing",
-    trigger: "self.cardPlayed",
-    triggerRate: 0.4,
-    oncePerCombat: false,
-    effects: [
-      {"target":"enemy.foremost","action":"damage","coef":{"phy":0.225}},
-      {"target":"self","action":"addShield","value":8}
-    ],
-    cutinSkillName: "ショックトゥキル"
   },
   // heroId: 5001
   "nobunaga": {

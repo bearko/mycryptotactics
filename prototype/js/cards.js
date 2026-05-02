@@ -1750,29 +1750,7 @@ function makeCardLibrary(clog, api) {
         s.playerInt += 1;
       },
     },
-    ext1060: {
-      libraryKey: "ext1060",
-      extId: 1060,
-      extNameJa: "ヒョウタンツギ",
-      skillNameJa: "新種のキノコ",
-      skillIcon: "phy.png",
-      cost: 1,
-      type: "atk",
-      target: "enemy.foremost",
-      caster: "foremost",
-      // SPEC-006: auto-derived effects (review needed: no)
-      effects: [
-        { target: "enemy.foremost", text: "PHYダメ 45-45%" },
-        { target: "enemy.foremost", text: "出血 ×1" }
-      ],
-      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 45, 45)}`, "出血 ×1（敵）"]; },
-      peekHelpKeys() { return []; },
-      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 45, 45)} ダメージ（PHY 45〜45%）`, "敵に出血 ×1 付与"]; },
-      play(s) {
-        api.dealPhySkillToEnemy(s, 45, 45);
-        api.addBleedToEnemy(s, 1);
-      },
-    },
+
     ext1061: {
       libraryKey: "ext1061",
       extId: 1061,
@@ -5551,29 +5529,7 @@ function makeCardLibrary(clog, api) {
         s.playerInt += 1;
       },
     },
-    ext2060: {
-      libraryKey: "ext2060",
-      extId: 2060,
-      extNameJa: "ロビタ",
-      skillNameJa: "レオナの記憶",
-      skillIcon: "phy.png",
-      cost: 1,
-      type: "atk",
-      target: "enemy.foremost",
-      caster: "foremost",
-      // SPEC-006: auto-derived effects (review needed: no)
-      effects: [
-        { target: "enemy.foremost", text: "PHYダメ 45-45%" },
-        { target: "enemy.foremost", text: "出血 ×1" }
-      ],
-      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 45, 45)}`, "出血 ×1（敵）"]; },
-      peekHelpKeys() { return []; },
-      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 45, 45)} ダメージ（PHY 45〜45%）`, "敵に出血 ×1 付与"]; },
-      play(s) {
-        api.dealPhySkillToEnemy(s, 45, 45);
-        api.addBleedToEnemy(s, 1);
-      },
-    },
+
     ext2061: {
       libraryKey: "ext2061",
       extId: 2061,
@@ -5595,29 +5551,7 @@ function makeCardLibrary(clog, api) {
         api.healPlayerFromIntSkill(s, 40, 50);
       },
     },
-    ext2062: {
-      libraryKey: "ext2062",
-      extId: 2062,
-      extNameJa: "創輝剣ベルテ",
-      skillNameJa: "グロウ・レゾナンス",
-      skillIcon: "phy.png",
-      cost: 1,
-      type: "atk",
-      target: "enemy.foremost",
-      caster: "foremost",
-      // SPEC-006: auto-derived effects (review needed: no)
-      effects: [
-        { target: "enemy.foremost", text: "PHYダメ 45-55%" },
-        { target: "enemy.foremost", text: "出血 ×1" }
-      ],
-      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 45, 55)}`, "出血 ×1（敵）"]; },
-      peekHelpKeys() { return []; },
-      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 45, 55)} ダメージ（PHY 45〜55%）`, "敵に出血 ×1 付与"]; },
-      play(s) {
-        api.dealPhySkillToEnemy(s, 45, 55);
-        api.addBleedToEnemy(s, 1);
-      },
-    },
+
     ext2063: {
       libraryKey: "ext2063",
       extId: 2063,
@@ -6435,29 +6369,7 @@ function makeCardLibrary(clog, api) {
         api.addPoisonToEnemy(s, 1);
       },
     },
-    ext2101: {
-      libraryKey: "ext2101",
-      extId: 2101,
-      extNameJa: "リリエッタの盾",
-      skillNameJa: "鉄壁の防御",
-      skillIcon: "phy.png",
-      cost: 1,
-      type: "atk",
-      target: "enemy.foremost",
-      caster: "foremost",
-      // SPEC-006: auto-derived effects (review needed: no)
-      effects: [
-        { target: "enemy.foremost", text: "PHYダメ 50-50%" },
-        { target: "self", text: "PHY +2" }
-      ],
-      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 50)}`, "PHY\u3000+2"]; },
-      peekHelpKeys() { return ["phy"]; },
-      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 50)} ダメージ（PHY 50〜50%）`, "PHY を +2"]; },
-      play(s) {
-        api.dealPhySkillToEnemy(s, 50, 50);
-        s.playerPhy += 2;
-      },
-    },
+
     ext2102: {
       libraryKey: "ext2102",
       extId: 2102,
@@ -9719,29 +9631,7 @@ function makeCardLibrary(clog, api) {
         s.playerInt += 2;
       },
     },
-    ext3060: {
-      libraryKey: "ext3060",
-      extId: 3060,
-      extNameJa: "ユニコ",
-      skillNameJa: "愛を取らないでください",
-      skillIcon: "phy.png",
-      cost: 1,
-      type: "atk",
-      target: "enemy.foremost",
-      caster: "foremost",
-      // SPEC-006: auto-derived effects (review needed: no)
-      effects: [
-        { target: "enemy.foremost", text: "PHYダメ 50-50%" },
-        { target: "enemy.foremost", text: "出血 ×2" }
-      ],
-      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 50)}`, "出血 ×2（敵）"]; },
-      peekHelpKeys() { return []; },
-      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 50)} ダメージ（PHY 50〜50%）`, "敵に出血 ×2 付与"]; },
-      play(s) {
-        api.dealPhySkillToEnemy(s, 50, 50);
-        api.addBleedToEnemy(s, 2);
-      },
-    },
+
     ext3061: {
       libraryKey: "ext3061",
       extId: 3061,
@@ -9763,29 +9653,7 @@ function makeCardLibrary(clog, api) {
         api.healPlayerFromIntSkill(s, 50, 60);
       },
     },
-    ext3062: {
-      libraryKey: "ext3062",
-      extId: 3062,
-      extNameJa: "創聖剣ベラネル",
-      skillNameJa: "ホーリー・レゾナンス",
-      skillIcon: "phy.png",
-      cost: 1,
-      type: "atk",
-      target: "enemy.foremost",
-      caster: "foremost",
-      // SPEC-006: auto-derived effects (review needed: no)
-      effects: [
-        { target: "enemy.foremost", text: "PHYダメ 50-60%" },
-        { target: "enemy.foremost", text: "出血 ×2" }
-      ],
-      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)}`, "出血 ×2（敵）"]; },
-      peekHelpKeys() { return []; },
-      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 50, 60)} ダメージ（PHY 50〜60%）`, "敵に出血 ×2 付与"]; },
-      play(s) {
-        api.dealPhySkillToEnemy(s, 50, 60);
-        api.addBleedToEnemy(s, 2);
-      },
-    },
+
     ext3063: {
       libraryKey: "ext3063",
       extId: 3063,
@@ -10540,27 +10408,7 @@ function makeCardLibrary(clog, api) {
         api.addPoisonToEnemy(s, 2);
       },
     },
-    ext3101: {
-      libraryKey: "ext3101",
-      extId: 3101,
-      extNameJa: "モクク",
-      skillNameJa: "癒しボイス",
-      skillIcon: "hp.png",
-      cost: 1,
-      type: "skl",
-      target: "self",
-      caster: "foremost",
-      // SPEC-006: auto-derived effects (review needed: no)
-      effects: [
-        { target: "self", text: "HP回復 INT40-40%" }
-      ],
-      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 40, 40)]; },
-      peekHelpKeys() { return ["hp"]; },
-      previewLines(s) { return [`HP を回復係数 40〜40% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 40, 40)}）`]; },
-      play(s) {
-        api.healPlayerFromIntSkill(s, 40, 40);
-      },
-    },
+
     ext3102: {
       libraryKey: "ext3102",
       extId: 3102,
@@ -13859,29 +13707,7 @@ function makeCardLibrary(clog, api) {
         s.playerInt += 2;
       },
     },
-    ext4060: {
-      libraryKey: "ext4060",
-      extId: 4060,
-      extNameJa: "レオ",
-      skillNameJa: "ジャングル大帝",
-      skillIcon: "phy.png",
-      cost: 1,
-      type: "atk",
-      target: "enemy.foremost",
-      caster: "foremost",
-      // SPEC-006: auto-derived effects (review needed: no)
-      effects: [
-        { target: "enemy.foremost", text: "PHYダメ 55-55%" },
-        { target: "enemy.foremost", text: "出血 ×3" }
-      ],
-      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 55, 55)}`, "出血 ×3（敵）"]; },
-      peekHelpKeys() { return []; },
-      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 55, 55)} ダメージ（PHY 55〜55%）`, "敵に出血 ×3 付与"]; },
-      play(s) {
-        api.dealPhySkillToEnemy(s, 55, 55);
-        api.addBleedToEnemy(s, 3);
-      },
-    },
+
     ext4061: {
       libraryKey: "ext4061",
       extId: 4061,
@@ -14663,33 +14489,7 @@ function makeCardLibrary(clog, api) {
         api.addPoisonToEnemy(s, 3);
       },
     },
-    ext4101: {
-      libraryKey: "ext4101",
-      extId: 4101,
-      extNameJa: "マモリ",
-      skillNameJa: "エロ防具じゃないマモ！",
-      skillIcon: "int.png",
-      cost: 1,
-      type: "atk",
-      target: "enemy.foremost",
-      caster: "foremost",
-      // SPEC-006: auto-derived effects (review needed: no)
-      effects: [
-        { target: "enemy.foremost", text: "INTダメ 5-5%" },
-        { target: "self", text: "PHY +1" },
-        { target: "self", text: "INT +1" },
-        { target: "enemy.foremost", text: "毒 ×3" }
-      ],
-      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 5, 5)}`, "PHY\u3000+1", "INT\u3000+1", "毒 ×3（敵）"]; },
-      peekHelpKeys() { return ["phy", "int"]; },
-      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 5, 5)} ダメージ（INT 5〜5%）`, "PHY を +1", "INT を +1", "敵に毒 ×3 付与"]; },
-      play(s) {
-        api.dealIntSkillToEnemy(s, 5, 5);
-        s.playerPhy += 1;
-        s.playerInt += 1;
-        api.addPoisonToEnemy(s, 3);
-      },
-    },
+
     ext4102: {
       libraryKey: "ext4102",
       extId: 4102,
@@ -16095,75 +15895,9 @@ function makeCardLibrary(clog, api) {
         api.dealIntSkillToEnemy(s, 65, 75);
       },
     },
-    ext4166: {
-      libraryKey: "ext4166",
-      extId: 4166,
-      extNameJa: "レーヴァテイン[PK Alterna]",
-      skillNameJa: "大切な仲間だし！",
-      skillIcon: "phy.png",
-      cost: 1,
-      type: "atk",
-      target: "enemy.foremost",
-      caster: "foremost",
-      // SPEC-006: auto-derived effects (review needed: no)
-      effects: [
-        { target: "enemy.foremost", text: "PHYダメ 40-45%" },
-        { target: "self", text: "PHY +3" }
-      ],
-      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 40, 45)}`, "PHY\u3000+3"]; },
-      peekHelpKeys() { return ["phy"]; },
-      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 40, 45)} ダメージ（PHY 40〜45%）`, "PHY を +3"]; },
-      play(s) {
-        api.dealPhySkillToEnemy(s, 40, 45);
-        s.playerPhy += 3;
-      },
-    },
-    ext4167: {
-      libraryKey: "ext4167",
-      extId: 4167,
-      extNameJa: "アルマス[PK Alterna]",
-      skillNameJa: "絶対解放戦線",
-      skillIcon: "phy.png",
-      cost: 1,
-      type: "atk",
-      target: "enemy.foremost",
-      caster: "foremost",
-      // SPEC-006: auto-derived effects (review needed: no)
-      effects: [
-        { target: "enemy.foremost", text: "PHYダメ 25-35%" },
-        { target: "enemy.foremost", text: "INTダメ 25-35%" }
-      ],
-      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 25, 35)}`, `敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 25, 35)}`]; },
-      peekHelpKeys() { return []; },
-      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 25, 35)} ダメージ（PHY 25〜35%）`, `敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 25, 35)} ダメージ（INT 25〜35%・1v1=単体）`]; },
-      play(s) {
-        api.dealPhySkillToEnemy(s, 25, 35);
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 25, 35);
-      },
-    },
-    ext4168: {
-      libraryKey: "ext4168",
-      extId: 4168,
-      extNameJa: "フェイルノート[PK Alterna]",
-      skillNameJa: "誓約されし明星の魔弓",
-      skillIcon: "int.png",
-      cost: 1,
-      type: "atk",
-      target: "enemy.foremost",
-      caster: "foremost",
-      // SPEC-006: auto-derived effects (review needed: no)
-      effects: [
-        { target: "enemy.foremost", text: "INTダメ 25-40%" },
-        { target: "self", text: "INT +2" }
-      ],
-      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 25, 40)}`, "INT\u3000+2"]; },
-      peekHelpKeys() { return ["int"]; },
-      previewLines(s) { return [`敵全体相当に ${estIntHit(s.playerInt, s.enemyInt, 25, 40)} ダメージ（INT 25〜40%・1v1=単体）`, "INT を +2"]; },
-      play(s) {
-        api.playBattleSe("area"); api.dealIntSkillToEnemy(s, 25, 40);
-        s.playerInt += 2;
-      },
-    },
+
+
+
     ext4169: {
       libraryKey: "ext4169",
       extId: 4169,
@@ -18107,29 +17841,7 @@ function makeCardLibrary(clog, api) {
         s.playerInt += 3;
       },
     },
-    ext5060: {
-      libraryKey: "ext5060",
-      extId: 5060,
-      extNameJa: "火の鳥",
-      skillNameJa: "永遠の生命",
-      skillIcon: "phy.png",
-      cost: 1,
-      type: "atk",
-      target: "enemy.foremost",
-      caster: "foremost",
-      // SPEC-006: auto-derived effects (review needed: no)
-      effects: [
-        { target: "enemy.foremost", text: "PHYダメ 65-65%" },
-        { target: "enemy.foremost", text: "出血 ×4" }
-      ],
-      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 65, 65)}`, "出血 ×4（敵）"]; },
-      peekHelpKeys() { return []; },
-      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 65, 65)} ダメージ（PHY 65〜65%）`, "敵に出血 ×4 付与"]; },
-      play(s) {
-        api.dealPhySkillToEnemy(s, 65, 65);
-        api.addBleedToEnemy(s, 4);
-      },
-    },
+
     ext5061: {
       libraryKey: "ext5061",
       extId: 5061,
@@ -20972,9 +20684,7 @@ export const CARD_RARITIES = {
   ext1056: 'common',
   ext1057: 'common',
   ext1058: 'common',
-  ext1059: 'common',
-  ext1060: 'common',
-  ext1061: 'common',
+  ext1059: 'common',  ext1061: 'common',
   ext1063: 'common',
   ext1064: 'common',
   ext1065: 'common',
@@ -21143,11 +20853,7 @@ export const CARD_RARITIES = {
   ext2056: 'uncommon',
   ext2057: 'uncommon',
   ext2058: 'uncommon',
-  ext2059: 'uncommon',
-  ext2060: 'uncommon',
-  ext2061: 'uncommon',
-  ext2062: 'uncommon',
-  ext2063: 'uncommon',
+  ext2059: 'uncommon',  ext2061: 'uncommon',  ext2063: 'uncommon',
   ext2064: 'uncommon',
   ext2065: 'uncommon',
   ext2066: 'uncommon',
@@ -21183,9 +20889,7 @@ export const CARD_RARITIES = {
   ext2097: 'uncommon',
   ext2098: 'uncommon',
   ext2099: 'uncommon',
-  ext2100: 'uncommon',
-  ext2101: 'uncommon',
-  ext2102: 'uncommon',
+  ext2100: 'uncommon',  ext2102: 'uncommon',
   ext2103: 'uncommon',
   ext2104: 'uncommon',
   ext2105: 'uncommon',
@@ -21332,11 +21036,7 @@ export const CARD_RARITIES = {
   ext3056: 'rare',
   ext3057: 'rare',
   ext3058: 'rare',
-  ext3059: 'rare',
-  ext3060: 'rare',
-  ext3061: 'rare',
-  ext3062: 'rare',
-  ext3063: 'rare',
+  ext3059: 'rare',  ext3061: 'rare',  ext3063: 'rare',
   ext3064: 'rare',
   ext3065: 'rare',
   ext3066: 'rare',
@@ -21369,9 +21069,7 @@ export const CARD_RARITIES = {
   ext3097: 'rare',
   ext3098: 'rare',
   ext3099: 'rare',
-  ext3100: 'rare',
-  ext3101: 'rare',
-  ext3102: 'rare',
+  ext3100: 'rare',  ext3102: 'rare',
   ext3103: 'rare',
   ext3104: 'rare',
   ext3105: 'rare',
@@ -21518,9 +21216,7 @@ export const CARD_RARITIES = {
   ext4056: 'epic',
   ext4057: 'epic',
   ext4058: 'epic',
-  ext4059: 'epic',
-  ext4060: 'epic',
-  ext4061: 'epic',
+  ext4059: 'epic',  ext4061: 'epic',
   ext4063: 'epic',
   ext4064: 'epic',
   ext4065: 'epic',
@@ -21554,9 +21250,7 @@ export const CARD_RARITIES = {
   ext4097: 'epic',
   ext4098: 'epic',
   ext4099: 'epic',
-  ext4100: 'epic',
-  ext4101: 'epic',
-  ext4102: 'epic',
+  ext4100: 'epic',  ext4102: 'epic',
   ext4103: 'epic',
   ext4104: 'epic',
   ext4105: 'epic',
@@ -21618,11 +21312,7 @@ export const CARD_RARITIES = {
   ext4162: 'epic',
   ext4163: 'epic',
   ext4164: 'epic',
-  ext4165: 'epic',
-  ext4166: 'epic',
-  ext4167: 'epic',
-  ext4168: 'epic',
-  ext4169: 'epic',
+  ext4165: 'epic',  ext4169: 'epic',
   ext4170: 'epic',
   ext4171: 'epic',
   ext4172: 'epic',
@@ -21708,9 +21398,7 @@ export const CARD_RARITIES = {
   ext5056: 'legendary',
   ext5057: 'legendary',
   ext5058: 'legendary',
-  ext5059: 'legendary',
-  ext5060: 'legendary',
-  ext5061: 'legendary',
+  ext5059: 'legendary',  ext5061: 'legendary',
   ext5063: 'legendary',
   ext5064: 'legendary',
   ext5065: 'legendary',
