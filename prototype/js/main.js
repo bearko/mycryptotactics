@@ -2189,6 +2189,8 @@ function setHandFocusByIndex(idx) {
     s.classList.remove("card-slot--focused", "card-peek--right");
     s.style.setProperty("--peek-lift", "0px");
   });
+  // Card preview cleanup
+  clearCardPreview();
   if (idx >= 0 && idx < slots.length && slots[idx] && !slots[idx].classList.contains("card-slot--disabled")) {
     handFocusedIdx = idx;
     const slot = slots[idx];
@@ -2209,8 +2211,125 @@ function setHandFocusByIndex(idx) {
       const lift = Math.max(0, rect.bottom - (viewH - 8));
       slot.style.setProperty("--peek-lift", lift + "px");
     });
+    // SPEC-006 UX: フォーカスされたカードのターゲットを portrait 上に視覚予告
+    const card = combat?.hand?.[idx];
+    if (card) setCardPreview(card);
   } else {
     handFocusedIdx = -1;
+  }
+}
+
+// ─── SPEC-006 UX: カード hover 時のターゲット preview ──────────────────
+// effects[].target を解決し、対象 portrait に枠ハイライト + 予測値オーバーレイを表示。
+// 計算は battle-mch.js のヘルパを流用 (実プレイ時と同じ式の中央値 = expected)
+
+function clearCardPreview() {
+  document.querySelectorAll(".preview-target-damage, .preview-target-heal, .preview-target-buff, .preview-target-status")
+    .forEach(el => el.classList.remove(
+      "preview-target-damage", "preview-target-heal", "preview-target-buff", "preview-target-status"
+    ));
+  document.querySelectorAll(".preview-overlay").forEach(el => el.remove());
+}
+
+/** 効果テキストを大まかに分類 (damage / heal / buff / status / unknown) */
+function classifyEffectKind(text) {
+  if (!text) return null;
+  const t = String(text);
+  if (/ダメ|ダメージ/.test(t)) return "damage";
+  if (/回復|HP\s*[+＋]/.test(t)) return "heal";
+  if (/毒|出血|脆弱|バインド/.test(t)) return "status";
+  if (/[+＋\-]/.test(t)) return "buff";
+  return null;
+}
+
+/** "50%" / "50-60%" を [lo, hi] に分解 (avg を使う) */
+function parsePercentRange(text) {
+  const m = String(text || "").match(/(\d+)(?:[-〜](\d+))?%/);
+  if (!m) return null;
+  const lo = parseInt(m[1], 10);
+  const hi = m[2] ? parseInt(m[2], 10) : lo;
+  return [lo, hi];
+}
+
+/** 予測ダメ計算 (caster の PHY/INT × 中央値 % × target の cut 後) */
+function predictEffectDamage(card, effect, caster, target) {
+  if (!caster || !target) return 0;
+  const range = parsePercentRange(effect.text);
+  if (!range) return 0;
+  const avg = (range[0] + range[1]) / 2;
+  // PHY か INT 判定: text 内に "INT" あれば INT、それ以外は skillIcon ベース or PHY
+  const isInt = /INT|int/.test(effect.text || "") || /int/i.test(card.skillIcon || "");
+  if (isInt) {
+    const cut = cutRateFromInt(target.int ?? 0);
+    return phyIntDamageAfterCut(caster.int ?? 0, avg, cut);
+  }
+  const cut = cutRateFromPhy(target.phy ?? 0);
+  return phyIntDamageAfterCut(caster.phy ?? 0, avg, cut);
+}
+
+/** 予測回復計算 */
+function predictEffectHeal(effect, caster) {
+  if (!caster) return 0;
+  const range = parsePercentRange(effect.text);
+  if (range) {
+    const avg = (range[0] + range[1]) / 2;
+    const coef = healingCoefficientIntCaster(caster.int ?? 0, caster.phy ?? 0);
+    return Math.max(0, Math.floor((coef * avg) / 100));
+  }
+  // 「+N 回復」のような実数指定
+  const r = String(effect.text || "").match(/[+＋](\d+)/);
+  return r ? parseInt(r[1], 10) : 0;
+}
+
+/** カード focus 時に対象 portrait へ視覚予告を貼る */
+function setCardPreview(card) {
+  if (!combat || !card) return;
+  const caster = resolveCaster(card.caster, combat);
+  if (!caster) return;
+
+  for (const effect of (card.effects || [])) {
+    const kind = classifyEffectKind(effect.text);
+    if (!kind) continue;
+    const targets = resolveTargets(effect.target, caster, combat);
+    if (!targets || targets.length === 0) continue;
+
+    for (const tgt of targets) {
+      if (!tgt || tgt.alive === false) continue;
+      const side = (tgt.side === "enemy") ? "enemy" : "player";
+      const portraitWrap = resolveUnitPortraitWrap(side, tgt);
+      if (!portraitWrap) continue;
+
+      // フレームハイライト
+      const cls = kind === "damage" ? "preview-target-damage"
+                : kind === "status" ? "preview-target-status"
+                : kind === "heal"   ? "preview-target-heal"
+                                    : "preview-target-buff";
+      portraitWrap.classList.add(cls);
+
+      // 予測値オーバーレイ
+      let overlayText = null;
+      let overlayClass = null;
+      if (kind === "damage") {
+        const dmg = predictEffectDamage(card, effect, caster, tgt);
+        if (dmg > 0) { overlayText = `-${dmg}`; overlayClass = "preview-overlay--damage"; }
+      } else if (kind === "heal") {
+        const amt = predictEffectHeal(effect, caster);
+        if (amt > 0) { overlayText = `+${amt}`; overlayClass = "preview-overlay--heal"; }
+      } else if (kind === "status") {
+        // 「毒 ×2」のような文字をそのまま簡略表示
+        overlayText = String(effect.text).replace(/\s+/g, "");
+        overlayClass = "preview-overlay--status";
+      } else if (kind === "buff") {
+        overlayText = String(effect.text).replace(/\s+/g, "");
+        overlayClass = "preview-overlay--buff";
+      }
+      if (overlayText) {
+        const ov = document.createElement("div");
+        ov.className = `preview-overlay ${overlayClass}`;
+        ov.textContent = overlayText;
+        portraitWrap.appendChild(ov);
+      }
+    }
   }
 }
 
