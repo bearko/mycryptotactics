@@ -324,20 +324,29 @@ function stringifyDef(def) {
 function main() {
   const inputPath = process.argv[2];
   if (!inputPath) {
-    console.error("usage: gen-passives.js <heroes csv>");
+    console.error("usage: gen-passives.js <heroes json>");
     process.exit(1);
   }
   const raw = fs.readFileSync(inputPath, "utf-8");
-  const lines = parseCsv(raw);
-  if (lines.length === 0) { console.error("empty CSV"); process.exit(1); }
-  const headers = parseCsvLine(lines[0]).map(h => h.trim());
-  const rows = lines.slice(1).map(line => {
-    if (!line.trim()) return null;
-    const cells = parseCsvLine(line);
-    const obj = {};
-    headers.forEach((h, i) => obj[h] = (cells[i] || "").trim());
-    return obj;
-  }).filter(Boolean);
+  // CSV / JSON 両対応 (拡張子で判定)
+  let rows;
+  if (inputPath.toLowerCase().endsWith(".json")) {
+    rows = JSON.parse(raw);
+    if (!Array.isArray(rows)) {
+      console.error("heroes.json は配列形式である必要があります"); process.exit(1);
+    }
+  } else {
+    const lines = parseCsv(raw);
+    if (lines.length === 0) { console.error("empty CSV"); process.exit(1); }
+    const headers = parseCsvLine(lines[0]).map(h => h.trim());
+    rows = lines.slice(1).map(line => {
+      if (!line.trim()) return null;
+      const cells = parseCsvLine(line);
+      const obj = {};
+      headers.forEach((h, i) => obj[h] = (cells[i] || "").trim());
+      return obj;
+    }).filter(Boolean);
+  }
 
   const defs = [];
   for (const row of rows) {
@@ -351,7 +360,7 @@ function main() {
   outLines.push(" * passives-generated.js — SPEC-006 §18 Phase 4j codemod 出力 (v2)");
   outLines.push(" *");
   outLines.push(` * 全 ${defs.length} 体のヒーローパッシブを宣言形式 PassiveDef に変換。`);
-  outLines.push(" * 元データ: prototype/data/heroes.csv");
+  outLines.push(" * 元データ: prototype/data/heroes.json");
   outLines.push(" * 生成スクリプト: prototype/tools/gen-passives.js");
   outLines.push(" *");
   outLines.push(" * 変換方針:");

@@ -2,15 +2,19 @@ export const ASSET_BASE = "https://raw.githubusercontent.com/bearko/mycryptohero
 export const img = (path) => ASSET_BASE + path;
 export const audioUrl = (relPath) => ASSET_BASE + relPath;
 
-/** 選択可能ヒーロー一覧（auto-generated js/heroes.js から再エクスポート） */
-export { HERO_DEFS, HERO_ROSTER } from "./heroes.js";
-import { HERO_ROSTER as _HERO_ROSTER } from "./heroes.js";
+/** 選択可能ヒーロー一覧（data/heroes.json から runtime fetch）
+ *  loadHeroes() を呼ぶまで HERO_ROSTER / HERO_DEFS は空。 */
+export { HERO_DEFS, HERO_ROSTER, loadHeroes } from "./heroes.js";
 
-/** リーダー基礎ステ（カードで PHY/INT が変化する前提の初期値）。ヒーロー選択で書き換わる。 */
-export let LEADER = { ..._HERO_ROSTER[0] };
+/** リーダー基礎ステ。loadHeroes() 後に initLeader(HERO_ROSTER[0]) で初期化する。
+ *  ヒーロー選択で setLeader() により書き換わる。
+ *  export object reference は固定 (consumers が import 後に持ち続けても値は追従)。 */
+export const LEADER = {};
 
 /** ヒーローを選択して LEADER を更新する */
 export function setLeader(hero) {
+  // 既存キーをクリアしてから上書き (前ヒーローのフィールドが残らないように)
+  for (const k of Object.keys(LEADER)) delete LEADER[k];
   Object.assign(LEADER, hero);
 }
 
