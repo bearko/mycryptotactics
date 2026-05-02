@@ -230,7 +230,8 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      // SPEC-006 Phase 4i: 前衛限定 (居合は前衛が抜く想定)。前衛死亡で👤不在グレーアウト
+      caster: "front",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 45-55%" }
@@ -298,7 +299,8 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      // SPEC-006 Phase 4i: PHY 最高ヒーローが斧を振るう (馬力で殴る系)
+      caster: "highest_phy",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "PHYダメ 45-55%" }
@@ -8810,7 +8812,8 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "atk",
       target: "enemy.foremost",
-      caster: "foremost",
+      // SPEC-006 Phase 4i: INT 最高ヒーロー (賢者) が巻物を読み上げる
+      caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "enemy.foremost", text: "INTダメ 25-30%" },
@@ -8854,7 +8857,8 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
-      caster: "foremost",
+      // SPEC-006 Phase 4i: HP 最高ヒーロー (タンク) が兜を被る
+      caster: "highest_hp",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "self", text: "PHY +1" },
@@ -9122,7 +9126,8 @@ function makeCardLibrary(clog, api) {
       cost: 1,
       type: "skl",
       target: "self",
-      caster: "foremost",
+      // SPEC-006 Phase 4i: 後衛限定 (後衛の賢者が安全圏で杯を掲げる)
+      caster: "back",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "self", text: "HP回復 INT40-50%" }
@@ -20918,9 +20923,9 @@ export const CARD_RARITIES = {
   ext2011: 'uncommon',  // エリートアックス
   ext2013: 'uncommon',  // エリートユミ
 
-  // ─── 章0 アバカス カードプール ────────────────────────────────────
-  // ─── 章1 ホレリス カードプール ────────────────────────────────────
-  // ─── 章2 アンティキティラ カードプール ───────────────────────────
+  // ─── 章0 アバカス カードプール ────────────────────────────────────
+  // ─── 章1 ホレリス カードプール ────────────────────────────────────
+  // ─── 章2 アンティキティラ カードプール ───────────────────────────
   // ─── 章3 アタナソフ カードプール ─────────────────────────────────// ─── auto-generated CARD_RARITIES entries ───
   ext1009: 'common',
   ext1010: 'common',

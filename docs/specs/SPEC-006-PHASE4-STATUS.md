@@ -23,7 +23,7 @@
 | 4g | Phase 3j 撤去 | P0 | ✅ **完了** | setActiveHero / getActiveHero / ensureActiveHeroAlive / loadActiveHeroStatsToLegacy / syncLegacyStatsToActiveHero / activeHeroIdx を全削除。portrait click handler + ▶ ACTIVE バッジ + hover lift CSS も撤去。getActiveHero 利用箇所は transient な `combat._currentCaster` (playCard スコープ) に置換 |
 | 4h | バトル外カード券面 effects ベース統一 + caster ロール表示 | P1 | ✅ **完了** | buildRewardPickButton (リワード/デッキ/ショップ/クラフト共通) と showOwnedDeckPeek を effects 配列 + caster ロールラベル ベースに更新。バトル外は具体ヒーロー portrait は出さず「先頭」「前衛」等のロール pill のみ表示 |
 | 4i | 945 カード手動 caster 再指定 | P2 | **デモ完了 (5 件)** | 既存 MCH カード 5 件の caster を変更: ノービスカタナ→front / アックス→highest_phy / ウィズダムスクロール→highest_int / ウィズダムゴブレット→back / ブレイブカブト→highest_hp (PR #75)。MCH アセット縛りを維持しつつ 5 種の caster ロールをカバー |
-| 4j | パッシブ trigger DSL 統合 (codemod) | P0 | ✅ **完了** | passive-runtime.js + 13 種 effect handler。content 担当 codemod (PR #76) で 210 関数→PassiveDef (`passives-generated.js`) を生成し、`init()` で `registerPassives(PASSIVES)` + `registerPassives(SAMPLE_PASSIVES)` の順に登録。legacy hardcoded switch は LEADER 用に残しつつ、`getRegisteredPassive()` で runtime 側に処理を委譲する早期 return を導入 (PR #80) |
+| 4j | パッシブ trigger DSL 統合 (codemod) | P0 | ✅ **完了** | passive-runtime.js + 13 種 effect handler。content 担当 codemod (PR #76) で 210 関数→PassiveDef (`passives-generated.js`) を生成し、`init()` で `registerPassives(PASSIVES)` + `registerPassives(SAMPLE_PASSIVES)` の順に登録。legacy hardcoded switch は LEADER 用に残しつつ、`getRegisteredPassive()` で runtime 側に処理を委譲する早期 return を導入 (PR #80)。codemod の trigger 誤分類問題を game CSV 対応版に書き直して解消 (PR #81) |
 
 ### 完了済みフェーズの動作確認済み事項 (Phase 4a-4d)
 
