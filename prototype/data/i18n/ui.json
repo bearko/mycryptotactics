@@ -28,6 +28,8 @@
   "combat.tag.boss":           { "ja": "（ボス）", "en": " (Boss)" },
   "combat.tag.elite":          { "ja": "（精鋭）", "en": " (Elite)" },
   "combat.boss.shield":        { "ja": "ボスはシールド {n} を持ちます！", "en": "Boss starts with Shield {n}!" },
+  "combat.boss.vigilance.intro": { "ja": "ボスの警戒: 同種カードを 1 ターン中に 3 回以上使うと、3 回目以降は反動ダメージ", "en": "Boss vigilance: using the same card 3+ times in one turn deals self-damage from the 3rd play onward" },
+  "combat.boss.vigilance.hit":  { "ja": "警戒の反動: 「{name}」{count} 枚目 → HP -{n}", "en": "Vigilance backlash: \"{name}\" #{count} → HP -{n}" },
   "clog.enterChapter":         { "ja": "── 章 {id}「{name}」へ ──", "en": "── Entering Ch.{id}: {name} ──" },
   "combat.deck.aria":          { "ja": "残りデッキを表示", "en": "Show remaining deck" },
   "combat.exhaust.title":      { "ja": "消耗済みカード", "en": "Exhausted cards" },

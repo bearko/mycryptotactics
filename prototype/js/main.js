@@ -665,6 +665,11 @@ function clog(msg) {
 function sleep(ms) { return new Promise(res => setTimeout(res, ms)); }
 const ENEMY_ACTION_GAP_MS = 850;
 
+/** ボス警戒 (Vigilance) — 同 libraryKey カードを 1 ターン中に N 回以上使うと
+ *  N 回目以降に反動ダメージ。1-2 回は無料、3 回目から (count - 2) * BASE のリニア。
+ *  3rd: 4 / 4th: 8 / 5th: 12 / 6th: 16 / 7th: 20 dmg。Boss 戦のみ作動。 */
+const VIGILANCE_BACKLASH_BASE_DMG = 4;
+
 /** SPEC-005 Phase 3h: data-pos スロット内の combatant-portrait-wrap を解決
  *  - heroes[0] / enemies[0] (前衛) → 静的 ID (#playerPortraitWrap / #enemyPortraitWrap)
  *  - heroes[1+] / enemies[1+] → .party-slot[data-pos="N"] .combatant-portrait-wrap
@@ -2049,6 +2054,10 @@ function startCombatFromMapNode(node) {
     isBoss,
     bossPhase,
     bossDef: isBoss ? bossDef : null,
+    // ボス戦のみ「警戒 (Vigilance)」: 同種カード (libraryKey) を 1 ターン中に
+    // 3 回以上使うと 3 回目以降は反動ダメージを受ける chain-abuse 抑止機構。
+    bossVigilance: isBoss,
+    cardPlayCounts: {}, // libraryKey -> 今ターンの使用回数
     enemyName: enemyDef.name,
     enemyImgId: enemyDef.imgId,
     enemyDefId: enemyDef.id,
@@ -2148,6 +2157,10 @@ function startCombatFromMapNode(node) {
   clog(ti18n("combat.start").replace("{name}", enemyDispLogName) + battleSuffix);
   if (isBoss && (enemyDef.initialShield || 0) > 0) {
     clog(ti18n("combat.boss.shield").replace("{n}", enemyDef.initialShield));
+  }
+  // ボス戦のみ警戒 (Vigilance) を開幕通知
+  if (isBoss) {
+    clog(ti18n("combat.boss.vigilance.intro"));
   }
   applyHeroPassiveOnCombatStart(combat);
   syncLlExtSlots();
@@ -2269,6 +2282,8 @@ function startPlayerTurn() {
   }
   combat.playerGuard = 0;  // legacy mirror (heroes[0])
   combat.damageReducedThisTurn = false;
+  // ボス警戒 (Vigilance) の同種カード使用回数をターン毎にリセット
+  combat.cardPlayCounts = {};
 
   // SPEC-006 Phase 4f + β1 修正: 毒 / 出血 ティックを per-hero (生存ヒーロー個別)
   // 旧: 毒のみ tick、出血は PHY 攻撃時のボーナスのみ → 出血ダメージが入らないと報告
@@ -5683,6 +5698,40 @@ async function playCard(idx) {
     clog(`【消耗】${card.extNameJa} を除外`);
   } else {
     combat.discardPile.push(card);
+  }
+  // ボス警戒 (Vigilance) 反動: 同 libraryKey のカードを 1 ターン中に
+  // 3 回以上使うと、3 回目以降は使用ごとに反動ダメージが入る。
+  // 1-2 回までは無料、3 回目から線形に増加 (3rd: +1, 4th: +2, ...) × VIGILANCE_BASE
+  if (combat.bossVigilance && card.libraryKey) {
+    const counts = combat.cardPlayCounts || (combat.cardPlayCounts = {});
+    const k = card.libraryKey;
+    counts[k] = (counts[k] || 0) + 1;
+    const VIGILANCE_BASE = VIGILANCE_BACKLASH_BASE_DMG;
+    const VIGILANCE_FREE_THRESHOLD = 2;
+    if (counts[k] > VIGILANCE_FREE_THRESHOLD) {
+      const overage = counts[k] - VIGILANCE_FREE_THRESHOLD;
+      const dmg = overage * VIGILANCE_BASE;
+      const front = combat.heroes?.[0];
+      if (front) {
+        applyHpDeltaToHero(combat, front, -dmg);
+        flashPortrait("player", front);
+        playPortraitEffect("player", "debuff", front);
+      } else {
+        // legacy フォールバック
+        combat.playerHp = Math.max(0, (combat.playerHp || 0) - dmg);
+      }
+      const cardLabel = tExt(card.extId, card.extNameJa);
+      clog(ti18n("combat.boss.vigilance.hit")
+        .replace("{name}", cardLabel)
+        .replace("{count}", counts[k])
+        .replace("{n}", dmg));
+      checkResurrection(combat);
+      if (isPartyWipedOut(combat)) {
+        renderCombat();
+        endCombatLoss();
+        return;
+      }
+    }
   }
   card.play(combat, { caster, effectsResolved });
   // SPEC-006 Phase 4d: card.play() で変化した legacy stats を caster に書き戻す
