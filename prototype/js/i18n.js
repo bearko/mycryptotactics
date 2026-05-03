@@ -182,6 +182,16 @@ const RUNTIME_REPLACEMENTS = [
   [/INT最高/g, "Highest INT"],
   [/HP最高/g,  "Highest HP"],
   [/AGI最高/g, "Highest AGI"],
+  // 「敵INT -2」「敵PHY -1」: 既にカードのターゲット pill (Front 等) で陣営が
+  // 分かるので「敵」プレフィックスは省略して PHY/INT/AGI/HP のみ残す。
+  [/敵\s*INT\s*([+\-]?\d+)/g, "INT $1"],
+  [/敵\s*PHY\s*([+\-]?\d+)/g, "PHY $1"],
+  [/敵\s*AGI\s*([+\-]?\d+)/g, "AGI $1"],
+  [/敵\s*HP\s*([+\-]?\d+)/g, "HP $1"],
+  [/味方\s*INT\s*([+\-]?\d+)/g, "INT $1"],
+  [/味方\s*PHY\s*([+\-]?\d+)/g, "PHY $1"],
+  [/味方\s*AGI\s*([+\-]?\d+)/g, "AGI $1"],
+  [/味方\s*HP\s*([+\-]?\d+)/g, "HP $1"],
   // 「ダメージ」を先に置換 → 残った「ダメ」だけを後で潰す。
   // 旧版は `/ダメ\b/g` を使っていたが JS の \b は非 ASCII の境界に発火しないため
   // 「25-30% ダメ」が翻訳されないままだった (shop カード券面で再発)。
@@ -386,6 +396,11 @@ const COMBAT_LOG_REPLACEMENTS = [
   [/INT全体攻撃\s*(\d+)%\s*→\s*合計ダメ\s*(\d+)/g, "INT area $1% → total $2 DMG"],
   [/敵\s*PHY\s*(\d+)%\s*→\s*被ダメージ\s*(\d+)/g, "Enemy PHY $1% → DMG taken $2"],
   [/敵\s*INT\s*(\d+)%\s*→\s*被ダメージ\s*(\d+)/g, "Enemy INT $1% → DMG taken $2"],
+  // プレイヤーの単体攻撃 clog "PHY攻撃 50% → 基礎4 カット8% → HP-4" 等
+  [/PHY攻撃\s*(\d+)%\s*→\s*基礎(\d+)\s*カット(\d+)%/g, "PHY $1% → base $2 cut $3%"],
+  [/INT攻撃\s*(\d+)%\s*→\s*基礎(\d+)\s*カット(\d+)%/g, "INT $1% → base $2 cut $3%"],
+  [/\+脆弱(\d+)/g, "+Vuln $1"],
+  [/脆弱/g, "Vuln"],
   [/敵\s*PHY\s*(-?\d+)/g, "Enemy PHY $1"],
   [/敵\s*INT\s*(-?\d+)/g, "Enemy INT $1"],
   [/リカバリー:\s*係数(.+)/g, "Recovery: coef $1"],
