@@ -688,21 +688,33 @@ function makeCardLibrary(clog, api) {
       skillIcon: "int.png",
       cost: 0,
       type: "skl",
-      target: "self",
+      target: "enemy.foremost",
       caster: "highest_int",
       // SPEC-006: auto-derived effects (review needed: no)
       effects: [
         { target: "self", text: "INT +2" },
-        { target: "self", text: "ドロー +3" }
+        { target: "self", text: "ドロー +3" },
+        { target: "enemy.foremost", text: "INTダメ 25-30%" }
       ],
-      effectSummaryLines() { return ["INT　+2（戦闘中ずっと）", "ドロー　3"]; },
+      effectSummaryLines(s) {
+        const d = estIntHit(s.playerInt + 2, s.enemyInt, 25, 30);
+        return ["INT　+2（戦闘中ずっと）", "ドロー　3", `敵にダメージ　${d}`];
+      },
       peekHelpKeys() { return ["int", "draw"]; },
-      previewLines() { return ["INT を +2（戦闘中ずっと）", "カードを 3 枚引く"]; },
+      previewLines(s) {
+        const d = estIntHit(s.playerInt + 2, s.enemyInt, 25, 30);
+        return [
+          "INT を +2（戦闘中ずっと）",
+          "カードを 3 枚引く",
+          `その後、敵1体に ${d} ダメージ（INT+2 後・25〜30% 想定）`,
+        ];
+      },
       play(s) {
         se("buff"); fx("player", "buff");
         s.playerInt += 2;
         api.drawCards(s, 3);
-        clog("エリートリーディング: INT+2、ドロー3");
+        api.dealIntSkillToEnemy(s, 25, 30);
+        clog("エリートリーディング: INT+2、ドロー3、敵にINTダメージ");
       },
     },
 
@@ -15092,29 +15104,7 @@ function makeCardLibrary(clog, api) {
         api.addPoisonToEnemy(s, 3);
       },
     },
-    ext4114: {
-      libraryKey: "ext4114",
-      extId: 4114,
-      extNameJa: "南葛SCのエンブレム",
-      skillNameJa: "南葛の守護神",
-      skillIcon: "phy.png",
-      cost: 1,
-      type: "atk",
-      target: "enemy.foremost",
-      caster: "foremost",
-      // SPEC-006: auto-derived effects (review needed: no)
-      effects: [
-        { target: "enemy.foremost", text: "PHYダメ 60-70%" },
-        { target: "self", text: "PHY +1" }
-      ],
-      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)}`, "PHY\u3000+1"]; },
-      peekHelpKeys() { return ["phy"]; },
-      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 60, 70)} ダメージ（PHY 60〜70%）`, "PHY を +1"]; },
-      play(s) {
-        api.dealPhySkillToEnemy(s, 60, 70);
-        s.playerPhy += 1;
-      },
-    },
+
     ext4115: {
       libraryKey: "ext4115",
       extId: 4115,
@@ -15782,52 +15772,8 @@ function makeCardLibrary(clog, api) {
         api.addPoisonToEnemy(s, 3);
       },
     },
-    ext4145: {
-      libraryKey: "ext4145",
-      extId: 4145,
-      extNameJa: "余市町赤ワイン",
-      skillNameJa: "ヴィニュロン",
-      skillIcon: "int.png",
-      cost: 1,
-      type: "atk",
-      target: "enemy.foremost",
-      caster: "highest_int",
-      // SPEC-006: auto-derived effects (review needed: no)
-      effects: [
-        { target: "enemy.foremost", text: "INTダメ 55-55%" },
-        { target: "enemy.foremost", text: "毒 ×3" }
-      ],
-      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 55, 55)}`, "毒 ×3（敵）"]; },
-      peekHelpKeys() { return []; },
-      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 55, 55)} ダメージ（INT 55〜55%）`, "敵に毒 ×3 付与"]; },
-      play(s) {
-        api.dealIntSkillToEnemy(s, 55, 55);
-        api.addPoisonToEnemy(s, 3);
-      },
-    },
-    ext4146: {
-      libraryKey: "ext4146",
-      extId: 4146,
-      extNameJa: "余市町白ワイン",
-      skillNameJa: "雪の布団",
-      skillIcon: "hp.png",
-      cost: 1,
-      type: "skl",
-      target: "self",
-      caster: "foremost",
-      // SPEC-006: auto-derived effects (review needed: no)
-      effects: [
-        { target: "self", text: "HP回復 INT60-60%" },
-        { target: "self", text: "毒 ×3" }
-      ],
-      effectSummaryLines(s) { return ["HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 60, 60), "毒 ×3（敵）"]; },
-      peekHelpKeys() { return ["hp"]; },
-      previewLines(s) { return [`HP を回復係数 60〜60% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 60, 60)}）`, "敵に毒 ×3 付与"]; },
-      play(s) {
-        api.healPlayerFromIntSkill(s, 60, 60);
-        api.addPoisonToEnemy(s, 3);
-      },
-    },
+
+
     ext4147: {
       libraryKey: "ext4147",
       extId: 4147,
@@ -19306,29 +19252,7 @@ function makeCardLibrary(clog, api) {
         api.addPoisonToEnemy(s, 4);
       },
     },
-    ext5114: {
-      libraryKey: "ext5114",
-      extId: 5114,
-      extNameJa: "南葛SCのインシグニア",
-      skillNameJa: "南葛魂",
-      skillIcon: "phy.png",
-      cost: 1,
-      type: "atk",
-      target: "enemy.foremost",
-      caster: "foremost",
-      // SPEC-006: auto-derived effects (review needed: no)
-      effects: [
-        { target: "enemy.foremost", text: "PHYダメ 65-75%" },
-        { target: "self", text: "PHY +2" }
-      ],
-      effectSummaryLines(s) { return [`敵にダメージ\u3000${estPhyHit(s.playerPhy, s.enemyPhy, 65, 75)}`, "PHY\u3000+2"]; },
-      peekHelpKeys() { return ["phy"]; },
-      previewLines(s) { return [`敵1体に ${estPhyHit(s.playerPhy, s.enemyPhy, 65, 75)} ダメージ（PHY 65〜75%）`, "PHY を +2"]; },
-      play(s) {
-        api.dealPhySkillToEnemy(s, 65, 75);
-        s.playerPhy += 2;
-      },
-    },
+
     ext5115: {
       libraryKey: "ext5115",
       extId: 5115,
@@ -19996,31 +19920,7 @@ function makeCardLibrary(clog, api) {
         api.addPoisonToEnemy(s, 4);
       },
     },
-    ext5144: {
-      libraryKey: "ext5144",
-      extId: 5144,
-      extNameJa: "余市の宝〜北海道余市町名産ワイン〜",
-      skillNameJa: "テロワール～1227～",
-      skillIcon: "int.png",
-      cost: 1,
-      type: "atk",
-      target: "enemy.foremost",
-      caster: "highest_int",
-      // SPEC-006: auto-derived effects (review needed: no)
-      effects: [
-        { target: "enemy.foremost", text: "INTダメ 50-60%" },
-        { target: "self", text: "HP回復 INT40-50%" },
-        { target: "enemy.foremost", text: "毒 ×4" }
-      ],
-      effectSummaryLines(s) { return [`敵にダメージ\u3000${estIntHit(s.playerInt, s.enemyInt, 50, 60)}`, "HP\u3000+" + estHealInt(s.playerInt, s.playerPhy, 40, 50), "毒 ×4（敵）"]; },
-      peekHelpKeys() { return ["hp"]; },
-      previewLines(s) { return [`敵1体に ${estIntHit(s.playerInt, s.enemyInt, 50, 60)} ダメージ（INT 50〜60%）`, `HP を回復係数 40〜50% 分回復（推定 +${estHealInt(s.playerInt, s.playerPhy, 40, 50)}）`, "敵に毒 ×4 付与"]; },
-      play(s) {
-        api.dealIntSkillToEnemy(s, 50, 60);
-        api.healPlayerFromIntSkill(s, 40, 50);
-        api.addPoisonToEnemy(s, 4);
-      },
-    },
+
     ext5147: {
       libraryKey: "ext5147",
       extId: 5147,
@@ -21737,9 +21637,7 @@ export const CARD_RARITIES = {
   ext4110: 'epic',
   ext4111: 'epic',
   ext4112: 'epic',
-  ext4113: 'epic',
-  ext4114: 'epic',
-  ext4115: 'epic',
+  ext4113: 'epic',  ext4115: 'epic',
   ext4116: 'epic',
   ext4117: 'epic',
   ext4118: 'epic',
@@ -21767,10 +21665,7 @@ export const CARD_RARITIES = {
   ext4140: 'epic',
   ext4141: 'epic',
   ext4142: 'epic',
-  ext4143: 'epic',
-  ext4145: 'epic',
-  ext4146: 'epic',
-  ext4147: 'epic',
+  ext4143: 'epic',  ext4147: 'epic',
   ext4148: 'epic',
   ext4149: 'epic',
   ext4150: 'epic',
@@ -21919,9 +21814,7 @@ export const CARD_RARITIES = {
   ext5110: 'legendary',
   ext5111: 'legendary',
   ext5112: 'legendary',
-  ext5113: 'legendary',
-  ext5114: 'legendary',
-  ext5115: 'legendary',
+  ext5113: 'legendary',  ext5115: 'legendary',
   ext5116: 'legendary',
   ext5117: 'legendary',
   ext5118: 'legendary',
@@ -21949,9 +21842,7 @@ export const CARD_RARITIES = {
   ext5140: 'legendary',
   ext5141: 'legendary',
   ext5142: 'legendary',
-  ext5143: 'legendary',
-  ext5144: 'legendary',
-  ext5147: 'legendary',
+  ext5143: 'legendary',  ext5147: 'legendary',
   ext5148: 'legendary',
   ext5149: 'legendary',
   ext5150: 'legendary',
