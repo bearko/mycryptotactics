@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>MyCryptoTactics — Ver.1.0.0</title>
+  <title>MyCryptoTactics — Ver.1.1.0</title>
   <meta name="description" content="My Crypto Heroes の偉人たち × ローグライク × カードバトルのファンメイドブラウザゲーム。" />
 
   <!-- favicon -->
@@ -11,7 +11,7 @@
 
   <!-- Open Graph / Twitter Card (X リンクプレビュー用) -->
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="MyCryptoTactics — Ver.1.0.0" />
+  <meta property="og:title" content="MyCryptoTactics — Ver.1.1.0" />
   <meta property="og:description" content="My Crypto Heroes の偉人たち × ローグライク × カードバトル。スマホ・PC で遊べるブラウザゲーム。" />
   <meta property="og:url" content="https://mycryptotactics.vercel.app/" />
   <meta property="og:image" content="https://mycryptotactics.vercel.app/og-image.png" />
@@ -19,7 +19,7 @@
   <meta property="og:image:height" content="1536" />
   <meta property="og:site_name" content="MyCryptoTactics" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="MyCryptoTactics — Ver.1.0.0" />
+  <meta name="twitter:title" content="MyCryptoTactics — Ver.1.1.0" />
   <meta name="twitter:description" content="My Crypto Heroes 偉人 × ローグライク × カードバトル。" />
   <meta name="twitter:image" content="https://mycryptotactics.vercel.app/og-image.png" />
 
@@ -109,9 +109,56 @@
       text-transform: uppercase;
       animation: title-blink 1.3s ease-in-out infinite;
     }
+    .title-version {
+      position: fixed; bottom: 0.55rem; left: 50%;
+      transform: translateX(-50%);
+      margin: 0;
+      font-size: 0.7rem; color: #6c5e8a; letter-spacing: 0.16em;
+      font-weight: 500;
+      pointer-events: none;
+    }
     @keyframes title-blink {
       0%, 100% { opacity: 1; }
       50%       { opacity: 0.15; }
+    }
+    /* ── Title-screen language toggle ───────────────────────────────────── */
+    .lang-toggle {
+      position: fixed;
+      bottom: 1.5rem; left: 50%;
+      transform: translateX(-50%);
+      display: flex; flex-direction: column;
+      align-items: center; gap: 0.55rem;
+      cursor: default;
+    }
+    .lang-toggle-label {
+      font-size: 0.72rem; color: #8c7fb0; letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+    .lang-toggle .lang-btn {
+      appearance: none; -webkit-appearance: none;
+      background: rgba(255,255,255,0.04);
+      color: #d6cdec;
+      border: 1px solid #5b4d8a;
+      border-radius: 8px;
+      padding: 0.5rem 1.1rem;
+      font-size: 0.85rem; letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+    }
+    .lang-toggle .lang-btn + .lang-btn { margin-left: 0.4rem; }
+    .lang-toggle { /* override flex direction so buttons sit side-by-side */ }
+    .lang-toggle-buttons {
+      display: flex; gap: 0.5rem;
+    }
+    .lang-toggle .lang-btn:hover {
+      background: rgba(155,127,210,0.18);
+      border-color: #9b7fd2;
+    }
+    .lang-toggle .lang-btn.lang-btn--active {
+      background: #9b7fd2;
+      border-color: #c8b6e6;
+      color: #fff;
+      font-weight: 700;
     }
 
     /* ── Map resources bar ─────────────────────────────────────────────── */
@@ -1441,7 +1488,7 @@
 
     /* SPEC-007: ランキング送信モーダル */
     #rankingSubmitOverlay {
-      position: fixed; inset: 0; background: #000c; z-index: 215;
+      position: fixed; inset: 0; background: #000c; z-index: 700;
       display: flex; align-items: center; justify-content: center; padding: 0.75rem;
     }
     #rankingSubmitOverlay.hidden { display: none; }
@@ -1734,6 +1781,7 @@
     }
     .hs-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 6px 18px #000a; }
     .hs-card--in-party { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(196,163,90,0.25); }
+    [lang="en"] .hs-card--in-party::after { content: "✓ In Party"; }
     .hs-card--in-party::after {
       content: "✓ 編成中";
       position: absolute; top: 4px; right: 4px;
@@ -2011,9 +2059,11 @@
     .owned-deck-summary .od-total::before {
       content: "計"; font-size: 0.7rem; color: var(--muted); font-weight: 600;
     }
+    [lang="en"] .owned-deck-summary .od-total::before { content: "Total "; }
     .owned-deck-summary .od-total::after {
       content: "枚"; font-size: 0.7rem; color: var(--muted); font-weight: 600;
     }
+    [lang="en"] .owned-deck-summary .od-total::after { content: ""; }
     .owned-deck-grid {
       display: grid;
       /* 列幅は 96px〜1fr で auto-fill。画面幅に応じて自動的に列数が変わる */
@@ -2574,39 +2624,45 @@
 </head>
 <body>
   <!-- ── Title Screen ── -->
-  <div id="titleView" class="title-screen" role="button" aria-label="ゲームを始める" tabindex="0">
+  <div id="titleView" class="title-screen" role="button" aria-label="Start the game" data-i18n-attr-aria-label="title.aria" tabindex="0">
     <img class="title-logo" src="./MCT_logo.jpg" alt="MyCryptoTactics" />
-    <p class="title-press">Press to Start</p>
+    <p class="title-press" data-i18n="title.press">Press to Start</p>
+    <div class="lang-toggle" id="langToggle" role="group" aria-label="Language">
+      <span class="lang-toggle-label" data-i18n="lang.toggle.label">言語 / Language</span>
+      <button type="button" class="lang-btn" data-lang="ja" data-i18n="lang.ja">JP：日本語</button>
+      <button type="button" class="lang-btn" data-lang="en" data-i18n="lang.en">EN：English</button>
+    </div>
+    <p class="title-version">Ver.1.1.0</p>
   </div>
 
   <div class="wrap">
     <div class="resources" id="mapResources" aria-label="ランリソース">
       <span class="res"><img alt="GUM" data-icon="gum" /> <span id="goldVal">0</span></span>
       <span class="res res-hp">♥ <span id="mapHpVal">0</span>/<span id="mapHpMax">0</span></span>
-      <span class="res">層 <span id="layerVal">入口</span></span>
-      <span class="res">章 <span id="chapterVal">1</span></span>
+      <span class="res"><span data-i18n="map.legend.layer">層</span> <span id="layerVal" data-i18n="map.legend.entry">入口</span></span>
+      <span class="res"><span data-i18n="map.legend.chapter">章</span> <span id="chapterVal">1</span></span>
       <!-- LLエクステ スロット（GUM右に2枠） -->
-      <span class="res ll-ext-slots-wrap" id="mapLlExtWrap" title="LLエクステ（バトル中に無コストで使用可能）">
+      <span class="res ll-ext-slots-wrap" id="mapLlExtWrap" data-i18n-attr-title="res.ll.title" title="LLエクステ（バトル中に無コストで使用可能）">
         <span class="ll-ext-slot-icon" id="mapLlSlot0" title="">—</span>
         <span class="ll-ext-slot-icon" id="mapLlSlot1" title="">—</span>
       </span>
-      <button type="button" class="btn-deck-view" id="btnDeckViewMap" aria-label="保有デッキを表示" title="保有デッキを表示"><span class="btn-deck-view-icon">📚</span><span class="btn-deck-view-label">デッキ表示</span></button>
-      <img class="header-reg-icon" id="headerRegIconMap" alt="レギュレーション" title="レギュレーション" />
-      <button type="button" class="btn-ranking" id="btnRankingOpenMap" aria-label="ランキングを表示" title="ランキング"><img src="./ranking_icon.png" alt="ランキング" /></button>
-      <button type="button" class="btn-help" id="btnHelpOpen" aria-label="ヘルプを開く" title="ヘルプ">?</button>
+      <button type="button" class="btn-deck-view" id="btnDeckViewMap" data-i18n-attr-aria-label="res.deck.aria" data-i18n-attr-title="res.deck.aria" aria-label="保有デッキを表示" title="保有デッキを表示"><span class="btn-deck-view-icon">📚</span><span class="btn-deck-view-label" data-i18n="res.deck">デッキ表示</span></button>
+      <img class="header-reg-icon" id="headerRegIconMap" data-i18n-attr-alt="res.regulation.alt" data-i18n-attr-title="res.regulation.alt" alt="レギュレーション" title="レギュレーション" />
+      <button type="button" class="btn-ranking" id="btnRankingOpenMap" data-i18n-attr-aria-label="res.ranking.aria" data-i18n-attr-title="res.ranking.alt" aria-label="ランキングを表示" title="ランキング"><img src="./ranking_icon.png" data-i18n-attr-alt="res.ranking.alt" alt="ランキング" /></button>
+      <button type="button" class="btn-help" id="btnHelpOpen" data-i18n-attr-aria-label="res.help.aria" data-i18n-attr-title="res.help.title" aria-label="ヘルプを開く" title="ヘルプ">?</button>
     </div>
 
     <div id="mapView" class="panel" style="position:relative">
-      <p class="map-title" id="mapTitle">始まりの塔（下から上へ。緑のノードから進む）</p>
+      <p class="map-title" id="mapTitle" data-i18n="map.title.first">始まりの塔（下から上へ。緑のノードから進む）</p>
       <div id="mapRows" class="map-graph-wrap" role="region" aria-label="マップ"></div>
-      <p style="font-size:0.7rem;color:var(--muted);margin:0.5rem 0 0">緑のノードから上へ進み、ボスを倒すと次の章へ。利用条件は <a href="https://github.com/bearko/mycryptoheroes/blob/main/README.md" target="_blank" rel="noopener">MCH README</a> を参照。</p>
+      <p style="font-size:0.7rem;color:var(--muted);margin:0.5rem 0 0" data-i18n="map.note">緑のノードから上へ進み、ボスを倒すと次の章へ。</p>
       <!-- ── Mai Navigator（マップ内右下に絶対配置） ── -->
       <div class="mai-navigator hidden" id="maiNavigator" aria-live="polite">
         <div class="mai-bubble" id="maiBubble">
-          <div class="mai-bubble-name">マイ</div>
-          <span id="maiText">ボスの居るステージを目指しましょう！</span>
+          <div class="mai-bubble-name" data-i18n="navigator.name">マイ</div>
+          <span id="maiText" data-i18n="nav.first">ボスの居るステージを目指しましょう！</span>
         </div>
-        <img class="mai-icon" id="maiIcon" src="./MAI_SD.png" alt="マイ" />
+        <img class="mai-icon" id="maiIcon" src="./MAI_SD.png" data-i18n-attr-alt="navigator.name" alt="マイ" />
       </div>
     </div>
 
@@ -2619,17 +2675,17 @@
           <span id="combatGoldVal">0</span>
         </div>
         <!-- LLエクステ スロット -->
-        <div class="combat-ll-slots" id="combatLlSlots" title="LLエクステ（使用ボタンから無コストで使用）">
+        <div class="combat-ll-slots" id="combatLlSlots" data-i18n-attr-title="res.ll.title.combat" title="LLエクステ（使用ボタンから無コストで使用）">
           <span class="ll-ext-slot-icon" id="combatLlSlot0" title="">—</span>
           <span class="ll-ext-slot-icon" id="combatLlSlot1" title="">—</span>
         </div>
         <span class="combat-header-stage" id="combatStageTitle">—</span>
         <div class="combat-header-btns">
-          <button type="button" class="btn-deck-view btn-deck-view-combat" id="btnDeckViewCombat" aria-label="保有デッキを表示" title="保有デッキを表示"><span class="btn-deck-view-icon">📚</span><span class="btn-deck-view-label">デッキ表示</span></button>
-          <img class="header-reg-icon" id="headerRegIconCombat" alt="レギュレーション" title="レギュレーション" />
-          <button type="button" class="btn-ranking btn-ranking-combat" id="btnRankingOpenCombat" aria-label="ランキングを表示" title="ランキング"><img src="./ranking_icon.png" alt="ランキング" /></button>
-          <button type="button" class="btn-icon-hd" id="btnSettingsOpen" aria-label="設定" title="設定">⚙</button>
-          <button type="button" class="btn-icon-hd" id="btnHelpOpenCombat" aria-label="ヘルプ" title="ヘルプ">?</button>
+          <button type="button" class="btn-deck-view btn-deck-view-combat" id="btnDeckViewCombat" data-i18n-attr-aria-label="res.deck.aria" data-i18n-attr-title="res.deck.aria" aria-label="保有デッキを表示" title="保有デッキを表示"><span class="btn-deck-view-icon">📚</span><span class="btn-deck-view-label" data-i18n="res.deck">デッキ表示</span></button>
+          <img class="header-reg-icon" id="headerRegIconCombat" data-i18n-attr-alt="res.regulation.alt" data-i18n-attr-title="res.regulation.alt" alt="レギュレーション" title="レギュレーション" />
+          <button type="button" class="btn-ranking btn-ranking-combat" id="btnRankingOpenCombat" data-i18n-attr-aria-label="res.ranking.aria" data-i18n-attr-title="res.ranking.alt" aria-label="ランキングを表示" title="ランキング"><img src="./ranking_icon.png" data-i18n-attr-alt="res.ranking.alt" alt="ランキング" /></button>
+          <button type="button" class="btn-icon-hd" id="btnSettingsOpen" data-i18n-attr-aria-label="res.settings" data-i18n-attr-title="res.settings" aria-label="設定" title="設定">⚙</button>
+          <button type="button" class="btn-icon-hd" id="btnHelpOpenCombat" data-i18n-attr-aria-label="res.help.title" data-i18n-attr-title="res.help.title" aria-label="ヘルプ" title="ヘルプ">?</button>
         </div>
       </div>
 
@@ -2694,7 +2750,7 @@
             <div class="party-slot party-slot--front" data-pos="0" data-side="enemy">
               <div class="combatant enemy-combatant">
                 <div class="intent-bubble" id="enemyIntentWrap" aria-live="polite">
-                  <span class="intent-label">NEXT ACTION</span>
+                  <span class="intent-label" data-i18n="combat.intent.label">NEXT ACTION</span>
                   <span id="enemyIntent">—</span>
                 </div>
                 <div class="combatant-portrait-wrap" id="enemyPortraitWrap">
@@ -2739,19 +2795,19 @@
       <div class="combat-footer">
         <div class="footer-topbar">
           <span class="energy-pill">⚡ <span id="energyVal">0</span> / <span id="energyMax">3</span></span>
-          <button type="button" class="action primary" id="btnEndTurn">ターン終了</button>
+          <button type="button" class="action primary" id="btnEndTurn" data-i18n="combat.endTurn">ターン終了</button>
         </div>
         <!-- LLエクステ 使用バー（スロットが埋まっているとき表示） -->
-        <div class="ll-ext-bar hidden" id="llExtBar" aria-label="LLエクステ使用">
-          <button type="button" class="ll-ext-use-btn ll-slot--empty" id="btnUseLlExt0" title="">空きスロット</button>
-          <button type="button" class="ll-ext-use-btn ll-slot--empty" id="btnUseLlExt1" title="">空きスロット</button>
+        <div class="ll-ext-bar hidden" id="llExtBar" data-i18n-attr-aria-label="combat.ll.aria" aria-label="LLエクステ使用">
+          <button type="button" class="ll-ext-use-btn ll-slot--empty" id="btnUseLlExt0" title="">—</button>
+          <button type="button" class="ll-ext-use-btn ll-slot--empty" id="btnUseLlExt1" title="">—</button>
         </div>
         <div class="hand-scroll">
           <div id="hand" class="hand" role="list"></div>
         </div>
         <div class="footer-bottombar">
-          <span class="exhaust-count" id="exhaustCount" title="消耗済みカード">🔥<span id="exhaustNum">0</span></span>
-          <button type="button" class="btn-deck-pile" id="btnDeckOpen" aria-label="残りデッキを表示">
+          <span class="exhaust-count" id="exhaustCount" data-i18n-attr-title="combat.exhaust.title" title="消耗済みカード">🔥<span id="exhaustNum">0</span></span>
+          <button type="button" class="btn-deck-pile" id="btnDeckOpen" data-i18n-attr-aria-label="combat.deck.aria" aria-label="残りデッキを表示">
             <img alt="" data-icon="deck" width="20" height="20" />
             <span class="btn-deck-pile__count" id="deckPileCount">0</span>
           </button>
@@ -2764,25 +2820,25 @@
     <!-- SPEC-007: ランキング表示画面 -->
     <div id="rankingView" class="hidden">
       <div class="rk-header">
-        <h2>ランキング</h2>
+        <h2 data-i18n="ranking.title">ランキング</h2>
         <div class="rk-controls">
-          <select data-rk-filter aria-label="レギュレーションでフィルタ"></select>
-          <button type="button" class="action" data-rk-refresh>更新</button>
-          <button type="button" class="action" data-rk-back>← 戻る</button>
+          <select data-rk-filter data-i18n-attr-aria-label="ranking.regulation" aria-label="レギュレーションでフィルタ"></select>
+          <button type="button" class="action" data-rk-refresh data-i18n="ranking.refresh">更新</button>
+          <button type="button" class="action" data-rk-back data-i18n="craft.back">← 戻る</button>
         </div>
       </div>
       <div data-rk-list>
-        <p class="rk-msg">取得中...</p>
+        <p class="rk-msg" data-i18n="ranking.fetching">取得中...</p>
       </div>
       <details class="rk-advanced-details">
-        <summary>上級設定: 別のランキングサーバーを使う</summary>
-        <p style="font-size:0.75rem;color:var(--muted);margin:0.25rem 0;">
+        <summary data-i18n="ranking.advanced">上級設定: 別のランキングサーバーを使う</summary>
+        <p style="font-size:0.75rem;color:var(--muted);margin:0.25rem 0;" data-i18n="ranking.advanced.desc">
           通常は組み込みのランキング API を自動利用します。独自の Google Apps Script を使う場合のみ URL を入力してください。空欄で「保存」を押すと既定値に戻ります。
         </p>
         <div class="rk-apiurl-row">
           <label for="rkApiUrlInput">Apps Script URL</label>
-          <input id="rkApiUrlInput" type="text" placeholder="（既定の URL を使用）" data-rk-apiurl />
-          <button type="button" class="action" data-rk-save-apiurl>保存</button>
+          <input id="rkApiUrlInput" type="text" data-i18n-attr-placeholder="ranking.api.placeholder" placeholder="（既定の URL を使用）" data-rk-apiurl />
+          <button type="button" class="action" data-rk-save-apiurl data-i18n="btn.save">保存</button>
         </div>
       </details>
     </div>
@@ -2795,37 +2851,37 @@
 
     <div id="shopView" class="panel hidden">
       <div class="shop-header-row">
-        <p style="margin:0;font-weight:600;color:var(--accent);font-size:0.95rem">ショップ</p>
+        <p style="margin:0;font-weight:600;color:var(--accent);font-size:0.95rem" data-i18n="shop.title">ショップ</p>
         <div class="shop-gold-disp">
           <img alt="G" data-icon="gum" />
-          <span class="shop-gold-val" id="shopGoldDisp">0</span> GUM
+          <span class="shop-gold-val" id="shopGoldDisp">0</span> <span data-i18n="shop.gold.unit">GUM</span>
         </div>
       </div>
-      <p style="font-size:0.76rem;color:var(--muted);margin:0.2rem 0 0">エクステンションを購入してデッキを強化しよう。</p>
+      <p style="font-size:0.76rem;color:var(--muted);margin:0.2rem 0 0" data-i18n="shop.subtitle">エクステンションを購入してデッキを強化しよう。</p>
       <div id="shopList"></div>
-      <button type="button" class="action" id="btnLeaveShop" style="margin-top:0.25rem;width:100%">立ち去る</button>
+      <button type="button" class="action" id="btnLeaveShop" style="margin-top:0.25rem;width:100%" data-i18n="shop.leave">立ち去る</button>
     </div>
 
     <div id="gameOver" class="panel hidden">
-      <h2 style="margin:0 0 0.5rem">ラン終了</h2>
+      <h2 style="margin:0 0 0.5rem" data-i18n="gameover.title">ラン終了</h2>
       <p id="gameOverMsg" style="color:var(--muted)"></p>
-      <button type="button" class="action" id="btnViewReportClear" style="margin-top:0.75rem;width:100%">活動レポートを見る</button>
-      <button type="button" class="action primary" id="btnRestart" style="margin-top:0.5rem;width:100%">もう一度</button>
+      <button type="button" class="action" id="btnViewReportClear" style="margin-top:0.75rem;width:100%" data-i18n="gameover.viewReport">活動レポートを見る</button>
+      <button type="button" class="action primary" id="btnRestart" style="margin-top:0.5rem;width:100%" data-i18n="gameover.restart">もう一度</button>
     </div>
 
     <div id="rewardView" class="panel hidden">
-      <p class="map-title">報酬選択</p>
-      <p class="reward-intro">バトル勝利おめでとうございます。追加するカードを 1 枚選ぶか、スキップしてマップへ戻ります。</p>
+      <p class="map-title" data-i18n="reward.title">報酬選択</p>
+      <p class="reward-intro" data-i18n="reward.intro">バトル勝利おめでとうございます。追加するカードを 1 枚選ぶか、スキップしてマップへ戻ります。</p>
       <div class="reward-picks" id="rewardPicks"></div>
-      <button type="button" class="action" id="btnSkipReward" style="margin-top:0.75rem;width:100%">スキップ（報酬なし）</button>
+      <button type="button" class="action" id="btnSkipReward" style="margin-top:0.75rem;width:100%" data-i18n="reward.skipFull">スキップ（報酬なし）</button>
     </div>
   </div>
 
   <div id="ownedDeckOverlay" class="hidden" aria-hidden="true" role="dialog" aria-labelledby="ownedDeckTitle">
     <div class="owned-deck-card">
       <div class="owned-deck-header">
-        <h2 id="ownedDeckTitle">保有デッキ</h2>
-        <button type="button" class="owned-deck-close" id="ownedDeckCloseBtn" aria-label="閉じる">✕</button>
+        <h2 id="ownedDeckTitle" data-i18n="owned.deck.title">保有デッキ</h2>
+        <button type="button" class="owned-deck-close" id="ownedDeckCloseBtn" data-i18n-attr-aria-label="owned.deck.close" aria-label="閉じる">✕</button>
       </div>
       <div class="owned-deck-summary" id="ownedDeckSummary"></div>
       <div class="owned-deck-grid" id="ownedDeckGrid"></div>
@@ -2837,18 +2893,18 @@
     <div class="report-card">
       <div class="report-header">
         <img class="report-logo" alt="MyCryptoTactics" />
-        <h2 id="reportTitle" class="report-title">活動レポート</h2>
+        <h2 id="reportTitle" class="report-title" data-i18n="report.title">活動レポート</h2>
         <p class="report-datetime" id="reportDatetime"></p>
       </div>
 
       <div class="report-result-row">
         <div class="report-result-block">
-          <p class="report-block-label">ヒーロー</p>
+          <p class="report-block-label" data-i18n="report.hero">ヒーロー</p>
           <img class="report-portrait" id="reportHeroImg" alt="" onerror="this.style.opacity='0'" />
           <p class="report-portrait-name" id="reportHeroName"></p>
         </div>
         <div class="report-result-block">
-          <p class="report-block-label" id="reportOpponentLabel">対戦相手</p>
+          <p class="report-block-label" id="reportOpponentLabel" data-i18n="report.opponent">対戦相手</p>
           <img class="report-portrait" id="reportOpponentImg" alt="" onerror="this.style.opacity='0'" />
           <p class="report-portrait-name" id="reportOpponentName"></p>
         </div>
@@ -2868,69 +2924,69 @@
       </div>
 
       <div class="report-section">
-        <p class="report-block-label">保有エクステンション <span id="reportDeckCount" class="report-block-count"></span></p>
+        <p class="report-block-label"><span data-i18n="report.deck">保有エクステンション</span> <span id="reportDeckCount" class="report-block-count"></span></p>
         <div class="report-ext-grid" id="reportDeckList"></div>
       </div>
 
       <div class="report-section">
-        <p class="report-block-label">獲得 LL エクステ <span id="reportLlCount" class="report-block-count"></span></p>
+        <p class="report-block-label"><span data-i18n="report.ll">獲得 LL エクステ</span> <span id="reportLlCount" class="report-block-count"></span></p>
         <div class="report-ext-grid" id="reportLlList"></div>
       </div>
 
       <!-- SPEC-007: クリア時のスコア表示 -->
       <div class="report-section report-score hidden" id="reportScoreSection">
-        <p class="report-block-label">クリアスコア</p>
+        <p class="report-block-label" data-i18n="report.score">クリアスコア</p>
         <p class="report-score-final" id="reportScoreFinal">0</p>
         <table class="report-score-table">
-          <tr><td>ターン bonus</td><td id="reportScoreTurn">0</td></tr>
-          <tr><td>デッキ bonus</td><td id="reportScoreDeck">0</td></tr>
-          <tr><td>LL bonus</td><td id="reportScoreLl">0</td></tr>
-          <tr><td>レアリティ bonus</td><td id="reportScoreRarity">0</td></tr>
-          <tr><td>レギュレーション乗数</td><td id="reportScoreRegMult">×1.0</td></tr>
-          <tr id="reportScoreAbsRow" class="hidden"><td>Absolute 倍率</td><td id="reportScoreAbsMult">×1.0</td></tr>
+          <tr><td data-i18n="report.bonus.turn">ターン bonus</td><td id="reportScoreTurn">0</td></tr>
+          <tr><td data-i18n="report.bonus.deck">デッキ bonus</td><td id="reportScoreDeck">0</td></tr>
+          <tr><td data-i18n="report.bonus.ll">LL bonus</td><td id="reportScoreLl">0</td></tr>
+          <tr><td data-i18n="report.bonus.rarity">レアリティ bonus</td><td id="reportScoreRarity">0</td></tr>
+          <tr><td data-i18n="report.bonus.regMult">レギュレーション乗数</td><td id="reportScoreRegMult">×1.0</td></tr>
+          <tr id="reportScoreAbsRow" class="hidden"><td data-i18n="report.bonus.absMult">Absolute 倍率</td><td id="reportScoreAbsMult">×1.0</td></tr>
         </table>
       </div>
 
       <!-- SPEC-007: クリア時点のランキング順位表示 -->
       <div class="report-section report-rank hidden" id="reportRankSection">
-        <p class="report-block-label">この時点のランキング</p>
+        <p class="report-block-label" data-i18n="report.rank.title">この時点のランキング</p>
         <div id="reportRankBody">
-          <p class="report-rank-msg">取得中...</p>
+          <p class="report-rank-msg" data-i18n="ranking.fetching">取得中...</p>
         </div>
       </div>
 
       <div class="report-actions">
-        <button type="button" class="action primary report-share-btn" id="reportShareBtn">𝕏 で共有</button>
-        <button type="button" class="action report-close-btn" id="reportCloseBtn">閉じる</button>
+        <button type="button" class="action primary report-share-btn" id="reportShareBtn" data-i18n="report.share">𝕏 で共有</button>
+        <button type="button" class="action report-close-btn" id="reportCloseBtn" data-i18n="deck.modal.close">閉じる</button>
       </div>
     </div>
   </div>
 
   <div id="deckModal" class="hidden" aria-hidden="true" role="dialog" aria-labelledby="deckModalTitle">
     <div class="deck-modal-box">
-      <h3 id="deckModalTitle">残りデッキ</h3>
+      <h3 id="deckModalTitle" data-i18n="deck.modal.title">残りデッキ</h3>
       <p class="deck-modal-meta" id="deckModalCount"></p>
       <div id="deckModalList"></div>
-      <button type="button" class="action" id="deckModalClose" style="margin-top:0.75rem;width:100%">閉じる</button>
+      <button type="button" class="action" id="deckModalClose" style="margin-top:0.75rem;width:100%" data-i18n="deck.modal.close">閉じる</button>
     </div>
   </div>
 
   <div id="cutinOverlay" class="hidden" aria-hidden="true">
     <div class="cutin-inner" id="cutinInner">
       <p class="cutin-title" id="cutinTitle">—</p>
-      <p class="cutin-sub" id="cutinSub">タップで続行</p>
+      <p class="cutin-sub" id="cutinSub" data-i18n="cutin.tap">タップで続行</p>
     </div>
   </div>
 
   <footer>
-    <span class="footer-meta">MyCryptoTactics Ver.1.0.0 · 非営利のファン制作</span>
-    <span class="footer-credit">
+    <span class="footer-meta" data-i18n="footer.meta">MyCryptoTactics Ver.1.1.0 · 非営利のファン制作</span>
+    <span class="footer-credit" data-i18n-html="footer.credit.full">
       キャラクター画像 / BGM / SE は <strong>My Crypto Heroes (MCH Co., Ltd.)</strong> に帰属します。
       利用条件・権利表記・二次創作ガイドラインは
       <a href="https://github.com/bearko/mycryptoheroes/blob/main/README.md" target="_blank" rel="noopener">bearko/mycryptoheroes README</a>
       を参照してください。
     </span>
-    <span class="footer-source">
+    <span class="footer-source" data-i18n-html="footer.source.full">
       ソースコード: <a href="https://github.com/bearko/mycryptotactics" target="_blank" rel="noopener">bearko/mycryptotactics</a>
       · フィードバック / バグ報告は
       <a href="https://github.com/bearko/mycryptotactics/issues" target="_blank" rel="noopener">GitHub Issues</a>
@@ -2941,30 +2997,30 @@
   <!-- SPEC-007: ランキング送信モーダル（クリア時に表示）-->
   <div id="rankingSubmitOverlay" class="hidden" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="rsTitle">
     <div class="rs-dialog">
-      <h2 id="rsTitle" class="rs-title">クリア！ ランキングに登録</h2>
+      <h2 id="rsTitle" class="rs-title" data-i18n="rs.title">クリア！ ランキングに登録</h2>
 
       <div class="rs-final" data-rs-final>0</div>
 
       <table class="rs-table">
-        <tr><td>ターン数ボーナス</td><td data-rs-turn>0</td></tr>
-        <tr><td>デッキ枚数ボーナス</td><td data-rs-deck>0</td></tr>
-        <tr><td>LL エクステボーナス</td><td data-rs-ll>0</td></tr>
-        <tr><td>レアリティボーナス</td><td data-rs-rarity>0</td></tr>
-        <tr><td>ベーススコア</td><td data-rs-base>0</td></tr>
-        <tr><td>レギュレーション乗数</td><td data-rs-regmult>×1.00</td></tr>
-        <tr class="rs-row hidden" data-rs-absrow><td>Absolute 倍率</td><td data-rs-absmult>×1.00</td></tr>
+        <tr><td data-i18n="rs.bonus.turn">ターン数ボーナス</td><td data-rs-turn>0</td></tr>
+        <tr><td data-i18n="rs.bonus.deck">デッキ枚数ボーナス</td><td data-rs-deck>0</td></tr>
+        <tr><td data-i18n="rs.bonus.ll">LL エクステボーナス</td><td data-rs-ll>0</td></tr>
+        <tr><td data-i18n="rs.bonus.rarity">レアリティボーナス</td><td data-rs-rarity>0</td></tr>
+        <tr><td data-i18n="rs.bonus.base">ベーススコア</td><td data-rs-base>0</td></tr>
+        <tr><td data-i18n="rs.bonus.regMult">レギュレーション乗数</td><td data-rs-regmult>×1.00</td></tr>
+        <tr class="rs-row hidden" data-rs-absrow><td data-i18n="rs.bonus.absMult">Absolute 倍率</td><td data-rs-absmult>×1.00</td></tr>
       </table>
 
       <div class="rs-name-row">
-        <label for="rsNameInput">プレイヤー名</label>
+        <label for="rsNameInput" data-i18n="rs.playerName">プレイヤー名</label>
         <input id="rsNameInput" type="text" maxlength="30" placeholder="anonymous" data-rs-name />
       </div>
 
       <div class="rs-status" data-rs-status></div>
 
       <div class="rs-buttons">
-        <button type="button" class="action" data-rs-cancel>登録しない</button>
-        <button type="button" class="action" data-rs-confirm style="background:var(--accent);border-color:var(--accent);color:#1a1530;font-weight:600;">登録する</button>
+        <button type="button" class="action" data-rs-cancel data-i18n="rs.cancel">登録しない</button>
+        <button type="button" class="action" data-rs-confirm style="background:var(--accent);border-color:var(--accent);color:#1a1530;font-weight:600;" data-i18n="rs.submit">登録する</button>
       </div>
     </div>
   </div>
@@ -2972,38 +3028,38 @@
   <!-- SPEC-007: Absolute レギュレーション設定モーダル -->
   <div id="absoluteConfigOverlay" class="hidden" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="absTitle">
     <div class="abs-dialog">
-      <h2 id="absTitle" class="abs-title">Absolute レギュレーション設定</h2>
-      <p style="font-size:0.85rem;color:var(--muted);margin:0;">各倍率は 0.1〜5.0、0.1 刻み。スライダーを動かすとスコア倍率が再計算されます。</p>
+      <h2 id="absTitle" class="abs-title" data-i18n="abs.title">Absolute レギュレーション設定</h2>
+      <p style="font-size:0.85rem;color:var(--muted);margin:0;" data-i18n="abs.subtitle">各倍率は 0.1〜5.0、0.1 刻み。スライダーを動かすとスコア倍率が再計算されます。</p>
 
       <div class="abs-row">
-        <label for="absSlider-enemyHpMult">敵 HP 倍率</label>
+        <label for="absSlider-enemyHpMult" data-i18n="abs.enemyHp">敵 HP 倍率</label>
         <input id="absSlider-enemyHpMult" type="range" min="0.1" max="5.0" step="0.1" value="1.0" data-abs-key="enemyHpMult" />
         <span class="abs-val" data-abs-val="enemyHpMult">1.0x</span>
       </div>
       <div class="abs-row">
-        <label for="absSlider-enemyDmgMult">敵ダメ倍率</label>
+        <label for="absSlider-enemyDmgMult" data-i18n="abs.enemyDmg">敵ダメ倍率</label>
         <input id="absSlider-enemyDmgMult" type="range" min="0.1" max="5.0" step="0.1" value="1.0" data-abs-key="enemyDmgMult" />
         <span class="abs-val" data-abs-val="enemyDmgMult">1.0x</span>
       </div>
       <div class="abs-row">
-        <label for="absSlider-playerHpMult">自 HP 倍率</label>
+        <label for="absSlider-playerHpMult" data-i18n="abs.playerHp">自 HP 倍率</label>
         <input id="absSlider-playerHpMult" type="range" min="0.1" max="5.0" step="0.1" value="1.0" data-abs-key="playerHpMult" />
         <span class="abs-val" data-abs-val="playerHpMult">1.0x</span>
       </div>
       <div class="abs-row">
-        <label for="absSlider-playerDmgMult">自ダメ倍率</label>
+        <label for="absSlider-playerDmgMult" data-i18n="abs.playerDmg">自ダメ倍率</label>
         <input id="absSlider-playerDmgMult" type="range" min="0.1" max="5.0" step="0.1" value="1.0" data-abs-key="playerDmgMult" />
         <span class="abs-val" data-abs-val="playerDmgMult">1.0x</span>
       </div>
 
       <div class="abs-score-row">
-        <span class="abs-score-label">スコア倍率（敵HP×敵ダメ ÷ 自HP×自ダメ）</span>
+        <span class="abs-score-label" data-i18n="abs.scoreMult">スコア倍率（敵HP×敵ダメ ÷ 自HP×自ダメ）</span>
         <span class="abs-score-mult" data-abs-score-mult>1.00x</span>
       </div>
 
       <div class="abs-buttons">
-        <button type="button" class="action" data-abs-cancel>キャンセル</button>
-        <button type="button" class="action" data-abs-confirm style="background:#a855f7;border-color:#a855f7;">この設定で開始</button>
+        <button type="button" class="action" data-abs-cancel data-i18n="btn.cancel">キャンセル</button>
+        <button type="button" class="action" data-abs-confirm style="background:#a855f7;border-color:#a855f7;" data-i18n="abs.start">この設定で開始</button>
       </div>
     </div>
   </div>
@@ -3011,24 +3067,24 @@
   <div id="helpOverlay" class="hidden" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
     <div class="help-dialog">
       <div class="help-header">
-        <h2 id="helpTitle">ヘルプ</h2>
-        <button type="button" class="action" id="btnHelpClose">閉じる</button>
+        <h2 id="helpTitle" data-i18n="help.title">ヘルプ</h2>
+        <button type="button" class="action" id="btnHelpClose" data-i18n="deck.modal.close">閉じる</button>
       </div>
       <div class="help-nav" role="tablist" aria-label="ヘルプの章">
-        <button type="button" class="help-nav-btn help-nav-btn--active" data-help-nav="goal" role="tab" aria-selected="true">目的</button>
-        <button type="button" class="help-nav-btn" data-help-nav="controls" role="tab" aria-selected="false">操作</button>
-        <button type="button" class="help-nav-btn" data-help-nav="params" role="tab" aria-selected="false">パラメーター</button>
-        <button type="button" class="help-nav-btn" data-help-nav="terms" role="tab" aria-selected="false">用語</button>
-        <button type="button" class="help-nav-btn" data-help-nav="battle" role="tab" aria-selected="false">バトル</button>
+        <button type="button" class="help-nav-btn help-nav-btn--active" data-help-nav="goal" role="tab" aria-selected="true" data-i18n="help.nav.goal">目的</button>
+        <button type="button" class="help-nav-btn" data-help-nav="controls" role="tab" aria-selected="false" data-i18n="help.nav.controls">操作</button>
+        <button type="button" class="help-nav-btn" data-help-nav="params" role="tab" aria-selected="false" data-i18n="help.nav.params">パラメーター</button>
+        <button type="button" class="help-nav-btn" data-help-nav="terms" role="tab" aria-selected="false" data-i18n="help.nav.terms">用語</button>
+        <button type="button" class="help-nav-btn" data-help-nav="battle" role="tab" aria-selected="false" data-i18n="help.nav.battle">バトル</button>
       </div>
       <div class="help-body">
-        <section class="help-page help-page--active" data-help-page="goal">
+        <section class="help-page help-page--active" data-help-page="goal" data-i18n-html="help.body.goal">
           <h3>ゲームの目的</h3>
           <p>このプロトタイプは、<strong>マップ上でノードを選びながら進むローグライク</strong>と、<strong>ターン制のカードバトル</strong>を組み合わせた体験の検証用です。</p>
           <p>ゴールド（GUM）を稼ぎ、デッキにエクステンション由来のカードを加えながら、最終層のボスを倒してランをクリアすることを目指します。</p>
           <p>歴史偉人をリーダーに据え、<a href="https://github.com/bearko/mycryptoheroes" target="_blank" rel="noopener">mycryptoheroes</a> のアセットで見た目を構成しています（利用はリポジトリのライセンスに従ってください）。</p>
         </section>
-        <section class="help-page" data-help-page="controls">
+        <section class="help-page" data-help-page="controls" data-i18n-html="help.body.controls">
           <h3>操作方法</h3>
           <h3>マップ</h3>
           <ul>
@@ -3049,7 +3105,7 @@
             <li>このヘルプは <kbd>Esc</kbd> でも閉じられます。</li>
           </ul>
         </section>
-        <section class="help-page" data-help-page="params">
+        <section class="help-page" data-help-page="params" data-i18n-html="help.body.params">
           <h3>パラメーター（画面上の意味）</h3>
           <p>リーダーと敵のカード下は<strong>3行</strong>で、ラベルなしの<strong>アイコン＋数値</strong>だけを表示しています。</p>
           <ul>
@@ -3062,7 +3118,7 @@
           </ul>
           <p>詳しい原作の定義は <a href="https://www.mycryptoheroes.net/ja/help-posts/7iMLBLL1sMJ9Rlk2Fv2Zmj" target="_blank" rel="noopener">MCH ヘルプ：パラメーター</a> を参照してください。</p>
         </section>
-        <section class="help-page" data-help-page="terms">
+        <section class="help-page" data-help-page="terms" data-i18n-html="help.body.terms">
           <h3>カードに出てくる用語</h3>
           <ul>
             <li><strong>戦闘中ずっと</strong> — その効果は<strong>そのバトルが終わるまで</strong>続きます。次のバトルでは元の値に戻ります（例: <code>PHY +3（戦闘中ずっと）</code>）。</li>
@@ -3083,9 +3139,9 @@
             <li><strong>?</strong> — ランダム（その時点の生存者から無作為に選択）。</li>
             <li><strong>PHY↑ / HP↓</strong> 等 — そのステータスが<strong>最も高い / 低い</strong>対象を選択。</li>
           </ul>
-          <p style="font-size:0.78rem;color:var(--muted)">※ パーティ編成（3 人 vs 3 人）はVer.1.0.0から有効です。前衛・中衛・後衛の並びはタイトルから入って編成画面で確認できます。</p>
+          <p style="font-size:0.78rem;color:var(--muted)">※ パーティ編成（3 人 vs 3 人）はVer.1.1.0から有効です。前衛・中衛・後衛の並びはタイトルから入って編成画面で確認できます。</p>
         </section>
-        <section class="help-page" data-help-page="battle">
+        <section class="help-page" data-help-page="battle" data-i18n-html="help.body.battle">
           <h3>バトルロジック（概要）</h3>
           <p>数式は <strong>My Crypto Heroes 公式ヘルプ</strong>に沿った簡略実装です。一次ソースへのリンクを併記します。</p>
           <h3>ダメージとカット率</h3>

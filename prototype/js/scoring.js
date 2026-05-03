@@ -42,7 +42,8 @@ const REGULATION_SCORE_MULTS = {
  */
 export function computeBaseScore({ turns, deckSize, llExtCount, partyHeroes }) {
   const turnBonus = Math.max(0, 500 - (turns || 0)) * 30;
-  const deckBonus = (deckSize || 0) * 50;
+  // Ver.1.1.0: 1 枚 50 → 200 点。少枚数クリアが最適解にならないように引き上げ。
+  const deckBonus = (deckSize || 0) * 200;
   const llBonus = (llExtCount || 0) * 3000;
   const rarityBonus = (partyHeroes || []).reduce((sum, h) => {
     const v = RARITY_VALUES[(h?.rarity || "").toLowerCase()] || 3;
@@ -83,7 +84,8 @@ export function computeFinalScore({ baseScore, regulationId, absoluteConfig }) {
  */
 export function computeScoreBreakdown({ turns, deckSize, llExtCount, partyHeroes, regulationId, absoluteConfig }) {
   const turnBonus = Math.max(0, 500 - (turns || 0)) * 30;
-  const deckBonus = (deckSize || 0) * 50;
+  // Ver.1.1.0: 1 枚 50 → 200 点。少枚数クリアが最適解にならないように引き上げ。
+  const deckBonus = (deckSize || 0) * 200;
   const llBonus = (llExtCount || 0) * 3000;
   const rarityBonus = (partyHeroes || []).reduce((sum, h) => {
     const v = RARITY_VALUES[(h?.rarity || "").toLowerCase()] || 3;
