@@ -2149,16 +2149,27 @@ function startCombatFromMapNode(node) {
   if (isBoss && (enemyDef.initialShield || 0) > 0) {
     clog(ti18n("combat.boss.shield").replace("{n}", enemyDef.initialShield));
   }
-  applyHeroPassiveOnCombatStart(combat);
+  // β1 UX: パッシブ発動前に「敵 + 手札 + intent」を最新化する。
+  // 旧版は applyHeroPassiveOnCombatStart → applyPassiveTriggerAsync → startPlayerTurn
+  // の順で、startPlayerTurn が手札をドローするまで「ファラオの呪い」等のカットインが
+  // 空の手札 + 古い表示の上に重なって状況がわかりにくかった。
+  // → 先に initial draw + intent advance + render を済ませてから passives を発動する。
   syncLlExtSlots();
-  // SPEC-006 §18.6: PassiveDef DSL の combat.started trigger を発動
-  // 各ヒーローのカットインを「前衛 → 中衛 → 後衛」の順に sequential 表示するため
-  // async 版を fire-and-forget で起動し、終わってから startPlayerTurn を呼ぶ。
-  // カットイン中は combatInputLocked = true にして手札クリック等を無効化。
+  combat.energy = combat.energyMax + (combat.bonusEnergyNext || 0);
+  combat.bonusEnergyNext = 0;
+  drawCards(combat, 5);
+  advanceEnemyIntent();
+  renderCombat();
+
+  // 手札と敵が画面に出てから passives を順次発動。
   combatInputLocked = true;
+  applyHeroPassiveOnCombatStart(combat);
+  // SPEC-006 §18.6: PassiveDef DSL の combat.started trigger を順次発動
+  // (前衛 → 中衛 → 後衛 のカットイン順に sequential 表示)。
+  // 完了後はカットインで変化したステを反映するため renderCombat を再実行。
   applyPassiveTriggerAsync(combat, "combat.started").finally(() => {
     combatInputLocked = false;
-    startPlayerTurn();
+    renderCombat();
   });
 }
 
