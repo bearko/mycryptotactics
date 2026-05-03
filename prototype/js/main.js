@@ -19,7 +19,11 @@ import {
   tPassive,
   tPassiveText,
   tChapterName,
+  tTargetLabel,
+  tCasterLabel,
+  translateCombatLog,
   translateGameText,
+  registerNameMapping,
 } from "./i18n.js";
 import {
   img,
@@ -644,7 +648,9 @@ function useLlExt(slotIdx) {
 function clog(msg) {
   const el = document.getElementById("clog");
   const p = document.createElement("p");
-  p.textContent = msg;
+  // EN モードでは慣用的な戦闘ログ表現を short EN に置換 (ヒーロー名 / 敵名 /
+  // カード名は元の clog 呼び出し側で既に i18n 名に解決されている前提)。
+  p.textContent = translateCombatLog(msg);
   el.insertBefore(p, el.firstChild);
 }
 
@@ -1771,20 +1777,17 @@ function renderMap() {
     circ.setAttribute("cx", String(node.x)); circ.setAttribute("cy", String(node.y));
     circ.setAttribute("r", "4.2"); circ.setAttribute("class", "map-node-shape");
     g.appendChild(circ);
-    const lab = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    lab.setAttribute("x", String(node.x)); lab.setAttribute("y", String(node.y + 8.5));
-    lab.setAttribute("text-anchor", "middle"); lab.setAttribute("class", "map-node-cap");
-    lab.textContent = node.label;
-    g.appendChild(lab);
-    const ty = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    ty.setAttribute("x", String(node.x)); ty.setAttribute("y", String(node.y + 11.8));
-    ty.setAttribute("text-anchor", "middle"); ty.setAttribute("class", "map-node-type");
-    ty.textContent =
+    // ノード種別名 (旧 node.label = JA literal を直接表示していたが i18n 化)
+    const typeLabel =
       node.type === "fight"  ? (node.elite ? ti18n("node.elite") : ti18n("node.battle")) :
       node.type === "rest"   ? ti18n("node.rest") :
       node.type === "shop"   ? ti18n("node.shop") :
       node.type === "craft"  ? ti18n("node.craft") : ti18n("node.boss");
-    g.appendChild(ty);
+    const lab = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    lab.setAttribute("x", String(node.x)); lab.setAttribute("y", String(node.y + 8.5));
+    lab.setAttribute("text-anchor", "middle"); lab.setAttribute("class", "map-node-cap");
+    lab.textContent = typeLabel;
+    g.appendChild(lab);
     const allowed = new Set(reachableNextNodeIds(runState.lastMapNodeId));
     if (!allowed.has(node.id)) g.style.pointerEvents = "none";
     g.addEventListener("click", () => tryEnterMapNode(node.id));
@@ -2892,7 +2895,7 @@ function renderCombat() {
     // 上の summary swap で resolveCaster(card.caster) は既に previewCaster として確定済み
     const casterUnit = previewCaster;
     const roleKey = card.caster || "foremost";
-    const roleLabel = CASTER_ROLE_LABELS[roleKey] || roleKey;
+    const roleLabel = tCasterLabel(roleKey, CASTER_ROLE_LABELS[roleKey] || roleKey);
     const casterTitle = casterUnit
       ? `${casterUnit.name || "ヒーロー"} (${roleLabel})`
       : `キャスター候補不在 (ロール: ${roleLabel})`;
@@ -2911,7 +2914,7 @@ function renderCombat() {
     // effectSummaryLines が存在しない場合は effects[].text (係数形式) にフォールバック。
     const effectRowsHtml = (Array.isArray(card.effects) && card.effects.length > 0)
       ? card.effects.map((e, i) => {
-          const lbl = targetLabelText(e.target) || e.target || "";
+          const lbl = tTargetLabel(e.target, targetLabelText(e.target));
           const colorVar = targetColorVar(e.target) || "--text";
           // 実数値テキストを優先 (caster の PHY/INT + ターゲット enemy の防御を反映)
           const computedText = (Array.isArray(summaryLines) && summaryLines[i] != null)
@@ -5898,10 +5901,10 @@ function showCutin(kind) {
   const title = document.getElementById("cutinTitle");
   const sub = document.getElementById("cutinSub");
   if (kind === "win") {
-    title.textContent = "VICTORY"; sub.textContent = "タップして次へ";
+    title.textContent = "VICTORY"; sub.textContent = ti18n("cutin.tap");
     cutinWinIgnoreUntil = performance.now() + 480;
   } else {
-    title.textContent = "DEFEAT"; sub.textContent = "タップで続行";
+    title.textContent = "DEFEAT"; sub.textContent = ti18n("cutin.tap");
   }
   playJingle(kind);
   return new Promise((resolve) => { cutinResolve = { resolve }; });
@@ -6005,7 +6008,7 @@ function buildRewardPickButton(def, mockS) {
 
   // caster ロールラベル (バトル外なので具体ヒーローは未指定)
   const roleKey = def.caster || "foremost";
-  const roleLabel = CASTER_ROLE_LABELS[roleKey] || roleKey;
+  const roleLabel = tCasterLabel(roleKey, CASTER_ROLE_LABELS[roleKey] || roleKey);
 
   // 効果行の描画 (effects 配列を「対象 pill 30% + 効果テキスト 70%」で)
   // バトル外は実数値計算できないので effects[].text (係数) を使う。
@@ -6013,7 +6016,7 @@ function buildRewardPickButton(def, mockS) {
   let effectRowsHtml = "";
   if (Array.isArray(def.effects) && def.effects.length > 0) {
     effectRowsHtml = def.effects.map(e => {
-      const lbl = targetLabelText(e.target) || e.target || "";
+      const lbl = tTargetLabel(e.target, targetLabelText(e.target));
       const colorVar = targetColorVar(e.target) || "--text";
       const simplified = translateGameText(simplifyEffectText(e.text || ""));
       return `<div class="card-effect-row">` +
@@ -6161,7 +6164,7 @@ function showOwnedDeckPeek(def) {
   let linesHtml = "";
   if (Array.isArray(def.effects) && def.effects.length > 0) {
     linesHtml = def.effects.map(e => {
-      const lbl = targetLabelText(e.target) || e.target || "";
+      const lbl = tTargetLabel(e.target, targetLabelText(e.target));
       const colorVar = targetColorVar(e.target) || "--text";
       const simplified = translateGameText(simplifyEffectText(e.text || ""));
       return `<p><span class="opc-target" style="color: var(${colorVar})">[${escapeHtml(lbl)}]</span> ${escapeHtml(simplified)}</p>`;
@@ -6175,7 +6178,7 @@ function showOwnedDeckPeek(def) {
   const rarity = CARD_RARITIES[def.libraryKey] || "common";
   // SPEC-006 Phase 4h: caster ロールを peek にも表示
   const roleKey = def.caster || "foremost";
-  const roleLabel = CASTER_ROLE_LABELS[roleKey] || roleKey;
+  const roleLabel = tCasterLabel(roleKey, CASTER_ROLE_LABELS[roleKey] || roleKey);
   const peekName = tExt(def.extId, def.extNameJa || "");
   const peekSkill = tExtSkill(def.extId, def.skillNameJa || "");
   const typeLabel = def.type === "atk" ? ti18n("card.type.atk")
@@ -6766,7 +6769,7 @@ function openShop() {
     const buyBtn = document.createElement("button");
     buyBtn.type = "button";
     buyBtn.className = "shop-buy-btn action";
-    buyBtn.textContent = "購入する";
+    buyBtn.textContent = ti18n("shop.buy");
     buyBtn.addEventListener("click", () => {
       if (gold < price) { clog(ti18n("shop.gold.short")); return; }
       gold -= price;
@@ -6869,9 +6872,9 @@ function openShopRemoveCard(goldDisp, removeBtn) {
   const overlay = document.createElement("div");
   overlay.className = "shop-remove-overlay";
   overlay.innerHTML = `<div class="shop-remove-modal">
-    <div class="shop-remove-modal-title">破棄するカードを選んでください</div>
+    <div class="shop-remove-modal-title">${escapeHtml(ti18n("shop.remove.pick"))}</div>
     <div class="shop-remove-card-list" id="shopRemoveCardList"></div>
-    <button class="shop-remove-cancel" id="shopRemoveCancel">キャンセル</button>
+    <button class="shop-remove-cancel" id="shopRemoveCancel">${escapeHtml(ti18n("btn.cancel"))}</button>
   </div>`;
   document.getElementById("shopView").appendChild(overlay);
   document.getElementById("shopRemoveCancel").addEventListener("click", () => overlay.remove());
@@ -6897,7 +6900,7 @@ function openShopRemoveCard(goldDisp, removeBtn) {
 
     const delBtn = document.createElement("button");
     delBtn.className = "action shop-remove-confirm-btn";
-    delBtn.textContent = `破棄 (-${SHOP_REMOVE_COST} GUM)`;
+    delBtn.textContent = `${ti18n("shop.remove.confirm")} (-${SHOP_REMOVE_COST} GUM)`;
     delBtn.addEventListener("click", () => {
       gold -= SHOP_REMOVE_COST;
       // 同じキーの最初の1枚を削除
@@ -6905,7 +6908,7 @@ function openShopRemoveCard(goldDisp, removeBtn) {
       if (removeIdx >= 0) runState.deck.splice(removeIdx, 1);
       if (goldDisp) goldDisp.textContent = String(gold);
       syncResources();
-      clog(`破棄: ${card.extNameJa}（-${SHOP_REMOVE_COST} GUM）`);
+      clog(ti18n("clog.removed").replace("{name}", tExt(card.extId, card.extNameJa)).replace("{n}", SHOP_REMOVE_COST));
       renderNavigator(ti18n("nav.shop.removed").replace("{name}", tExt(card.extId, card.extNameJa)));
       // 1 ショップ訪問につき 1 回まで (#33)
       runState.shopRemoveUsed = true;
@@ -6949,9 +6952,9 @@ function openShopUpgradeCard(goldDisp, upgradeBtn) {
   const overlay = document.createElement("div");
   overlay.className = "shop-remove-overlay";
   overlay.innerHTML = `<div class="shop-remove-modal">
-    <div class="shop-remove-modal-title">ランクアップするカードを選んでください</div>
+    <div class="shop-remove-modal-title">${escapeHtml(ti18n("shop.upgrade.pick"))}</div>
     <div class="shop-remove-card-list" id="shopUpgradeCardList"></div>
-    <button class="shop-remove-cancel" id="shopUpgradeCancel">キャンセル</button>
+    <button class="shop-remove-cancel" id="shopUpgradeCancel">${escapeHtml(ti18n("btn.cancel"))}</button>
   </div>`;
   document.getElementById("shopView").appendChild(overlay);
   document.getElementById("shopUpgradeCancel").addEventListener("click", () => overlay.remove());
@@ -6994,7 +6997,7 @@ function openShopUpgradeCard(goldDisp, upgradeBtn) {
 
     const upBtn = document.createElement("button");
     upBtn.className = "action shop-remove-confirm-btn";
-    upBtn.textContent = `ランクアップ (-${SHOP_UPGRADE_COST} GUM)`;
+    upBtn.textContent = `${ti18n("shop.upgrade.confirm")} (-${SHOP_UPGRADE_COST} GUM)`;
     upBtn.addEventListener("click", () => {
       gold -= SHOP_UPGRADE_COST;
       // 同じキーの最初の 1 枚をアップグレード後カードに置き換え (元カードのコストを保持)
@@ -7007,7 +7010,10 @@ function openShopUpgradeCard(goldDisp, upgradeBtn) {
       }
       if (goldDisp) goldDisp.textContent = String(gold);
       syncResources();
-      clog(`ショップ打ち直し: ${card.extNameJa} → ${upgradeDef.extNameJa}（-${SHOP_UPGRADE_COST} GUM、コスト据え置き）`);
+      clog(ti18n("clog.shopUpgrade")
+        .replace("{from}", tExt(card.extId, card.extNameJa))
+        .replace("{to}", tExt(upgradeDef.extId, upgradeDef.extNameJa))
+        .replace("{n}", SHOP_UPGRADE_COST));
       renderNavigator(ti18n("msg.upgrade.shop")
         .replace("{from}", tExt(card.extId, card.extNameJa))
         .replace("{to}", tExt(upgradeDef.extId, upgradeDef.extNameJa)));
@@ -8150,6 +8156,25 @@ async function init() {
     await Promise.all([loadHeroes(), loadEnemies(), loadBosses(), loadLlExtensions()]);
     // LEADER 初期値を最初のヒーローに (旧 constants.js のモジュールロード時セットを置き換え)
     if (HERO_ROSTER.length > 0) setLeader(HERO_ROSTER[0]);
+    // i18n: 戦闘ログの post-process 用に JA→EN 名マッピングを登録
+    // (cards.js の clog はカードや caster 名を JA で埋め込むため、
+    //  EN モードでは clog 通過時にここで登録した名前を一括置換する)
+    for (const h of HERO_ROSTER) {
+      const en = tHero(h.heroId, h.nameJa);
+      if (en && en !== h.nameJa) registerNameMapping(h.nameJa, en);
+    }
+    for (const id of Object.keys(ENEMY_DEFS)) {
+      const def = ENEMY_DEFS[id];
+      if (!def) continue;
+      const en = tEnemy(def.imgId, def.name);
+      if (en && en !== def.name) registerNameMapping(def.name, en);
+    }
+    for (const id of Object.keys(BOSS_DEFS)) {
+      const def = BOSS_DEFS[id];
+      if (!def) continue;
+      const en = tEnemy(def.imgId, def.name);
+      if (en && en !== def.name) registerNameMapping(def.name, en);
+    }
   } catch (e) {
     console.error("[init] data load failed", e);
     alert((getLang() === "en" ? "Data load failed: " : "データロードに失敗しました: ") + e.message);

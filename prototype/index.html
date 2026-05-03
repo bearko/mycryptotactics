@@ -2051,9 +2051,11 @@
     .owned-deck-summary .od-total::before {
       content: "計"; font-size: 0.7rem; color: var(--muted); font-weight: 600;
     }
+    [lang="en"] .owned-deck-summary .od-total::before { content: "Total "; }
     .owned-deck-summary .od-total::after {
       content: "枚"; font-size: 0.7rem; color: var(--muted); font-weight: 600;
     }
+    [lang="en"] .owned-deck-summary .od-total::after { content: ""; }
     .owned-deck-grid {
       display: grid;
       /* 列幅は 96px〜1fr で auto-fill。画面幅に応じて自動的に列数が変わる */
@@ -3056,24 +3058,24 @@
   <div id="helpOverlay" class="hidden" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
     <div class="help-dialog">
       <div class="help-header">
-        <h2 id="helpTitle">ヘルプ</h2>
-        <button type="button" class="action" id="btnHelpClose">閉じる</button>
+        <h2 id="helpTitle" data-i18n="help.title">ヘルプ</h2>
+        <button type="button" class="action" id="btnHelpClose" data-i18n="deck.modal.close">閉じる</button>
       </div>
       <div class="help-nav" role="tablist" aria-label="ヘルプの章">
-        <button type="button" class="help-nav-btn help-nav-btn--active" data-help-nav="goal" role="tab" aria-selected="true">目的</button>
-        <button type="button" class="help-nav-btn" data-help-nav="controls" role="tab" aria-selected="false">操作</button>
-        <button type="button" class="help-nav-btn" data-help-nav="params" role="tab" aria-selected="false">パラメーター</button>
-        <button type="button" class="help-nav-btn" data-help-nav="terms" role="tab" aria-selected="false">用語</button>
-        <button type="button" class="help-nav-btn" data-help-nav="battle" role="tab" aria-selected="false">バトル</button>
+        <button type="button" class="help-nav-btn help-nav-btn--active" data-help-nav="goal" role="tab" aria-selected="true" data-i18n="help.nav.goal">目的</button>
+        <button type="button" class="help-nav-btn" data-help-nav="controls" role="tab" aria-selected="false" data-i18n="help.nav.controls">操作</button>
+        <button type="button" class="help-nav-btn" data-help-nav="params" role="tab" aria-selected="false" data-i18n="help.nav.params">パラメーター</button>
+        <button type="button" class="help-nav-btn" data-help-nav="terms" role="tab" aria-selected="false" data-i18n="help.nav.terms">用語</button>
+        <button type="button" class="help-nav-btn" data-help-nav="battle" role="tab" aria-selected="false" data-i18n="help.nav.battle">バトル</button>
       </div>
       <div class="help-body">
-        <section class="help-page help-page--active" data-help-page="goal">
+        <section class="help-page help-page--active" data-help-page="goal" data-i18n-html="help.body.goal">
           <h3>ゲームの目的</h3>
           <p>このプロトタイプは、<strong>マップ上でノードを選びながら進むローグライク</strong>と、<strong>ターン制のカードバトル</strong>を組み合わせた体験の検証用です。</p>
           <p>ゴールド（GUM）を稼ぎ、デッキにエクステンション由来のカードを加えながら、最終層のボスを倒してランをクリアすることを目指します。</p>
           <p>歴史偉人をリーダーに据え、<a href="https://github.com/bearko/mycryptoheroes" target="_blank" rel="noopener">mycryptoheroes</a> のアセットで見た目を構成しています（利用はリポジトリのライセンスに従ってください）。</p>
         </section>
-        <section class="help-page" data-help-page="controls">
+        <section class="help-page" data-help-page="controls" data-i18n-html="help.body.controls">
           <h3>操作方法</h3>
           <h3>マップ</h3>
           <ul>
@@ -3094,7 +3096,7 @@
             <li>このヘルプは <kbd>Esc</kbd> でも閉じられます。</li>
           </ul>
         </section>
-        <section class="help-page" data-help-page="params">
+        <section class="help-page" data-help-page="params" data-i18n-html="help.body.params">
           <h3>パラメーター（画面上の意味）</h3>
           <p>リーダーと敵のカード下は<strong>3行</strong>で、ラベルなしの<strong>アイコン＋数値</strong>だけを表示しています。</p>
           <ul>
@@ -3107,7 +3109,7 @@
           </ul>
           <p>詳しい原作の定義は <a href="https://www.mycryptoheroes.net/ja/help-posts/7iMLBLL1sMJ9Rlk2Fv2Zmj" target="_blank" rel="noopener">MCH ヘルプ：パラメーター</a> を参照してください。</p>
         </section>
-        <section class="help-page" data-help-page="terms">
+        <section class="help-page" data-help-page="terms" data-i18n-html="help.body.terms">
           <h3>カードに出てくる用語</h3>
           <ul>
             <li><strong>戦闘中ずっと</strong> — その効果は<strong>そのバトルが終わるまで</strong>続きます。次のバトルでは元の値に戻ります（例: <code>PHY +3（戦闘中ずっと）</code>）。</li>
@@ -3130,7 +3132,7 @@
           </ul>
           <p style="font-size:0.78rem;color:var(--muted)">※ パーティ編成（3 人 vs 3 人）はVer.1.0.0から有効です。前衛・中衛・後衛の並びはタイトルから入って編成画面で確認できます。</p>
         </section>
-        <section class="help-page" data-help-page="battle">
+        <section class="help-page" data-help-page="battle" data-i18n-html="help.body.battle">
           <h3>バトルロジック（概要）</h3>
           <p>数式は <strong>My Crypto Heroes 公式ヘルプ</strong>に沿った簡略実装です。一次ソースへのリンクを併記します。</p>
           <h3>ダメージとカット率</h3>

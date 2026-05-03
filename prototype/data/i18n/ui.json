@@ -167,7 +167,7 @@
   "card.estimate":             { "ja": "想定", "en": "est." },
 
   "intent.front":              { "ja": "先頭", "en": "Front" },
-  "intent.dmg":                { "ja": "ダメージ", "en": "dmg" },
+  "intent.dmg":                { "ja": "ダメージ", "en": "DMG" },
   "intent.poison":             { "ja": "毒",   "en": "Poison" },
   "intent.bleed":              { "ja": "出血", "en": "Bleed" },
   "intent.heal":               { "ja": "回復", "en": "Heal" },
@@ -228,5 +228,39 @@
   "help.tab.battle":           { "ja": "バトル", "en": "Battle" },
   "help.tab.targeting":        { "ja": "対象指定", "en": "Targeting" },
   "help.tab.party":            { "ja": "パーティ", "en": "Party" },
-  "help.tab.shop":             { "ja": "ショップ / クラフト", "en": "Shop / Craft" }
+  "help.tab.shop":             { "ja": "ショップ / クラフト", "en": "Shop / Craft" },
+
+  "help.nav.goal":             { "ja": "目的", "en": "Goal" },
+  "help.nav.controls":         { "ja": "操作", "en": "Controls" },
+  "help.nav.params":           { "ja": "パラメーター", "en": "Stats" },
+  "help.nav.terms":            { "ja": "用語", "en": "Terms" },
+  "help.nav.battle":           { "ja": "バトル", "en": "Battle" },
+
+  "help.body.goal": {
+    "ja": "<h3>ゲームの目的</h3><p>このプロトタイプは、<strong>マップ上でノードを選びながら進むローグライク</strong>と、<strong>ターン制のカードバトル</strong>を組み合わせた体験の検証用です。</p><p>ゴールド（GUM）を稼ぎ、デッキにエクステンション由来のカードを加えながら、最終層のボスを倒してランをクリアすることを目指します。</p><p>歴史偉人をリーダーに据え、<a href=\"https://github.com/bearko/mycryptoheroes\" target=\"_blank\" rel=\"noopener\">mycryptoheroes</a> のアセットで見た目を構成しています（利用はリポジトリのライセンスに従ってください）。</p>",
+    "en": "<h3>Goal</h3><p>A prototype combining a <strong>node-pick roguelike</strong> map with <strong>turn-based card battles</strong>.</p><p>Earn GUM, add Extension cards to your deck, beat the final boss to clear the run.</p><p>Heroes are historical figures from <a href=\"https://github.com/bearko/mycryptoheroes\" target=\"_blank\" rel=\"noopener\">mycryptoheroes</a> (used under that repo's license)."
+  },
+  "help.body.controls": {
+    "ja": "<h3>操作方法</h3><h3>マップ</h3><ul><li><strong>下から上</strong>へ進みます。緑のノードから次が選べます。</li><li><strong>休憩</strong>で HP 回復、<strong>店</strong>で GUM を消費してカード購入。</li></ul><h3>戦闘</h3><ul><li>手札は<strong>1 タップでフォーカス</strong>、<strong>同じカードを再タップで使用</strong>。</li><li>右の<strong>ターン終了</strong>でターン交代。左の山札アイコンで残り枚数を確認。</li><li>勝利時は<strong>VICTORY</strong> → タップで報酬選択へ。</li></ul><h3>その他</h3><ul><li>このヘルプは <kbd>Esc</kbd> でも閉じられます。</li></ul>",
+    "en": "<h3>Controls</h3><h3>Map</h3><ul><li>Move <strong>bottom → top</strong>. Pick the next node from the green ones.</li><li><strong>Rest</strong> heals HP. <strong>Shop</strong> spends GUM for cards.</li></ul><h3>Battle</h3><ul><li>Hand cards: <strong>tap once to focus</strong>, <strong>tap the same card again to play</strong>.</li><li><strong>End Turn</strong> on the right. Tap the deck icon to see remaining count.</li><li>Win → <strong>VICTORY</strong> → tap for reward.</li></ul><h3>Other</h3><ul><li>Press <kbd>Esc</kbd> to close this help.</li></ul>"
+  },
+  "help.body.params": {
+    "ja": "<h3>パラメーター</h3><ul><li><strong>HP</strong> — 0 で敗北 / 撃破。<code>現在/最大</code>。</li><li><strong>PHY</strong> — 物理攻撃の基礎値。</li><li><strong>INT</strong> — 知略攻撃 + 回復係数の基礎値。</li><li><strong>AGI</strong> — クリティカル率に反映。</li><li><strong>🛡 ガード</strong> — 受ける PHY/INT を先に削る。ターン開始でリセット。</li><li><strong>✦ シールド</strong> — 特殊ダメージのみ吸収。リセットなし。</li></ul><p>原作の定義は <a href=\"https://www.mycryptoheroes.net/ja/help-posts/7iMLBLL1sMJ9Rlk2Fv2Zmj\" target=\"_blank\" rel=\"noopener\">MCH ヘルプ</a> 参照。</p>",
+    "en": "<h3>Stats</h3><ul><li><strong>HP</strong> — 0 = defeat / KO. Shown as <code>current/max</code>.</li><li><strong>PHY</strong> — base for physical attacks.</li><li><strong>INT</strong> — base for magic + heal coefficient.</li><li><strong>AGI</strong> — feeds the crit rate.</li><li><strong>🛡 Guard</strong> — soaks incoming PHY/INT this turn. Resets at turn start.</li><li><strong>✦ Shield</strong> — soaks special damage only. Persistent.</li></ul><p>See the <a href=\"https://www.mycryptoheroes.net/ja/help-posts/7iMLBLL1sMJ9Rlk2Fv2Zmj\" target=\"_blank\" rel=\"noopener\">MCH stat help</a> for the upstream definitions.</p>"
+  },
+  "help.body.terms": {
+    "ja": "<h3>カード用語</h3><ul><li><strong>戦闘中ずっと</strong> — その戦闘の終わりまで持続。次戦闘でリセット。</li><li><strong>【消耗】</strong> — 使用後に除外、山札 / 捨て札に戻らない。</li><li><strong>ガード +N</strong> — このターン PHY/INT を N 先に削る。ターン開始でリセット。</li><li><strong>シールド +N</strong> — 特殊ダメージのみ吸収、リセットなし。</li><li><strong>ドロー N</strong> — 山札から N 枚引く。</li><li><strong>毒 ×N</strong> — 各ターン開始時に N ダメージ（スタック）。</li><li><strong>出血 ×N</strong> — 行動 / カード使用ごとに N ダメージ（スタック）。</li></ul><h3>ターゲット表示</h3><ul><li><strong style=\"color:#ff8090\">先頭</strong>（赤）— 最も画面中央寄りの敵。</li><li><strong style=\"color:#ff8090\">全</strong>（赤）— 敵全体。</li><li><strong style=\"color:#2ecc71\">自身</strong>（緑）— カード使用者本人。</li><li><strong style=\"color:#2ecc71\">前衛 / 中衛 / 後衛</strong>（緑）— 味方陣営。</li><li><strong style=\"color:#c8b6e6\">All</strong>（紫）— 敵味方すべて。</li><li><strong>Hi PHY / Lo HP</strong> 等 — そのステータスが最高 / 最低の対象。</li></ul>",
+    "en": "<h3>Card terms</h3><ul><li><strong>Whole battle</strong> — lasts until this battle ends; resets next battle.</li><li><strong>[Exhaust]</strong> — removed after use, doesn't return to draw / discard.</li><li><strong>Guard +N</strong> — soaks PHY/INT this turn; resets at turn start.</li><li><strong>Shield +N</strong> — soaks special DMG only; persistent.</li><li><strong>Draw N</strong> — draw N from the deck.</li><li><strong>Poison ×N</strong> — N DMG at each turn start (stacks).</li><li><strong>Bleed ×N</strong> — N DMG per action / card play (stacks).</li></ul><h3>Target tags</h3><ul><li><strong style=\"color:#ff8090\">Front</strong> (red) — frontmost living enemy.</li><li><strong style=\"color:#ff8090\">All</strong> (red) — every enemy.</li><li><strong style=\"color:#2ecc71\">Self</strong> (green) — the card's caster.</li><li><strong style=\"color:#2ecc71\">Front / Mid / Back</strong> (green) — ally side.</li><li><strong style=\"color:#c8b6e6\">All</strong> (purple) — both sides.</li><li><strong>Hi PHY / Lo HP</strong> etc. — highest / lowest of that stat.</li></ul>"
+  },
+  "help.body.battle": {
+    "ja": "<h3>バトルロジック</h3><p><strong>My Crypto Heroes 公式ヘルプ</strong>準拠の簡略実装。</p><h3>ダメージとカット率</h3><ul><li>PHY 受側カット率: <code>min(40%, floor(相手PHY ÷ 2))</code></li><li>INT 受側カット率: <code>min(40%, floor(相手INT ÷ 2))</code></li><li>最終ダメージ: <code>floor(攻撃側ステ × スキル% ÷ 100 × (100 − カット率) ÷ 100)</code></li></ul><p><a href=\"https://www.mycryptoheroes.net/ja/help-posts/11ek6KSt0fq0x5gdUeKlie\" target=\"_blank\" rel=\"noopener\">公式：ダメージ</a></p><h3>クリティカル</h3><p>追加ダメージは<strong>戦闘開始時の基礎ステ</strong>で再計算（バフ・デバフ除外）、カット率は適用。</p><p><a href=\"https://www.mycryptoheroes.net/ja/help-posts/3HfmOjuWDSyw1isnhnLSfv\" target=\"_blank\" rel=\"noopener\">公式：クリティカル</a></p><h3>回復</h3><p>INT 回復: 係数 <code>(術者INT + 対象PHY) ÷ 2</code> × スキル %。</p><h3>シールド</h3><p>特殊ダメージのみシールドが減り、溢れた分が HP に。</p><h3>権利表記</h3><p>ロジックは <a href=\"https://github.com/bearko/mycryptotactics/blob/main/prototype/js/battle-mch.js\" target=\"_blank\" rel=\"noopener\">battle-mch.js</a>。アセット利用条件は <a href=\"https://github.com/bearko/mycryptoheroes/blob/main/README.md\" target=\"_blank\" rel=\"noopener\">README</a>。</p>",
+    "en": "<h3>Battle logic</h3><p>Simplified port of the <strong>My Crypto Heroes</strong> official rules.</p><h3>Damage & cut rate</h3><ul><li>PHY cut rate: <code>min(40%, floor(target PHY ÷ 2))</code></li><li>INT cut rate: <code>min(40%, floor(target INT ÷ 2))</code></li><li>Final dmg: <code>floor(attacker stat × skill% ÷ 100 × (100 − cut) ÷ 100)</code></li></ul><p><a href=\"https://www.mycryptoheroes.net/ja/help-posts/11ek6KSt0fq0x5gdUeKlie\" target=\"_blank\" rel=\"noopener\">Official: damage</a></p><h3>Critical</h3><p>Bonus dmg is recomputed from <strong>base stats at battle start</strong> (buffs/debuffs excluded); cut rate still applies.</p><p><a href=\"https://www.mycryptoheroes.net/ja/help-posts/3HfmOjuWDSyw1isnhnLSfv\" target=\"_blank\" rel=\"noopener\">Official: critical</a></p><h3>Healing</h3><p>INT heal: <code>(caster INT + target PHY) ÷ 2 × skill%</code> goes to HP.</p><h3>Shield</h3><p>Only special damage spends shield; overflow hits HP.</p><h3>Credits</h3><p>Logic in <a href=\"https://github.com/bearko/mycryptotactics/blob/main/prototype/js/battle-mch.js\" target=\"_blank\" rel=\"noopener\">battle-mch.js</a>. Asset use terms: <a href=\"https://github.com/bearko/mycryptoheroes/blob/main/README.md\" target=\"_blank\" rel=\"noopener\">README</a>.</p>"
+  },
+
+  "shop.remove.pick":          { "ja": "破棄するカードを選んでください", "en": "Pick a card to remove" },
+  "shop.remove.confirm":       { "ja": "破棄", "en": "Remove" },
+  "shop.upgrade.pick":         { "ja": "ランクアップするカードを選んでください", "en": "Pick a card to rank up" },
+  "shop.upgrade.confirm":      { "ja": "ランクアップ", "en": "Rank Up" },
+  "clog.removed":              { "ja": "破棄: {name}（-{n} GUM）", "en": "Removed: {name} (-{n} GUM)" },
+  "clog.shopUpgrade":          { "ja": "ショップ打ち直し: {from} → {to}（-{n} GUM、コスト据え置き）", "en": "Shop Rank Up: {from} → {to} (-{n} GUM, cost preserved)" }
 }

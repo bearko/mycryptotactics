@@ -174,8 +174,9 @@ const RUNTIME_REPLACEMENTS = [
   [/INT最高/g, "Highest INT"],
   [/HP最高/g,  "Highest HP"],
   [/AGI最高/g, "Highest AGI"],
-  [/PHYダメ/g, "PHY dmg"],
-  [/INTダメ/g, "INT dmg"],
+  [/PHYダメ/g, "PHY DMG"],
+  [/INTダメ/g, "INT DMG"],
+  [/ダメ\b/g, "DMG"],
   [/PHY攻撃/g, "PHY attack"],
   [/INT攻撃/g, "INT attack"],
   [/出血/g, "Bleed"],
@@ -184,7 +185,7 @@ const RUNTIME_REPLACEMENTS = [
   [/ガード/g, "Guard"],
   [/シールド/g, "Shield"],
   [/回復/g, "Heal"],
-  [/ダメージ/g, "damage"],
+  [/ダメージ/g, "DMG"],
   [/敵全体/g, "all enemies"],
   [/味方全体/g, "all allies"],
   [/先頭の敵/g, "the front enemy"],
@@ -250,6 +251,145 @@ const CHAPTER_NAME_MAP_JA_EN = {
   "ホレリス":         "Hollerith",
   "トロイ":           "Troy",
 };
+
+/** TargetSpec → short EN tag (e.g. "self" / "Front" / "All" / "Hi PHY").
+ *  Falls back to raw label in JA mode. Designed for the card target pill
+ *  which has very limited width (1–2 short words).
+ */
+const TARGET_LABEL_EN = {
+  "self":             "Self",
+  "ally.front":       "Front",
+  "ally.mid":         "Mid",
+  "ally.back":        "Back",
+  "ally.foremost":    "Front",
+  "ally.rearmost":    "Rear",
+  "ally.all":         "All",
+  "ally.random":      "Rnd",
+  "ally.highest_phy": "Hi PHY",
+  "ally.lowest_phy":  "Lo PHY",
+  "ally.highest_int": "Hi INT",
+  "ally.lowest_int":  "Lo INT",
+  "ally.highest_hp":  "Hi HP",
+  "ally.lowest_hp":   "Lo HP",
+  "enemy.front":       "Front",
+  "enemy.mid":         "Mid",
+  "enemy.back":        "Back",
+  "enemy.foremost":    "Front",
+  "enemy.rearmost":    "Rear",
+  "enemy.all":         "All",
+  "enemy.random":      "Rnd",
+  "enemy.highest_phy": "Hi PHY",
+  "enemy.lowest_phy":  "Lo PHY",
+  "enemy.highest_int": "Hi INT",
+  "enemy.lowest_int":  "Lo INT",
+  "enemy.highest_hp":  "Hi HP",
+  "enemy.lowest_hp":   "Lo HP",
+  "all":               "All",
+  "all.random":        "AllRnd",
+};
+
+export function tTargetLabel(spec, jaLabel) {
+  if (_lang === "ja") return jaLabel ?? spec ?? "";
+  return TARGET_LABEL_EN[spec] || jaLabel || spec || "";
+}
+
+/** Caster role short EN labels (mirrors caster.js CASTER_ROLE_LABELS). */
+const CASTER_ROLE_EN = {
+  front:        "Front",
+  mid:          "Mid",
+  back:         "Back",
+  foremost:     "Front",
+  rearmost:     "Rear",
+  highest_phy:  "Hi PHY",
+  highest_int:  "Hi INT",
+  highest_hp:   "Hi HP",
+};
+
+export function tCasterLabel(role, jaLabel) {
+  if (_lang === "ja") return jaLabel ?? role ?? "";
+  return CASTER_ROLE_EN[role] || jaLabel || role || "";
+}
+
+/**
+ * 戦闘ログ (clog) で見かける慣用的な日本語フレーズを EN に短く翻訳する。
+ * 動的に挿入されるヒーロー名・敵名・カード名は別途 tHero/tEnemy/tExt を
+ * 通すので、ここはテンプレ部分のみカバー。
+ */
+const COMBAT_LOG_REPLACEMENTS = [
+  // 角括弧つきヒーロー名・カード名は EN モードでは括弧記号もそのままで OK
+  [/\bダメ\b/g, "DMG"],
+  [/\bダメージ\b/g, "DMG"],
+  [/が\【/g, " used ["],
+  [/\】を使用/g, "]"],
+  [/\】 ?発動/g, "] triggered"],
+  [/発動！/g, "triggered!"],
+  [/に出血\s*[×x]\s*(\d+)/g, " → Bleed×$1"],
+  [/に毒\s*[×x]\s*(\d+)/g, " → Poison×$1"],
+  [/出血ダメージ\s*(\d+)/g, "Bleed dmg $1"],
+  [/毒ダメージ\s*(\d+)/g, "Poison dmg $1"],
+  [/休憩で HP\+(\d+)/g, "Rested for HP +$1"],
+  [/購入:?\s*/g, "Purchased: "],
+  [/シールド\s*(\d+)/g, "Shield $1"],
+  [/ガード\s*\+(\d+)/g, "Guard +$1"],
+  [/ドロー\s*(\d+)/g, "Draw $1"],
+  [/カードを\s*(\d+)\s*枚引く/g, "draw $1"],
+  [/(\d+)\s*ダメ\b/g, "$1 DMG"],
+  [/(\d+)\s*回復/g, "+$1 HP"],
+  [/(\d+)\s*HP/g, "$1 HP"],
+];
+
+/**
+ * Reverse name index: { jaName → enName } for heroes / extensions / enemies.
+ * Built lazily from the loaded i18n JSON tables. The original game stores
+ * proper-noun JA strings in many places (cards.js play(), boss intent etc.),
+ * so the combat-log post-processor scans for any known JA name and swaps to
+ * EN. We sort by length DESC so longer names match first ("ゴースト・上杉
+ * 謙信" before "上杉謙信").
+ */
+let _nameJaEnIndex = null;
+function ensureNameIndex() {
+  if (_nameJaEnIndex) return _nameJaEnIndex;
+  const out = new Map();
+  // We don't have JA-side names here (only EN tables loaded). The runtime
+  // injects them through tHero/tEnemy/tExt at the call site. For combat
+  // log we instead rely on the calling code to swap names; this map stays
+  // empty until we learn names dynamically.
+  _nameJaEnIndex = out;
+  return out;
+}
+
+/** Allow runtime registration of a JA→EN name mapping (called from main.js
+ *  when heroes / enemies / extensions data is loaded). */
+export function registerNameMapping(jaName, enName) {
+  if (!jaName || !enName || jaName === enName) return;
+  const idx = ensureNameIndex();
+  idx.set(jaName, enName);
+  _sortedKeys = null;
+}
+
+let _sortedKeys = null;
+function sortedKeys() {
+  if (_sortedKeys) return _sortedKeys;
+  const idx = ensureNameIndex();
+  _sortedKeys = [...idx.keys()].sort((a, b) => b.length - a.length);
+  return _sortedKeys;
+}
+
+export function translateCombatLog(text) {
+  if (_lang === "ja" || !text) return text ?? "";
+  let out = String(text);
+  // 1) Substitute proper nouns first (longest-first to avoid prefix collision)
+  const idx = ensureNameIndex();
+  for (const ja of sortedKeys()) {
+    if (out.indexOf(ja) >= 0) {
+      const en = idx.get(ja);
+      out = out.split(ja).join(en);
+    }
+  }
+  // 2) Pattern translations
+  for (const [re, rep] of COMBAT_LOG_REPLACEMENTS) out = out.replace(re, rep);
+  return out;
+}
 
 export function tChapterName(jaName) {
   if (_lang === "ja" || !jaName) return jaName ?? "";
