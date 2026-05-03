@@ -102,7 +102,50 @@ export function tPassive(heroId, jaName) {
 export function tPassiveText(heroId, jaText) {
   if (_lang === "ja") return jaText ?? "";
   const e = _lookupEn(_heroes, heroId);
-  return (e && e.passiveText) ? e.passiveText : (jaText ?? "");
+  const raw = (e && e.passiveText) ? e.passiveText : (jaText ?? "");
+  return condensePassiveText(raw);
+}
+
+/**
+ * Shorten the upstream MCH English passive text — verbose by default
+ * ("After this hero uses an Active Skill, {triggerRate}% chance to trigger.
+ *   / Decrease the first ally's PHY by 15% of this hero's PHY. / ...")
+ * → terse game-y phrasing readable at a glance.
+ */
+function condensePassiveText(text) {
+  if (!text) return "";
+  let s = String(text);
+  // Trigger preludes → compact tag at the start
+  s = s.replace(/At the start of battle,?\s*\{triggerRate\}%\s*chance to trigger\.\s*\/?/gi, "[Battle start, {triggerRate}%]: ");
+  s = s.replace(/At the start of battle,?\s*/gi, "[Battle start]: ");
+  s = s.replace(/At the end of (?:the |this )?turn,?\s*\{triggerRate\}%\s*chance to trigger\.\s*\/?/gi, "[Turn end, {triggerRate}%]: ");
+  s = s.replace(/At the start of (?:the |this )?turn,?\s*\{triggerRate\}%\s*chance to trigger\.\s*\/?/gi, "[Turn start, {triggerRate}%]: ");
+  s = s.replace(/After this hero (?:uses|casts) an Active Skill,?\s*\{triggerRate\}%\s*chance to trigger\.\s*\/?/gi, "[After Active, {triggerRate}%]: ");
+  s = s.replace(/After this hero takes damage(?: from an Active Skill)?,?\s*\{triggerRate\}%\s*chance to trigger\.\s*\/?/gi, "[On damaged, {triggerRate}%]: ");
+  s = s.replace(/(?:If|When) this hero(?:'s)? HP (?:is|drops|becomes) (?:less than|below|under)\s*(\d+)% ,?\s*\{triggerRate\}%\s*chance to trigger(?: once)?\.\s*\/?/gi, "[HP<$1%, once, {triggerRate}%]: ");
+  s = s.replace(/(?:If|When) this hero(?:'s)? HP (?:is|drops|becomes) (?:less than|below|under)\s*(\d+)% ,?\s*/gi, "[HP<$1%]: ");
+  // "Deal damage to the first enemy equal to N% of this hero's PHY" → "first enemy: N% PHY"
+  s = s.replace(/Deal damage to the first enemy equal to (\d+)% of this hero's (PHY|INT)\.?/gi, "front enemy: $1% $2 dmg.");
+  s = s.replace(/Deal damage to the last enemy equal to (\d+)% of this hero's (PHY|INT)\.?/gi, "back enemy: $1% $2 dmg.");
+  s = s.replace(/Deal damage to all enemies equal to (\d+)% of this hero's (PHY|INT)\.?/gi, "all enemies: $1% $2 dmg.");
+  s = s.replace(/Deal damage to the enemy with the highest (PHY|INT|HP) equal to (\d+)% of this hero's (PHY|INT)\.?/gi, "highest-$1 enemy: $2% $3 dmg.");
+  // Increase / Decrease X stat
+  s = s.replace(/Increase the first ally's (PHY|INT|AGI|HP) by (\d+)% of this hero's (PHY|INT|AGI|HP)\.?/gi, "front ally: $1 +$2% (self $3).");
+  s = s.replace(/Increase all allies' (PHY|INT|AGI|HP) by (\d+)% of this hero's (PHY|INT|AGI|HP)\.?/gi, "all allies: $1 +$2% (self $3).");
+  s = s.replace(/Increase this hero's (PHY|INT|AGI|HP) by (\d+)% of this hero's (PHY|INT|AGI|HP)\.?/gi, "self: $1 +$2% (self $3).");
+  s = s.replace(/Increase this hero's max (PHY|INT|AGI|HP) by (\d+)\.?/gi, "self: max-$1 +$2.");
+  s = s.replace(/Decrease the first ally's (PHY|INT|AGI|HP) by (\d+)% of this hero's (PHY|INT|AGI|HP)\.?/gi, "front ally: $1 -$2% (self $3).");
+  s = s.replace(/Decrease the first enemy's (PHY|INT|AGI|HP) by (\d+)% of this hero's (PHY|INT|AGI|HP)\.?/gi, "front enemy: $1 -$2% (self $3).");
+  s = s.replace(/Decrease all enemies' (PHY|INT|AGI|HP) by (\d+)% of this hero's (PHY|INT|AGI|HP)\.?/gi, "all enemies: $1 -$2% (self $3).");
+  // Status conditions
+  s = s.replace(/\{successRate\}% chance to inflict (Bleed|Poison) on the (first|last|highest-PHY|highest-INT|highest-HP) enemy\.?/gi, "{successRate}% $2 enemy → $1.");
+  s = s.replace(/\{successRate\}% chance to inflict (Bleed|Poison) on all enemies\.?/gi, "{successRate}% all enemies → $1.");
+  // Generic cleanup
+  s = s.replace(/this hero's /gi, "self ");
+  s = s.replace(/this hero/gi, "self");
+  s = s.replace(/\s*\/\s*/g, " · ");
+  s = s.replace(/\s+/g, " ").trim();
+  return s;
 }
 
 export function tExt(extId, jaName) {
@@ -190,6 +233,32 @@ export function translateGameText(text) {
     out = out.replace(pat, rep);
   }
   return out.trim();
+}
+
+/**
+ * Translate MCT chapter / node codenames (Japanese ↔ English).
+ * The full chapter name is "node : <codename>" in JA — we strip the prefix,
+ * translate the codename, and rebuild as "node : <Codename>" for EN.
+ *
+ * Codenames are MCT proper nouns (well-known computers / pioneers / sites)
+ * authored by the user; mapping list is fixed per user direction.
+ */
+const CHAPTER_NAME_MAP_JA_EN = {
+  "アバカス":         "Abacus",
+  "アタナソフ":       "Atanasoff",
+  "アンティキティラ": "Antikythera",
+  "ホレリス":         "Hollerith",
+  "トロイ":           "Troy",
+};
+
+export function tChapterName(jaName) {
+  if (_lang === "ja" || !jaName) return jaName ?? "";
+  // Match patterns "node : XXX" / "node :XXX" / bare "XXX"
+  const m = String(jaName).match(/^(node\s*:\s*)?(.+)$/);
+  const prefix = m && m[1] ? m[1] : "";
+  const body   = m && m[2] ? m[2] : String(jaName);
+  const en = CHAPTER_NAME_MAP_JA_EN[body];
+  return en ? (prefix ? "node : " + en : en) : jaName;
 }
 
 /** Apply [data-i18n] attributes to update DOM text on lang change. */

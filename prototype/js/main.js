@@ -18,6 +18,7 @@ import {
   tEnemy,
   tPassive,
   tPassiveText,
+  tChapterName,
   translateGameText,
 } from "./i18n.js";
 import {
@@ -1553,7 +1554,7 @@ function advanceToNextChapter() {
   const chapter = CHAPTERS[nextIdx];
   const { nodes, edges, viewH, startY } = generateChapterMap(chapter, ENEMY_DEFS);
   setActiveMap(nodes, edges, viewH, startY);
-  clog(`── 章 ${chapter.id}「${chapter.name}」へ ──`);
+  clog(ti18n("clog.enterChapter").replace("{id}", chapter.id).replace("{name}", tChapterName(chapter.name)));
 }
 
 // ─── 現在の章カードプール（累積） ───────────────────────────────
@@ -1641,12 +1642,19 @@ function syncResources() {
   const layerEl = document.getElementById("layerVal");
   if (layerEl) {
     if (runState.runComplete) {
-      layerEl.textContent = "クリア";
+      layerEl.textContent = ti18n("layer.clear");
     } else if (!runState.lastMapNodeId) {
-      layerEl.textContent = "入口";
+      layerEl.textContent = ti18n("map.legend.entry");
     } else {
       const cur = mapNodeById(runState.lastMapNodeId);
-      layerEl.textContent = cur ? `第${cur.layer + 1}層 · ${cur.label}` : "—";
+      if (cur) {
+        const tmpl = ti18n("layer.cur");
+        layerEl.textContent = tmpl
+          .replace("{n}", cur.layer + 1)
+          .replace("{label}", cur.label);
+      } else {
+        layerEl.textContent = "—";
+      }
     }
   }
 }
@@ -1678,14 +1686,14 @@ function renderMap() {
   if (titleEl) {
     const chapter = CHAPTERS[runState.chapterIdx];
     titleEl.textContent = runState.runComplete
-      ? `全ランクリア！（${CHAPTERS.length} 章突破・トロイ制覇）`
-      : `章 ${chapter.id}「${chapter.name}」（下から上へ進む）`;
+      ? ti18n("map.title.clear").replace("{n}", CHAPTERS.length)
+      : ti18n("map.title.chapter").replace("{id}", chapter.id).replace("{name}", tChapterName(chapter.name));
   }
 
   if (runState.runComplete) {
     host.innerHTML =
-      `<p style='color:var(--accent);margin:0 0 0.75rem'>全 ${CHAPTERS.length} 章（トロイまで）をクリアしました！おめでとうございます。</p>` +
-      "<button type='button' class='action primary' id='btnRestartClear'>もう一度</button>";
+      `<p style='color:var(--accent);margin:0 0 0.75rem'>${ti18n("map.clear.body").replace("{n}", CHAPTERS.length)}</p>` +
+      `<button type='button' class='action primary' id='btnRestartClear'>${ti18n("gameover.restart")}</button>`;
     document.getElementById("btnRestartClear").addEventListener("click", resetRun);
     syncResources();
     return;
@@ -1750,7 +1758,7 @@ function renderMap() {
   const st = document.createElementNS("http://www.w3.org/2000/svg", "text");
   st.setAttribute("x", String(MAP_START_X)); st.setAttribute("y", String(activeMapStartY + 7.5));
   st.setAttribute("text-anchor", "middle"); st.setAttribute("class", "map-start-label");
-  st.textContent = "入口";
+  st.textContent = ti18n("map.legend.entry");
   startG.appendChild(st);
   svg.appendChild(startG);
 
@@ -1772,10 +1780,10 @@ function renderMap() {
     ty.setAttribute("x", String(node.x)); ty.setAttribute("y", String(node.y + 11.8));
     ty.setAttribute("text-anchor", "middle"); ty.setAttribute("class", "map-node-type");
     ty.textContent =
-      node.type === "fight"  ? (node.elite ? "レアエネミー" : "エネミー") :
-      node.type === "rest"   ? "HP回復" :
-      node.type === "shop"   ? "ショップ" :
-      node.type === "craft"  ? "クラフト" : "ボス";
+      node.type === "fight"  ? (node.elite ? ti18n("node.elite") : ti18n("node.battle")) :
+      node.type === "rest"   ? ti18n("node.rest") :
+      node.type === "shop"   ? ti18n("node.shop") :
+      node.type === "craft"  ? ti18n("node.craft") : ti18n("node.boss");
     g.appendChild(ty);
     const allowed = new Set(reachableNextNodeIds(runState.lastMapNodeId));
     if (!allowed.has(node.id)) g.style.pointerEvents = "none";
@@ -1826,8 +1834,7 @@ function renderMap() {
   const legend = document.createElement("p");
   legend.className = "map-legend";
   legend.id = "mapDynLegend";
-  legend.innerHTML =
-    "金枠＝現在地 · 緑＝次に選べる · 灰＝見送り／未到達。戦闘ノードの丸上に敵アイコン。";
+  legend.textContent = ti18n("map.legend.full");
   const mapPanel = host.parentNode;
   if (mapPanel && host.nextSibling) mapPanel.insertBefore(legend, host.nextSibling);
   else if (mapPanel) mapPanel.appendChild(legend);
@@ -2106,7 +2113,7 @@ function startCombatFromMapNode(node) {
   const stageTitleEl = document.getElementById("combatStageTitle");
   if (stageTitleEl) {
     const chapter = CHAPTERS[runState.chapterIdx];
-    stageTitleEl.textContent = chapter.name;
+    stageTitleEl.textContent = tChapterName(chapter.name);
   }
 
   const bgFile = isBoss ? "1004" : node.elite ? "1002" : "1001";
@@ -2114,11 +2121,15 @@ function startCombatFromMapNode(node) {
   document.getElementById("leaderImg").src = LEADER.img();
   document.getElementById("leaderName").textContent = tHero(LEADER.heroId, LEADER.nameJa);
   document.getElementById("enemyImg").src = ENEMY_IMG(enemyDef.imgId);
-  document.getElementById("enemyName").textContent = tEnemy(enemyDef.id, combat.enemyName);
+  // Enemy EN lookup is keyed by imgId (MCH master), not by gameplay id "sn-001" etc.
+  document.getElementById("enemyName").textContent = tEnemy(enemyDef.imgId, combat.enemyName);
   document.getElementById("clog").innerHTML = "";
-  clog(`戦闘開始 vs ${enemyDef.name}${isBoss ? "（ボス）" : node.elite ? "（精鋭）" : ""}`);
+  const enemyDispLogName = tEnemy(enemyDef.imgId, enemyDef.name);
+  const battleSuffix = isBoss ? ti18n("combat.tag.boss")
+    : node.elite ? ti18n("combat.tag.elite") : "";
+  clog(ti18n("combat.start").replace("{name}", enemyDispLogName) + battleSuffix);
   if (isBoss && (enemyDef.initialShield || 0) > 0) {
-    clog(`ボスはシールド ${enemyDef.initialShield} を持ちます！`);
+    clog(ti18n("combat.boss.shield").replace("{n}", enemyDef.initialShield));
   }
   applyHeroPassiveOnCombatStart(combat);
   syncLlExtSlots();
@@ -2149,46 +2160,51 @@ function estEnemyIntDmg(pct) {
 function intentText() {
   const it = combat?.enemyIntent;
   if (!it) return "—";
+  // i18n: 「先頭」「ダメージ」「毒」「出血」等を ti18n に切替
+  const front = ti18n("intent.front");
+  const dmg   = ti18n("intent.dmg");
+  const poison = ti18n("intent.poison");
+  const bleed  = ti18n("intent.bleed");
   switch (it.kind) {
     case "attack": {
       const d = estEnemyPhyDmg(it.phyPct);
-      return `先頭：${d} ダメージ`;
+      return `${front}: ${d} ${dmg}`;
     }
     case "attackPoison": {
       const d = estEnemyPhyDmg(it.phyPct);
-      return `先頭：${d} ダメージ ＋毒×${it.poisonStacks}`;
+      return `${front}: ${d} ${dmg} +${poison}×${it.poisonStacks}`;
     }
     case "attackBleed": {
       const d = estEnemyPhyDmg(it.phyPct);
-      return `先頭：${d} ダメージ ＋出血×${it.bleedStacks}`;
+      return `${front}: ${d} ${dmg} +${bleed}×${it.bleedStacks}`;
     }
     case "attackDouble": {
       const d = estEnemyPhyDmg(it.phyPct);
-      return `先頭：${d} ダメージ ×2`;
+      return `${front}: ${d} ${dmg} ×2`;
     }
     case "attackInt": {
       const d = estEnemyIntDmg(it.intPct);
-      return `先頭：${d} ダメージ（INT）`;
+      return `${front}: ${d} ${dmg} (INT)`;
     }
     case "attackIntDouble": {
       const d = estEnemyIntDmg(it.intPct);
-      return `先頭：${d} ダメージ（INT）×2`;
+      return `${front}: ${d} ${dmg} (INT)×2`;
     }
     case "healSelf": {
       const h = Math.max(1, Math.floor(combat.enemyHpMax * it.pct / 100));
-      return `自己回復：${h} HP`;
+      return `${ti18n("intent.heal")}: ${h} HP`;
     }
     case "buffSelf": {
       const parts = [];
       if (it.phyAdd) parts.push(`PHY+${it.phyAdd}`);
       if (it.intAdd) parts.push(`INT+${it.intAdd}`);
-      return `強化：${parts.join(' ')}`;
+      return `${ti18n("intent.buff")}: ${parts.join(' ')}`;
     }
     case "guard":
-      return `防御：GRD+${it.value}`;
+      return `${ti18n("intent.guard")}: GRD+${it.value}`;
     case "special": {
       const d = Math.max(1, Math.floor(combat.playerHpMax * it.pct / 100));
-      return `先頭：${d} ダメージ（特殊）`;
+      return `${front}: ${d} ${dmg} (${ti18n("intent.special")})`;
     }
     default:
       return "—";
@@ -7063,9 +7079,14 @@ function renderNodeSelect(justUnlockedIdx = null) {
   if (!el) return;
 
   // CHAPTERS のみ（トロイ実装済みのため最終目標 TROY エントリは廃止）
-  const goals = CHAPTERS.map((ch, idx) => ({ idx, name: ch.name.replace('node : ', ''), chapter: ch }));
+  // EN モードでは codename を翻訳 (アバカス → Abacus etc.)
+  const goals = CHAPTERS.map((ch, idx) => {
+    const bare = ch.name.replace('node : ', '');
+    const trBare = tChapterName(bare); // strips no prefix → translates bare codename
+    return { idx, name: trBare, chapter: ch };
+  });
 
-  let html = '<div class="ns-header"><h2>node を選択してください</h2><p class="ns-sub">ボスを倒すと次の node が解放されます</p></div>';
+  let html = `<div class="ns-header"><h2>${escapeHtml(ti18n("node.select.title"))}</h2><p class="ns-sub">${escapeHtml(ti18n("node.select.sub"))}</p></div>`;
   html += '<div class="ns-cards">';
 
   goals.forEach((goal) => {
@@ -7098,7 +7119,7 @@ function renderNodeSelect(justUnlockedIdx = null) {
 
     if (!isUnlocked) {
       // ロック中
-      html += '<div class="ns-card-lock-overlay"><span class="ns-lock-icon">🔒</span><span class="ns-lock-label">ロック中</span></div>';
+      html += `<div class="ns-card-lock-overlay"><span class="ns-lock-icon">🔒</span><span class="ns-lock-label">${escapeHtml(ti18n("node.locked"))}</span></div>`;
     } else {
       // 出現エネミー（通常 + フラペチーノ）
       const enemyIds = [...(ch.enemyPool || []), ...(ch.elitePool || [])].slice(0, 4);
@@ -7107,7 +7128,8 @@ function renderNodeSelect(justUnlockedIdx = null) {
         enemyIds.forEach(id => {
           const def = ENEMY_DEFS[id];
           if (def) {
-            html += `<img class="ns-enemy-img" src="${ENEMY_IMG(def.imgId)}" alt="${def.name}" title="${def.name}" />`;
+            const enName = tEnemy(def.imgId, def.name);
+            html += `<img class="ns-enemy-img" src="${ENEMY_IMG(def.imgId)}" alt="${escapeHtml(enName)}" title="${escapeHtml(enName)}" />`;
           }
         });
         html += '</div>';
@@ -7116,16 +7138,17 @@ function renderNodeSelect(justUnlockedIdx = null) {
       // ボス
       const bossDef = ch.bossId ? BOSS_DEFS[ch.bossId] : null;
       if (bossDef) {
+        const bossName = tEnemy(bossDef.imgId, bossDef.name);
         html += '<div class="ns-boss-row">';
         html += '<span class="ns-boss-label">boss</span>';
-        html += `<img class="ns-boss-img" src="${ENEMY_IMG(bossDef.imgId)}" alt="${bossDef.name}" />`;
-        html += `<span class="ns-boss-name">${bossDef.name}</span>`;
+        html += `<img class="ns-boss-img" src="${ENEMY_IMG(bossDef.imgId)}" alt="${escapeHtml(bossName)}" />`;
+        html += `<span class="ns-boss-name">${escapeHtml(bossName)}</span>`;
         html += '</div>';
       }
 
       // クリア済みバッジ
       if (isCleared) {
-        html += '<div class="ns-cleared-badge">✓ クリア済み</div>';
+        html += `<div class="ns-cleared-badge">${escapeHtml(ti18n("node.cleared"))}</div>`;
       }
     }
 
@@ -7165,17 +7188,23 @@ function togglePassivePopup() {
     popup.classList.add("hidden");
     return;
   }
-  const heroName   = LEADER.nameJa        || "—";
-  const skillName  = LEADER.passiveName   || "—";
-  // β1: trigger 別倍率を効果数値に反映した文言で表示
-  const rawDesc    = LEADER.passiveDesc   || "—";
-  const skillDesc  = LEADER.passiveKey
-    ? multiplyPassiveDescription(LEADER.passiveKey, rawDesc)
-    : rawDesc;
+  const heroName   = tHero(LEADER.heroId, LEADER.nameJa) || "—";
+  const skillName  = tPassive(LEADER.heroId, LEADER.passiveName || "") || "—";
+  // EN モードは MCH CSV の英訳を condense して表示。
+  // JA モードは従来通り trigger 倍率を係数埋め込み (multiplyPassiveDescription)。
+  let skillDesc;
+  if (getLang() === "en") {
+    skillDesc = tPassiveText(LEADER.heroId, LEADER.passiveDesc || "—");
+  } else {
+    const rawDesc = LEADER.passiveDesc || "—";
+    skillDesc = LEADER.passiveKey
+      ? multiplyPassiveDescription(LEADER.passiveKey, rawDesc)
+      : rawDesc;
+  }
   popup.innerHTML =
-    `<div class="pp-hero-name">${heroName}</div>` +
-    `<div class="pp-skill-name">【${skillName}】</div>` +
-    `<div class="pp-skill-desc">${skillDesc}</div>`;
+    `<div class="pp-hero-name">${escapeHtml(heroName)}</div>` +
+    `<div class="pp-skill-name">【${escapeHtml(skillName)}】</div>` +
+    `<div class="pp-skill-desc">${escapeHtml(skillDesc)}</div>`;
   popup.classList.remove("hidden");
 }
 
@@ -7204,7 +7233,9 @@ function renderRegulationSelect() {
     html += `</div>`;
     html += `<div class="rs-card-body">`;
     html += `<div class="rs-card-name" style="color:${r.color}">${escapeHtml(r.nameJa)}</div>`;
-    html += `<div class="rs-card-desc">${r.descShort}</div>`;
+    // Use per-regulation i18n key for descShort, fall back to literal JA on missing
+    const descTr = ti18n("regulation.desc." + r.id, r.descShort);
+    html += `<div class="rs-card-desc">${escapeHtml(descTr)}</div>`;
     if (isUnlocked) {
       // SPEC-007: Absolute は「設定して開始」ボタンに分岐
       const btnText = r.effects.isAbsolute
@@ -7610,7 +7641,8 @@ function renderEnemySubUnits() {
     const portraitImg = en.imgId ? ENEMY_IMG(en.imgId) : "";
     const intentTxt = isDead ? "" : intentTextForUnit(en);
     const hpPct = en.hpMax ? Math.max(0, Math.min(100, Math.round((en.hp / en.hpMax) * 100))) : 0;
-    const enDisplayName = tEnemy(en.defId, en.name || "");
+    // EN lookup is keyed by MCH imgId, not the in-game string defId
+    const enDisplayName = tEnemy(en.imgId, en.name || "");
     slot.innerHTML =
       `<div class="combatant enemy-combatant${isDead ? " combatant--dead" : ""}">` +
         (intentTxt ? `<div class="intent-bubble"><span class="intent-label">${escapeHtml(ti18n("combat.intent.label"))}</span><span>${escapeHtml(intentTxt)}</span></div>` : "") +
