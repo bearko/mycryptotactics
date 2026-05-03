@@ -6,6 +6,21 @@ import {
   CARD_UPGRADE_SERIES,
 } from "./cards.js";
 import {
+  initI18n,
+  getLang,
+  setLang,
+  onLangChange,
+  applyDataI18n,
+  t as ti18n,
+  tHero,
+  tExt,
+  tExtSkill,
+  tEnemy,
+  tPassive,
+  tPassiveText,
+  translateGameText,
+} from "./i18n.js";
+import {
   img,
   LEADER,
   HERO_ROSTER,
@@ -134,8 +149,8 @@ const MAI_SD_URL = "./MAI_SD.png";
 
 /** マイのメッセージをゲーム状態から決定する */
 function getMaiMessage() {
-  if (!runState) return "ボスの居るステージを目指しましょう！緑のノードへ進めます！";
-  if (runState.runComplete) return "全クリアおめでとうございます！あなたは最高ですよ〜！";
+  if (!runState) return ti18n("nav.start");
+  if (runState.runComplete) return ti18n("nav.allClear");
 
   const reachable = reachableNextNodeIds(runState.lastMapNodeId);
   const reachableNodes = reachable.map(id => mapNodeById(id)).filter(Boolean);
@@ -144,13 +159,13 @@ function getMaiMessage() {
   const restNext  = reachableNodes.some(n => n.type === "rest");
   const hpPct = runState.playerHp / runState.playerHpMax;
 
-  if (bossNext) return "いよいよボス戦です！ここまで来たら全力でがんばってください！";
+  if (bossNext) return ti18n("nav.boss.next");
   if (hpPct <= 0.80 && restNext) {
-    return `体力が減っています（${runState.playerHp}/${runState.playerHpMax}）。休憩（HP回復）を目指して休みましょう！`;
+    return ti18n("nav.hp.low").replace("{hp}", runState.playerHp).replace("{hpMax}", runState.playerHpMax);
   }
-  if (shopNext) return "近くにショップがあります！GUMを使ってエクステンションを強化しましょう！";
-  if (!runState.lastMapNodeId) return "ボスの居るステージを目指しましょう！緑のノードへ進めます！";
-  return "次のノードを選んで進みましょう！戦略的な選択がカギですよ！";
+  if (shopNext) return ti18n("nav.shop.next");
+  if (!runState.lastMapNodeId) return ti18n("nav.start");
+  return ti18n("nav.proceed");
 }
 
 /** マイのセリフを更新して表示する（msg省略時はゲーム状態から自動決定） */
@@ -2097,9 +2112,9 @@ function startCombatFromMapNode(node) {
   const bgFile = isBoss ? "1004" : node.elite ? "1002" : "1001";
   document.getElementById("combatBg").style.backgroundImage = "url('" + BATTLE_BG(bgFile) + "')";
   document.getElementById("leaderImg").src = LEADER.img();
-  document.getElementById("leaderName").textContent = LEADER.nameJa;
+  document.getElementById("leaderName").textContent = tHero(LEADER.heroId, LEADER.nameJa);
   document.getElementById("enemyImg").src = ENEMY_IMG(enemyDef.imgId);
-  document.getElementById("enemyName").textContent = combat.enemyName;
+  document.getElementById("enemyName").textContent = tEnemy(enemyDef.id, combat.enemyName);
   document.getElementById("clog").innerHTML = "";
   clog(`戦闘開始 vs ${enemyDef.name}${isBoss ? "（ボス）" : node.elite ? "（精鋭）" : ""}`);
   if (isBoss && (enemyDef.initialShield || 0) > 0) {
@@ -2851,8 +2866,8 @@ function renderCombat() {
     const detailLines = typeof card.previewLines === "function" ? card.previewLines(combat) : summaryLines;
     if (_savedStats) Object.assign(combat, _savedStats); // 復元
     const helpKeys = typeof card.peekHelpKeys === "function" ? card.peekHelpKeys() : [];
-    const detailBody = detailLines.map(t => "<p>" + escapeHtml(t) + "</p>").join("");
-    const summaryBody = summaryLines.map(t => "<p>" + escapeHtml(t) + "</p>").join("");
+    const detailBody = detailLines.map(t => "<p>" + escapeHtml(translateGameText(t)) + "</p>").join("");
+    const summaryBody = summaryLines.map(t => "<p>" + escapeHtml(translateGameText(t)) + "</p>").join("");
     const unplayableBadgeHtml = reasonBadge
       ? `<div class="card-unplayable-badge" title="${escapeHtml(reasonBadge.title)}">${escapeHtml(reasonBadge.badge)}</div>`
       : "";
@@ -2886,7 +2901,7 @@ function renderCombat() {
           const computedText = (Array.isArray(summaryLines) && summaryLines[i] != null)
             ? summaryLines[i]
             : (e.text || "");
-          const simplified = simplifyEffectText(computedText);
+          const simplified = translateGameText(simplifyEffectText(computedText));
           return `<div class="card-effect-row">` +
             `<span class="card-effect-target" style="--target-pill-color: var(${colorVar})">${escapeHtml(lbl)}</span>` +
             `<span class="card-effect-text">${escapeHtml(simplified)}</span>` +
@@ -2894,12 +2909,14 @@ function renderCombat() {
         }).join("")
       : summaryBody;
 
+    const cardName = tExt(card.extId, card.extNameJa);
+    const cardSkill = tExtSkill(card.extId, card.skillNameJa);
     slot.innerHTML =
       '<div class="card-cost-above"><span class="cost-zeus" aria-hidden="true">⚡</span>' + card.cost + '</div>' +
       unplayableBadgeHtml +
       '<div class="card ' + card.type + (card.exhaust ? ' card--exhaust' : '') + '">' +
-      '<div class="card-name-hd">' + escapeHtml(card.extNameJa) + (card.exhaust ? '<span class="exhaust-badge" title="消耗：使い切り">🔥</span>' : '') +
-      (card.skillNameJa ? '<span class="card-skill-sub">' + escapeHtml(card.skillNameJa) + '</span>' : '') + '</div>' +
+      '<div class="card-name-hd">' + escapeHtml(cardName) + (card.exhaust ? '<span class="exhaust-badge" title="' + escapeHtml(ti18n("card.exhaust.title")) + '">🔥</span>' : '') +
+      (cardSkill ? '<span class="card-skill-sub">' + escapeHtml(cardSkill) + '</span>' : '') + '</div>' +
       '<div class="card-icon-area">' +
       '<img class="card-ext-img-full" src="' + EXT_IMG(card.extId) + '" alt="" onerror="this.style.opacity=\'0\'" />' +
       '<img class="card-skill-icon-tl" src="' + battleIconUrl(card.skillIcon) + '" alt="" />' +
@@ -5982,7 +5999,7 @@ function buildRewardPickButton(def, mockS) {
     effectRowsHtml = def.effects.map(e => {
       const lbl = targetLabelText(e.target) || e.target || "";
       const colorVar = targetColorVar(e.target) || "--text";
-      const simplified = simplifyEffectText(e.text || "");
+      const simplified = translateGameText(simplifyEffectText(e.text || ""));
       return `<div class="card-effect-row">` +
         `<span class="card-effect-target" style="--target-pill-color: var(${colorVar})">${escapeHtml(lbl)}</span>` +
         `<span class="card-effect-text">${escapeHtml(simplified)}</span>` +
@@ -5992,9 +6009,11 @@ function buildRewardPickButton(def, mockS) {
     const lines =
       typeof def.effectSummaryLines === "function" ? def.effectSummaryLines(mockS) :
       typeof def.previewLines === "function" ? def.previewLines(mockS) : [];
-    effectRowsHtml = lines.map(t => "<p>" + escapeHtml(simplifyEffectText(t)) + "</p>").join("");
+    effectRowsHtml = lines.map(t => "<p>" + escapeHtml(translateGameText(simplifyEffectText(t))) + "</p>").join("");
   }
 
+  const defName = tExt(def.extId, def.extNameJa);
+  const defSkill = tExtSkill(def.extId, def.skillNameJa);
   b.innerHTML =
     '<div class="reward-card-inner ' + def.type + '">' +
     '<div class="card-art-full">' +
@@ -6007,11 +6026,11 @@ function buildRewardPickButton(def, mockS) {
     '<img class="card-skill-corner" src="' + battleIconUrl(def.skillIcon) + '" alt="" />' +
     "</div></div>" +
     // caster ロール pill (バトル中のヒーローアイコンの代わり)
-    '<div class="card-caster-display card-caster-display--rolelabel" title="' + escapeHtml("キャスターロール: " + roleLabel) + '">' +
+    '<div class="card-caster-display card-caster-display--rolelabel" title="' + escapeHtml(ti18n("card.caster.role") + ": " + roleLabel) + '">' +
     '<span class="card-caster-role">' + escapeHtml(roleLabel) + '</span>' +
     '</div>' +
-    '<div class="card-ext-name">' + escapeHtml(def.extNameJa) +
-    (def.skillNameJa ? '<span class="card-ext-skill-sub">' + escapeHtml(def.skillNameJa) + '</span>' : '') +
+    '<div class="card-ext-name">' + escapeHtml(defName) +
+    (defSkill ? '<span class="card-ext-skill-sub">' + escapeHtml(defSkill) + '</span>' : '') +
     "</div>" +
     '<div class="card-effect-summary">' +
     effectRowsHtml +
@@ -6128,31 +6147,38 @@ function showOwnedDeckPeek(def) {
     linesHtml = def.effects.map(e => {
       const lbl = targetLabelText(e.target) || e.target || "";
       const colorVar = targetColorVar(e.target) || "--text";
-      const simplified = simplifyEffectText(e.text || "");
+      const simplified = translateGameText(simplifyEffectText(e.text || ""));
       return `<p><span class="opc-target" style="color: var(${colorVar})">[${escapeHtml(lbl)}]</span> ${escapeHtml(simplified)}</p>`;
     }).join("");
   } else {
     const lines =
       typeof def.previewLines === "function" ? def.previewLines(mockS) :
       typeof def.effectSummaryLines === "function" ? def.effectSummaryLines(mockS) : [];
-    linesHtml = lines.map(l => `<p>${escapeHtml(simplifyEffectText(l))}</p>`).join("");
+    linesHtml = lines.map(l => `<p>${escapeHtml(translateGameText(simplifyEffectText(l)))}</p>`).join("");
   }
   const rarity = CARD_RARITIES[def.libraryKey] || "common";
   // SPEC-006 Phase 4h: caster ロールを peek にも表示
   const roleKey = def.caster || "foremost";
   const roleLabel = CASTER_ROLE_LABELS[roleKey] || roleKey;
+  const peekName = tExt(def.extId, def.extNameJa || "");
+  const peekSkill = tExtSkill(def.extId, def.skillNameJa || "");
+  const typeLabel = def.type === "atk" ? ti18n("card.type.atk")
+    : def.type === "skl" ? ti18n("card.type.skl")
+    : def.type === "power" ? ti18n("card.type.power")
+    : def.type;
+  const rarityLabel = ti18n("rarity." + rarity, RARITY_LABEL[rarity] || rarity);
   peek.innerHTML = `
     <div class="owned-deck-peek-card" data-rarity="${rarity}">
-      <h3>${escapeHtml(def.extNameJa || "")}</h3>
-      ${def.skillNameJa ? `<p class="opc-skill">${escapeHtml(def.skillNameJa)}</p>` : ""}
+      <h3>${escapeHtml(peekName)}</h3>
+      ${peekSkill ? `<p class="opc-skill">${escapeHtml(peekSkill)}</p>` : ""}
       <div class="opc-meta">
         <span>⚡ ${def.cost}</span>
-        <span>${def.type === "atk" ? "攻撃" : def.type === "skl" ? "スキル" : def.type}</span>
-        <span>${RARITY_LABEL[rarity] || rarity}</span>
-        <span class="opc-caster">使い手: ${escapeHtml(roleLabel)}</span>
+        <span>${escapeHtml(typeLabel)}</span>
+        <span>${escapeHtml(rarityLabel)}</span>
+        <span class="opc-caster">${escapeHtml(ti18n("card.caster.role"))}: ${escapeHtml(roleLabel)}</span>
       </div>
       <div class="opc-lines">${linesHtml}</div>
-      <button type="button" class="opc-close">閉じる</button>
+      <button type="button" class="opc-close">${escapeHtml(ti18n("deck.modal.close"))}</button>
     </div>
   `;
   peek.classList.remove("hidden");
@@ -6726,17 +6752,18 @@ function openShop() {
     buyBtn.className = "shop-buy-btn action";
     buyBtn.textContent = "購入する";
     buyBtn.addEventListener("click", () => {
-      if (gold < price) { clog("GUM が足りません"); return; }
+      if (gold < price) { clog(ti18n("shop.gold.short")); return; }
       gold -= price;
       ensureRunState();
       runState.deck.push(copyCard(key));
       buyBtn.disabled = true;
-      buyBtn.textContent = "購入済み";
+      buyBtn.textContent = ti18n("shop.bought");
       if (goldDisp) goldDisp.textContent = String(gold);
       playSeShopBuy();
       syncResources();
-      clog(`購入: ${def.extNameJa}`);
-      renderNavigator(`「${def.extNameJa}」を購入しました！デッキが強化されましたよ！`);
+      const purchaseName = tExt(def.extId, def.extNameJa);
+      clog((getLang() === "en" ? "Purchased: " : "購入: ") + purchaseName);
+      renderNavigator(ti18n("msg.purchase").replace("{name}", purchaseName));
     });
     item.appendChild(buyBtn);
 
@@ -6751,17 +6778,17 @@ function openShop() {
   removeSection.className = "shop-remove-section";
   const removeTitle = document.createElement("div");
   removeTitle.className = "shop-remove-title";
-  removeTitle.textContent = "カード破棄（50 GUM）";
+  removeTitle.textContent = ti18n("shop.remove.title");
   removeSection.appendChild(removeTitle);
   const removeDesc = document.createElement("div");
   removeDesc.className = "shop-remove-desc";
-  removeDesc.textContent = "デッキ内のカードを1枚選んで除外できます（スターターも含む）。1 ショップ訪問につき 1 枚まで。";
+  removeDesc.textContent = ti18n("shop.remove.desc");
   removeSection.appendChild(removeDesc);
 
   const removeBtn = document.createElement("button");
   removeBtn.type = "button";
   removeBtn.className = "shop-remove-btn action";
-  removeBtn.textContent = "カードを破棄する";
+  removeBtn.textContent = ti18n("shop.remove.button");
   removeBtn.addEventListener("click", () => openShopRemoveCard(goldDisp, removeBtn));
   removeSection.appendChild(removeBtn);
   list.parentElement.appendChild(removeSection);
@@ -6774,23 +6801,23 @@ function openShop() {
   upgradeSection.className = "shop-remove-section";  // 既存スタイルを流用
   const upgradeTitle = document.createElement("div");
   upgradeTitle.className = "shop-remove-title";
-  upgradeTitle.textContent = `カードランクアップ（${SHOP_UPGRADE_COST} GUM）`;
+  upgradeTitle.textContent = ti18n("shop.upgrade.title") + ` (${SHOP_UPGRADE_COST} GUM)`;
   upgradeSection.appendChild(upgradeTitle);
   const upgradeDesc = document.createElement("div");
   upgradeDesc.className = "shop-remove-desc";
-  upgradeDesc.textContent = "デッキ内のノービスカードを1枚選んでエリートにランクアップします（クラフトの打ち直し相当）。1 ショップ訪問につき 1 枚まで。";
+  upgradeDesc.textContent = ti18n("shop.upgrade.desc");
   upgradeSection.appendChild(upgradeDesc);
 
   const upgradeBtn = document.createElement("button");
   upgradeBtn.type = "button";
   upgradeBtn.className = "shop-remove-btn action";
-  upgradeBtn.textContent = "カードをランクアップする";
+  upgradeBtn.textContent = ti18n("shop.upgrade.button");
   upgradeBtn.addEventListener("click", () => openShopUpgradeCard(goldDisp, upgradeBtn));
   upgradeSection.appendChild(upgradeBtn);
   list.parentElement.appendChild(upgradeSection);
 
   // マイのメッセージ（ショップ入店時）
-  renderNavigator("エクステンションを購入してデッキを強化しましょう！GUMに余裕があるなら積極的に買いましょう！");
+  renderNavigator(ti18n("nav.shop.welcome"));
 }
 
 // ─── ショップ カード破棄 ──────────────────────────────────────────
@@ -6800,17 +6827,17 @@ function setShopRemoveBtnSoldOut(btn) {
   if (!btn) return;
   btn.disabled = true;
   btn.classList.add("sold-out");
-  btn.textContent = "売り切れ（このショップでは使用済み）";
+  btn.textContent = ti18n("shop.soldout");
 }
 function openShopRemoveCard(goldDisp, removeBtn) {
   ensureRunState();
   if (runState.shopRemoveUsed) {
-    renderNavigator("このショップではすでにカード破棄を 1 回使用しています");
+    renderNavigator(ti18n("nav.shop.removeUsed"));
     setShopRemoveBtnSoldOut(removeBtn);
     return;
   }
   if (gold < SHOP_REMOVE_COST) {
-    renderNavigator(`GUM が足りません（必要: ${SHOP_REMOVE_COST} GUM）`);
+    renderNavigator(ti18n("nav.shop.gumShort").replace("{n}", SHOP_REMOVE_COST));
     return;
   }
   // デッキ内の全カードが破棄対象（スターターも含む）
@@ -6818,7 +6845,7 @@ function openShopRemoveCard(goldDisp, removeBtn) {
     .map((c, idx) => ({ card: c, idx }));
 
   if (removable.length === 0) {
-    renderNavigator("破棄できるカードがありません");
+    renderNavigator(ti18n("nav.shop.removeNoCard"));
     return;
   }
 
@@ -6863,7 +6890,7 @@ function openShopRemoveCard(goldDisp, removeBtn) {
       if (goldDisp) goldDisp.textContent = String(gold);
       syncResources();
       clog(`破棄: ${card.extNameJa}（-${SHOP_REMOVE_COST} GUM）`);
-      renderNavigator(`「${card.extNameJa}」を破棄しました！デッキが軽くなりましたよ！`);
+      renderNavigator(ti18n("nav.shop.removed").replace("{name}", tExt(card.extId, card.extNameJa)));
       // 1 ショップ訪問につき 1 回まで (#33)
       runState.shopRemoveUsed = true;
       setShopRemoveBtnSoldOut(removeBtn);
@@ -6879,17 +6906,17 @@ function setShopUpgradeBtnSoldOut(btn) {
   if (!btn) return;
   btn.disabled = true;
   btn.classList.add("sold-out");
-  btn.textContent = "売り切れ（このショップでは使用済み）";
+  btn.textContent = ti18n("shop.soldout");
 }
 function openShopUpgradeCard(goldDisp, upgradeBtn) {
   ensureRunState();
   if (runState.shopUpgradeUsed) {
-    renderNavigator("このショップではすでにランクアップを 1 回使用しています");
+    renderNavigator(ti18n("nav.shop.upgradeUsed"));
     setShopUpgradeBtnSoldOut(upgradeBtn);
     return;
   }
   if (gold < SHOP_UPGRADE_COST) {
-    renderNavigator(`GUM が足りません（必要: ${SHOP_UPGRADE_COST} GUM）`);
+    renderNavigator(ti18n("nav.shop.gumShort").replace("{n}", SHOP_UPGRADE_COST));
     return;
   }
   // アップグレード可能なカード (CARD_UPGRADE_SERIES に登録あり)
@@ -6898,7 +6925,7 @@ function openShopUpgradeCard(goldDisp, upgradeBtn) {
     .filter(({ card }) => CARD_UPGRADE_SERIES[card.libraryKey]);
 
   if (upgradeable.length === 0) {
-    renderNavigator("ランクアップできるノービスカードがデッキにありません");
+    renderNavigator(ti18n("nav.shop.upgradeNoCard"));
     return;
   }
 
@@ -6965,7 +6992,9 @@ function openShopUpgradeCard(goldDisp, upgradeBtn) {
       if (goldDisp) goldDisp.textContent = String(gold);
       syncResources();
       clog(`ショップ打ち直し: ${card.extNameJa} → ${upgradeDef.extNameJa}（-${SHOP_UPGRADE_COST} GUM、コスト据え置き）`);
-      renderNavigator(`「${card.extNameJa}」を「${upgradeDef.extNameJa}」にランクアップしました！コストはそのまま、効果が強くなりましたよ！`);
+      renderNavigator(ti18n("msg.upgrade.shop")
+        .replace("{from}", tExt(card.extId, card.extNameJa))
+        .replace("{to}", tExt(upgradeDef.extId, upgradeDef.extNameJa)));
       runState.shopUpgradeUsed = true;
       setShopUpgradeBtnSoldOut(upgradeBtn);
       overlay.remove();
@@ -7157,7 +7186,7 @@ function renderRegulationSelect() {
 
   const unlocked = new Set(loadUnlockedRegulations());
 
-  let html = '<div class="rs-header"><h2>レギュレーションを選択</h2><p class="rs-sub">難易度を選んでください。クリアすると次の難易度が解放されます。</p></div>';
+  let html = `<div class="rs-header"><h2>${escapeHtml(ti18n("regulation.title"))}</h2><p class="rs-sub">${escapeHtml(ti18n("regulation.sub"))}</p></div>`;
   html += '<div class="rs-list">';
 
   REGULATIONS.forEach((r) => {
@@ -7170,20 +7199,20 @@ function renderRegulationSelect() {
 
     html += `<div class="${cls.join(' ')}" data-reg-id="${r.id}" role="button" tabindex="${isUnlocked ? 0 : -1}" aria-disabled="${!isUnlocked}">`;
     html += `<div class="rs-card-cup">`;
-    html += `<img src="${r.iconUrl}" alt="${r.nameJa}" onerror="this.style.opacity='0.2'" />`;
+    html += `<img src="${r.iconUrl}" alt="${escapeHtml(r.nameJa)}" onerror="this.style.opacity='0.2'" />`;
     if (!isUnlocked) html += `<span class="rs-lock">🔒</span>`;
     html += `</div>`;
     html += `<div class="rs-card-body">`;
-    html += `<div class="rs-card-name" style="color:${r.color}">${r.nameJa}</div>`;
+    html += `<div class="rs-card-name" style="color:${r.color}">${escapeHtml(r.nameJa)}</div>`;
     html += `<div class="rs-card-desc">${r.descShort}</div>`;
     if (isUnlocked) {
       // SPEC-007: Absolute は「設定して開始」ボタンに分岐
       const btnText = r.effects.isAbsolute
-        ? (isCurrent ? '選択中（設定変更）' : 'Absolute を設定して開始')
-        : (isCurrent ? '選択中' : 'このレギュレーションで始める');
-      html += `<button class="rs-select-btn action${isCurrent ? ' rs-select-btn--current' : ''}">${btnText}</button>`;
+        ? (isCurrent ? ti18n("regulation.absoluteEdit") : ti18n("regulation.absoluteStart"))
+        : (isCurrent ? ti18n("regulation.current") : ti18n("regulation.startThis"));
+      html += `<button class="rs-select-btn action${isCurrent ? ' rs-select-btn--current' : ''}">${escapeHtml(btnText)}</button>`;
     } else {
-      html += `<div class="rs-locked-hint">前の難易度をクリアで解放</div>`;
+      html += `<div class="rs-locked-hint">${escapeHtml(ti18n("regulation.lockHint"))}</div>`;
     }
     html += `</div>`;
     html += `</div>`;
@@ -7506,13 +7535,14 @@ function renderPartySubHeroes() {
     const isDead = hero.alive === false || (hero.hp != null && hero.hp <= 0);
     const portraitImg = hero.imgUrl || "";
     const hpPct = hero.hpMax ? Math.max(0, Math.min(100, Math.round((hero.hp / hero.hpMax) * 100))) : 0;
+    const heroDisplayName = tHero(hero.defId, hero.name || "");
     slot.innerHTML =
       `<div class="combatant hero-combatant${isDead ? " combatant--dead" : ""}">` +
         `<div class="combatant-portrait-wrap">` +
-          `<img class="combatant-portrait" src="${portraitImg}" alt="${escapeHtml(hero.name || "")}" onerror="this.style.opacity='0.2'" />` +
+          `<img class="combatant-portrait" src="${portraitImg}" alt="${escapeHtml(heroDisplayName)}" onerror="this.style.opacity='0.2'" />` +
         `</div>` +
         `<div class="combatant-info">` +
-          `<div class="combatant-name">${escapeHtml(hero.name || "")}</div>` +
+          `<div class="combatant-name">${escapeHtml(heroDisplayName)}</div>` +
           `<div class="hp-bar-row">` +
             `<div class="hp-bar-track"><div class="hp-bar-fill" style="width:${hpPct}%"></div></div>` +
             `<span class="hp-bar-nums">${hero.hp ?? "?"}/${hero.hpMax ?? "?"}</span>` +
@@ -7543,17 +7573,25 @@ function intentTextForUnit(unit) {
   const cutInt = Math.min(40, Math.floor(playerInt / 2));
   const phyDmg = (pct) => Math.max(0, Math.floor(phy * pct / 100 * (100 - cutPhy) / 100));
   const intDmg = (pct) => Math.max(0, Math.floor(int * pct / 100 * (100 - cutInt) / 100));
+  // i18n: 先頭 / 毒 / 出血 / 回復 / 強化 / 防御 / 特殊 を言語別に切り替え
+  const front  = ti18n("intent.front");
+  const poison = ti18n("intent.poison");
+  const bleed  = ti18n("intent.bleed");
+  const heal   = ti18n("intent.heal");
+  const buff   = ti18n("intent.buff");
+  const guard  = ti18n("intent.guard");
+  const special = ti18n("intent.special");
   switch (it.kind) {
-    case "attack":         return `先頭：${phyDmg(it.phyPct)}`;
-    case "attackPoison":   return `先頭：${phyDmg(it.phyPct)}＋毒×${it.poisonStacks}`;
-    case "attackBleed":    return `先頭：${phyDmg(it.phyPct)}＋出血×${it.bleedStacks}`;
-    case "attackDouble":   return `先頭：${phyDmg(it.phyPct)}×2`;
-    case "attackInt":      return `先頭：${intDmg(it.intPct)}（INT）`;
-    case "attackIntDouble":return `先頭：${intDmg(it.intPct)}（INT）×2`;
-    case "healSelf":       return `回復`;
-    case "buffSelf":       return `強化`;
-    case "guard":          return `防御 +${it.value}`;
-    case "special":        return `特殊：${Math.max(1, Math.floor(playerHpMax * it.pct / 100))}`;
+    case "attack":         return `${front}: ${phyDmg(it.phyPct)}`;
+    case "attackPoison":   return `${front}: ${phyDmg(it.phyPct)} +${poison}×${it.poisonStacks}`;
+    case "attackBleed":    return `${front}: ${phyDmg(it.phyPct)} +${bleed}×${it.bleedStacks}`;
+    case "attackDouble":   return `${front}: ${phyDmg(it.phyPct)}×2`;
+    case "attackInt":      return `${front}: ${intDmg(it.intPct)} (INT)`;
+    case "attackIntDouble":return `${front}: ${intDmg(it.intPct)} (INT)×2`;
+    case "healSelf":       return heal;
+    case "buffSelf":       return buff;
+    case "guard":          return `${guard} +${it.value}`;
+    case "special":        return `${special}: ${Math.max(1, Math.floor(playerHpMax * it.pct / 100))}`;
     default: return "";
   }
 }
@@ -7572,14 +7610,15 @@ function renderEnemySubUnits() {
     const portraitImg = en.imgId ? ENEMY_IMG(en.imgId) : "";
     const intentTxt = isDead ? "" : intentTextForUnit(en);
     const hpPct = en.hpMax ? Math.max(0, Math.min(100, Math.round((en.hp / en.hpMax) * 100))) : 0;
+    const enDisplayName = tEnemy(en.defId, en.name || "");
     slot.innerHTML =
       `<div class="combatant enemy-combatant${isDead ? " combatant--dead" : ""}">` +
-        (intentTxt ? `<div class="intent-bubble"><span class="intent-label">NEXT ACTION</span><span>${escapeHtml(intentTxt)}</span></div>` : "") +
+        (intentTxt ? `<div class="intent-bubble"><span class="intent-label">${escapeHtml(ti18n("combat.intent.label"))}</span><span>${escapeHtml(intentTxt)}</span></div>` : "") +
         `<div class="combatant-portrait-wrap">` +
-          `<img class="combatant-portrait combatant-portrait--enemy" src="${portraitImg}" alt="${escapeHtml(en.name || "")}" onerror="this.style.opacity='0.2'" />` +
+          `<img class="combatant-portrait combatant-portrait--enemy" src="${portraitImg}" alt="${escapeHtml(enDisplayName)}" onerror="this.style.opacity='0.2'" />` +
         `</div>` +
         `<div class="combatant-info">` +
-          `<div class="combatant-name">${escapeHtml(en.name || "")}</div>` +
+          `<div class="combatant-name">${escapeHtml(enDisplayName)}</div>` +
           `<div class="hp-bar-row">` +
             `<div class="hp-bar-track"><div class="hp-bar-fill hp-bar-fill--enemy" style="width:${hpPct}%"></div></div>` +
             `<span class="hp-bar-nums">${en.hp ?? "?"}/${en.hpMax ?? "?"}</span>` +
@@ -7626,8 +7665,8 @@ function renderHeroSelect() {
 
   const renderInner = () => {
     let html = '<div class="hs-header">';
-    html += '<h2>パーティを編成</h2>';
-    html += '<p class="hs-sub">最大 3 体まで選べます。先に選んだヒーローほど前衛 (画面中央寄り) に配置 / 下のスロットを<strong>ドラッグ＆ドロップ</strong>で並び替え可能</p>';
+    html += `<h2>${escapeHtml(ti18n("party.title"))}</h2>`;
+    html += `<p class="hs-sub">${ti18n("party.subtitle")}</p>`;
     html += '</div>';
 
     // 現在のパーティ表示 (3 スロット)
@@ -7635,16 +7674,17 @@ function renderHeroSelect() {
     for (let pos = 0; pos < PARTY_MAX; pos++) {
       const hid = pendingPartyHeroIds[pos];
       const h = hid ? HERO_ROSTER.find(x => x.heroId === hid) : null;
-      const posLabel = ["前衛", "中衛", "後衛"][pos];
+      const posLabel = [ti18n("hero.party.front"), ti18n("hero.party.mid"), ti18n("hero.party.back")][pos];
       const dragAttr = h ? 'draggable="true"' : '';
       html += `<div class="ps-slot ps-slot--${pos}" data-pos="${pos}" ${dragAttr}>`;
-      html += `<div class="ps-slot-pos">${posLabel}</div>`;
+      html += `<div class="ps-slot-pos">${escapeHtml(posLabel)}</div>`;
       if (h) {
-        html += `<img class="ps-slot-img" src="${h.img()}" alt="${h.nameJa}" />`;
-        html += `<div class="ps-slot-name">${h.nameJa}</div>`;
-        html += `<button class="ps-slot-remove" data-remove-pos="${pos}" type="button" aria-label="外す">✕</button>`;
+        const hDispName = tHero(h.heroId, h.nameJa);
+        html += `<img class="ps-slot-img" src="${h.img()}" alt="${escapeHtml(hDispName)}" />`;
+        html += `<div class="ps-slot-name">${escapeHtml(hDispName)}</div>`;
+        html += `<button class="ps-slot-remove" data-remove-pos="${pos}" type="button" aria-label="${escapeHtml(ti18n("party.remove"))}">✕</button>`;
       } else {
-        html += '<div class="ps-slot-empty">（空き）</div>';
+        html += `<div class="ps-slot-empty">${escapeHtml(ti18n("party.empty"))}</div>`;
       }
       html += '</div>';
     }
@@ -7655,20 +7695,21 @@ function renderHeroSelect() {
     const partyCount = pendingPartyHeroIds.length;
     const canStart = partyCount >= 1;
     html += `<button class="action primary ps-confirm-btn" ${canStart ? '' : 'disabled'}>`;
-    html += `編成を確定（${partyCount}/${PARTY_MAX} 体）→ 出撃</button>`;
+    html += `${ti18n("party.confirm").replace("{n}", partyCount).replace("{max}", PARTY_MAX)}</button>`;
     html += '</div>';
 
     // 選択可能なヒーロー一覧
-    html += '<div class="hs-header" style="margin-top:1.0rem;"><h3 style="font-size:1rem;color:var(--accent);margin:0;">編成可能なヒーロー</h3>';
-    html += '<p class="hs-sub" style="margin-top:0.25rem;">カードをタップで追加 / もう一度タップで外す</p>';
+    html += `<div class="hs-header" style="margin-top:1.0rem;"><h3 style="font-size:1rem;color:var(--accent);margin:0;">${escapeHtml(ti18n("party.available"))}</h3>`;
+    html += `<p class="hs-sub" style="margin-top:0.25rem;">${escapeHtml(ti18n("party.toggle"))}</p>`;
     html += '</div>';
 
     // レアリティフィルタ
-    html += '<div class="hs-rarity-filter" role="group" aria-label="レアリティで絞り込み">';
-    html += '<span class="hs-rarity-filter-label">レアリティ</span>';
+    html += `<div class="hs-rarity-filter" role="group" aria-label="${escapeHtml(ti18n("party.rarity.filter"))}">`;
+    html += `<span class="hs-rarity-filter-label">${escapeHtml(ti18n("party.rarity"))}</span>`;
     for (const p of RARITY_FILTER_PILLS) {
       const active = (pendingRarityFilter === p.key);
-      html += `<button class="hs-rarity-pill" data-rarity="${p.key}" data-active="${active}" type="button" title="${p.label}">${p.letter}</button>`;
+      const labelTr = ti18n("rarity." + p.key, p.label);
+      html += `<button class="hs-rarity-pill" data-rarity="${p.key}" data-active="${active}" type="button" title="${escapeHtml(labelTr)}">${p.letter}</button>`;
     }
     html += '</div>';
 
@@ -7680,17 +7721,19 @@ function renderHeroSelect() {
       return r === pendingRarityFilter;
     });
     if (filtered.length === 0) {
-      html += `<p style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:0.8rem;padding:1rem;">該当するヒーローがいません</p>`;
+      html += `<p style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:0.8rem;padding:1rem;">${escapeHtml(ti18n("party.no-match"))}</p>`;
     }
     filtered.forEach((hero) => {
       const inParty = pendingPartyHeroIds.includes(hero.heroId);
       const cls = ['hs-card'];
       if (inParty) cls.push('hs-card--in-party');
       const r = hero.rarity || "normal";
+      const heroDispName = tHero(hero.heroId, hero.nameJa);
+      const heroPassiveName = tPassive(hero.heroId, hero.passiveName || '');
       html += `<div class="${cls.join(' ')}" data-hid="${hero.heroId}" data-rarity="${r}" role="button" tabindex="0" aria-pressed="${inParty}">`;
-      html += `<img class="hs-hero-img" src="${hero.img()}" alt="${hero.nameJa}" />`;
+      html += `<img class="hs-hero-img" src="${hero.img()}" alt="${escapeHtml(heroDispName)}" />`;
       html += `<div class="hs-hero-body">`;
-      html += `<div class="hs-hero-name">${hero.nameJa}</div>`;
+      html += `<div class="hs-hero-name">${escapeHtml(heroDispName)}</div>`;
       html += `<div class="hs-hero-stats">`;
       html += `<span>HP ${hero.hpMax}</span>`;
       html += `<span>PHY ${hero.basePhy}</span>`;
@@ -7698,10 +7741,16 @@ function renderHeroSelect() {
       html += `<span>AGI ${hero.baseAgi}</span>`;
       html += `</div>`;
       // β1: trigger 別倍率を効果数値に反映した文言で表示
-      const heroPassiveDesc = hero.passiveKey
-        ? multiplyPassiveDescription(hero.passiveKey, hero.passiveDesc)
-        : hero.passiveDesc;
-      html += `<div class="hs-passive"><span class="hs-passive-name">【${hero.passiveName || '—'}】</span>${heroPassiveDesc}</div>`;
+      // EN モードでは passive 説明文を EN 訳 (CSV 由来) に切り替え。
+      let heroPassiveDesc;
+      if (getLang() === "en") {
+        heroPassiveDesc = tPassiveText(hero.heroId, hero.passiveDesc || "");
+      } else {
+        heroPassiveDesc = hero.passiveKey
+          ? multiplyPassiveDescription(hero.passiveKey, hero.passiveDesc)
+          : hero.passiveDesc;
+      }
+      html += `<div class="hs-passive"><span class="hs-passive-name">【${escapeHtml(heroPassiveName || '—')}】</span>${heroPassiveDesc}</div>`;
       html += `</div></div>`;
     });
     html += '</div>';
@@ -8014,12 +8063,17 @@ function openDeckModal() {
   const modal = document.getElementById("deckModal");
   const list = document.getElementById("deckModalList");
   const count = document.getElementById("deckModalCount");
-  const cards = combat.drawPile.slice().sort((a, b) => a.extNameJa.localeCompare(b.extNameJa, "ja"));
-  count.textContent = "残り " + cards.length + " 枚（引く順序は非表示）";
+  const cards = combat.drawPile.slice().sort((a, b) => {
+    const an = tExt(a.extId, a.extNameJa);
+    const bn = tExt(b.extId, b.extNameJa);
+    return an.localeCompare(bn, getLang() === "en" ? "en" : "ja");
+  });
+  count.textContent = ti18n("deck.modal.remaining").replace("{n}", String(cards.length));
   list.innerHTML = "";
   const tally = new Map();
   for (const c of cards) {
-    const k = c.extNameJa + "|" + c.cost;
+    const displayName = tExt(c.extId, c.extNameJa);
+    const k = displayName + "|" + c.cost;
     tally.set(k, (tally.get(k) || 0) + 1);
   }
   for (const [k, num] of tally) {
@@ -8038,7 +8092,26 @@ function closeDeckModal() {
 }
 
 // ─── 初期化 ───────────────────────────────────────────────────────
+// タイトル画面の言語トグルで、現在の言語に対応するボタンに active クラスを付与
+function syncLangToggleActive() {
+  const cur = getLang();
+  document.querySelectorAll("#langToggle .lang-btn").forEach(btn => {
+    const isActive = btn.getAttribute("data-lang") === cur;
+    btn.classList.toggle("lang-btn--active", isActive);
+    btn.setAttribute("aria-pressed", isActive ? "true" : "false");
+  });
+}
+
 async function init() {
+  // 0a. i18n bootstrap — load lang preference + ui/name JSON, then apply to DOM.
+  try {
+    await initI18n();
+    applyDataI18n(document);
+    syncLangToggleActive();
+  } catch (e) {
+    console.warn("[init] i18n load failed (continuing in JA only)", e);
+  }
+
   // 0. data/*.json を runtime fetch (旧 sync_csv_json.js による .js 静的生成は廃止)
   //    HERO_ROSTER / ENEMY_DEFS / BOSS_DEFS / LL_EXT_POOL は loadXxx() 後に populated
   try {
@@ -8047,7 +8120,7 @@ async function init() {
     if (HERO_ROSTER.length > 0) setLeader(HERO_ROSTER[0]);
   } catch (e) {
     console.error("[init] data load failed", e);
-    alert("データロードに失敗しました: " + e.message);
+    alert((getLang() === "en" ? "Data load failed: " : "データロードに失敗しました: ") + e.message);
     return;
   }
 
@@ -8120,12 +8193,44 @@ async function init() {
   // ── タイトル画面 ──────────────────────────────────────────────────
   const titleEl = document.getElementById("titleView");
   if (titleEl) {
-    // クリック / タップで遷移
-    titleEl.addEventListener("click", dismissTitle);
+    // クリック / タップで遷移 (lang toggle 内のクリックは伝播停止で除外)
+    titleEl.addEventListener("click", (ev) => {
+      // 言語トグル内をクリックした場合は遷移しない
+      if (ev.target.closest("#langToggle")) return;
+      dismissTitle();
+    });
     titleEl.addEventListener("keydown", (ev) => {
+      if (ev.target.closest("#langToggle")) return;
       if (ev.key === "Enter" || ev.key === " ") dismissTitle();
     });
   }
+
+  // ── 言語トグル (タイトル画面) ─────────────────────────────────────
+  const langToggleEl = document.getElementById("langToggle");
+  if (langToggleEl) {
+    langToggleEl.addEventListener("click", (ev) => {
+      const btn = ev.target.closest("button[data-lang]");
+      if (!btn) return;
+      ev.stopPropagation();
+      setLang(btn.getAttribute("data-lang"));
+    });
+  }
+  // 言語変更時に再描画が必要な箇所 (combat / map / shop / hero名など)
+  onLangChange(() => {
+    syncLangToggleActive();
+    // 現在開いている view を再描画
+    try {
+      if (combat) renderCombat();
+      renderMap();
+      renderHeroSelect();
+      renderRegulationSelect();
+      // map header (HP / chapter / layer label) も含めて再同期
+      syncResources();
+      updateHeaderRegulationIcons();
+    } catch (e) {
+      console.warn("[i18n] re-render failed", e);
+    }
+  });
   // SPEC-007: ヘッダー右端のランキングボタン (map / combat 共通)
   ["btnRankingOpenMap", "btnRankingOpenCombat"].forEach((id) => {
     document.getElementById(id)?.addEventListener("click", (ev) => {
