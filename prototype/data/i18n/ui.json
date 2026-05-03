@@ -92,6 +92,9 @@
   "reward.intro":              { "ja": "バトル勝利おめでとうございます。追加するカードを 1 枚選ぶか、スキップしてマップへ戻ります。", "en": "Congratulations on the victory! Choose one card to add, or skip to return to the map." },
   "reward.skipFull":           { "ja": "スキップ（報酬なし）", "en": "Skip (no reward)" },
   "ranking.regulation":        { "ja": "レギュレーション", "en": "Regulation" },
+  "ranking.version":           { "ja": "バージョン", "en": "Version" },
+  "ranking.version.all":       { "ja": "全バージョン", "en": "All versions" },
+  "ranking.version.legacy":    { "ja": "旧版 (バージョン未設定)", "en": "Legacy (no version)" },
   "ranking.score":             { "ja": "スコア", "en": "Score" },
   "ranking.rank":              { "ja": "順位", "en": "Rank" },
   "ranking.player":            { "ja": "プレイヤー", "en": "Player" },
@@ -187,7 +190,7 @@
   "rarity.legendary":          { "ja": "レジェンド", "en": "Legendary" },
   "rarity.ll":                 { "ja": "LL",         "en": "LL" },
 
-  "footer.meta":               { "ja": "MyCryptoTactics Ver.1.1.0 · 非営利のファン制作", "en": "MyCryptoTactics Ver.1.1.0 · Non-commercial fan project" },
+  "footer.meta":               { "ja": "MyCryptoTactics Ver.1.2.0 · 非営利のファン制作", "en": "MyCryptoTactics Ver.1.2.0 · Non-commercial fan project" },
   "footer.credit":             { "ja": "キャラクター画像 / BGM / SE は My Crypto Heroes (MCH Co., Ltd.) に帰属します。", "en": "Character artwork / BGM / SFX belong to My Crypto Heroes (MCH Co., Ltd.)." },
   "footer.source":             { "ja": "ソースコード", "en": "Source code" },
 
