@@ -182,7 +182,7 @@
   "rarity.legendary":          { "ja": "レジェンド", "en": "Legendary" },
   "rarity.ll":                 { "ja": "LL",         "en": "LL" },
 
-  "footer.meta":               { "ja": "MyCryptoTactics Ver.1.0.0 · 非営利のファン制作", "en": "MyCryptoTactics Ver.1.0.0 · Non-commercial fan project" },
+  "footer.meta":               { "ja": "MyCryptoTactics Ver.1.1.0 · 非営利のファン制作", "en": "MyCryptoTactics Ver.1.1.0 · Non-commercial fan project" },
   "footer.credit":             { "ja": "キャラクター画像 / BGM / SE は My Crypto Heroes (MCH Co., Ltd.) に帰属します。", "en": "Character artwork / BGM / SFX belong to My Crypto Heroes (MCH Co., Ltd.)." },
   "footer.source":             { "ja": "ソースコード", "en": "Source code" },
 

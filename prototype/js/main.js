@@ -7396,7 +7396,7 @@ function buildRankingPayload(playerName) {
     llExt: llExtCount,
     heroIds: partyHeroes.map(h => h.heroId),
     absoluteConfig: absConfig,
-    version: "beta1",
+    version: "1.1.0",
     _breakdown: breakdown,
   };
 }

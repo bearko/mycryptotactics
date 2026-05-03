@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>MyCryptoTactics — Ver.1.0.0</title>
+  <title>MyCryptoTactics — Ver.1.1.0</title>
   <meta name="description" content="My Crypto Heroes の偉人たち × ローグライク × カードバトルのファンメイドブラウザゲーム。" />
 
   <!-- favicon -->
@@ -11,7 +11,7 @@
 
   <!-- Open Graph / Twitter Card (X リンクプレビュー用) -->
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="MyCryptoTactics — Ver.1.0.0" />
+  <meta property="og:title" content="MyCryptoTactics — Ver.1.1.0" />
   <meta property="og:description" content="My Crypto Heroes の偉人たち × ローグライク × カードバトル。スマホ・PC で遊べるブラウザゲーム。" />
   <meta property="og:url" content="https://mycryptotactics.vercel.app/" />
   <meta property="og:image" content="https://mycryptotactics.vercel.app/og-image.png" />
@@ -19,7 +19,7 @@
   <meta property="og:image:height" content="1536" />
   <meta property="og:site_name" content="MyCryptoTactics" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="MyCryptoTactics — Ver.1.0.0" />
+  <meta name="twitter:title" content="MyCryptoTactics — Ver.1.1.0" />
   <meta name="twitter:description" content="My Crypto Heroes 偉人 × ローグライク × カードバトル。" />
   <meta name="twitter:image" content="https://mycryptotactics.vercel.app/og-image.png" />
 
@@ -108,6 +108,14 @@
       font-size: 1.05rem; color: #bba8d8; letter-spacing: 0.2em;
       text-transform: uppercase;
       animation: title-blink 1.3s ease-in-out infinite;
+    }
+    .title-version {
+      position: fixed; bottom: 0.55rem; left: 50%;
+      transform: translateX(-50%);
+      margin: 0;
+      font-size: 0.7rem; color: #6c5e8a; letter-spacing: 0.16em;
+      font-weight: 500;
+      pointer-events: none;
     }
     @keyframes title-blink {
       0%, 100% { opacity: 1; }
@@ -2624,6 +2632,7 @@
       <button type="button" class="lang-btn" data-lang="ja" data-i18n="lang.ja">JP：日本語</button>
       <button type="button" class="lang-btn" data-lang="en" data-i18n="lang.en">EN：English</button>
     </div>
+    <p class="title-version">Ver.1.1.0</p>
   </div>
 
   <div class="wrap">
@@ -2970,7 +2979,7 @@
   </div>
 
   <footer>
-    <span class="footer-meta" data-i18n="footer.meta">MyCryptoTactics Ver.1.0.0 · 非営利のファン制作</span>
+    <span class="footer-meta" data-i18n="footer.meta">MyCryptoTactics Ver.1.1.0 · 非営利のファン制作</span>
     <span class="footer-credit" data-i18n-html="footer.credit.full">
       キャラクター画像 / BGM / SE は <strong>My Crypto Heroes (MCH Co., Ltd.)</strong> に帰属します。
       利用条件・権利表記・二次創作ガイドラインは
@@ -3130,7 +3139,7 @@
             <li><strong>?</strong> — ランダム（その時点の生存者から無作為に選択）。</li>
             <li><strong>PHY↑ / HP↓</strong> 等 — そのステータスが<strong>最も高い / 低い</strong>対象を選択。</li>
           </ul>
-          <p style="font-size:0.78rem;color:var(--muted)">※ パーティ編成（3 人 vs 3 人）はVer.1.0.0から有効です。前衛・中衛・後衛の並びはタイトルから入って編成画面で確認できます。</p>
+          <p style="font-size:0.78rem;color:var(--muted)">※ パーティ編成（3 人 vs 3 人）はVer.1.1.0から有効です。前衛・中衛・後衛の並びはタイトルから入って編成画面で確認できます。</p>
         </section>
         <section class="help-page" data-help-page="battle" data-i18n-html="help.body.battle">
           <h3>バトルロジック（概要）</h3>
