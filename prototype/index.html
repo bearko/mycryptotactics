@@ -1480,7 +1480,7 @@
 
     /* SPEC-007: ランキング送信モーダル */
     #rankingSubmitOverlay {
-      position: fixed; inset: 0; background: #000c; z-index: 215;
+      position: fixed; inset: 0; background: #000c; z-index: 700;
       display: flex; align-items: center; justify-content: center; padding: 0.75rem;
     }
     #rankingSubmitOverlay.hidden { display: none; }
@@ -2884,18 +2884,18 @@
     <div class="report-card">
       <div class="report-header">
         <img class="report-logo" alt="MyCryptoTactics" />
-        <h2 id="reportTitle" class="report-title">活動レポート</h2>
+        <h2 id="reportTitle" class="report-title" data-i18n="report.title">活動レポート</h2>
         <p class="report-datetime" id="reportDatetime"></p>
       </div>
 
       <div class="report-result-row">
         <div class="report-result-block">
-          <p class="report-block-label">ヒーロー</p>
+          <p class="report-block-label" data-i18n="report.hero">ヒーロー</p>
           <img class="report-portrait" id="reportHeroImg" alt="" onerror="this.style.opacity='0'" />
           <p class="report-portrait-name" id="reportHeroName"></p>
         </div>
         <div class="report-result-block">
-          <p class="report-block-label" id="reportOpponentLabel">対戦相手</p>
+          <p class="report-block-label" id="reportOpponentLabel" data-i18n="report.opponent">対戦相手</p>
           <img class="report-portrait" id="reportOpponentImg" alt="" onerror="this.style.opacity='0'" />
           <p class="report-portrait-name" id="reportOpponentName"></p>
         </div>
@@ -2915,40 +2915,40 @@
       </div>
 
       <div class="report-section">
-        <p class="report-block-label">保有エクステンション <span id="reportDeckCount" class="report-block-count"></span></p>
+        <p class="report-block-label"><span data-i18n="report.deck">保有エクステンション</span> <span id="reportDeckCount" class="report-block-count"></span></p>
         <div class="report-ext-grid" id="reportDeckList"></div>
       </div>
 
       <div class="report-section">
-        <p class="report-block-label">獲得 LL エクステ <span id="reportLlCount" class="report-block-count"></span></p>
+        <p class="report-block-label"><span data-i18n="report.ll">獲得 LL エクステ</span> <span id="reportLlCount" class="report-block-count"></span></p>
         <div class="report-ext-grid" id="reportLlList"></div>
       </div>
 
       <!-- SPEC-007: クリア時のスコア表示 -->
       <div class="report-section report-score hidden" id="reportScoreSection">
-        <p class="report-block-label">クリアスコア</p>
+        <p class="report-block-label" data-i18n="report.score">クリアスコア</p>
         <p class="report-score-final" id="reportScoreFinal">0</p>
         <table class="report-score-table">
-          <tr><td>ターン bonus</td><td id="reportScoreTurn">0</td></tr>
-          <tr><td>デッキ bonus</td><td id="reportScoreDeck">0</td></tr>
-          <tr><td>LL bonus</td><td id="reportScoreLl">0</td></tr>
-          <tr><td>レアリティ bonus</td><td id="reportScoreRarity">0</td></tr>
-          <tr><td>レギュレーション乗数</td><td id="reportScoreRegMult">×1.0</td></tr>
-          <tr id="reportScoreAbsRow" class="hidden"><td>Absolute 倍率</td><td id="reportScoreAbsMult">×1.0</td></tr>
+          <tr><td data-i18n="report.bonus.turn">ターン bonus</td><td id="reportScoreTurn">0</td></tr>
+          <tr><td data-i18n="report.bonus.deck">デッキ bonus</td><td id="reportScoreDeck">0</td></tr>
+          <tr><td data-i18n="report.bonus.ll">LL bonus</td><td id="reportScoreLl">0</td></tr>
+          <tr><td data-i18n="report.bonus.rarity">レアリティ bonus</td><td id="reportScoreRarity">0</td></tr>
+          <tr><td data-i18n="report.bonus.regMult">レギュレーション乗数</td><td id="reportScoreRegMult">×1.0</td></tr>
+          <tr id="reportScoreAbsRow" class="hidden"><td data-i18n="report.bonus.absMult">Absolute 倍率</td><td id="reportScoreAbsMult">×1.0</td></tr>
         </table>
       </div>
 
       <!-- SPEC-007: クリア時点のランキング順位表示 -->
       <div class="report-section report-rank hidden" id="reportRankSection">
-        <p class="report-block-label">この時点のランキング</p>
+        <p class="report-block-label" data-i18n="report.rank.title">この時点のランキング</p>
         <div id="reportRankBody">
-          <p class="report-rank-msg">取得中...</p>
+          <p class="report-rank-msg" data-i18n="ranking.fetching">取得中...</p>
         </div>
       </div>
 
       <div class="report-actions">
-        <button type="button" class="action primary report-share-btn" id="reportShareBtn">𝕏 で共有</button>
-        <button type="button" class="action report-close-btn" id="reportCloseBtn">閉じる</button>
+        <button type="button" class="action primary report-share-btn" id="reportShareBtn" data-i18n="report.share">𝕏 で共有</button>
+        <button type="button" class="action report-close-btn" id="reportCloseBtn" data-i18n="deck.modal.close">閉じる</button>
       </div>
     </div>
   </div>
@@ -2988,30 +2988,30 @@
   <!-- SPEC-007: ランキング送信モーダル（クリア時に表示）-->
   <div id="rankingSubmitOverlay" class="hidden" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="rsTitle">
     <div class="rs-dialog">
-      <h2 id="rsTitle" class="rs-title">クリア！ ランキングに登録</h2>
+      <h2 id="rsTitle" class="rs-title" data-i18n="rs.title">クリア！ ランキングに登録</h2>
 
       <div class="rs-final" data-rs-final>0</div>
 
       <table class="rs-table">
-        <tr><td>ターン数ボーナス</td><td data-rs-turn>0</td></tr>
-        <tr><td>デッキ枚数ボーナス</td><td data-rs-deck>0</td></tr>
-        <tr><td>LL エクステボーナス</td><td data-rs-ll>0</td></tr>
-        <tr><td>レアリティボーナス</td><td data-rs-rarity>0</td></tr>
-        <tr><td>ベーススコア</td><td data-rs-base>0</td></tr>
-        <tr><td>レギュレーション乗数</td><td data-rs-regmult>×1.00</td></tr>
-        <tr class="rs-row hidden" data-rs-absrow><td>Absolute 倍率</td><td data-rs-absmult>×1.00</td></tr>
+        <tr><td data-i18n="rs.bonus.turn">ターン数ボーナス</td><td data-rs-turn>0</td></tr>
+        <tr><td data-i18n="rs.bonus.deck">デッキ枚数ボーナス</td><td data-rs-deck>0</td></tr>
+        <tr><td data-i18n="rs.bonus.ll">LL エクステボーナス</td><td data-rs-ll>0</td></tr>
+        <tr><td data-i18n="rs.bonus.rarity">レアリティボーナス</td><td data-rs-rarity>0</td></tr>
+        <tr><td data-i18n="rs.bonus.base">ベーススコア</td><td data-rs-base>0</td></tr>
+        <tr><td data-i18n="rs.bonus.regMult">レギュレーション乗数</td><td data-rs-regmult>×1.00</td></tr>
+        <tr class="rs-row hidden" data-rs-absrow><td data-i18n="rs.bonus.absMult">Absolute 倍率</td><td data-rs-absmult>×1.00</td></tr>
       </table>
 
       <div class="rs-name-row">
-        <label for="rsNameInput">プレイヤー名</label>
+        <label for="rsNameInput" data-i18n="rs.playerName">プレイヤー名</label>
         <input id="rsNameInput" type="text" maxlength="30" placeholder="anonymous" data-rs-name />
       </div>
 
       <div class="rs-status" data-rs-status></div>
 
       <div class="rs-buttons">
-        <button type="button" class="action" data-rs-cancel>登録しない</button>
-        <button type="button" class="action" data-rs-confirm style="background:var(--accent);border-color:var(--accent);color:#1a1530;font-weight:600;">登録する</button>
+        <button type="button" class="action" data-rs-cancel data-i18n="rs.cancel">登録しない</button>
+        <button type="button" class="action" data-rs-confirm style="background:var(--accent);border-color:var(--accent);color:#1a1530;font-weight:600;" data-i18n="rs.submit">登録する</button>
       </div>
     </div>
   </div>
@@ -3019,38 +3019,38 @@
   <!-- SPEC-007: Absolute レギュレーション設定モーダル -->
   <div id="absoluteConfigOverlay" class="hidden" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="absTitle">
     <div class="abs-dialog">
-      <h2 id="absTitle" class="abs-title">Absolute レギュレーション設定</h2>
-      <p style="font-size:0.85rem;color:var(--muted);margin:0;">各倍率は 0.1〜5.0、0.1 刻み。スライダーを動かすとスコア倍率が再計算されます。</p>
+      <h2 id="absTitle" class="abs-title" data-i18n="abs.title">Absolute レギュレーション設定</h2>
+      <p style="font-size:0.85rem;color:var(--muted);margin:0;" data-i18n="abs.subtitle">各倍率は 0.1〜5.0、0.1 刻み。スライダーを動かすとスコア倍率が再計算されます。</p>
 
       <div class="abs-row">
-        <label for="absSlider-enemyHpMult">敵 HP 倍率</label>
+        <label for="absSlider-enemyHpMult" data-i18n="abs.enemyHp">敵 HP 倍率</label>
         <input id="absSlider-enemyHpMult" type="range" min="0.1" max="5.0" step="0.1" value="1.0" data-abs-key="enemyHpMult" />
         <span class="abs-val" data-abs-val="enemyHpMult">1.0x</span>
       </div>
       <div class="abs-row">
-        <label for="absSlider-enemyDmgMult">敵ダメ倍率</label>
+        <label for="absSlider-enemyDmgMult" data-i18n="abs.enemyDmg">敵ダメ倍率</label>
         <input id="absSlider-enemyDmgMult" type="range" min="0.1" max="5.0" step="0.1" value="1.0" data-abs-key="enemyDmgMult" />
         <span class="abs-val" data-abs-val="enemyDmgMult">1.0x</span>
       </div>
       <div class="abs-row">
-        <label for="absSlider-playerHpMult">自 HP 倍率</label>
+        <label for="absSlider-playerHpMult" data-i18n="abs.playerHp">自 HP 倍率</label>
         <input id="absSlider-playerHpMult" type="range" min="0.1" max="5.0" step="0.1" value="1.0" data-abs-key="playerHpMult" />
         <span class="abs-val" data-abs-val="playerHpMult">1.0x</span>
       </div>
       <div class="abs-row">
-        <label for="absSlider-playerDmgMult">自ダメ倍率</label>
+        <label for="absSlider-playerDmgMult" data-i18n="abs.playerDmg">自ダメ倍率</label>
         <input id="absSlider-playerDmgMult" type="range" min="0.1" max="5.0" step="0.1" value="1.0" data-abs-key="playerDmgMult" />
         <span class="abs-val" data-abs-val="playerDmgMult">1.0x</span>
       </div>
 
       <div class="abs-score-row">
-        <span class="abs-score-label">スコア倍率（敵HP×敵ダメ ÷ 自HP×自ダメ）</span>
+        <span class="abs-score-label" data-i18n="abs.scoreMult">スコア倍率（敵HP×敵ダメ ÷ 自HP×自ダメ）</span>
         <span class="abs-score-mult" data-abs-score-mult>1.00x</span>
       </div>
 
       <div class="abs-buttons">
-        <button type="button" class="action" data-abs-cancel>キャンセル</button>
-        <button type="button" class="action" data-abs-confirm style="background:#a855f7;border-color:#a855f7;">この設定で開始</button>
+        <button type="button" class="action" data-abs-cancel data-i18n="btn.cancel">キャンセル</button>
+        <button type="button" class="action" data-abs-confirm style="background:#a855f7;border-color:#a855f7;" data-i18n="abs.start">この設定で開始</button>
       </div>
     </div>
   </div>

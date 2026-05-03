@@ -6104,8 +6104,7 @@ function advanceAfterRewardPick(libraryKey) {
         // 全章クリア → ゲームオーバー画面（クリア）
         lastReportSnapshot = captureRunSnapshot({ isCleared: true, defeatedBy: null });
         showView("over");
-        document.getElementById("gameOverMsg").textContent =
-          "全 node クリアおめでとうございます！あなたは最高ですよ〜！";
+        document.getElementById("gameOverMsg").textContent = ti18n("gameover.clear.msg");
       } else {
         // 次章のマップへそのまま遷移（runState.deck / playerHp / llExtSlots を引き継ぎ） #31
         // advanceToNextChapter() で chapterIdx++ と新章マップのセットアップは既に完了
@@ -6364,7 +6363,7 @@ async function renderReportRanking(container, snap) {
   // 自分の予想位置をハイライト行として挿入
   const myLine = `<tr class="report-rank-mine">
     <td>★ ${myRank}</td>
-    <td>${escapeHtml(getPlayerName() || "anonymous")} (あなた)</td>
+    <td>${escapeHtml(getPlayerName() || "anonymous")} (${escapeHtml(ti18n("report.you"))})</td>
     <td style="text-align:right;">${myScore.toLocaleString()}</td>
   </tr>`;
   // 自分の位置を行の中で挿入
@@ -6384,17 +6383,18 @@ async function renderReportRanking(container, snap) {
   }
   if (!inserted) finalRows.push(myLine);
 
-  const regNameForHeader = REGULATION_BY_ID[snap.regulation?.id]?.nameJa || "全レギュレーション";
+  const regNameForHeader = REGULATION_BY_ID[snap.regulation?.id]?.nameJa || ti18n("report.rank.allReg");
+  const overflowSuffix = myRank > 50 ? ti18n("report.rank.overflow") : "";
   container.innerHTML = `
     <p style="font-size:0.75rem;color:var(--muted);margin:0 0 0.25rem;">
-      ${escapeHtml(regNameForHeader)} 内・想定順位 <strong style="color:var(--accent);">${myRank}位</strong>
-      ${myRank > 50 ? "（51位以下）" : ""}
+      ${ti18n("report.rank.header").replace("{reg}", escapeHtml(regNameForHeader)).replace("{rank}", `<strong style="color:var(--accent);">${myRank}</strong>`)}
+      ${escapeHtml(overflowSuffix)}
     </p>
     <table class="report-rank-table">
-      <thead><tr><th>#</th><th>プレイヤー</th><th style="text-align:right;">スコア</th></tr></thead>
+      <thead><tr><th>#</th><th>${escapeHtml(ti18n("ranking.player"))}</th><th style="text-align:right;">${escapeHtml(ti18n("ranking.score"))}</th></tr></thead>
       <tbody>${finalRows.join("")}</tbody>
     </table>
-    <p style="font-size:0.7rem;color:var(--muted);margin:0.25rem 0 0;">※ 表示順位はスコア送信前の想定値。送信後にランキング画面で正式な順位を確認できます。</p>
+    <p style="font-size:0.7rem;color:var(--muted);margin:0.25rem 0 0;">${escapeHtml(ti18n("report.rank.note"))}</p>
   `;
 }
 const SHARE_URL = "https://mycryptotactics.vercel.app/";
@@ -6434,7 +6434,7 @@ function captureRunSnapshot({ isCleared, defeatedBy }) {
   return {
     isCleared,
     when: new Date(),
-    hero: { name: LEADER.nameJa, imgUrl: LEADER.img() },
+    hero: { heroId: LEADER.heroId, name: LEADER.nameJa, imgUrl: LEADER.img() },
     regulation: { id: reg.id, name: reg.nameJa, iconUrl: reg.iconUrl, color: reg.color },
     newlyUnlockedRegulation: newlyUnlocked
       ? { id: newlyUnlocked.id, name: newlyUnlocked.nameJa, iconUrl: newlyUnlocked.iconUrl }
@@ -6453,9 +6453,9 @@ function captureRunSnapshot({ isCleared, defeatedBy }) {
       name: e.name,
     })),
     opponent: defeatedBy
-      ? { name: defeatedBy.name, imgUrl: ENEMY_IMG(defeatedBy.imgId) }
+      ? { name: defeatedBy.name, imgId: defeatedBy.imgId, imgUrl: ENEMY_IMG(defeatedBy.imgId) }
       // クリア時はディープ・ヨシュカ (boss-troy, imgId 171)
-      : { name: "ディープ・ヨシュカ", imgUrl: ENEMY_IMG(171) },
+      : { name: "ディープ・ヨシュカ", imgId: 171, imgUrl: ENEMY_IMG(171) },
     // SPEC-007
     scoreBreakdown,
   };
@@ -6506,12 +6506,17 @@ function showActivityReport(snap) {
 
   document.getElementById("reportDatetime").textContent = fmtReportDateTime(snap.when);
   document.getElementById("reportHeroImg").src = snap.hero.imgUrl;
-  document.getElementById("reportHeroName").textContent = snap.hero.name;
-  document.getElementById("reportOpponentLabel").textContent = snap.isCleared ? "撃破した相手" : "倒された相手";
+  // hero/opponent name fields are JA in the snapshot — translate via lookup tables.
+  const heroDispName = tHero(snap.hero.heroId, snap.hero.name);
+  document.getElementById("reportHeroName").textContent = heroDispName;
+  document.getElementById("reportOpponentLabel").textContent = ti18n(snap.isCleared ? "report.opponent.killed" : "report.opponent.killedBy");
   document.getElementById("reportOpponentImg").src = snap.opponent.imgUrl;
-  document.getElementById("reportOpponentName").textContent = snap.opponent.name;
+  const oppDispName = tEnemy(snap.opponent.imgId, snap.opponent.name);
+  document.getElementById("reportOpponentName").textContent = oppDispName;
+  // stage names like "node : トロイ" → "node : Troy" via tChapterName
+  const stageDisp = tChapterName(snap.stageName || "—");
   document.getElementById("reportStage").textContent =
-    (snap.isCleared ? "全ステージ制覇 / 最終: " : "到達ステージ: ") + (snap.stageName || "—");
+    ti18n(snap.isCleared ? "report.stage.clear" : "report.stage.reached").replace("{name}", stageDisp);
 
   // レギュレーション表示 (#37)
   if (snap.regulation) {
@@ -6519,7 +6524,7 @@ function showActivityReport(snap) {
     const regName = document.getElementById("reportRegName");
     if (regIcon) regIcon.src = snap.regulation.iconUrl;
     if (regName) {
-      regName.textContent = `Regulation: ${snap.regulation.name}`;
+      regName.textContent = ti18n("report.regulation").replace("{name}", snap.regulation.name);
       if (snap.regulation.color) regName.style.color = snap.regulation.color;
     }
   }
@@ -6528,7 +6533,7 @@ function showActivityReport(snap) {
   if (unlockEl) {
     if (snap.newlyUnlockedRegulation) {
       document.getElementById("reportUnlockIcon").src = snap.newlyUnlockedRegulation.iconUrl;
-      document.getElementById("reportUnlockName").textContent = `${snap.newlyUnlockedRegulation.name} 解放！`;
+      document.getElementById("reportUnlockName").textContent = ti18n("report.unlock").replace("{name}", snap.newlyUnlockedRegulation.name);
       unlockEl.classList.remove("hidden");
     } else {
       unlockEl.classList.add("hidden");
@@ -6593,9 +6598,12 @@ function showActivityReport(snap) {
       resolve();
     });
     newShare.addEventListener("click", async () => {
+      const heroN = tHero(snap.hero.heroId, snap.hero.name);
+      const oppN = tEnemy(snap.opponent.imgId, snap.opponent.name);
+      const stageN = tChapterName(snap.stageName);
       const intro = snap.isCleared
-        ? `${snap.hero.name} で全ステージ制覇しました！`
-        : `${snap.hero.name} で「${snap.stageName}」まで到達。${snap.opponent.name} に倒された…`;
+        ? ti18n("share.cleared").replace("{hero}", heroN)
+        : ti18n("share.lost").replace("{hero}", heroN).replace("{stage}", stageN).replace("{opp}", oppN);
       const intentUrl =
         `https://twitter.com/intent/tweet` +
         `?text=${encodeURIComponent(intro)}` +
@@ -6614,7 +6622,7 @@ function showActivityReport(snap) {
 
       newShare.disabled = true;
       const originalLabel = newShare.textContent;
-      newShare.textContent = "画像生成中…";
+      newShare.textContent = ti18n("share.generating");
 
       try {
         const canvas = await window.html2canvas(targetEl, {
@@ -7414,6 +7422,8 @@ function openRankingSubmitModal() {
   setText("[data-rs-rarity]", String(breakdown.rarityBonus));
   setText("[data-rs-base]", String(breakdown.baseScore));
   setText("[data-rs-regmult]", `× ${breakdown.regMult.toFixed(2)} (${REGULATION_BY_ID[payload.regulation]?.nameJa || payload.regulation})`);
+  // i18n: ランキング送信モーダルの static text を data-i18n 属性に基づいて再描画
+  applyDataI18n(overlay);
   if (payload.regulation === "absolute") {
     overlay.querySelector("[data-rs-absrow]")?.classList.remove("hidden");
     setText("[data-rs-absmult]", `× ${breakdown.absMult.toFixed(2)}`);
@@ -7441,10 +7451,10 @@ function openRankingSubmitModal() {
     const name = (nameInput?.value || "").trim() || "anonymous";
     setPlayerName(name);
     confirmBtn.disabled = true;
-    if (statusEl) statusEl.textContent = "送信中...";
+    if (statusEl) statusEl.textContent = ti18n("rs.sending");
     const result = await submitScore({ ...payload, playerName: name });
     if (result.ok) {
-      if (statusEl) statusEl.textContent = "送信完了！";
+      if (statusEl) statusEl.textContent = ti18n("rs.sent");
       setTimeout(() => {
         cancelBtn.removeEventListener("click", onCancel);
         confirmBtn.removeEventListener("click", onConfirm);
@@ -7452,7 +7462,7 @@ function openRankingSubmitModal() {
         cleanup();
       }, 800);
     } else {
-      if (statusEl) statusEl.textContent = `送信失敗: ${result.error || "unknown"}`;
+      if (statusEl) statusEl.textContent = ti18n("rs.failed").replace("{err}", result.error || "unknown");
       confirmBtn.disabled = false;
     }
   };
@@ -7480,24 +7490,24 @@ async function renderRankingView() {
   if (apiUrlInput) apiUrlInput.value = apiUrl || "";
   if (!listEl) return;
   if (!apiUrl) {
-    listEl.innerHTML = '<p class="rk-msg">ランキング API URL が未設定です。下の設定欄に Apps Script の URL を入力して保存してください。</p>';
+    listEl.innerHTML = `<p class="rk-msg">${escapeHtml(ti18n("ranking.noApi"))}</p>`;
     return;
   }
-  listEl.innerHTML = '<p class="rk-msg">取得中...</p>';
+  listEl.innerHTML = `<p class="rk-msg">${escapeHtml(ti18n("ranking.fetching"))}</p>`;
   const filterId = filterEl?.value || "";
   const result = await fetchRanking({ regulation: filterId || undefined, limit: 50 });
   if (!result.ok) {
-    listEl.innerHTML = `<p class="rk-msg rk-msg--error">取得失敗: ${result.error || "unknown"}</p>`;
+    listEl.innerHTML = `<p class="rk-msg rk-msg--error">${escapeHtml(ti18n("ranking.fetch.error"))}: ${escapeHtml(result.error || "unknown")}</p>`;
     return;
   }
   if (!result.ranking || result.ranking.length === 0) {
-    listEl.innerHTML = '<p class="rk-msg">エントリーはまだありません。</p>';
+    listEl.innerHTML = `<p class="rk-msg">${escapeHtml(ti18n("ranking.empty"))}</p>`;
     return;
   }
   const rows = result.ranking.map(e => {
     const regJa = REGULATION_BY_ID[e.regulation]?.nameJa || e.regulation;
     const absInfo = e.absolute
-      ? ` <span class="rk-abs">[敵HP×${e.absolute.enemyHpMult} 敵ダメ×${e.absolute.enemyDmgMult} 自HP×${e.absolute.playerHpMult} 自ダメ×${e.absolute.playerDmgMult}]</span>`
+      ? ` <span class="rk-abs">[eHP×${e.absolute.enemyHpMult} eDmg×${e.absolute.enemyDmgMult} sHP×${e.absolute.playerHpMult} sDmg×${e.absolute.playerDmgMult}]</span>`
       : "";
     return `<tr>
       <td class="rk-rank">${e.rank}</td>
@@ -7508,7 +7518,7 @@ async function renderRankingView() {
     </tr>`;
   }).join("");
   listEl.innerHTML = `<table class="rk-table">
-    <thead><tr><th>#</th><th>プレイヤー</th><th>スコア</th><th>レギュ</th><th>内訳</th></tr></thead>
+    <thead><tr><th>#</th><th>${escapeHtml(ti18n("ranking.player"))}</th><th>${escapeHtml(ti18n("ranking.score"))}</th><th>${escapeHtml(ti18n("ranking.reg"))}</th><th>${escapeHtml(ti18n("ranking.meta"))}</th></tr></thead>
     <tbody>${rows}</tbody>
   </table>`;
 }
