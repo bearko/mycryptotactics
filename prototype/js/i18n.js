@@ -224,7 +224,25 @@ const RUNTIME_REPLACEMENTS = [
   [/戦闘終了時/g, "at battle end"],
   [/ターン開始時/g, "at turn start"],
   [/ターン終了時/g, "at turn end"],
-  // 敵 / 味方 stand-alone
+  [/ターン終了まで有効/g, "until end of turn"],
+  [/ターン終了まで/g, "until end of turn"],
+  // 「PHY を +2」「INT を -3」「AGI を +1」 → "PHY +2" 形式
+  [/(PHY|INT|AGI|HP|Guard|Shield)\s*を\s*\+(\d+)/g, "$1 +$2"],
+  [/(PHY|INT|AGI|HP|Guard|Shield)\s*を\s*-(\d+)/g, "$1 -$2"],
+  [/(PHY|INT|AGI|HP|Guard|Shield)\s*を\s*\+(\d+)〜(\d+)/g, "$1 +$2~$3"],
+  // 「Guardを 7 得る」「Shieldを 5 得る」→ "+7 Guard" / "+5 Shield"
+  // 既に ガード→Guard / シールド→Shield 置換済みの状態で動く
+  [/(Guard|Shield)\s*を\s*(\d+)\s*得る/g, "+$2 $1"],
+  // 「INT を 2 下げる」「PHY を 1 上げる」 → "-2 INT" / "+1 PHY"
+  [/(PHY|INT|AGI|HP)\s*を\s*(\d+)\s*下げる/g, "-$2 $1"],
+  [/(PHY|INT|AGI|HP)\s*を\s*(\d+)\s*上げる/g, "+$2 $1"],
+  // 「HP を回復係数 N% 分回復」→ "Heal N% of int coef"
+  [/HP\s*を回復係数\s*(\d+)〜?(\d+)?%\s*分回復/g, (m, a, b) => b ? `Heal ${a}~${b}% of INT coef` : `Heal ${a}% of INT coef`],
+  [/HP\s*を回復係数/g, "Heal of INT coef"],
+  // 敵 / 味方 stand-alone (この後の所有格クリーンアップが効くよう、
+  // 「敵の」「味方の」をここで先に消す)
+  [/敵\s*の\s+/g, "enemy "],
+  [/味方\s*の\s+/g, "ally "],
   [/敵/g, "enemy"],
   [/味方/g, "ally"],
   // 接続詞

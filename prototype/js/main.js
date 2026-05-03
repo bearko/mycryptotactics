@@ -28,6 +28,7 @@ import {
   getEnEnemyName,
   getEnExtName,
   getEnExtSkill,
+  getEnPassiveName,
 } from "./i18n.js";
 import {
   img,
@@ -409,7 +410,9 @@ function showPassiveCutin(skillName, portraitUrl, opts = {}) {
   if (!el) return Promise.resolve();
   const skillEl    = document.getElementById("passiveCutinSkill");
   const portraitEl = document.getElementById("passiveCutinPortrait");
-  if (skillEl)    skillEl.textContent = skillName;
+  // i18n: 各 cards.js の play() 関数は skillName を JA リテラルで渡してくるので、
+  // 登録済み JA→EN 名前マップ (passive 名込み) を通して翻訳する。
+  if (skillEl)    skillEl.textContent = translateCombatLog(skillName);
   if (portraitEl) portraitEl.src      = portraitUrl;
 
   // 表示時間 (ms)。複数連続表示 (戦闘開始時 multi-hero) では長めにして読める時間を確保
@@ -8201,6 +8204,11 @@ async function init() {
     for (const h of HERO_ROSTER) {
       const en = getEnHeroName(h.heroId);
       if (en && en !== h.nameJa) registerNameMapping(h.nameJa, en);
+      // パッシブスキル名 (showPassiveCutin / clog で JA リテラルが現れる)
+      const enPas = getEnPassiveName(h.heroId);
+      if (enPas && h.passiveName && enPas !== h.passiveName) {
+        registerNameMapping(h.passiveName, enPas);
+      }
     }
     for (const id of Object.keys(ENEMY_DEFS)) {
       const def = ENEMY_DEFS[id];
