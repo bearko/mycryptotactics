@@ -2081,7 +2081,9 @@ function startCombatFromMapNode(node) {
     }
   }
 
-  combat.drawPile = shuffle(combat.deck.map((c) => copyCard(c.libraryKey)));
+  // β1: ランクアップ済みカードの per-instance フィールド (cost override 等) を保持するため
+  // copyCard で library から再生成せず、既存インスタンスを shallow clone する。
+  combat.drawPile = shuffle(combat.deck.map((c) => ({ ...c })));
   showView("combat");
   startBgmCombat();
 
@@ -6119,9 +6121,22 @@ function showOwnedDeckPeek(def) {
     playerHpMax: runState?.playerHpMax ?? LEADER.hpMax,
     playerGuard: 0, playerShield: 0, energyMax: 3, energy: 3,
   };
-  const lines =
-    typeof def.previewLines === "function" ? def.previewLines(mockS) :
-    typeof def.effectSummaryLines === "function" ? def.effectSummaryLines(mockS) : [];
+  // ランクアップでエフェクトが増えるカードは effects[] 配列に全件入っているので、
+  // それを優先で表示する (previewLines は単独 line のみのカードがあり 2/3 が欠落する)。
+  let linesHtml = "";
+  if (Array.isArray(def.effects) && def.effects.length > 0) {
+    linesHtml = def.effects.map(e => {
+      const lbl = targetLabelText(e.target) || e.target || "";
+      const colorVar = targetColorVar(e.target) || "--text";
+      const simplified = simplifyEffectText(e.text || "");
+      return `<p><span class="opc-target" style="color: var(${colorVar})">[${escapeHtml(lbl)}]</span> ${escapeHtml(simplified)}</p>`;
+    }).join("");
+  } else {
+    const lines =
+      typeof def.previewLines === "function" ? def.previewLines(mockS) :
+      typeof def.effectSummaryLines === "function" ? def.effectSummaryLines(mockS) : [];
+    linesHtml = lines.map(l => `<p>${escapeHtml(simplifyEffectText(l))}</p>`).join("");
+  }
   const rarity = CARD_RARITIES[def.libraryKey] || "common";
   // SPEC-006 Phase 4h: caster ロールを peek にも表示
   const roleKey = def.caster || "foremost";
@@ -6136,7 +6151,7 @@ function showOwnedDeckPeek(def) {
         <span>${RARITY_LABEL[rarity] || rarity}</span>
         <span class="opc-caster">使い手: ${escapeHtml(roleLabel)}</span>
       </div>
-      <div class="opc-lines">${lines.map(l => `<p>${escapeHtml(simplifyEffectText(l))}</p>`).join("")}</div>
+      <div class="opc-lines">${linesHtml}</div>
       <button type="button" class="opc-close">閉じる</button>
     </div>
   `;
@@ -6164,9 +6179,15 @@ function openOwnedDeckOverlay() {
   }
 
   // ソート: シリーズキー → レアリティ → libraryKey（カード単位）
+  // ランクアップ済みカードの per-instance cost override を保持するため、
+  // CARD_LIBRARY ベースのまま全置換せず instance 値を上書きで残す。
   const sorted = cards
     .filter(c => c && c.libraryKey)
-    .map(c => CARD_LIBRARY[c.libraryKey] || c)
+    .map(c => {
+      const def = CARD_LIBRARY[c.libraryKey];
+      if (!def) return c;
+      return { ...def, cost: c.cost ?? def.cost };
+    })
     .sort((a, b) => {
       const sa = deckSeriesKey(a.libraryKey);
       const sb = deckSeriesKey(b.libraryKey);
@@ -6648,6 +6669,9 @@ function openShop() {
 
   const list = document.getElementById("shopList");
   list.innerHTML = "";
+  // 入店ごとに前回追加した「カード破棄」「ランクアップ」セクションが
+  // shopList の親 (shopView) に積み重なるのを防ぐため、ここで一掃する。
+  list.parentElement.querySelectorAll(".shop-remove-section").forEach(el => el.remove());
 
   // カードプレビュー用モックステート（現在のランステートを参照）
   ensureRunState();
