@@ -2678,11 +2678,12 @@ function setCardPreview(card) {
         const amt = predictEffectHeal(effect, caster);
         if (amt > 0) { overlayText = `+${amt}`; overlayClass = "preview-overlay--heal"; }
       } else if (kind === "status") {
-        // 「毒 ×2」のような文字をそのまま簡略表示
-        overlayText = String(effect.text).replace(/\s+/g, "");
+        // 「毒 ×2」のような文字を i18n 経由で簡略表示 (translateGameText で
+        // 「毒」→「Poison」「ガード+N」→「Guard +N」等に変換される)
+        overlayText = translateGameText(String(effect.text)).replace(/\s+/g, "");
         overlayClass = "preview-overlay--status";
       } else if (kind === "buff") {
-        overlayText = String(effect.text).replace(/\s+/g, "");
+        overlayText = translateGameText(String(effect.text)).replace(/\s+/g, "");
         overlayClass = "preview-overlay--buff";
       }
       if (overlayText) {
