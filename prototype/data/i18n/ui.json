@@ -323,5 +323,61 @@
   "abs.scoreMult":             { "ja": "スコア倍率（敵HP×敵ダメ ÷ 自HP×自ダメ）", "en": "Score mult. (eHP×eDmg ÷ sHP×sDmg)" },
   "abs.start":                 { "ja": "この設定で開始", "en": "Start with these settings" },
 
-  "gameover.clear.msg":        { "ja": "全 node クリアおめでとうございます！あなたは最高ですよ〜！", "en": "All nodes cleared — congratulations! You're the best!" }
+  "gameover.clear.msg":        { "ja": "全 node クリアおめでとうございます！あなたは最高ですよ〜！", "en": "All nodes cleared — congratulations! You're the best!" },
+
+  "peek.guard": {
+    "ja": "<strong>ガード</strong> — ターン中、PHY/INT ダメージを数値分だけ先に吸収（味方はターン開始で 0）。",
+    "en": "<strong>Guard</strong> — soaks PHY/INT DMG this turn (allies reset to 0 at turn start)."
+  },
+  "peek.shield": {
+    "ja": "<strong>シールド</strong> — 特殊ダメージ（最大 HP 割合など）のみ吸収。PHY/INT 通常攻撃には無効。",
+    "en": "<strong>Shield</strong> — soaks special DMG only (e.g. max-HP %). No effect on normal PHY/INT."
+  },
+  "peek.energy": {
+    "ja": "<strong>⚡ エナジー</strong> — ターンで使える行動コスト。次ターン開始時に最大まで回復。",
+    "en": "<strong>⚡ Energy</strong> — action cost per turn. Refills to max next turn."
+  },
+  "peek.draw": {
+    "ja": "<strong>ドロー</strong> — 山札から手札へカードを引く。山が空なら捨て札をシャッフルして山にする。",
+    "en": "<strong>Draw</strong> — pull a card from the deck; reshuffles discard if empty."
+  },
+  "peek.phy": {
+    "ja": "<strong>PHY</strong> — 物理攻撃の基礎値。PHY 依存スキルのダメージに使う。",
+    "en": "<strong>PHY</strong> — base for physical attacks; feeds PHY-skill DMG."
+  },
+  "peek.int": {
+    "ja": "<strong>INT</strong> — 知略の基礎値。INT 攻撃や回復係数に関わる。",
+    "en": "<strong>INT</strong> — base for magic attacks and the heal coefficient."
+  },
+  "peek.agi": {
+    "ja": "<strong>AGI</strong> — このプロトでは主にクリティカル率に反映。",
+    "en": "<strong>AGI</strong> — mainly feeds the crit rate in this prototype."
+  },
+  "peek.hp": {
+    "ja": "<strong>HP</strong> — 0 で敗北。回復は最大値を超えない。",
+    "en": "<strong>HP</strong> — 0 = defeat. Heal can't exceed max."
+  },
+
+  "badge.energyShort":         { "ja": "⚡不足", "en": "⚡ low" },
+  "badge.energyTip":           { "ja": "エナジーが {need} 必要ですが {have} しかありません", "en": "Needs {need} energy; only {have} available" },
+  "badge.casterShort":         { "ja": "👤不在", "en": "👤 none" },
+  "badge.casterTip":           { "ja": "キャスター「{role}」が解決できません（該当ヒーロー全員死亡）", "en": "No caster for role “{role}” (all matching heroes are down)" },
+
+  "craft.title":               { "ja": "クラフト", "en": "Craft" },
+  "craft.sub":                 { "ja": "エクステンションを獲得するか、デッキを強化しましょう", "en": "Pick up an Extension or rank up your deck." },
+  "craft.get.title":           { "ja": "エクステ獲得", "en": "Get Extension" },
+  "craft.get.desc":            { "ja": "累積カードプールからカードを3枚提示します。1枚をデッキに追加できます。", "en": "Pick 1 of 3 cards drawn from the cumulative pool to add to your deck." },
+  "craft.get.button":          { "ja": "獲得する", "en": "Get" },
+  "craft.get.pick":            { "ja": "1枚を選んでデッキに追加します", "en": "Pick one to add to your deck" },
+  "craft.reroll.title":        { "ja": "打ち直し", "en": "Reroll" },
+  "craft.reroll.desc":         { "ja": "デッキ内のノービスカードを1枚選んでエリートにランクアップします。", "en": "Pick one Novice card from your deck and rank it up to Elite." },
+  "craft.reroll.button":       { "ja": "打ち直す", "en": "Reroll" },
+  "craft.reroll.pick":         { "ja": "ランクアップするカードを選んでください（ノービス → エリート）", "en": "Pick a card to rank up (Novice → Elite)" },
+  "craft.reroll.empty":        { "ja": "アップグレード可能なノービスカードがありません", "en": "No Novice cards eligible for upgrade" },
+  "craft.upgrade.button":      { "ja": "このカードを強化", "en": "Upgrade this card" },
+  "craft.backMap":             { "ja": "← マップに戻る", "en": "← Back to map" },
+  "craft.skip":                { "ja": "スキップ", "en": "Skip" },
+
+  "clog.craftGet":             { "ja": "クラフト獲得: {name}", "en": "Crafted: {name}" },
+  "clog.craftUpgrade":         { "ja": "打ち直し: {from} → {to} (コスト {cost} 据え置き)", "en": "Reroll: {from} → {to} (cost {cost} preserved)" }
 }

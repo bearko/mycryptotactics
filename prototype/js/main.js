@@ -24,6 +24,10 @@ import {
   translateCombatLog,
   translateGameText,
   registerNameMapping,
+  getEnHeroName,
+  getEnEnemyName,
+  getEnExtName,
+  getEnExtSkill,
 } from "./i18n.js";
 import {
   img,
@@ -1654,10 +1658,18 @@ function syncResources() {
     } else {
       const cur = mapNodeById(runState.lastMapNodeId);
       if (cur) {
+        // cur.label は maps.js が JA リテラルでベイク (エネミー / 休憩 / etc)。
+        // ノード type から i18n 化したラベルを引く。
+        const labelTr =
+          cur.type === "fight" ? (cur.elite ? ti18n("node.elite") : ti18n("node.battle")) :
+          cur.type === "rest"  ? ti18n("node.rest") :
+          cur.type === "shop"  ? ti18n("node.shop") :
+          cur.type === "craft" ? ti18n("node.craft") :
+          cur.type === "boss"  ? ti18n("node.boss") : (cur.label || "");
         const tmpl = ti18n("layer.cur");
         layerEl.textContent = tmpl
           .replace("{n}", cur.layer + 1)
-          .replace("{label}", cur.label);
+          .replace("{label}", labelTr);
       } else {
         layerEl.textContent = "—";
       }
@@ -2417,16 +2429,10 @@ function simplifyEffectText(text) {
   return t;
 }
 
-const PEEK_HELP_SNIPPETS = {
-  guard:  "<strong>ガード</strong> — ターン中、PHY/INT ダメージを数値分だけ先に吸収（味方はターン開始で 0）。",
-  shield: "<strong>シールド</strong> — 特殊ダメージ（最大 HP 割合など）のみ吸収。PHY/INT 通常攻撃には無効。",
-  energy: "<strong>⚡ エナジー</strong> — ターンで使える行動コスト。次ターン開始時に最大まで回復。",
-  draw:   "<strong>ドロー</strong> — 山札から手札へカードを引く。山が空なら捨て札をシャッフルして山にする。",
-  phy:    "<strong>PHY</strong> — 物理攻撃の基礎値。PHY 依存スキルのダメージに使う。",
-  int:    "<strong>INT</strong> — 知略の基礎値。INT 攻撃や回復係数に関わる。",
-  agi:    "<strong>AGI</strong> — このプロトでは主にクリティカル率に反映。",
-  hp:     "<strong>HP</strong> — 0 で敗北。回復は最大値を超えない。",
-};
+// 旧: ハードコード JA。今は ti18n("peek.<k>") から取得 (JA / EN 両対応)。
+function peekHelpSnippet(key) {
+  return ti18n("peek." + key, "");
+}
 
 // ─── ターゲット表示バッジ (#44 SPEC-005 Phase 1) ──────────────────
 /**
@@ -2474,7 +2480,7 @@ function buildTargetBadgeHtml(card) {
 
 function buildPeekHelpHtml(keys) {
   if (!keys || !keys.length) return "";
-  const parts = keys.map((k) => PEEK_HELP_SNIPPETS[k]).filter(Boolean);
+  const parts = keys.map((k) => peekHelpSnippet(k)).filter(Boolean);
   if (!parts.length) return "";
   return (
     '<div class="card-peek-help">' +
@@ -2863,6 +2869,18 @@ function renderCombat() {
     // SPEC-006 Phase 4b: コスト + キャスター不在の両方をチェック
     const playable = canPlayCard(card, combat);
     const reasonBadge = !playable ? unplayableBadge(card, combat) : null;
+    // i18n: caster.js が返す JA バッジを EN 表示用に翻訳
+    if (reasonBadge) {
+      if (reasonBadge.badge === "⚡不足") {
+        reasonBadge.badge = ti18n("badge.energyShort", "⚡不足");
+        reasonBadge.title = ti18n("badge.energyTip").replace("{need}", card.cost).replace("{have}", combat.energy ?? 0);
+      } else if (reasonBadge.badge === "👤不在") {
+        const role = card?.caster ?? "foremost";
+        const roleLabel = tCasterLabel(role, CASTER_ROLE_LABELS[role] || role);
+        reasonBadge.badge = ti18n("badge.casterShort", "👤不在");
+        reasonBadge.title = ti18n("badge.casterTip").replace("{role}", roleLabel);
+      }
+    }
     slot.className = "card-slot" + (!playable ? " card-slot--disabled" : "");
     slot.setAttribute("data-cost", String(card.cost));
     slot.setAttribute("data-rarity", rarity);
@@ -7938,22 +7956,22 @@ function openCraftScreen() {
 
   el.innerHTML = `
     <div class="craft-header">
-      <h2>クラフト</h2>
-      <p class="craft-sub">エクステンションを獲得するか、デッキを強化しましょう</p>
+      <h2>${escapeHtml(ti18n("craft.title"))}</h2>
+      <p class="craft-sub">${escapeHtml(ti18n("craft.sub"))}</p>
     </div>
     <div class="craft-choices">
       <div class="craft-option" id="craftOptGet">
-        <div class="craft-opt-title">エクステ獲得</div>
-        <div class="craft-opt-desc">累積カードプールからカードを3枚提示します。1枚をデッキに追加できます。</div>
-        <button class="action craft-opt-btn" id="btnCraftGet">獲得する</button>
+        <div class="craft-opt-title">${escapeHtml(ti18n("craft.get.title"))}</div>
+        <div class="craft-opt-desc">${escapeHtml(ti18n("craft.get.desc"))}</div>
+        <button class="action craft-opt-btn" id="btnCraftGet">${escapeHtml(ti18n("craft.get.button"))}</button>
       </div>
       <div class="craft-option" id="craftOptUpgrade">
-        <div class="craft-opt-title">打ち直し</div>
-        <div class="craft-opt-desc">デッキ内のノービスカードを1枚選んでエリートにランクアップします。</div>
-        <button class="action craft-opt-btn" id="btnCraftUpgrade">打ち直す</button>
+        <div class="craft-opt-title">${escapeHtml(ti18n("craft.reroll.title"))}</div>
+        <div class="craft-opt-desc">${escapeHtml(ti18n("craft.reroll.desc"))}</div>
+        <button class="action craft-opt-btn" id="btnCraftUpgrade">${escapeHtml(ti18n("craft.reroll.button"))}</button>
       </div>
     </div>
-    <button class="craft-leave-btn" id="btnLeaveCraft">← マップに戻る</button>
+    <button class="craft-leave-btn" id="btnLeaveCraft">${escapeHtml(ti18n("craft.backMap"))}</button>
   `;
 
   document.getElementById("btnCraftGet").addEventListener("click", () => {
@@ -7992,7 +8010,7 @@ function openCraftGetCard() {
     playerGuard: 0, playerShield: 0, energyMax: 3, energy: 3,
   };
 
-  el.innerHTML = `<div class="craft-header"><h2>エクステ獲得</h2><p class="craft-sub">1枚を選んでデッキに追加します</p></div>`;
+  el.innerHTML = `<div class="craft-header"><h2>${escapeHtml(ti18n("craft.get.title"))}</h2><p class="craft-sub">${escapeHtml(ti18n("craft.get.pick"))}</p></div>`;
   const list = document.createElement("div");
   list.className = "craft-reward-list";
   offerKeys.forEach(key => {
@@ -8001,7 +8019,7 @@ function openCraftGetCard() {
     const btn = buildRewardPickButton(def, mockS);
     btn.addEventListener("click", () => {
       runState.deck.push(copyCard(key));
-      clog(`クラフト獲得: ${def.extNameJa}`);
+      clog(ti18n("clog.craftGet").replace("{name}", tExt(def.extId, def.extNameJa)));
       leaveCraft();
     });
     list.appendChild(btn);
@@ -8010,7 +8028,7 @@ function openCraftGetCard() {
 
   const skipBtn = document.createElement("button");
   skipBtn.className = "craft-leave-btn";
-  skipBtn.textContent = "スキップ";
+  skipBtn.textContent = ti18n("craft.skip");
   skipBtn.addEventListener("click", leaveCraft);
   el.appendChild(skipBtn);
 }
@@ -8027,15 +8045,15 @@ function openCraftUpgrade() {
 
   if (upgradeable.length === 0) {
     el.innerHTML = `
-      <div class="craft-header"><h2>打ち直し</h2></div>
-      <p style="text-align:center;color:var(--muted);margin:2rem 0;">アップグレード可能なノービスカードがありません</p>
-      <button class="craft-leave-btn" id="btnLeaveCraft2">← 戻る</button>
+      <div class="craft-header"><h2>${escapeHtml(ti18n("craft.reroll.title"))}</h2></div>
+      <p style="text-align:center;color:var(--muted);margin:2rem 0;">${escapeHtml(ti18n("craft.reroll.empty"))}</p>
+      <button class="craft-leave-btn" id="btnLeaveCraft2">${escapeHtml(ti18n("craft.back"))}</button>
     `;
     document.getElementById("btnLeaveCraft2").addEventListener("click", () => openCraftScreen());
     return;
   }
 
-  el.innerHTML = `<div class="craft-header"><h2>打ち直し</h2><p class="craft-sub">ランクアップするカードを選んでください（ノービス → エリート）</p></div>`;
+  el.innerHTML = `<div class="craft-header"><h2>${escapeHtml(ti18n("craft.reroll.title"))}</h2><p class="craft-sub">${escapeHtml(ti18n("craft.reroll.pick"))}</p></div>`;
   const list = document.createElement("div");
   list.className = "craft-upgrade-list";
 
@@ -8066,14 +8084,17 @@ function openCraftUpgrade() {
 
     const selBtn = document.createElement("button");
     selBtn.className = "action craft-opt-btn";
-    selBtn.textContent = "このカードを強化";
+    selBtn.textContent = ti18n("craft.upgrade.button");
     selBtn.addEventListener("click", () => {
       // β1: 元カードのコストを保持してランクアップ
       const originalCost = runState.deck[idx].cost;
       const upgraded = copyCard(upgradeKey);
       upgraded.cost = originalCost;
       runState.deck[idx] = upgraded;
-      clog(`打ち直し: ${card.extNameJa} → ${upgradeDef.extNameJa} (コスト ${originalCost} 据え置き)`);
+      clog(ti18n("clog.craftUpgrade")
+        .replace("{from}", tExt(card.extId, card.extNameJa))
+        .replace("{to}", tExt(upgradeDef.extId, upgradeDef.extNameJa))
+        .replace("{cost}", originalCost));
       leaveCraft();
     });
 
@@ -8088,7 +8109,7 @@ function openCraftUpgrade() {
 
   const backBtn = document.createElement("button");
   backBtn.className = "craft-leave-btn";
-  backBtn.textContent = "← 戻る";
+  backBtn.textContent = ti18n("craft.back");
   backBtn.addEventListener("click", () => openCraftScreen());
   el.appendChild(backBtn);
 }
@@ -8140,13 +8161,19 @@ function closeDeckModal() {
 }
 
 // ─── 初期化 ───────────────────────────────────────────────────────
-// タイトル画面の言語トグルで、現在の言語に対応するボタンに active クラスを付与
+// タイトル画面の言語トグルで、現在の言語に対応するボタンに active クラスを付与。
+// 加えてヘッダー常設ボタンのラベルを「次に切り替わる言語」に更新 (現在 JA → 次は EN を表示する慣例)。
 function syncLangToggleActive() {
   const cur = getLang();
   document.querySelectorAll("#langToggle .lang-btn").forEach(btn => {
     const isActive = btn.getAttribute("data-lang") === cur;
     btn.classList.toggle("lang-btn--active", isActive);
     btn.setAttribute("aria-pressed", isActive ? "true" : "false");
+  });
+  // ヘッダー常設ボタンには現在の言語コードを表示 (タップで他方に切り替わる)
+  document.querySelectorAll(".btn-lang-hd").forEach(btn => {
+    btn.textContent = cur === "en" ? "EN" : "JP";
+    btn.setAttribute("aria-pressed", "false");
   });
 }
 
@@ -8169,21 +8196,33 @@ async function init() {
     // i18n: 戦闘ログの post-process 用に JA→EN 名マッピングを登録
     // (cards.js の clog はカードや caster 名を JA で埋め込むため、
     //  EN モードでは clog 通過時にここで登録した名前を一括置換する)
+    // lang 状態に依存しないルックアップを使うので、JA で開始 → 後から EN に
+    // 切り替えた場合でも既に置換マップが構築されている。
     for (const h of HERO_ROSTER) {
-      const en = tHero(h.heroId, h.nameJa);
+      const en = getEnHeroName(h.heroId);
       if (en && en !== h.nameJa) registerNameMapping(h.nameJa, en);
     }
     for (const id of Object.keys(ENEMY_DEFS)) {
       const def = ENEMY_DEFS[id];
       if (!def) continue;
-      const en = tEnemy(def.imgId, def.name);
+      const en = getEnEnemyName(def.imgId);
       if (en && en !== def.name) registerNameMapping(def.name, en);
     }
     for (const id of Object.keys(BOSS_DEFS)) {
       const def = BOSS_DEFS[id];
       if (!def) continue;
-      const en = tEnemy(def.imgId, def.name);
+      const en = getEnEnemyName(def.imgId);
       if (en && en !== def.name) registerNameMapping(def.name, en);
+    }
+    // 全エクステ名 (cards.js play() 内 clog がカード名を JA で埋め込む対策)
+    // CARD_LIBRARY 全件の extNameJa / skillNameJa を JA→EN マップに登録。
+    for (const key of Object.keys(CARD_LIBRARY)) {
+      const def = CARD_LIBRARY[key];
+      if (!def) continue;
+      const enName = getEnExtName(def.extId);
+      if (enName && enName !== def.extNameJa) registerNameMapping(def.extNameJa, enName);
+      const enSkill = getEnExtSkill(def.extId);
+      if (enSkill && def.skillNameJa && enSkill !== def.skillNameJa) registerNameMapping(def.skillNameJa, enSkill);
     }
   } catch (e) {
     console.error("[init] data load failed", e);
@@ -8282,6 +8321,16 @@ async function init() {
       setLang(btn.getAttribute("data-lang"));
     });
   }
+  // ── ヘッダー常設の言語トグル (map / combat) ──
+  // 1 タップで JA ⇄ EN を切り替える。プレイ中の任意のタイミングで使えるよう設置。
+  ["btnLangToggleMap", "btnLangToggleCombat"].forEach(id => {
+    const b = document.getElementById(id);
+    if (!b) return;
+    b.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      setLang(getLang() === "en" ? "ja" : "en");
+    });
+  });
   // 言語変更時に再描画が必要な箇所 (combat / map / shop / hero名など)
   onLangChange(() => {
     syncLangToggleActive();

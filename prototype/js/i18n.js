@@ -85,6 +85,14 @@ function _lookupEn(table, id) {
   return table[String(id)] || null;
 }
 
+/** lang に関係なく EN 名を返すローレベルルックアップ。
+ *  名前置換マップ構築のように「現在言語に依存させたくない」初期化処理から使う。 */
+export function getEnHeroName(id)   { return _lookupEn(_heroes, id)?.name        || null; }
+export function getEnEnemyName(id)  { return _lookupEn(_enemies, id)?.name       || null; }
+export function getEnExtName(id)    { return _lookupEn(_exts, id)?.name          || null; }
+export function getEnExtSkill(id)   { return _lookupEn(_exts, id)?.skillName     || null; }
+export function getEnPassiveName(id){ return _lookupEn(_heroes, id)?.passiveName || null; }
+
 /** Hero name. Returns JA name if EN unavailable. */
 export function tHero(heroId, jaName) {
   if (_lang === "ja") return jaName ?? "";
@@ -174,9 +182,13 @@ const RUNTIME_REPLACEMENTS = [
   [/INT最高/g, "Highest INT"],
   [/HP最高/g,  "Highest HP"],
   [/AGI最高/g, "Highest AGI"],
+  // 「ダメージ」を先に置換 → 残った「ダメ」だけを後で潰す。
+  // 旧版は `/ダメ\b/g` を使っていたが JS の \b は非 ASCII の境界に発火しないため
+  // 「25-30% ダメ」が翻訳されないままだった (shop カード券面で再発)。
+  [/ダメージ/g, "DMG"],
   [/PHYダメ/g, "PHY DMG"],
   [/INTダメ/g, "INT DMG"],
-  [/ダメ\b/g, "DMG"],
+  [/ダメ/g, "DMG"],
   [/PHY攻撃/g, "PHY attack"],
   [/INT攻撃/g, "INT attack"],
   [/出血/g, "Bleed"],
@@ -316,26 +328,71 @@ export function tCasterLabel(role, jaLabel) {
  * 通すので、ここはテンプレ部分のみカバー。
  */
 const COMBAT_LOG_REPLACEMENTS = [
-  // 角括弧つきヒーロー名・カード名は EN モードでは括弧記号もそのままで OK
-  [/\bダメ\b/g, "DMG"],
-  [/\bダメージ\b/g, "DMG"],
+  // ── 角括弧つきヒーロー名・カード名 [XX] のラッパ
   [/が\【/g, " used ["],
   [/\】を使用/g, "]"],
-  [/\】 ?発動/g, "] triggered"],
-  [/発動！/g, "triggered!"],
+  [/\】 ?発動！?/g, "] triggered!"],
+  [/【/g, "["],
+  [/】/g, "]"],
+  // ── 状態異常 / 効果適用
   [/に出血\s*[×x]\s*(\d+)/g, " → Bleed×$1"],
   [/に毒\s*[×x]\s*(\d+)/g, " → Poison×$1"],
+  [/出血\s*[×x]\s*(\d+)\s*追加/g, "Bleed×$1 added"],
+  [/出血\s*[×x]\s*(\d+)\s*付与（敵全体）/g, "Bleed×$1 → all enemies"],
+  [/出血\s*[×x]\s*(\d+)\s*付与（敵）/g, "Bleed×$1 → enemy"],
+  [/出血\s*[×x]\s*(\d+)\s*付与/g, "Bleed×$1 applied"],
+  [/毒\s*[×x]\s*(\d+)\s*付与（敵全体）/g, "Poison×$1 → all enemies"],
+  [/毒\s*[×x]\s*(\d+)\s*付与（敵）/g, "Poison×$1 → enemy"],
+  [/毒\s*[×x]\s*(\d+)\s*付与/g, "Poison×$1 applied"],
   [/出血ダメージ\s*(\d+)/g, "Bleed dmg $1"],
   [/毒ダメージ\s*(\d+)/g, "Poison dmg $1"],
+  [/状態異常解除（自分）/g, "Status cleared (self)"],
+  [/状態異常解除/g, "Status cleared"],
+  // ── 戦闘ログ専用フレーズ
   [/休憩で HP\+(\d+)/g, "Rested for HP +$1"],
   [/購入:?\s*/g, "Purchased: "],
-  [/シールド\s*(\d+)/g, "Shield $1"],
+  [/シールド\s*\+?(\d+)/g, "Shield +$1"],
   [/ガード\s*\+(\d+)/g, "Guard +$1"],
   [/ドロー\s*(\d+)/g, "Draw $1"],
   [/カードを\s*(\d+)\s*枚引く/g, "draw $1"],
+  [/捨て札をシャッフルして山に/g, "Reshuffled discard into deck"],
+  [/クリティカル（PHY）/g, "Critical (PHY)"],
+  [/クリティカル（INT）/g, "Critical (INT)"],
+  [/敵クリティカル（PHY）/g, "Enemy critical (PHY)"],
+  [/敵クリティカル（INT）/g, "Enemy critical (INT)"],
+  [/不屈：?このターン被ダメ半減/g, "Steadfast: half DMG taken this turn"],
+  [/不屈:?\s*ダメージ半減/g, "Steadfast: DMG halved"],
+  [/不屈:?\s*ダメ半減/g, "Steadfast: DMG halved"],
+  [/特殊ダメージ（最大HP\s*(\d+)%）→ HP-(\d+)/g, "Special DMG (max HP $1%) → HP -$2"],
+  [/PHY全体攻撃\s*(\d+)%\s*→\s*合計ダメ\s*(\d+)/g, "PHY area $1% → total $2 DMG"],
+  [/INT全体攻撃\s*(\d+)%\s*→\s*合計ダメ\s*(\d+)/g, "INT area $1% → total $2 DMG"],
+  [/敵\s*PHY\s*(\d+)%\s*→\s*被ダメージ\s*(\d+)/g, "Enemy PHY $1% → DMG taken $2"],
+  [/敵\s*INT\s*(\d+)%\s*→\s*被ダメージ\s*(\d+)/g, "Enemy INT $1% → DMG taken $2"],
+  [/敵\s*PHY\s*(-?\d+)/g, "Enemy PHY $1"],
+  [/敵\s*INT\s*(-?\d+)/g, "Enemy INT $1"],
+  [/リカバリー:\s*係数(.+)/g, "Recovery: coef $1"],
+  [/HP\+(\d+)（自己回復）/g, "HP +$1 (self heal)"],
+  [/HP\+(\d+)/g, "HP +$1"],
+  [/HP-(\d+)/g, "HP -$1"],
+  [/(\S+)\s*行動:\s*guard/g, "$1 action: guard"],
+  [/(\S+)\s*行動:\s*buffSelf/g, "$1 action: self buff"],
+  [/(\S+)\s*行動:\s*healSelf/g, "$1 action: self heal"],
+  [/(\S+)\s*行動:\s*([a-zA-Z]+)/g, "$1 action: $2"],
+  [/致死ダメージを耐えた！HP\s*1\s*で生存！/g, "Survived a lethal hit at HP 1!"],
+  [/致死ダメ.*$/g, "Survived a lethal hit at HP 1!"],
+  [/付与/g, "applied"],
   [/(\d+)\s*ダメ\b/g, "$1 DMG"],
+  [/ダメージ/g, "DMG"],
+  [/ダメ/g, "DMG"],
   [/(\d+)\s*回復/g, "+$1 HP"],
-  [/(\d+)\s*HP/g, "$1 HP"],
+  // 休憩 / 自己回復 / 強化 のラベル
+  [/自己回復/g, "self heal"],
+  [/強化/g, "buff"],
+  [/防御/g, "guard"],
+  [/敵全体/g, "all enemies"],
+  [/敵/g, "enemy"],
+  [/（/g, " ("],
+  [/）/g, ")"],
 ];
 
 /**
