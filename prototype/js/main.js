@@ -225,6 +225,11 @@ function reachableNextNodeIds(lastNodeId) {
 // x は固定・y は activeMapStartY に委譲
 const MAP_START_X = 50;
 
+/** アプリのバージョン文字列。スコア送信時の version フィールドと、
+ *  ランキングのバージョンフィルタの「現在」デフォルト値に使う。
+ *  index.html / ui.json の表記と一致させること (Ver.X.Y.Z 形式)。 */
+const APP_VERSION = "1.2.0";
+
 // ─── 状態変数 ────────────────────────────────────────────────────
 let gold = 75;
 let view = "map";
@@ -7514,7 +7519,7 @@ function buildRankingPayload(playerName) {
     llExt: llExtCount,
     heroIds: partyHeroes.map(h => h.heroId),
     absoluteConfig: absConfig,
-    version: "1.1.0",
+    version: APP_VERSION,
     _breakdown: breakdown,
   };
 }
@@ -7598,11 +7603,54 @@ async function openRankingView() {
   await renderRankingView();
 }
 
+/** ランキングのバージョン選択肢を、取得済みエントリから動的に組み立てる。
+ *  - APP_VERSION (現在実行中) は必ず先頭・デフォルト選択
+ *  - "" (= 全バージョン) を末尾に
+ *  - データから見つかったバージョンは新しい順 (semver 風 desc) に並べる
+ *  - 既存値があれば保持。デフォルトは APP_VERSION。
+ *  @param {Set<string>} versionsFromData
+ *  @param {string} currentValue */
+function rebuildRankingVersionOptions(selectEl, versionsFromData, currentValue) {
+  if (!selectEl) return;
+  const seen = new Set();
+  const opts = [];
+  // 1. 現在バージョンを先頭・必ず含める
+  seen.add(APP_VERSION);
+  opts.push({ value: APP_VERSION, label: `v${APP_VERSION} (current)` });
+  // 2. データから収集したバージョンを semver desc でソートして追加 (現バージョン以外)
+  const others = [...versionsFromData].filter(v => v && v !== APP_VERSION);
+  others.sort((a, b) => {
+    const pa = String(a).split(".").map(n => parseInt(n, 10) || 0);
+    const pb = String(b).split(".").map(n => parseInt(n, 10) || 0);
+    for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+      const da = pa[i] || 0, db = pb[i] || 0;
+      if (da !== db) return db - da; // desc
+    }
+    return 0;
+  });
+  for (const v of others) {
+    if (seen.has(v)) continue;
+    seen.add(v);
+    opts.push({ value: v, label: `v${v}` });
+  }
+  // 3. "全バージョン" 末尾
+  opts.push({ value: "__all__", label: ti18n("ranking.version.all") });
+  // 4. 旧データ (version 未設定) を表示するためのオプション
+  if (versionsFromData.has("")) {
+    opts.push({ value: "__legacy__", label: ti18n("ranking.version.legacy") });
+  }
+  selectEl.innerHTML = opts.map(o => `<option value="${escapeHtml(o.value)}">${escapeHtml(o.label)}</option>`).join("");
+  // デフォルト選択: 現在値が候補に残っていればそれ、無ければ APP_VERSION
+  const target = opts.find(o => o.value === currentValue) ? currentValue : APP_VERSION;
+  selectEl.value = target;
+}
+
 async function renderRankingView() {
   const el = document.getElementById("rankingView");
   if (!el) return;
   const apiUrl = getRankingApiUrl();
   const filterEl = el.querySelector("[data-rk-filter]");
+  const versionFilterEl = el.querySelector("[data-rk-version-filter]");
   const listEl = el.querySelector("[data-rk-list]");
   const apiUrlInput = el.querySelector("[data-rk-apiurl]");
   if (apiUrlInput) apiUrlInput.value = apiUrl || "";
@@ -7613,22 +7661,42 @@ async function renderRankingView() {
   }
   listEl.innerHTML = `<p class="rk-msg">${escapeHtml(ti18n("ranking.fetching"))}</p>`;
   const filterId = filterEl?.value || "";
-  const result = await fetchRanking({ regulation: filterId || undefined, limit: 50 });
+  const result = await fetchRanking({ regulation: filterId || undefined, limit: 200 });
   if (!result.ok) {
     listEl.innerHTML = `<p class="rk-msg rk-msg--error">${escapeHtml(ti18n("ranking.fetch.error"))}: ${escapeHtml(result.error || "unknown")}</p>`;
     return;
   }
-  if (!result.ranking || result.ranking.length === 0) {
+  // バージョン選択肢を更新 (取得済みデータから unique versions を抽出)
+  const versionsFromData = new Set();
+  for (const e of (result.ranking || [])) versionsFromData.add(e.version || "");
+  rebuildRankingVersionOptions(versionFilterEl, versionsFromData, versionFilterEl?.value || APP_VERSION);
+  const selectedVer = versionFilterEl?.value || APP_VERSION;
+
+  // バージョンフィルタ (client-side)
+  let filtered = result.ranking || [];
+  if (selectedVer === "__legacy__") {
+    filtered = filtered.filter(e => !e.version);
+  } else if (selectedVer === "__all__") {
+    // no-op
+  } else {
+    filtered = filtered.filter(e => (e.version || "") === selectedVer);
+  }
+
+  if (filtered.length === 0) {
     listEl.innerHTML = `<p class="rk-msg">${escapeHtml(ti18n("ranking.empty"))}</p>`;
     return;
   }
-  const rows = result.ranking.map(e => {
+  // 表示件数は 50 まで
+  const display = filtered.slice(0, 50);
+  const rows = display.map((e, idx) => {
+    // 元の `e.rank` はサーバ側全体順位なので、フィルタ後の表示順位 (1, 2, …) を採用
+    const rank = idx + 1;
     const regJa = REGULATION_BY_ID[e.regulation]?.nameJa || e.regulation;
     const absInfo = e.absolute
       ? ` <span class="rk-abs">[eHP×${e.absolute.enemyHpMult} eDmg×${e.absolute.enemyDmgMult} sHP×${e.absolute.playerHpMult} sDmg×${e.absolute.playerDmgMult}]</span>`
       : "";
     return `<tr>
-      <td class="rk-rank">${e.rank}</td>
+      <td class="rk-rank">${rank}</td>
       <td class="rk-name">${escapeHtml(e.playerName)}</td>
       <td class="rk-score">${e.score.toLocaleString()}</td>
       <td class="rk-reg">${escapeHtml(regJa)}${absInfo}</td>
@@ -7654,6 +7722,14 @@ async function renderRankingView() {
         .concat(REGULATIONS.map(r => `<option value="${r.id}">${r.nameJa}</option>`));
       filterEl.innerHTML = opts.join("");
       filterEl.addEventListener("change", () => renderRankingView());
+    }
+    // バージョンフィルタの change → 再描画 (実 fetch は再走、選択値は維持)
+    const verEl = el.querySelector("[data-rk-version-filter]");
+    if (verEl) {
+      // 初期値として APP_VERSION を入れておく (renderRankingView 内で
+      // データ取得後に rebuild される際の current 保持に使う)
+      verEl.innerHTML = `<option value="${escapeHtml(APP_VERSION)}">v${escapeHtml(APP_VERSION)} (current)</option>`;
+      verEl.addEventListener("change", () => renderRankingView());
     }
     el.querySelector("[data-rk-refresh]")?.addEventListener("click", () => renderRankingView());
     el.querySelector("[data-rk-back]")?.addEventListener("click", () => {
