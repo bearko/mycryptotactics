@@ -665,6 +665,14 @@ function clog(msg) {
 function sleep(ms) { return new Promise(res => setTimeout(res, ms)); }
 const ENEMY_ACTION_GAP_MS = 850;
 
+/** ボス警戒 (Vigilance) — ボス戦のみ作動する chain-abuse 抑止機構。
+ *  「1 ターンに使ったカードの合計枚数」が増えるほど反動ダメージが増加。
+ *  free 枠 (1〜3 枚目) は無料、4 枚目から (count - FREE) * BASE のリニア dmg。
+ *  例: 4th = 3 / 5th = 6 / 6th = 9 / 7th = 12 / 8th = 15 / 9th = 18 dmg
+ *  通常 build (1〜3 枚 / turn) は無傷、chain 戦法 (5〜10 枚 / turn) で頭打ち。 */
+const VIGILANCE_FREE_THRESHOLD = 3;
+const VIGILANCE_BACKLASH_BASE_DMG = 3;
+
 /** SPEC-005 Phase 3h: data-pos スロット内の combatant-portrait-wrap を解決
  *  - heroes[0] / enemies[0] (前衛) → 静的 ID (#playerPortraitWrap / #enemyPortraitWrap)
  *  - heroes[1+] / enemies[1+] → .party-slot[data-pos="N"] .combatant-portrait-wrap
@@ -2049,6 +2057,10 @@ function startCombatFromMapNode(node) {
     isBoss,
     bossPhase,
     bossDef: isBoss ? bossDef : null,
+    // ボス戦のみ「警戒 (Vigilance)」: 1 ターンの累積カード使用枚数が
+    // VIGILANCE_FREE_THRESHOLD を超えると 1 枚ごとに反動ダメージ。
+    bossVigilance: isBoss,
+    cardsPlayedThisTurn: 0,
     enemyName: enemyDef.name,
     enemyImgId: enemyDef.imgId,
     enemyDefId: enemyDef.id,
@@ -2148,6 +2160,12 @@ function startCombatFromMapNode(node) {
   clog(ti18n("combat.start").replace("{name}", enemyDispLogName) + battleSuffix);
   if (isBoss && (enemyDef.initialShield || 0) > 0) {
     clog(ti18n("combat.boss.shield").replace("{n}", enemyDef.initialShield));
+  }
+  // ボス戦のみ Vigilance ルールを開幕通知
+  if (isBoss) {
+    clog(ti18n("combat.boss.vigilance.intro")
+      .replace("{free}", VIGILANCE_FREE_THRESHOLD)
+      .replace("{n}", VIGILANCE_BACKLASH_BASE_DMG));
   }
   // β1 UX: パッシブ発動前に「敵 + 手札 + intent」を最新化する。
   // 旧版は applyHeroPassiveOnCombatStart → applyPassiveTriggerAsync → startPlayerTurn
@@ -2280,6 +2298,8 @@ function startPlayerTurn() {
   }
   combat.playerGuard = 0;  // legacy mirror (heroes[0])
   combat.damageReducedThisTurn = false;
+  // ボス警戒 (Vigilance): 1 ターンの累積使用枚数をリセット
+  combat.cardsPlayedThisTurn = 0;
 
   // SPEC-006 Phase 4f + β1 修正: 毒 / 出血 ティックを per-hero (生存ヒーロー個別)
   // 旧: 毒のみ tick、出血は PHY 攻撃時のボーナスのみ → 出血ダメージが入らないと報告
@@ -2775,11 +2795,29 @@ function renderStatusBadges() {
     h0 ? (h0.poison || 0) : (combat.playerPoison || 0),
     h0 ? (h0.bleed || 0) : (combat.playerBleed || 0),
   );
+  const enemyBadgeEl = document.getElementById("enemyStatusBadge");
   renderToEl(
-    document.getElementById("enemyStatusBadge"),
+    enemyBadgeEl,
     combat.enemies?.[0] ? (combat.enemies[0].poison || 0) : (combat.enemyPoison || 0),
     combat.enemies?.[0] ? (combat.enemies[0].bleed || 0) : (combat.enemyBleed || 0),
   );
+  // ボス警戒 (Vigilance): ボス戦のみ「👁N」バッジを enemyStatusBadge に追加。
+  // クリックで passivePopup にルール説明を表示。
+  if (enemyBadgeEl && combat.bossVigilance) {
+    const used = combat.cardsPlayedThisTurn || 0;
+    const isAlert = used > VIGILANCE_FREE_THRESHOLD;
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "sbadge-vigilance" + (isAlert ? " sbadge-vigilance--alert" : "");
+    btn.textContent = "👁 " + used + "/" + VIGILANCE_FREE_THRESHOLD;
+    btn.title = ti18n("combat.boss.vigilance.tooltip")
+      .replace("{free}", VIGILANCE_FREE_THRESHOLD)
+      .replace("{n}", VIGILANCE_BACKLASH_BASE_DMG);
+    btn.setAttribute("aria-label", ti18n("combat.boss.vigilance.label"));
+    btn.addEventListener("click", (ev) => { ev.stopPropagation(); showVigilancePopup(); });
+    enemyBadgeEl.appendChild(btn);
+    enemyBadgeEl.style.display = "";
+  }
   // SPEC-006 Phase 4f: サブヒーロー (heroes[1+]) の portrait wrap 内にも status badge を注入
   for (let pos = 1; pos < (combat.heroes?.length || 0); pos++) {
     const hero = combat.heroes[pos];
@@ -5695,6 +5733,36 @@ async function playCard(idx) {
   } else {
     combat.discardPile.push(card);
   }
+  // ボス警戒 (Vigilance) 反動: 1 ターンの累積使用枚数 (種類無関係) が
+  // VIGILANCE_FREE_THRESHOLD を超えると、超過分 × BASE_DMG が前衛に入る。
+  // 例: free=3 / base=3 → 4th: -3 / 5th: -6 / 6th: -9 / 7th: -12 …
+  if (combat.bossVigilance) {
+    combat.cardsPlayedThisTurn = (combat.cardsPlayedThisTurn || 0) + 1;
+    const count = combat.cardsPlayedThisTurn;
+    if (count > VIGILANCE_FREE_THRESHOLD) {
+      const overage = count - VIGILANCE_FREE_THRESHOLD;
+      const dmg = overage * VIGILANCE_BACKLASH_BASE_DMG;
+      const front = combat.heroes?.[0];
+      if (front) {
+        applyHpDeltaToHero(combat, front, -dmg);
+        flashPortrait("player", front);
+        playPortraitEffect("player", "debuff", front);
+      } else {
+        combat.playerHp = Math.max(0, (combat.playerHp || 0) - dmg);
+      }
+      clog(ti18n("combat.boss.vigilance.hit")
+        .replace("{count}", count)
+        .replace("{n}", dmg));
+      checkResurrection(combat);
+      if (isPartyWipedOut(combat)) {
+        renderCombat();
+        endCombatLoss();
+        return;
+      }
+    }
+    // バッジの数値を即時反映
+    renderStatusBadges();
+  }
   card.play(combat, { caster, effectsResolved });
   // SPEC-006 Phase 4d: card.play() で変化した legacy stats を caster に書き戻す
   syncLegacyStatsToCaster(combat, caster);
@@ -7227,6 +7295,23 @@ function renderNodeSelect(justUnlockedIdx = null) {
 }
 
 // ─── パッシブスキルポップアップ ──────────────────────────────────────
+/** ボス警戒 (Vigilance) バッジクリックで開くヘルプポップアップ。
+ *  passivePopup を再利用して、ルールの説明文を表示。 */
+function showVigilancePopup() {
+  const popup = document.getElementById("passivePopup");
+  if (!popup) return;
+  const titleStr = ti18n("combat.boss.vigilance.label");
+  const descStr  = ti18n("combat.boss.vigilance.tooltip")
+    .replace("{free}", VIGILANCE_FREE_THRESHOLD)
+    .replace("{n}", VIGILANCE_BACKLASH_BASE_DMG);
+  const usedStr  = String(combat?.cardsPlayedThisTurn || 0);
+  popup.innerHTML =
+    `<div class="pp-skill-name">【${escapeHtml(titleStr)}】</div>` +
+    `<div class="pp-skill-desc">${escapeHtml(descStr)}</div>` +
+    `<div class="pp-skill-desc" style="margin-top:0.3rem;color:var(--accent);">${escapeHtml(ti18n("combat.boss.vigilance.current").replace("{count}", usedStr))}</div>`;
+  popup.classList.remove("hidden");
+}
+
 function togglePassivePopup() {
   const popup = document.getElementById("passivePopup");
   if (!popup) return;

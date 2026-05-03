@@ -507,6 +507,20 @@
       padding: 1px 3px; line-height: 1.25; color: #f0a050;
       border: 1px solid #6a3820;
     }
+    /* ボス警戒 (Vigilance) バッジ — タップで詳細ポップアップを開ける。
+     *  status-badges 親が pointer-events: none なので、自身は auto にして
+     *  クリックを拾えるようにする。 */
+    .sbadge-vigilance {
+      font-size: 0.62rem; font-weight: 800;
+      background: rgba(46,16,32,0.92); border-radius: 4px;
+      padding: 2px 5px; line-height: 1.2; color: #ffd96b;
+      border: 1px solid #d68a2a;
+      cursor: pointer; pointer-events: auto;
+      display: inline-flex; align-items: center; gap: 2px;
+      transition: transform 0.12s ease, background 0.12s ease;
+    }
+    .sbadge-vigilance:hover { background: rgba(72,28,46,0.96); transform: scale(1.06); }
+    .sbadge-vigilance--alert { color: #ff6b6b; border-color: #ff7050; }
 
     /* Combatant info — HP ゲージ幅 = portrait × 80% (流動) */
     .combatant-info {
