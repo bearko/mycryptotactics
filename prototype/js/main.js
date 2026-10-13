@@ -6503,7 +6503,7 @@ async function renderReportRanking(container, snap) {
     <p style="font-size:0.7rem;color:var(--muted);margin:0.25rem 0 0;">${escapeHtml(ti18n("report.rank.note"))}</p>
   `;
 }
-const SHARE_URL = "https://mycryptotactics.vercel.app/";
+const SHARE_URL = "https://tactics.bearko.games/";
 const SHARE_TITLE = "MyCryptoTactics";
 
 function captureRunSnapshot({ isCleared, defeatedBy }) {

@@ -4,7 +4,7 @@
 
 ## 🎮 今すぐ遊ぶ
 
-**▶ https://mycryptotactics.vercel.app**
+**▶ https://tactics.bearko.games**
 
 スマホ・PC どちらでも動きます。インストール不要、無料。
 
