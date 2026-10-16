@@ -2,6 +2,7 @@ import { initPlatform, reportChapterClear, scoreMetrics, reportRunScore } from "
 import { installModalA11y, showToast } from "./ui-kit.js";
 import { getSettings, mixVolume, onSettingsChange } from "./settings.js";
 import { installSettingsUI, openSettings } from "./settings-ui.js";
+import { burstAt, hurtEdge, countTo, enterView } from "./fx.js";
 import {
   createCardRuntime,
   shuffle,
@@ -837,10 +838,13 @@ function getPlayerAttackTargetEnemy(s) {
 /** 敵 HP を更新し、必要に応じて legacy フィールドを同期。HP は [0, hpMax] にクランプ。 */
 function applyHpDeltaToEnemy(s, enemy, delta) {
   if (!enemy) return;
+  const wasAlive = enemy.alive !== false && (enemy.hp ?? 0) > 0;
   const newHp = (enemy.hp ?? 0) + delta;
   const cap = enemy.hpMax ?? newHp;
   enemy.hp = Math.max(0, Math.min(cap, newHp));
   if (enemy.hp <= 0) enemy.alive = false;
+  // SPEC-012: 倒した瞬間にポートレートから粒を散らす
+  if (wasAlive && enemy.hp <= 0) burstAt(resolveUnitPortraitWrap("enemy", enemy), "#ff8a6a");
   if (s.enemies && enemy === s.enemies[0]) {
     s.enemyHp = enemy.hp;
   }
@@ -1039,6 +1043,8 @@ function applyHpDeltaToHero(s, hero, delta) {
   const newHp = (hero.hp ?? 0) + delta;
   const cap = hero.hpMax ?? newHp;
   hero.hp = Math.max(0, Math.min(cap, newHp));
+  // SPEC-012: 被弾で画面の縁が赤く光る（最大 HP の 25% で最も濃く）
+  if (delta < 0 && wasAlive) hurtEdge(Math.min(1, -delta / Math.max(1, (hero.hpMax ?? 1) * 0.25)));
   if (hero.hp <= 0) hero.alive = false;
   // heroes[0] (前衛) なら legacy combat.playerHp と同期
   if (s.heroes && hero === s.heroes[0]) {
@@ -1675,10 +1681,9 @@ function nodeXY(id) {
 
 // ─── リソース表示更新 ─────────────────────────────────────────────
 function syncResources() {
-  const goldValEl = document.getElementById("goldVal");
-  if (goldValEl) goldValEl.textContent = String(gold);
-  const combatGoldEl = document.getElementById("combatGoldVal");
-  if (combatGoldEl) combatGoldEl.textContent = String(gold);
+  // SPEC-012: ゴールドは前の値から数え上げる（演出を減らす設定ではすぐ最後の値）
+  countTo(document.getElementById("goldVal"), gold);
+  countTo(document.getElementById("combatGoldVal"), gold);
   ensureRunState();
   // マップヘッダーHP
   const mapHpValEl = document.getElementById("mapHpVal");
@@ -1981,8 +1986,16 @@ function tryEnterMapNode(nodeId) {
 }
 
 // ─── ビュー切り替え ───────────────────────────────────────────────
+const VIEW_ELEMENT_IDS = {
+  map: "mapView", combat: "combatView", shop: "shopView", over: "gameOver", reward: "rewardView",
+  nodeSelect: "nodeSelectView", craft: "craftView", heroSelect: "heroSelectView",
+  regulationSelect: "regulationSelectView", ranking: "rankingView",
+};
+
 function showView(name) {
   if (view === "combat" && name !== "combat") stopBgm();
+  // SPEC-012: 画面が切り替わったときだけ、入ってくる画面に動きをつける
+  if (view !== name) requestAnimationFrame(() => enterView(document.getElementById(VIEW_ELEMENT_IDS[name])));
   view = name;
   document.getElementById("mapView").classList.toggle("hidden", name !== "map");
   document.getElementById("combatView").classList.toggle("hidden", name !== "combat");
@@ -2792,7 +2805,7 @@ function bindHandCard(el, idx, card) {
   el.addEventListener("click", (ev) => {
     if (!window.matchMedia("(pointer: fine)").matches) return;
     ev.preventDefault();
-    if (combatInputLocked) return;
+    if (combatInputLocked || !combat) return;   // 戦闘が終わったあと（勝利のカットイン中）に残った手札を押しても何もしない
     if (card.cost > combat.energy || el.classList.contains("card-slot--disabled")) return;
     const slots = Array.from(document.querySelectorAll("#hand .card-slot"));
     const myIdx = slots.indexOf(el);
