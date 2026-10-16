@@ -2843,6 +2843,34 @@
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
     }
+    /* ── SPEC-012: 演出（0.8 秒以内・操作を止めない・演出を減らすで止まる） ── */
+    .fx-particle {
+      position: fixed; z-index: 650; width: 6px; height: 6px; margin: -3px 0 0 -3px;
+      border-radius: 1px; pointer-events: none;
+      animation: fx-burst 600ms var(--ease-out) forwards;
+    }
+    @keyframes fx-burst {
+      from { opacity: 1; transform: translate(0, 0) scale(1); }
+      to   { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0.4); }
+    }
+    .fx-hurt-edge {
+      position: fixed; inset: 0; z-index: 640; pointer-events: none; opacity: 0;
+      background: radial-gradient(ellipse at center, transparent 55%, rgba(231, 60, 60, 0.85) 100%);
+    }
+    .fx-hurt-edge--on { animation: fx-hurt 350ms ease-out; }
+    @keyframes fx-hurt {
+      0%   { opacity: var(--fx-hurt, 0.6); }
+      100% { opacity: 0; }
+    }
+    .fx-count--up   { animation: fx-count-up 500ms ease-out; }
+    .fx-count--down { animation: fx-count-down 500ms ease-out; }
+    @keyframes fx-count-up   { 0%, 40% { color: #ffd76a; text-shadow: 0 0 8px #ffd76a99; } }
+    @keyframes fx-count-down { 0%, 40% { color: var(--loss); text-shadow: 0 0 8px #ff6b6b99; } }
+    .fx-view-enter { animation: fx-view-enter 220ms var(--ease-out); }
+    @keyframes fx-view-enter {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: none; }
+    }
   </style>
 </head>
 <body>
@@ -3420,6 +3448,9 @@
 
   <!-- SPEC-008: bearko.games 共通基盤の SDK（読めなくてもゲームは動く）。main.js より先に読む -->
   <script defer src="https://bearko.games/sdk/v1.js"></script>
+  <!-- SPEC-012: 被弾で画面の縁が光る (= 操作の邪魔をしない) -->
+  <div id="fxHurtEdge" class="fx-hurt-edge" aria-hidden="true"></div>
+
   <!-- SPEC-011: 設定 -->
   <div id="settingsOverlay" class="hidden" aria-hidden="true" role="dialog" aria-modal="true" data-esc-close="#setClose" aria-labelledby="setTitle">
     <div class="set-dialog">
