@@ -2,7 +2,8 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#121018" />
   <title>MyCryptoTactics — Ver.1.2.0</title>
   <meta name="description" content="My Crypto Heroes の偉人たち × ローグライク × カードバトルのファンメイドブラウザゲーム。" />
 
@@ -27,6 +28,13 @@
   <style>html, body { background: #121018; color: #e6e0f0; margin: 0; }</style>
 
   <link rel="preconnect" href="https://raw.githubusercontent.com" />
+
+  <!-- SPEC-010: 見出し (Dela Gothic One) と数字 (Chakra Petch) だけ Web フォント。読めなければシステムフォント (DESIGN_CHARTER 2.2) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- 読み込みを待たない (media=print → onload で all)。 Google Fonts が遅い・読めない環境でも画面がすぐ出る -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=Dela+Gothic+One&display=swap" media="print" onload="this.media='all'" />
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=Dela+Gothic+One&display=swap" /></noscript>
 
   <!-- 活動レポートのスクリーンショット生成用 (#X 投稿時に使用) -->
   <script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
@@ -2657,6 +2665,125 @@
       letter-spacing: 0.2em;
       text-transform: uppercase;
     }
+    /* ═══════════════════════════════════════════════════════════════════
+       SPEC-010: UI の土台（トークン・フォント・ボタン・モーダル・safe-area・reduced-motion）
+       ═══════════════════════════════════════════════════════════════════ */
+    :root {
+      --r-sm: 6px; --r-md: 10px; --r-lg: 14px; --r-pill: 999px;
+      --sp-1: 0.25rem; --sp-2: 0.4rem; --sp-3: 0.6rem; --sp-4: 0.8rem; --sp-5: 1.1rem; --sp-6: 1.6rem;
+      --fs-xs: 0.7rem; --fs-sm: 0.8rem; --fs-md: 0.9rem; --fs-lg: 1.1rem; --fs-xl: 1.4rem;
+      --font-body: "Segoe UI", "Hiragino Sans", sans-serif;
+      --font-display: "Dela Gothic One", var(--font-body);
+      --font-num: "Chakra Petch", ui-monospace, var(--font-body);
+      --line: rgba(255, 255, 255, 0.08);
+      --on-accent: #1a1420;
+      --z-toast: 400;
+      --ease-out: cubic-bezier(.2, .8, .4, 1);
+      --ease-spring: cubic-bezier(.2, .9, .25, 1.15);
+      --dur-fast: 120ms;
+      --dur-base: 220ms;
+      --safe-t: env(safe-area-inset-top, 0px);
+      --safe-r: env(safe-area-inset-right, 0px);
+      --safe-b: env(safe-area-inset-bottom, 0px);
+      --safe-l: env(safe-area-inset-left, 0px);
+    }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      font-family: var(--font-body);
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding: max(0.75rem, var(--safe-t)) max(0.75rem, var(--safe-r)) max(0.75rem, var(--safe-b)) max(0.75rem, var(--safe-l));
+      overscroll-behavior-y: none;
+    }
+    * { -webkit-tap-highlight-color: transparent; }
+    button { touch-action: manipulation; }
+
+    /* 見出し・数字のフォント */
+    h1, h2, .abs-title, .report-title, .rs-title {
+      font-family: var(--font-display);
+      font-weight: 400;
+      letter-spacing: 0.02em;
+    }
+    .num, .hp-bar-nums, .sbadge, .energy-pill, .card-cost-above, .stat-float,
+    .resources .res, .rk-score, .title-version {
+      font-family: var(--font-num);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ボタン：押した感じ・フォーカスの枠 (= キーボードのときだけ) */
+    button:focus { outline: none; }
+    button:focus-visible, [role="button"]:focus-visible, a:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    button:not(:disabled) {
+      transition: transform var(--dur-fast) var(--ease-out), filter var(--dur-base), background var(--dur-base), border-color var(--dur-base);
+    }
+    button:not(:disabled):active { transform: scale(0.97); }
+    button:disabled { cursor: not-allowed; }
+
+    /* タイトル：PRESS TO START を読みやすく (= 点滅で消えかけない) */
+    .title-press {
+      font-family: var(--font-num);
+      font-weight: 700;
+      color: #e3d6ff;
+      text-shadow: 0 0 12px rgba(155, 127, 210, 0.7);
+      animation-name: title-blink-soft;
+    }
+    @keyframes title-blink-soft {
+      0%, 100% { opacity: 1; }
+      50%      { opacity: 0.45; }
+    }
+    .title-version { bottom: max(0.55rem, var(--safe-b)); }
+
+    /* レギュレーションのアイコンが読めないときの代わり (= 名前の文字) */
+    .header-reg-fallback {
+      display: inline-flex; align-items: center;
+      height: 22px; padding: 0 0.35rem;
+      max-width: 3.6rem; overflow: hidden; text-overflow: ellipsis;
+      border: 1px solid var(--accent); border-radius: var(--r-pill);
+      color: var(--accent); font-size: 0.6rem; font-weight: 700;
+      white-space: nowrap; flex-shrink: 1; min-width: 2.2rem;
+    }
+
+    /* トースト (= alert() の代わり。 画面の下、 safe-area の内側に出て自動で消える) */
+    .toast-stack {
+      position: fixed; left: 50%; transform: translateX(-50%);
+      bottom: calc(var(--safe-b) + 1rem);
+      z-index: var(--z-toast);
+      display: flex; flex-direction: column; align-items: center; gap: var(--sp-2);
+      width: min(92vw, 440px);
+      pointer-events: none;
+    }
+    .toast {
+      pointer-events: auto;
+      width: 100%;
+      background: rgba(30, 26, 40, 0.96);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      border-radius: var(--r-md);
+      padding: var(--sp-3) var(--sp-4);
+      color: var(--text);
+      font-size: var(--fs-sm);
+      line-height: 1.5;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      animation: toast-in var(--dur-base) var(--ease-out) both;
+    }
+    .toast--good { border-left-color: var(--gain); }
+    .toast--bad  { border-left-color: var(--loss); }
+    .toast--out  { animation: toast-out var(--dur-base) ease-in both; }
+    @keyframes toast-in  { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+    @keyframes toast-out { to { opacity: 0; transform: translateY(6px); } }
+
+    /* 動きを減らす (= OS の設定。 DESIGN_CHARTER 2.4) */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -2917,7 +3044,7 @@
     </div>
   </div>
 
-  <div id="ownedDeckOverlay" class="hidden" aria-hidden="true" role="dialog" aria-labelledby="ownedDeckTitle">
+  <div id="ownedDeckOverlay" class="hidden" aria-hidden="true" role="dialog" aria-modal="true" data-esc-close="#ownedDeckCloseBtn" aria-labelledby="ownedDeckTitle">
     <div class="owned-deck-card">
       <div class="owned-deck-header">
         <h2 id="ownedDeckTitle" data-i18n="owned.deck.title">保有デッキ</h2>
@@ -2929,7 +3056,7 @@
     <div id="ownedDeckPeek" class="owned-deck-peek hidden" aria-hidden="true"></div>
   </div>
 
-  <div id="activityReportOverlay" class="hidden" aria-hidden="true" role="dialog" aria-labelledby="reportTitle">
+  <div id="activityReportOverlay" class="hidden" aria-hidden="true" role="dialog" aria-modal="true" data-esc-close="#reportCloseBtn" aria-labelledby="reportTitle">
     <div class="report-card">
       <div class="report-header">
         <img class="report-logo" alt="MyCryptoTactics" />
@@ -3002,7 +3129,7 @@
     </div>
   </div>
 
-  <div id="deckModal" class="hidden" aria-hidden="true" role="dialog" aria-labelledby="deckModalTitle">
+  <div id="deckModal" class="hidden" aria-hidden="true" role="dialog" aria-modal="true" data-esc-close="#deckModalClose" aria-labelledby="deckModalTitle">
     <div class="deck-modal-box">
       <h3 id="deckModalTitle" data-i18n="deck.modal.title">残りデッキ</h3>
       <p class="deck-modal-meta" id="deckModalCount"></p>
@@ -3035,7 +3162,7 @@
   </footer>
 
   <!-- SPEC-007: ランキング送信モーダル（クリア時に表示）-->
-  <div id="rankingSubmitOverlay" class="hidden" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="rsTitle">
+  <div id="rankingSubmitOverlay" class="hidden" aria-hidden="true" role="dialog" aria-modal="true" data-esc-close="[data-rs-cancel]" aria-labelledby="rsTitle">
     <div class="rs-dialog">
       <h2 id="rsTitle" class="rs-title" data-i18n="rs.title">クリア！ ランキングに登録</h2>
 
@@ -3066,7 +3193,7 @@
   </div>
 
   <!-- SPEC-007: Absolute レギュレーション設定モーダル -->
-  <div id="absoluteConfigOverlay" class="hidden" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="absTitle">
+  <div id="absoluteConfigOverlay" class="hidden" aria-hidden="true" role="dialog" aria-modal="true" data-esc-close="[data-abs-cancel]" aria-labelledby="absTitle">
     <div class="abs-dialog">
       <h2 id="absTitle" class="abs-title" data-i18n="abs.title">Absolute レギュレーション設定</h2>
       <p style="font-size:0.85rem;color:var(--muted);margin:0;" data-i18n="abs.subtitle">各倍率は 0.1〜5.0、0.1 刻み。スライダーを動かすとスコア倍率が再計算されます。</p>
@@ -3233,6 +3360,8 @@
 
   <!-- SPEC-008: bearko.games 共通基盤の SDK（読めなくてもゲームは動く）。main.js より先に読む -->
   <script defer src="https://bearko.games/sdk/v1.js"></script>
+  <!-- SPEC-010: トースト (= alert() の代わり) -->
+  <div id="toastStack" class="toast-stack" aria-live="polite"></div>
   <script type="module" src="./js/main.js"></script>
   <!-- アクセス解析は Cloudflare Web Analytics（ダッシュボードの自動挿入）で行う。ここにスクリプトは置かない -->
 </body>

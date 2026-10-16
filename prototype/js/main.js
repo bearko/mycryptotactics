@@ -1,4 +1,5 @@
 import { initPlatform, reportChapterClear, scoreMetrics, reportRunScore } from "./platform.js";
+import { installModalA11y, showToast } from "./ui-kit.js";
 import {
   createCardRuntime,
   shuffle,
@@ -6787,9 +6788,10 @@ function showActivityReport(snap) {
         }
         openIntentOnly();
         // ユーザーへの案内（一度だけ）
-        try {
-          window.alert("活動レポート画像をダウンロードしました。X 投稿画面で「画像を添付」から手動で添付してください。");
-        } catch (_) {}
+        // SPEC-010: alert() をやめてトースト (遊びを止めない)
+        showToast(getLang() === "en"
+          ? "Saved the activity report image. Attach it from \"Add photos\" on the X post screen."
+          : "活動レポート画像をダウンロードしました。X 投稿画面で「画像を添付」から手動で添付してください。", { tone: "good", ms: 6000 });
       } catch (err) {
         // html2canvas が CORS や renderer 制限で失敗した場合 → テキストのみ共有
         openIntentOnly();
@@ -7777,6 +7779,18 @@ function updateHeaderRegulationIcons() {
   ["headerRegIconMap", "headerRegIconCombat"].forEach((id) => {
     const el = document.getElementById(id);
     if (!el) return;
+    // SPEC-010: 画像が読めないときは壊れた画像の代わりに名前を出す
+    let fb = el.nextElementSibling;
+    if (!fb || !fb.classList.contains("header-reg-fallback")) {
+      fb = document.createElement("span");
+      fb.className = "header-reg-fallback hidden";
+      el.insertAdjacentElement("afterend", fb);
+    }
+    fb.textContent = r.nameJa;
+    fb.title = `レギュレーション: ${r.nameJa}`;
+    fb.classList.add("hidden");
+    el.classList.remove("hidden");
+    el.onerror = () => { el.classList.add("hidden"); fb.classList.remove("hidden"); };
     el.src = r.iconUrl;
     el.alt = r.nameJa;
     el.title = `レギュレーション: ${r.nameJa}`;
@@ -8427,7 +8441,7 @@ async function init() {
     }
   } catch (e) {
     console.error("[init] data load failed", e);
-    alert((getLang() === "en" ? "Data load failed: " : "データロードに失敗しました: ") + e.message);
+    showToast((getLang() === "en" ? "Data load failed: " : "データロードに失敗しました: ") + e.message, { tone: "bad", ms: 15000 });
     return;
   }
 
@@ -8488,6 +8502,7 @@ async function init() {
   wireAssets();
   initHelp();
   bindHandTouchDelegation();
+  installModalA11y();   // SPEC-010: ダイアログの Esc とフォーカス
 
   // Combat header buttons
   document.getElementById("btnHelpOpenCombat")?.addEventListener("click", () => {
