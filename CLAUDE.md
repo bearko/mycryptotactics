@@ -52,7 +52,7 @@
 
 - `docs/charters/*.md` の **直接編集**（人間の確認なしには変えない）
 - mycryptoheroes 素材を **このリポジトリにコミット** する
-- localStorage / IndexedDB / Cookie を本作のコードで使うこと（v1.0 では非目標。共通基盤のログイン状態は共通基盤が管理する）
+- localStorage を **設定・解放状況・表示名（`mct.*`）以外** に使うこと、IndexedDB / Cookie を本作のコードで使うこと（PROJECT_CHARTER 3.1。共通基盤のログイン状態は共通基盤が管理する）
 - 外部 npm パッケージの追加（依存ゼロを維持）
 - `node_modules/` のコミット
 - 秘密情報のコミット（そもそも秘密情報を持たない構成）
