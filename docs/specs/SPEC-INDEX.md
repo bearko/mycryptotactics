@@ -19,6 +19,7 @@
 | SPEC-010 | UI の土台（トークン・フォント・ボタン・モーダル・safe-area・reduced-motion） | Accepted | [SPEC-010-ui-foundation.md](./SPEC-010-ui-foundation.md) |
 | SPEC-011 | 設定（BGM・SE の音量、演出を減らす、言語） | Accepted | [SPEC-011-settings.md](./SPEC-011-settings.md) |
 | SPEC-012 | 演出（撃破・被弾・数字のカウントアップ・画面の切り替え） | Accepted | [SPEC-012-effects.md](./SPEC-012-effects.md) |
+| SPEC-013 | はじめての案内（初回の戦闘で指差し） | Accepted | [SPEC-013-first-guide.md](./SPEC-013-first-guide.md) |
 
 ## レビュー中・草案
 
