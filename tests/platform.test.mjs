@@ -43,3 +43,28 @@ test('SDK があれば unlockTrophy を呼び、失敗してもゲームを止�
     delete globalThis.window;
   }
 });
+
+// SPEC-009: 総合スコアに送る成績
+import { scoreMetrics, reportRunScore } from '../prototype/js/platform.js';
+
+test('総合スコア：送る成績の形', () => {
+  assert.deepEqual(scoreMetrics({ chaptersCleared: 5, chapterCount: 5, cleared: true, finalScore: 20500.4, regulation: 'common' }),
+    { chaptersCleared: 5, cleared: true, finalScore: 20500, regulation: 'common' });
+  assert.deepEqual(scoreMetrics({ chaptersCleared: 2, chapterCount: 5, cleared: false, finalScore: 999 }),
+    { chaptersCleared: 2, cleared: false, finalScore: 0, regulation: null }, '敗北なら最終スコアは入れない');
+  assert.equal(scoreMetrics({ chaptersCleared: 9, chapterCount: 5, cleared: false }).chaptersCleared, 5);
+});
+
+test('総合スコア：章をクリアしていなければ送らず、SDK がなくても例外を出さない', async () => {
+  assert.doesNotThrow(() => reportRunScore(scoreMetrics({ chaptersCleared: 1, chapterCount: 5, cleared: false })));
+  const sent = [];
+  globalThis.window = { BearkoGames: { submitScore: async (m) => { sent.push(m.chaptersCleared); return { ok: true }; } } };
+  try {
+    reportRunScore(scoreMetrics({ chaptersCleared: 0, chapterCount: 5, cleared: false }));
+    reportRunScore(scoreMetrics({ chaptersCleared: 3, chapterCount: 5, cleared: false }));
+    await new Promise((r) => setTimeout(r, 0));
+    assert.deepEqual(sent, [3]);
+  } finally {
+    delete globalThis.window;
+  }
+});

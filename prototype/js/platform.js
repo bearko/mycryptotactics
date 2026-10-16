@@ -36,3 +36,29 @@ export function reportChapterClear(chapterIdx, chapterCount) {
     }
   }
 }
+
+// SPEC-009: 総合スコア。挑戦の終わりの成績（共通基盤に送る形）。純関数（tests/platform.test.mjs）
+//   chaptersCleared：クリアした章の数、cleared：全章クリアか、finalScore：SPEC-007 の最終スコア（クリア時だけ）
+export function scoreMetrics({ chaptersCleared, chapterCount, cleared, finalScore, regulation }) {
+  const n = Math.max(0, Math.min(chapterCount, chaptersCleared | 0));
+  const all = !!cleared && n === chapterCount;
+  return {
+    chaptersCleared: n,
+    cleared: all,
+    finalScore: all ? Math.max(0, Math.round(finalScore || 0)) : 0,
+    regulation: regulation || null, // 将来の難易度ごとのレギュレーション用（今は点に効かない）
+  };
+}
+
+// 挑戦の終わりに送る。章を 1 つもクリアしていなければ送らない
+export function reportRunScore(metrics) {
+  const bg = sdk();
+  if (!bg || typeof bg.submitScore !== 'function' || !metrics || metrics.chaptersCleared < 1) return;
+  try {
+    Promise.resolve(bg.submitScore(metrics))
+      .then((r) => { if (!r || !r.ok) console.warn('[platform] score', r && r.error); })
+      .catch((e) => console.warn('[platform] score', e));
+  } catch (e) {
+    console.warn('[platform] score', e);
+  }
+}
