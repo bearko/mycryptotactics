@@ -1,5 +1,7 @@
 import { initPlatform, reportChapterClear, scoreMetrics, reportRunScore } from "./platform.js";
 import { installModalA11y, showToast } from "./ui-kit.js";
+import { getSettings, mixVolume, onSettingsChange } from "./settings.js";
+import { installSettingsUI, openSettings } from "./settings-ui.js";
 import {
   createCardRuntime,
   shuffle,
@@ -264,21 +266,52 @@ let handFocusedIdx = -1;
 let bgmAudio = null;
 
 // ─── BGM / SE ────────────────────────────────────────────────────
+// SPEC-011: 音量は「呼び出し側の音量 × 設定」。0 なら鳴らさない（BGM は読み込まない）。
+const BGM_BASE_VOLUME = 0.32;
+/** @type {'map'|'combat'|null} 今かけたい BGM（設定 0 で止めていても覚えておく） */
+let bgmKind = null;
+const bgmVolume = () => mixVolume(BGM_BASE_VOLUME, getSettings().bgm);
+
 function stopBgm() {
+  bgmKind = null;
   if (bgmAudio) { bgmAudio.pause(); bgmAudio.currentTime = 0; bgmAudio = null; }
+}
+
+function createBgm() {
+  if (!bgmKind) return;
+  const vol = bgmVolume();
+  if (vol <= 0) return;
+  try {
+    bgmAudio = new Audio(bgmKind === "combat" ? AUDIO_URLS.bgmPvp() : AUDIO_URLS.bgmMap());
+    bgmAudio.loop = true; bgmAudio.volume = vol;
+    if (!document.hidden) bgmAudio.play().catch(() => {});
+  } catch (_) {}
+}
+
+/** SPEC-011: 設定が変わったら、鳴っている BGM の音量を直す（0 なら止め、0 から上げたら鳴らし直す） */
+function applyBgmSettings() {
+  const vol = bgmVolume();
+  if (!bgmAudio) { if (vol > 0) createBgm(); return; }
+  if (vol <= 0) { bgmAudio.pause(); return; }
+  bgmAudio.volume = vol;
+  if (bgmAudio.paused && !document.hidden) bgmAudio.play().catch(() => {});
+}
+
+/** SE を鳴らす（設定 0 なら鳴らさない） */
+function playSeUrl(url, baseVolume) {
+  const vol = mixVolume(baseVolume, getSettings().se);
+  if (vol <= 0) return;
+  try { const a = new Audio(url); a.volume = vol; a.play().catch(() => {}); } catch (_) {}
 }
 
 function startBgmMap() {
   if (bgmAudio) {
     // オートプレイ制限で一時停止中の場合は再生を試みる（ユーザー操作後に有効）
-    if (bgmAudio.paused) bgmAudio.play().catch(() => {});
+    if (bgmAudio.paused && bgmVolume() > 0 && !document.hidden) bgmAudio.play().catch(() => {});
     return;
   }
-  try {
-    bgmAudio = new Audio(AUDIO_URLS.bgmMap());
-    bgmAudio.loop = true; bgmAudio.volume = 0.32;
-    bgmAudio.play().catch(() => {});
-  } catch (_) {}
+  bgmKind = "map";
+  createBgm();
 }
 
 // ─── タイトル画面 ─────────────────────────────────────────────────
@@ -298,36 +331,25 @@ function dismissTitle() {
 
 function startBgmCombat() {
   stopBgm();
-  try {
-    bgmAudio = new Audio(AUDIO_URLS.bgmPvp());
-    bgmAudio.loop = true; bgmAudio.volume = 0.32;
-    bgmAudio.play().catch(() => {});
-  } catch (_) {}
+  bgmKind = "combat";
+  createBgm();
 }
 
 function playSeNodeSelect() {
-  try {
-    const a = new Audio("Audio/SE/node_select.mp3");
-    a.volume = 0.65;
-    a.play().catch(() => {});
-  } catch (_) {}
+  playSeUrl("Audio/SE/node_select.mp3", 0.65);
 }
 
 function playSeShopBuy() {
-  try {
-    const a = new Audio("Audio/SE/coin.mp3");
-    a.volume = 0.70;
-    a.play().catch(() => {});
-  } catch (_) {}
+  playSeUrl("Audio/SE/coin.mp3", 0.70);
 }
 
 function playSeClear() {
-  try { const a = new Audio(AUDIO_URLS.seClear()); a.volume = 0.55; a.play().catch(() => {}); } catch (_) {}
+  playSeUrl(AUDIO_URLS.seClear(), 0.55);
 }
 
 function playJingle(kind) {
   const url = kind === "win" ? AUDIO_URLS.jingleWin() : AUDIO_URLS.jingleLose();
-  try { const a = new Audio(url); a.volume = 0.52; a.play().catch(() => {}); } catch (_) {}
+  playSeUrl(url, 0.52);
 }
 
 /** @param {'hit'|'heal'|'buff'|'debuff'|'area'} kind */
@@ -338,7 +360,7 @@ function playBattleSe(kind) {
     kind === "debuff" ? AUDIO_URLS.seBattleDebuff() :
     kind === "area"   ? AUDIO_URLS.seBattleAreaDamage() :
                         AUDIO_URLS.seBattleSingleDamage();
-  try { const a = new Audio(url); a.volume = 0.48; a.play().catch(() => {}); } catch (_) {}
+  playSeUrl(url, 0.48);
 }
 
 // ─── 紙吹雪 ──────────────────────────────────────────────────────
@@ -8508,8 +8530,15 @@ async function init() {
   document.getElementById("btnHelpOpenCombat")?.addEventListener("click", () => {
     document.getElementById("btnHelpOpen")?.click();
   });
-  document.getElementById("btnSettingsOpen")?.addEventListener("click", () => {
-    // future: open settings panel
+  // SPEC-011: 設定（戦闘・マップのヘッダーの ⚙）
+  installSettingsUI({ previewSe: () => playBattleSe("buff") });
+  document.getElementById("btnSettingsOpen")?.addEventListener("click", openSettings);
+  document.getElementById("btnSettingsOpenMap")?.addEventListener("click", openSettings);
+  onSettingsChange(() => applyBgmSettings());
+  // SPEC-011: タブを離れたら BGM を止め、戻ったら再開する
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) { if (bgmAudio) bgmAudio.pause(); }
+    else applyBgmSettings();
   });
 
   // ── タイトル画面 ──────────────────────────────────────────────────

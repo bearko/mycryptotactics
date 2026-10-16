@@ -2784,6 +2784,65 @@
         scroll-behavior: auto !important;
       }
     }
+    /* ── SPEC-011: 設定 ─────────────────────────────────────────────── */
+    #settingsOverlay {
+      position: fixed; inset: 0; background: #000c; z-index: 720;
+      display: flex; align-items: center; justify-content: center;
+      padding: max(0.75rem, var(--safe-t)) max(0.75rem, var(--safe-r)) max(0.75rem, var(--safe-b)) max(0.75rem, var(--safe-l));
+    }
+    #settingsOverlay.hidden { display: none; }
+    .set-dialog {
+      background: var(--panel); border: 1px solid var(--accent); border-radius: var(--r-lg);
+      width: 100%; max-width: 440px; max-height: 100%; overflow-y: auto;
+      padding: var(--sp-5); display: flex; flex-direction: column; gap: var(--sp-3);
+      box-shadow: 0 10px 30px #000a;
+    }
+    .set-head { display: flex; align-items: center; justify-content: space-between; }
+    .set-title { margin: 0; color: var(--accent); font-size: var(--fs-lg); }
+    .set-close-x {
+      background: transparent; border: none; color: var(--muted);
+      font-size: 1.5rem; line-height: 1; width: 44px; height: 44px; border-radius: 50%; cursor: pointer;
+    }
+    .set-row {
+      display: grid; grid-template-columns: 7rem 1fr 3rem; align-items: center; gap: var(--sp-3);
+      padding: var(--sp-3) var(--sp-4); border-radius: var(--r-md);
+      background: #0006; border: 1px solid var(--line);
+    }
+    .set-row--toggle { grid-template-columns: 1fr auto; cursor: pointer; }
+    .set-row--lang { grid-template-columns: auto 1fr; }
+    .set-label { font-weight: 700; font-size: var(--fs-md); }
+    .set-note { display: block; font-weight: 400; font-size: var(--fs-xs); color: var(--muted); margin-top: 2px; }
+    .set-value { text-align: right; font-size: var(--fs-sm); color: var(--muted); }
+    .set-range { width: 100%; accent-color: var(--accent); min-height: 28px; }
+    .set-langs { display: flex; gap: var(--sp-2); justify-content: flex-end; }
+    .set-langs .lang-btn {
+      padding: 0.35rem 0.8rem; border-radius: var(--r-pill);
+      border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer;
+    }
+    .set-langs .lang-btn.lang-btn--active { background: #9b7fd2; border-color: #c8b6e6; color: #fff; font-weight: 700; }
+    .set-switch {
+      appearance: none; -webkit-appearance: none; margin: 0; cursor: pointer;
+      width: 46px; height: 26px; border-radius: var(--r-pill);
+      background: #2a2438; border: 1px solid var(--border); position: relative;
+      transition: background var(--dur-base);
+    }
+    .set-switch::after {
+      content: ""; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%;
+      background: var(--muted); transition: transform var(--dur-base) var(--ease-out), background var(--dur-base);
+    }
+    .set-switch:checked { background: rgba(196, 163, 90, 0.35); border-color: var(--accent); }
+    .set-switch:checked::after { transform: translateX(20px); background: var(--accent); }
+    .set-switch:disabled { opacity: 0.6; cursor: not-allowed; }
+    @media (max-width: 380px) {
+      .set-row { grid-template-columns: 5.8rem 1fr 2.6rem; padding: var(--sp-2) var(--sp-3); }
+    }
+
+    /* SPEC-011: 設定の「演出を減らす」(= reduced-motion と同じく動きを止める) */
+    .reduce-fx *, .reduce-fx *::before, .reduce-fx *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   </style>
 </head>
 <body>
@@ -2813,6 +2872,7 @@
       <button type="button" class="btn-deck-view" id="btnDeckViewMap" data-i18n-attr-aria-label="res.deck.aria" data-i18n-attr-title="res.deck.aria" aria-label="保有デッキを表示" title="保有デッキを表示"><span class="btn-deck-view-icon">📚</span><span class="btn-deck-view-label" data-i18n="res.deck">デッキ表示</span></button>
       <img class="header-reg-icon" id="headerRegIconMap" data-i18n-attr-alt="res.regulation.alt" data-i18n-attr-title="res.regulation.alt" alt="レギュレーション" title="レギュレーション" />
       <button type="button" class="btn-ranking" id="btnRankingOpenMap" data-i18n-attr-aria-label="res.ranking.aria" data-i18n-attr-title="res.ranking.alt" aria-label="ランキングを表示" title="ランキング"><img src="./ranking_icon.png" data-i18n-attr-alt="res.ranking.alt" alt="ランキング" /></button>
+      <button type="button" class="btn-icon-hd" id="btnSettingsOpenMap" data-i18n-attr-aria-label="res.settings" data-i18n-attr-title="res.settings" aria-label="設定" title="設定">⚙</button>
       <button type="button" class="btn-help" id="btnHelpOpen" data-i18n-attr-aria-label="res.help.aria" data-i18n-attr-title="res.help.title" aria-label="ヘルプを開く" title="ヘルプ">?</button>
       <button type="button" class="btn-lang-hd" id="btnLangToggleMap" data-i18n-attr-aria-label="lang.toggle.label" data-i18n-attr-title="lang.toggle.label" aria-label="言語 / Language" title="言語 / Language">JP</button>
     </div>
@@ -3360,6 +3420,39 @@
 
   <!-- SPEC-008: bearko.games 共通基盤の SDK（読めなくてもゲームは動く）。main.js より先に読む -->
   <script defer src="https://bearko.games/sdk/v1.js"></script>
+  <!-- SPEC-011: 設定 -->
+  <div id="settingsOverlay" class="hidden" aria-hidden="true" role="dialog" aria-modal="true" data-esc-close="#setClose" aria-labelledby="setTitle">
+    <div class="set-dialog">
+      <header class="set-head">
+        <h2 id="setTitle" class="set-title" data-i18n="res.settings">設定</h2>
+        <button type="button" class="set-close-x" id="setCloseX" aria-label="Close">×</button>
+      </header>
+      <div class="set-row">
+        <label class="set-label" for="setBgm"><span aria-hidden="true">🎵</span> <span data-i18n="settings.bgm">BGM</span></label>
+        <input class="set-range" id="setBgm" type="range" min="0" max="100" step="5" />
+        <span class="set-value num" id="setBgmValue"></span>
+      </div>
+      <div class="set-row">
+        <label class="set-label" for="setSe"><span aria-hidden="true">🔊</span> <span data-i18n="settings.se">効果音</span></label>
+        <input class="set-range" id="setSe" type="range" min="0" max="100" step="5" />
+        <span class="set-value num" id="setSeValue"></span>
+      </div>
+      <label class="set-row set-row--toggle" for="setReduceFx">
+        <span class="set-label"><span aria-hidden="true">✨</span> <span data-i18n="settings.reduceFx">演出を減らす</span>
+          <small class="set-note" id="setReduceFxNote"></small></span>
+        <input class="set-switch" id="setReduceFx" type="checkbox" role="switch" />
+      </label>
+      <div class="set-row set-row--lang">
+        <span class="set-label"><span aria-hidden="true">🌐</span> <span data-i18n="settings.lang">言語</span></span>
+        <div class="set-langs">
+          <button type="button" class="lang-btn" data-lang="ja">日本語</button>
+          <button type="button" class="lang-btn" data-lang="en">English</button>
+        </div>
+      </div>
+      <button type="button" class="action primary" id="setClose" data-i18n="deck.modal.close">閉じる</button>
+    </div>
+  </div>
+
   <!-- SPEC-010: トースト (= alert() の代わり) -->
   <div id="toastStack" class="toast-stack" aria-live="polite"></div>
   <script type="module" src="./js/main.js"></script>
