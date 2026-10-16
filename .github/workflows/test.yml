@@ -1,0 +1,15 @@
+# 戦闘数式と共通基盤の連携のテスト（依存ゼロ。npm install はしない）
+name: test
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  node-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test tests/*.test.mjs

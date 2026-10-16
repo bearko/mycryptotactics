@@ -94,6 +94,8 @@
 
 **流れの要約**: 憲章を読む → 対象の SPEC を [SPEC-INDEX.md](docs/specs/SPEC-INDEX.md) から特定する → 実装 → PR に受け入れ基準と確認証跡を書く。
 
+**テスト**（依存ゼロ・Node 22 以上）: `node --test tests/*.test.mjs`。戦闘数式（`prototype/js/battle-mch.js`）と共通基盤の連携（`prototype/js/platform.js`）を確かめる。PR ごとに GitHub Actions（`.github/workflows/test.yml`）でも走る。
+
 ### 体験・UI の追加方針
 
 戦闘まわりのレイアウト・フィードバック・音声・ピクセル補間など **プレイヤーが何をどこで理解するか** は [SPEC-002 §10](docs/specs/SPEC-002-prototype.md#10-体験ui-設計方針機能追加時の参照) に集約する。新機能で画面を変えるときは **先に SPEC を更新** し、近接配置・モバイルでの視認性・数値の検証しやすさを崩さないこと。
