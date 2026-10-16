@@ -16,6 +16,7 @@
 | SPEC-007 | ランキング機能 + Absolute レギュレーション | Accepted（実装済み） | [SPEC-007-ranking-and-absolute.md](./SPEC-007-ranking-and-absolute.md) |
 | SPEC-008 | bearko.games 共通基盤との連携（トロフィー） | Accepted | [SPEC-008-platform-trophies.md](./SPEC-008-platform-trophies.md) |
 | SPEC-009 | bearko.games 共通基盤との連携（総合スコア） | Accepted | [SPEC-009-platform-score.md](./SPEC-009-platform-score.md) |
+| SPEC-010 | UI の土台（トークン・フォント・ボタン・モーダル・safe-area・reduced-motion） | Accepted | [SPEC-010-ui-foundation.md](./SPEC-010-ui-foundation.md) |
 
 ## レビュー中・草案
 
