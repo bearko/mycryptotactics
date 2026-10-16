@@ -2871,6 +2871,35 @@
       from { opacity: 0; transform: translateY(10px); }
       to   { opacity: 1; transform: none; }
     }
+    /* ── SPEC-013: はじめての案内 ─────────────────────────────────────── */
+    .guide-layer { position: fixed; inset: 0; z-index: 630; pointer-events: none; }
+    .guide-layer.hidden { display: none; }
+    .guide-ring {
+      position: fixed; border: 2px solid var(--accent); border-radius: var(--r-md);
+      box-shadow: 0 0 0 4px rgba(196, 163, 90, 0.25), 0 0 18px rgba(196, 163, 90, 0.55);
+      transition: left var(--dur-base) var(--ease-out), top var(--dur-base) var(--ease-out), width var(--dur-base), height var(--dur-base);
+      animation: guide-pulse 1.4s ease-in-out infinite;
+    }
+    @keyframes guide-pulse { 50% { box-shadow: 0 0 0 7px rgba(196, 163, 90, 0.12), 0 0 26px rgba(196, 163, 90, 0.7); } }
+    .guide-bubble {
+      position: fixed; max-width: min(320px, calc(100vw - 16px));
+      display: flex; align-items: flex-start; gap: var(--sp-2);
+      padding: var(--sp-3) var(--sp-3) var(--sp-3) var(--sp-4);
+      background: rgba(30, 26, 40, 0.97); border: 1px solid var(--accent); border-radius: var(--r-md);
+      color: var(--text); font-size: var(--fs-sm); line-height: 1.5; font-weight: 600;
+      box-shadow: 0 8px 22px #000b;
+    }
+    .guide-step { color: var(--accent); font-size: var(--fs-xs); white-space: nowrap; padding-top: 2px; }
+    .guide-text { flex: 1; }
+    .guide-close {
+      pointer-events: auto; background: transparent; border: none; color: var(--muted);
+      font-size: 1.1rem; line-height: 1; width: 32px; height: 32px; margin: -6px -6px -6px 0; cursor: pointer;
+    }
+    .reduce-fx .guide-ring { animation: none; }
+    .help-guide-replay {
+      margin: var(--sp-3) 0.85rem 0; background: transparent; border: 1px solid var(--border); border-radius: var(--r-pill);
+      color: var(--accent); font-size: var(--fs-sm); padding: 0.35rem 0.9rem; cursor: pointer; align-self: flex-start;
+    }
   </style>
 </head>
 <body>
@@ -3325,6 +3354,7 @@
         <h2 id="helpTitle" data-i18n="help.title">ヘルプ</h2>
         <button type="button" class="action" id="btnHelpClose" data-i18n="deck.modal.close">閉じる</button>
       </div>
+      <button type="button" class="help-guide-replay" id="btnGuideReplay" data-i18n="guide.replay">はじめての案内をもう一度見る</button>
       <div class="help-nav" role="tablist" aria-label="ヘルプの章">
         <button type="button" class="help-nav-btn help-nav-btn--active" data-help-nav="goal" role="tab" aria-selected="true" data-i18n="help.nav.goal">目的</button>
         <button type="button" class="help-nav-btn" data-help-nav="controls" role="tab" aria-selected="false" data-i18n="help.nav.controls">操作</button>
@@ -3448,6 +3478,16 @@
 
   <!-- SPEC-008: bearko.games 共通基盤の SDK（読めなくてもゲームは動く）。main.js より先に読む -->
   <script defer src="https://bearko.games/sdk/v1.js"></script>
+  <!-- SPEC-013: はじめての案内 (= 枠と吹き出しは操作を邪魔しない。× だけ押せる) -->
+  <div id="guideLayer" class="guide-layer hidden" aria-live="polite">
+    <div class="guide-ring" id="guideRing"></div>
+    <div class="guide-bubble" id="guideBubble">
+      <span class="guide-step num" id="guideStepNo"></span>
+      <span class="guide-text" id="guideText"></span>
+      <button type="button" class="guide-close" id="guideClose" aria-label="Close">×</button>
+    </div>
+  </div>
+
   <!-- SPEC-012: 被弾で画面の縁が光る (= 操作の邪魔をしない) -->
   <div id="fxHurtEdge" class="fx-hurt-edge" aria-hidden="true"></div>
 

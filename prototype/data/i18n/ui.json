@@ -394,5 +394,10 @@
   "settings.reduceFx":         { "ja": "演出を減らす", "en": "Reduce effects" },
   "settings.reduceFxNote":     { "ja": "揺れ・粒・画面の光を止める", "en": "No shake, particles or flashes" },
   "settings.reduceFxOs":       { "ja": "端末の設定で動きを減らしています", "en": "Reduced by your device settings" },
-  "settings.lang":             { "ja": "言語", "en": "Language" }
+  "settings.lang":             { "ja": "言語", "en": "Language" },
+  "guide.hand":                { "ja": "カードをタップすると持ち上がり、もう一度タップで使えます", "en": "Tap a card to lift it, then tap it again to play it." },
+  "guide.energy":              { "ja": "カードの左上の ⚡ がコスト。⚡ がなくなるまで使えます", "en": "The ⚡ on top of a card is its cost. Play cards until your ⚡ runs out." },
+  "guide.intent":              { "ja": "敵が次にすること。守るか攻めるかの手がかりに", "en": "What the enemy will do next. Use it to decide whether to defend or attack." },
+  "guide.endTurn":             { "ja": "使い切ったらターン終了。敵が動きます", "en": "When you're done, end your turn. Then the enemy acts." },
+  "guide.replay":              { "ja": "はじめての案内をもう一度見る", "en": "Show the first-battle guide again" }
 }
