@@ -234,7 +234,7 @@ const MAP_START_X = 50;
 /** アプリのバージョン文字列。スコア送信時の version フィールドと、
  *  ランキングのバージョンフィルタの「現在」デフォルト値に使う。
  *  index.html / ui.json の表記と一致させること (Ver.X.Y.Z 形式)。 */
-const APP_VERSION = "1.2.0";
+const APP_VERSION = "1.3.0";
 // SPEC-008: bearko.games 共通基盤（トロフィー）。SDK がなければ何もしない
 initPlatform(APP_VERSION);
 
@@ -7666,10 +7666,11 @@ async function openRankingView() {
 }
 
 /** ランキングのバージョン選択肢を、取得済みエントリから動的に組み立てる。
- *  - APP_VERSION (現在実行中) は必ず先頭・デフォルト選択
+ *  - APP_VERSION (現在実行中) は必ず先頭
+ *  - SPEC-014: 既定は「全バージョン」（版を上げた瞬間にランキングが空に見えないように。スコアの式は版で変えていない）
  *  - "" (= 全バージョン) を末尾に
  *  - データから見つかったバージョンは新しい順 (semver 風 desc) に並べる
- *  - 既存値があれば保持。デフォルトは APP_VERSION。
+ *  - 既存値があれば保持。デフォルトは "__all__"。
  *  @param {Set<string>} versionsFromData
  *  @param {string} currentValue */
 function rebuildRankingVersionOptions(selectEl, versionsFromData, currentValue) {
@@ -7702,8 +7703,8 @@ function rebuildRankingVersionOptions(selectEl, versionsFromData, currentValue) 
     opts.push({ value: "__legacy__", label: ti18n("ranking.version.legacy") });
   }
   selectEl.innerHTML = opts.map(o => `<option value="${escapeHtml(o.value)}">${escapeHtml(o.label)}</option>`).join("");
-  // デフォルト選択: 現在値が候補に残っていればそれ、無ければ APP_VERSION
-  const target = opts.find(o => o.value === currentValue) ? currentValue : APP_VERSION;
+  // デフォルト選択: 現在値が候補に残っていればそれ、無ければ全バージョン (SPEC-014)
+  const target = opts.find(o => o.value === currentValue) ? currentValue : "__all__";
   selectEl.value = target;
 }
 
@@ -7731,8 +7732,8 @@ async function renderRankingView() {
   // バージョン選択肢を更新 (取得済みデータから unique versions を抽出)
   const versionsFromData = new Set();
   for (const e of (result.ranking || [])) versionsFromData.add(e.version || "");
-  rebuildRankingVersionOptions(versionFilterEl, versionsFromData, versionFilterEl?.value || APP_VERSION);
-  const selectedVer = versionFilterEl?.value || APP_VERSION;
+  rebuildRankingVersionOptions(versionFilterEl, versionsFromData, versionFilterEl?.value || "__all__");   // SPEC-014: 既定は全バージョン
+  const selectedVer = versionFilterEl?.value || "__all__";
 
   // バージョンフィルタ (client-side)
   let filtered = result.ranking || [];
@@ -7788,9 +7789,9 @@ async function renderRankingView() {
     // バージョンフィルタの change → 再描画 (実 fetch は再走、選択値は維持)
     const verEl = el.querySelector("[data-rk-version-filter]");
     if (verEl) {
-      // 初期値として APP_VERSION を入れておく (renderRankingView 内で
-      // データ取得後に rebuild される際の current 保持に使う)
-      verEl.innerHTML = `<option value="${escapeHtml(APP_VERSION)}">v${escapeHtml(APP_VERSION)} (current)</option>`;
+      // 初期値として「全バージョン」を入れておく (renderRankingView 内で
+      // データ取得後に rebuild される際の current 保持に使う)。SPEC-014: 既定は全バージョン
+      verEl.innerHTML = `<option value="__all__">${escapeHtml(ti18n("ranking.version.all"))}</option>`;
       verEl.addEventListener("change", () => renderRankingView());
     }
     el.querySelector("[data-rk-refresh]")?.addEventListener("click", () => renderRankingView());

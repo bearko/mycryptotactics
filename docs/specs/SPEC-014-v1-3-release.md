@@ -5,7 +5,7 @@
 | ID | SPEC-014 |
 | 状態 | Accepted |
 | 作成日 | 2026-10-16 |
-| 最終更新 | 2026-10-16（1.0） |
+| 最終更新 | 2026-10-16（1.1） |
 | 作者 | Claude Code（作者 bearko の依頼） |
 | レビュア | bearko |
 | チケット | #135（親 #127） |
@@ -50,11 +50,11 @@ v1.x の仕上げ（SPEC-010〜013）を **v1.3.0** として出す。版の表�
 
 ## 5. 受け入れ基準
 
-- [ ] 版の表記（`APP_VERSION`・title・OGP・タイトル画面・フッター ja/en）がすべて 1.3.0
-- [ ] `manifest.json` とアイコン 4 枚が 200 で読め、`<link rel="manifest">`・`apple-touch-icon` がある
-- [ ] ルートの `index.html` に「アルファ版」がない
-- [ ] ランキングを開くと「全バージョン」が選ばれている
-- [ ] `node --test tests/*.test.mjs` が通る
+- [x] 版の表記（`APP_VERSION`・title・OGP・タイトル画面・フッター ja/en）がすべて 1.3.0
+- [x] `manifest.json` とアイコン 4 枚が 200 で読め、`<link rel="manifest">`・`apple-touch-icon` がある
+- [x] ルートの `index.html` に「アルファ版」がない
+- [x] ランキングを開くと「全バージョン」が選ばれている
+- [x] `node --test tests/*.test.mjs` が通る
 
 ## 6. テスト
 
@@ -71,3 +71,4 @@ v1.x の仕上げ（SPEC-010〜013）を **v1.3.0** として出す。版の表�
 | 日付 | 版 | 変更内容 |
 |---|---|---|
 | 2026-10-16 | 1.0 | 初版 |
+| 2026-10-16 | 1.1 | 実装（受け入れ基準をすべて確認）。ルートの `index.html` にも `viewport-fit`・`theme-color`・アイコンを足した |
