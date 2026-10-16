@@ -3,6 +3,7 @@ import { installModalA11y, showToast } from "./ui-kit.js";
 import { getSettings, mixVolume, onSettingsChange } from "./settings.js";
 import { installSettingsUI, openSettings } from "./settings-ui.js";
 import { burstAt, hurtEdge, countTo, enterView } from "./fx.js";
+import { installGuide, startGuideIfFirst, hideGuide, guideEvent, resetGuide } from "./guide.js";
 import {
   createCardRuntime,
   shuffle,
@@ -1996,6 +1997,9 @@ function showView(name) {
   if (view === "combat" && name !== "combat") stopBgm();
   // SPEC-012: 画面が切り替わったときだけ、入ってくる画面に動きをつける
   if (view !== name) requestAnimationFrame(() => enterView(document.getElementById(VIEW_ELEMENT_IDS[name])));
+  // SPEC-013: 初回の戦闘だけ案内。戦闘を離れたら隠す
+  if (name === "combat") requestAnimationFrame(() => startGuideIfFirst());
+  else hideGuide();
   view = name;
   document.getElementById("mapView").classList.toggle("hidden", name !== "map");
   document.getElementById("combatView").classList.toggle("hidden", name !== "combat");
@@ -5811,6 +5815,7 @@ async function playCard(idx) {
     renderStatusBadges();
   }
   card.play(combat, { caster, effectsResolved });
+  guideEvent("card");   // SPEC-013: はじめての案内を次の段へ
   // SPEC-006 Phase 4d: card.play() で変化した legacy stats を caster に書き戻す
   syncLegacyStatsToCaster(combat, caster);
   // SPEC-006 Phase 4f UI fix: legacy 表示用に combat.player* を前衛 (heroes[0]) に戻す
@@ -8482,6 +8487,7 @@ async function init() {
 
   document.getElementById("btnEndTurn").addEventListener("click", async () => {
     if (!combat || view !== "combat" || combatInputLocked) return;
+    guideEvent("endTurn");   // SPEC-013
     // 連打で enemyTurn() が二重実行されるのを防止 (敵攻撃の重複判定 + 手札補充の二重発生)
     combatInputLocked = true;
     try {
@@ -8538,6 +8544,12 @@ async function init() {
   initHelp();
   bindHandTouchDelegation();
   installModalA11y();   // SPEC-010: ダイアログの Esc とフォーカス
+  installGuide();       // SPEC-013: はじめての案内の ×
+  // SPEC-013: ヘルプの「はじめての案内をもう一度見る」
+  document.getElementById("btnGuideReplay")?.addEventListener("click", () => {
+    resetGuide();
+    showToast(getLang() === "en" ? "The guide will show again in the next battle." : "次の戦闘で、はじめての案内をもう一度出します。", { tone: "good" });
+  });
 
   // Combat header buttons
   document.getElementById("btnHelpOpenCombat")?.addEventListener("click", () => {
