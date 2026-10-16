@@ -1,4 +1,4 @@
-import { initPlatform, reportChapterClear } from "./platform.js";
+import { initPlatform, reportChapterClear, scoreMetrics, reportRunScore } from "./platform.js";
 import {
   createCardRuntime,
   shuffle,
@@ -6214,6 +6214,7 @@ function advanceAfterRewardPick(libraryKey) {
       if (runState.runComplete) {
         // 全章クリア → ゲームオーバー画面（クリア）
         lastReportSnapshot = captureRunSnapshot({ isCleared: true, defeatedBy: null });
+        sendRunScore(lastReportSnapshot);
         showView("over");
         document.getElementById("gameOverMsg").textContent = ti18n("gameover.clear.msg");
       } else {
@@ -6572,6 +6573,19 @@ function captureRunSnapshot({ isCleared, defeatedBy }) {
   };
 }
 
+// SPEC-009: 挑戦の終わりに、共通基盤の総合スコアへ成績を送る（1 回の挑戦で 1 回だけ）
+function sendRunScore(snap) {
+  if (!snap || !runState || runState.scoreSent) return;
+  runState.scoreSent = true;
+  reportRunScore(scoreMetrics({
+    chaptersCleared: clearedChapters.size,
+    chapterCount: CHAPTERS.length,
+    cleared: snap.isCleared,
+    finalScore: snap.scoreBreakdown?.finalScore,
+    regulation: snap.regulation?.id,
+  }));
+}
+
 function fmtReportDateTime(d) {
   const pad = (n) => String(n).padStart(2, "0");
   return `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
@@ -6794,6 +6808,7 @@ function endCombatLoss() {
   // 敗北情報をリセット前にスナップショット
   const defeatedBy = combat ? { name: combat.enemyName, imgId: combat.enemyImgId } : null;
   lastReportSnapshot = captureRunSnapshot({ isCleared: false, defeatedBy });
+  sendRunScore(lastReportSnapshot);
 
   showCutin("lose").then(async () => {
     if (lastReportSnapshot) {
