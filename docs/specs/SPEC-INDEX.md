@@ -10,6 +10,7 @@
 | SPEC-001 | ローグライク・デッキ観覧用モック | Accepted | [SPEC-001-roguelike-deck-mock.md](./SPEC-001-roguelike-deck-mock.md) |
 | SPEC-002 | ブラウザプロトタイプ（MCH 式戦闘・UX・手札3列） | Accepted | [SPEC-002-prototype.md](./SPEC-002-prototype.md) |
 | SPEC-008 | bearko.games 共通基盤との連携（トロフィー） | Accepted | [SPEC-008-platform-trophies.md](./SPEC-008-platform-trophies.md) |
+| SPEC-009 | bearko.games 共通基盤との連携（総合スコア） | Accepted | [SPEC-009-platform-score.md](./SPEC-009-platform-score.md) |
 
 ## レビュー中・草案
 
