@@ -1,3 +1,4 @@
+import { initPlatform, reportChapterClear } from "./platform.js";
 import {
   createCardRuntime,
   shuffle,
@@ -229,6 +230,8 @@ const MAP_START_X = 50;
  *  ランキングのバージョンフィルタの「現在」デフォルト値に使う。
  *  index.html / ui.json の表記と一致させること (Ver.X.Y.Z 形式)。 */
 const APP_VERSION = "1.2.0";
+// SPEC-008: bearko.games 共通基盤（トロフィー）。SDK がなければ何もしない
+initPlatform(APP_VERSION);
 
 // ─── 状態変数 ────────────────────────────────────────────────────
 let gold = 75;
@@ -1559,6 +1562,8 @@ function advanceToNextChapter() {
   if (!runState) return;
   // クリア済み章を記録（node選択画面のアンロックに使用）
   clearedChapters.add(runState.chapterIdx);
+  // SPEC-008: 章クリアのトロフィー（第 1・2 章と最終章）
+  reportChapterClear(runState.chapterIdx, CHAPTERS.length);
   const nextIdx = runState.chapterIdx + 1;
   if (nextIdx >= CHAPTERS.length) {
     runState.runComplete = true;
