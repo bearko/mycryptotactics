@@ -2,7 +2,7 @@
 // 実行: node --test tests/platform.test.mjs
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { trophyIdsForChapterClear, reportChapterClear, initPlatform } from '../prototype/js/platform.js';
+import { trophyIdsForChapterClear, reportChapterClear, initPlatform, canPickAvatar, openAvatarPicker } from '../prototype/js/platform.js';
 import { CHAPTERS } from '../prototype/js/chapters.js';
 
 test('章クリアで送るトロフィー（5 章構成）', () => {
@@ -64,6 +64,22 @@ test('総合スコア：章をクリアしていなければ送らず、SDK が�
     reportRunScore(scoreMetrics({ chaptersCleared: 3, chapterCount: 5, cleared: false }));
     await new Promise((r) => setTimeout(r, 0));
     assert.deepEqual(sent, [3]);
+  } finally {
+    delete globalThis.window;
+  }
+});
+
+test('SPEC-015 共通のアイコン：SDK がない・古いときは出さず例外も出さない。あれば窓を開く', () => {
+  assert.equal(canPickAvatar(), false);
+  assert.equal(openAvatarPicker(), false);
+  let opened = 0;
+  globalThis.window = { BearkoGames: { init: async () => ({ ok: true }) } };
+  try {
+    assert.equal(canPickAvatar(), false);
+    globalThis.window.BearkoGames.openAvatarPicker = () => { opened++; };
+    assert.equal(canPickAvatar(), true);
+    assert.equal(openAvatarPicker(), true);
+    assert.equal(opened, 1);
   } finally {
     delete globalThis.window;
   }
