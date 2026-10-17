@@ -5,7 +5,7 @@
 | ID | SPEC-009 |
 | 状態 | Accepted |
 | 作成日 | 2026-10-16 |
-| 最終更新 | 2026-10-17（1.1） |
+| 最終更新 | 2026-10-17（1.2） |
 | 作者 | Claude Code（作者 bearko の依頼） |
 | レビュア | bearko |
 
@@ -67,6 +67,13 @@ bearko.games の総合スコア（[bearko/mycryptoportfolio の SPEC-002](https:
   - 難易度の係数は共通基盤で決める（Common 1.0 ／ Egg 1.2 ／ Baby 1.4 ／ Blue 1.7 ／ Red 2.0 ／ ABSOLUTE は ABSOLUTE の倍率そのもので上限 2.0）。ゲーム内のレギュレーション倍率（Red 3.0・ABSOLUTE 最大 2,500 倍）は総合スコアには使わない（ゲーム内のランキングはそのまま）
   - `finalScore` は今までどおり送る（1.0 の成績と同じ形のまま、記録として残す）
 
+### ランキング画面からの導線（1.2）
+
+- ランキング画面（SPEC-007 の `#rankingView`）の一覧の下に、「bearko.games の総合ランキング ↗」のリンクを置く（共通基盤の Issue #29）。行き先は `https://bearko.games/score/?game=tactics`（共通基盤のタイトル別ランキング。総合のタブにも切り替えられる）
+- 新しいタブで開く（`target="_blank" rel="noopener"`）。遊んでいる途中の画面を失わないため
+- 添え書き：「このランキングとは別の、bearko.games のタイトル共通のランキングです」。ゲーム内のランキング（GAS）は今までどおり残す（共通基盤の SPEC-001 3 章）
+- 文言は `ui.json`（ja / en）
+
 ### エラー条件
 
 - SDK が読めない・通信に失敗した場合は何もしない（ゲームの進行を止めない・例外を出さない）。失敗は `console.warn` だけ
@@ -89,6 +96,7 @@ bearko.games の総合スコア（[bearko/mycryptoportfolio の SPEC-002](https:
 - [ ] 全章クリアで「タイトルスコア 自己ベスト」の通知が出る
 - [ ] SDK が読めない状態でも、全章クリアまで遊べる
 - [ ] Red で全章クリアすると、送る成績に `baseScore` が入り、総合スコアが `5,000 ＋ baseScore × 0.5` になる（1.1）
+- [ ] ランキング画面のリンクから、新しいタブで bearko.games の Tactics のランキングが開く（1.2）
 
 ## 9. テストと証跡
 
@@ -101,3 +109,4 @@ bearko.games の総合スコア（[bearko/mycryptoportfolio の SPEC-002](https:
 |---|---|---|
 | 2026-10-16 | 1.0 | 初版 |
 | 2026-10-17 | 1.1 | 倍率の前の点（`baseScore`）と ABSOLUTE の倍率（`absoluteMult`）を送る。共通基盤の計算式が v2（難易度の係数）になったため |
+| 2026-10-17 | 1.2 | ランキング画面に bearko.games の総合ランキングへのリンク（共通基盤の Issue #29） |
