@@ -22,6 +22,7 @@
 | SPEC-013 | はじめての案内（初回の戦闘で指差し） | Accepted | [SPEC-013-first-guide.md](./SPEC-013-first-guide.md) |
 | SPEC-014 | 公開版 v1.3.0（版・manifest・アイコン・OGP・README） | Accepted | [SPEC-014-v1-3-release.md](./SPEC-014-v1-3-release.md) |
 | SPEC-015 | bearko.games 共通基盤との連携（RTA） | Accepted | [SPEC-015-platform-rta.md](./SPEC-015-platform-rta.md) |
+| SPEC-016 | bearko.games 共通のアイコンへの入口（設定の行 → SDK の窓） | Accepted | [SPEC-016-shared-avatar.md](./SPEC-016-shared-avatar.md) |
 
 ## レビュー中・草案
 
