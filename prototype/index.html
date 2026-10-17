@@ -1572,6 +1572,9 @@
     #rankingView.hidden { display: none; }
     #rankingView .rk-header { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap; }
     #rankingView .rk-header h2 { margin: 0; }
+    #rankingView .rk-platform { margin: 0.75rem 0 0.25rem; display: flex; flex-direction: column; gap: 0.15rem; font-size: 0.85rem; }
+    #rankingView .rk-platform a { font-weight: 700; color: var(--accent); }
+    #rankingView .rk-platform-note { font-size: 0.72rem; color: var(--muted); }
     #rankingView .rk-controls { display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap; }
     #rankingView .rk-controls select,
     #rankingView .rk-controls input[type="text"] {
@@ -3133,6 +3136,11 @@
       <div data-rk-list>
         <p class="rk-msg" data-i18n="ranking.fetching">取得中...</p>
       </div>
+      <!-- SPEC-009 1.2: bearko.games の総合ランキングへ (新しいタブ。遊んでいる画面を失わないため) -->
+      <p class="rk-platform">
+        <a href="https://bearko.games/score/?game=tactics" target="_blank" rel="noopener" data-i18n="ranking.platform">bearko.games の総合ランキング ↗</a>
+        <span class="rk-platform-note" data-i18n="ranking.platform.note">このランキングとは別の、bearko.games のタイトル共通のランキングです</span>
+      </p>
       <details class="rk-advanced-details">
         <summary data-i18n="ranking.advanced">上級設定: 別のランキングサーバーを使う</summary>
         <p style="font-size:0.75rem;color:var(--muted);margin:0.25rem 0;" data-i18n="ranking.advanced.desc">

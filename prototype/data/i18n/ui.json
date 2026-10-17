@@ -93,6 +93,8 @@
   "reward.skipFull":           { "ja": "スキップ（報酬なし）", "en": "Skip (no reward)" },
   "ranking.regulation":        { "ja": "レギュレーション", "en": "Regulation" },
   "ranking.version":           { "ja": "バージョン", "en": "Version" },
+  "ranking.platform":          { "ja": "bearko.games の総合ランキング ↗", "en": "bearko.games overall ranking ↗" },
+  "ranking.platform.note":     { "ja": "このランキングとは別の、bearko.games のタイトル共通のランキングです", "en": "A separate ranking shared by all bearko.games titles" },
   "ranking.version.all":       { "ja": "全バージョン", "en": "All versions" },
   "ranking.version.legacy":    { "ja": "旧版 (バージョン未設定)", "en": "Legacy (no version)" },
   "ranking.score":             { "ja": "スコア", "en": "Score" },
