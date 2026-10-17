@@ -5,7 +5,7 @@
 
 import { getSettings, updateSettings, onSettingsChange, osPrefersReducedMotion, prefersReducedMotion } from './settings.js';
 import { t, getLang, setLang, onLangChange } from './i18n.js';
-import { canPickAvatar, openAvatarPicker } from './platform.js';   // SPEC-015
+import { canPickAvatar, openAvatarPicker } from './platform.js';   // SPEC-016
 
 const $ = (id) => document.getElementById(id);
 let wired = false;
@@ -22,7 +22,7 @@ function applyReduceFxClass() {
 
 function render() {
   const avatarRow = $('setAvatarRow');
-  if (avatarRow) avatarRow.hidden = !canPickAvatar();   // SPEC-015: SDK が読めていないときは行を出さない
+  if (avatarRow) avatarRow.hidden = !canPickAvatar();   // SPEC-016: SDK が読めていないときは行を出さない
   const s = getSettings();
   const bgm = $('setBgm');
   const se = $('setSe');
@@ -45,7 +45,7 @@ export function installSettingsUI(opt = {}) {
   wired = true;
   if (typeof opt.previewSe === 'function') previewSe = opt.previewSe;
   const overlay = $('settingsOverlay');
-  $('setAvatar')?.addEventListener('click', () => { openAvatarPicker(); });   // SPEC-015: 窓は SDK
+  $('setAvatar')?.addEventListener('click', () => { openAvatarPicker(); });   // SPEC-016: 窓は SDK
   $('setClose')?.addEventListener('click', closeSettings);
   $('setCloseX')?.addEventListener('click', closeSettings);
   overlay?.addEventListener('click', (e) => {
