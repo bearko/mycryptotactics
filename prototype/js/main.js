@@ -1,4 +1,4 @@
-import { initPlatform, reportChapterClear, scoreMetrics, reportRunScore } from "./platform.js";
+import { initPlatform, reportChapterClear, scoreMetrics, reportRunScore, rtaAvailable, rtaStart, rtaChapterClear, rtaAbort } from "./platform.js";
 import { installModalA11y, showToast } from "./ui-kit.js";
 import { getSettings, mixVolume, onSettingsChange } from "./settings.js";
 import { installSettingsUI, openSettings } from "./settings-ui.js";
@@ -127,6 +127,8 @@ import {
 
 // 現在選択中のレギュレーション (#37) — 全戦闘・全画面でこの値を参照
 let currentRegulationId = loadCurrentRegulationId();
+// SPEC-015: RTA のモード（'tactics-ch1' / 'tactics-all5'）。レギュレーション選択画面の「RTA」から選んだときだけ。タイトルに戻ると消える
+let rtaMode = null;
 function getCurrentRegulation() {
   return REGULATION_BY_ID[currentRegulationId] || REGULATIONS[0];
 }
@@ -1594,6 +1596,8 @@ function advanceToNextChapter() {
   clearedChapters.add(runState.chapterIdx);
   // SPEC-008: 章クリアのトロフィー（第 1・2 章と最終章）
   reportChapterClear(runState.chapterIdx, CHAPTERS.length);
+  // SPEC-015: RTA の区切り（IGT はターン数）
+  if (rtaMode) rtaChapterClear(rtaMode, runState.chapterIdx, CHAPTERS.length, runState.totalTurns);
   const nextIdx = runState.chapterIdx + 1;
   if (nextIdx >= CHAPTERS.length) {
     runState.runComplete = true;
@@ -6623,6 +6627,8 @@ function sendRunScore(snap) {
     chapterCount: CHAPTERS.length,
     cleared: snap.isCleared,
     finalScore: snap.scoreBreakdown?.finalScore,
+    baseScore: snap.scoreBreakdown?.baseScore,
+    absoluteMult: snap.scoreBreakdown?.absMult,
     regulation: snap.regulation?.id,
   }));
 }
@@ -6851,6 +6857,7 @@ function endCombatLoss() {
   const defeatedBy = combat ? { name: combat.enemyName, imgId: combat.enemyImgId } : null;
   lastReportSnapshot = captureRunSnapshot({ isCleared: false, defeatedBy });
   sendRunScore(lastReportSnapshot);
+  rtaAbort(); // SPEC-015
 
   showCutin("lose").then(async () => {
     if (lastReportSnapshot) {
@@ -6867,6 +6874,9 @@ function endCombatLoss() {
 
 /** タイトル画面へ戻る（クリア / 敗北 / 「もう一度」共通） (#37) */
 function backToTitle() {
+  // SPEC-015: 計測中なら中断し、RTA のモードを消す
+  rtaAbort();
+  rtaMode = null;
   // 各 view を hidden にしてタイトル表示
   ["mapView","combatView","shopView","gameOver","rewardView","nodeSelectView","craftView","heroSelectView","regulationSelectView"].forEach(id => {
     const el = document.getElementById(id);
@@ -7272,8 +7282,9 @@ function renderNodeSelect(justUnlockedIdx = null) {
   html += '<div class="ns-cards">';
 
   goals.forEach((goal) => {
-    const isUnlocked = goal.idx === 0 || clearedChapters.has(goal.idx - 1);
-    const isCleared  = clearedChapters.has(goal.idx);
+    // SPEC-015: RTA のモードでは第 1 章しか始められない
+    const isUnlocked = goal.idx === 0 || (!rtaMode && clearedChapters.has(goal.idx - 1));
+    const isCleared  = !rtaMode && clearedChapters.has(goal.idx);
     const isJustUnlocked = goal.idx === justUnlockedIdx;
     const isFinal    = goal.idx === CHAPTERS.length - 1;
 
@@ -7345,8 +7356,14 @@ function renderNodeSelect(justUnlockedIdx = null) {
   el.querySelectorAll('.ns-card--unlocked, .ns-card--cleared').forEach(cardEl => {
     const idx = parseInt(cardEl.dataset.idx, 10);
     const activate = () => {
+      if (rtaMode && idx !== 0) return; // SPEC-015
       playSeNodeSelect();
       startRunFromChapter(idx);
+      // SPEC-015: 第 1 章を始めたときに RTA の計測を始める（経過時間は資源の行の下に出す）
+      if (rtaMode) {
+        const bar = document.getElementById("mapResources");
+        rtaStart(rtaMode, bar ? Math.round(bar.getBoundingClientRect().bottom) : 0);
+      }
     };
     cardEl.addEventListener('click', activate);
     cardEl.addEventListener('keydown', ev => {
@@ -7449,7 +7466,28 @@ function renderRegulationSelect() {
   });
 
   html += '</div>';
+  // SPEC-015: RTA（Common 固定・ヒーロー自由）。SDK が使えないときは出さない
+  if (rtaAvailable()) {
+    html += `<div class="rs-rta">`;
+    html += `<div class="rs-rta-head"><span class="rs-rta-title">RTA</span><span class="rs-rta-sub">${escapeHtml(ti18n("rta.sub"))}</span></div>`;
+    html += `<div class="rs-rta-btns">`;
+    html += `<button type="button" class="action rs-rta-btn" data-rta="tactics-ch1">${escapeHtml(ti18n("rta.ch1"))}</button>`;
+    html += `<button type="button" class="action rs-rta-btn" data-rta="tactics-all5">${escapeHtml(ti18n("rta.all5"))}</button>`;
+    html += `</div>`;
+    html += `<a class="rs-rta-link" href="https://bearko.games/rta/" target="_blank" rel="noopener">${escapeHtml(ti18n("rta.ranking"))}</a>`;
+    html += `</div>`;
+  }
   el.innerHTML = html;
+
+  el.querySelectorAll('.rs-rta-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      rtaMode = btn.dataset.rta;
+      setCurrentRegulation("common");
+      clearedChapters = new Set(); // RTA は第 1 章から
+      showView("heroSelect");
+      renderHeroSelect();
+    });
+  });
 
   el.querySelectorAll('.rs-card--unlocked .rs-select-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -7458,6 +7496,7 @@ function renderRegulationSelect() {
       if (!id) return;
       // SPEC-007: Absolute なら設定モーダルを開いて、確定後にヒーロー選択へ
       const reg = REGULATION_BY_ID[id];
+      rtaMode = null; // ふつうのレギュレーションを選んだら RTA ではない（SPEC-015）
       if (reg && reg.effects.isAbsolute) {
         openAbsoluteConfigModal(() => {
           setCurrentRegulation(id);

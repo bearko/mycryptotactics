@@ -109,6 +109,10 @@
   "regulation.absoluteEdit":   { "ja": "選択中（設定変更）", "en": "Selected (edit settings)" },
   "regulation.absoluteStart":  { "ja": "Absolute を設定して開始", "en": "Configure Absolute & start" },
   "regulation.lockHint":       { "ja": "前の難易度をクリアで解放", "en": "Clear the previous difficulty to unlock" },
+  "rta.sub":                   { "ja": "Common・ヒーロー自由。第 1 章を始めたときから計ります", "en": "Common, any heroes. Timing starts with Chapter 1" },
+  "rta.ch1":                   { "ja": "RTA 第 1 章", "en": "RTA Chapter 1" },
+  "rta.all5":                  { "ja": "RTA 全 5 章", "en": "RTA All 5 Chapters" },
+  "rta.ranking":               { "ja": "RTA ランキング（bearko.games）", "en": "RTA ranking (bearko.games)" },
 
   "regulation.desc.common":    { "ja": "ベースライン（変更なし）", "en": "Baseline (no modifiers)" },
   "regulation.desc.egg":       { "ja": "敵 HP × 1.1", "en": "Enemy HP ×1.1" },
