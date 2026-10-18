@@ -27,7 +27,7 @@ const PASSIVE_KEYS = {
   2021: "shinsaku", 2022: "andersen", 2023: "michelangelo", 2024: "salome",
   2025: "satoshi", 2026: "hideyoshi", 2027: "aesop", 2028: "chun_sisters",
   2029: "ikkyu", 2030: "izumo", 2031: "bismarck", 2032: "montgomery",
-  2033: "goethe", 2034: "plato", 2035: "sarutahiko", 2036: "ichiyo",
+  2033: "goethe", 2034: "plato", 2036: "ichiyo", // 2035 猿田彦は表示しない（SPEC-018）
   2037: "sunce", 2038: "kiyomori", 2039: "dostoevsky", 2040: "mulan",
   2041: "franklin", 2042: "gama", 2043: "saizo", 2044: "socrates",
   2045: "daruma", 2046: "masako", 2047: "aristotle", 2048: "renoir",

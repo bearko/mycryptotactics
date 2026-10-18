@@ -3308,7 +3308,6 @@ async function applyHeroPassiveOnCardUse(s) {
     case "chun_sisters": await applyChunSistersPassive(s); break;
     case "bismarck": await applyBismarckPassive(s); break;
     case "montgomery": await applyMontgomeryPassive(s); break;
-    case "sarutahiko": await applySarutahikoPassive(s); break;
     case "gama": await applyGamaPassive(s); break;
     case "masako": await applyMasakoPassive(s); break;
     case "renoir": await applyRenoirPassive(s); break;
@@ -3818,20 +3817,6 @@ function applyPlatoPassive(s) {
   s.playerPhy += 1; playBattleSe("buff"); clog(`【イデア論】PHY +1`);
   s.playerAgi += 1; playBattleSe("buff"); clog(`【イデア論】AGI +1`);
   s.enemyPhy = Math.max(1, s.enemyPhy + (-3)); playBattleSe("debuff"); clog(`【イデア論】敵 PHY -3`);
-}
-
-// 2035 猿田彦「西暦3344年」 hook=onCardUse
-async function applySarutahikoPassive(s) {
-  const target = getPlayerAttackTargetEnemy(s);
-  const hero = s.heroes?.[0];
-  if (isPartyWipedOut(s) || areAllEnemiesDefeated(s)) return;
-  if (Math.random() >= 0.4) return;
-  combatInputLocked = true;
-  await showPassiveCutin("西暦3344年", typeof LEADER.img === "function" ? LEADER.img() : (LEADER.img || ""));
-  combatInputLocked = false;
-  if (!combat || isPartyWipedOut(s) || areAllEnemiesDefeated(s)) return;
-  s.playerInt += 3; playBattleSe("buff"); clog(`【西暦3344年】INT +3`);
-  renderCombat();
 }
 
 // 2036 樋口一葉「たけくらべ」 hook=onCombatStart
