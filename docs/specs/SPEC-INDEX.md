@@ -24,6 +24,7 @@
 | SPEC-015 | bearko.games 共通基盤との連携（RTA） | Accepted | [SPEC-015-platform-rta.md](./SPEC-015-platform-rta.md) |
 | SPEC-016 | bearko.games 共通のアイコンへの入口（設定の行 → SDK の窓） | Accepted | [SPEC-016-shared-avatar.md](./SPEC-016-shared-avatar.md) |
 | SPEC-017 | ランキングの表示を固くする（数は数に直す）・GAS の数式インジェクション・CI の権限 | Accepted | [SPEC-017-ranking-hardening.md](./SPEC-017-ranking-hardening.md) |
+| SPEC-018 | 版権キャラクター（猿田彦）を表示しない | Accepted | [SPEC-018-excluded-heroes.md](./SPEC-018-excluded-heroes.md) |
 
 ## レビュー中・草案
 

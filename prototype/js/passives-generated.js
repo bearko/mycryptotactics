@@ -528,17 +528,6 @@ export const PASSIVES = {
     ],
     cutinSkillName: "イデア論"
   },
-  // heroId: 2035
-  "sarutahiko": {
-    passiveKey: "sarutahiko",
-    trigger: "self.cardPlayed",
-    triggerRate: 0.4,
-    oncePerCombat: false,
-    effects: [
-      {"target":"self","action":"buffStat","stat":"int","value":3}
-    ],
-    cutinSkillName: "西暦3344年"
-  },
   // heroId: 2036
   "ichiyo": {
     passiveKey: "ichiyo",
