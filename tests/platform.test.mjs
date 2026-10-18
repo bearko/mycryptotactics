@@ -1,17 +1,17 @@
-// SPEC-008 の「章 → トロフィー ID」の対応と、SDK がないときに何もしないことのテスト。
+// SPEC-008・019 の「章 → アチーブメント ID」の対応と、SDK がないときに何もしないことのテスト。
 // 実行: node --test tests/platform.test.mjs
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { trophyIdsForChapterClear, reportChapterClear, initPlatform, canPickAvatar, openAvatarPicker } from '../prototype/js/platform.js';
 import { CHAPTERS } from '../prototype/js/chapters.js';
 
-test('章クリアで送るトロフィー（5 章構成）', () => {
+test('章クリアで送るアチーブメント（5 章構成）', () => {
   const n = CHAPTERS.length;
   assert.equal(n, 5);
   assert.deepEqual(trophyIdsForChapterClear(0, n), ['tactics.ch1']);
   assert.deepEqual(trophyIdsForChapterClear(1, n), ['tactics.ch2']);
-  assert.deepEqual(trophyIdsForChapterClear(2, n), []);
-  assert.deepEqual(trophyIdsForChapterClear(3, n), []);
+  assert.deepEqual(trophyIdsForChapterClear(2, n), ['tactics.ch3']);
+  assert.deepEqual(trophyIdsForChapterClear(3, n), ['tactics.ch4']);
   assert.deepEqual(trophyIdsForChapterClear(4, n), ['tactics.clear']);
 });
 
@@ -141,5 +141,89 @@ test('SPEC-016 共通のアイコン：SDK がない・古いときは出さず�
     assert.equal(opened, 1);
   } finally {
     delete globalThis.window;
+  }
+});
+
+// SPEC-019: アチーブメント（名鑑 11 枚・エクステンション 3 個）
+import { trophyIdsForCombatWin, reportCombatWin, unlockAchievements, resetAchievementsForTest } from '../prototype/js/platform.js';
+
+test('SPEC-019 章クリア：3 人パーティ・レギュレーション・RTA の完走', () => {
+  const n = CHAPTERS.length;
+  assert.deepEqual(trophyIdsForChapterClear(0, n, { partySize: 3, regulation: 'common' }), ['tactics.ch1', 'tactics.party3']);
+  assert.deepEqual(trophyIdsForChapterClear(0, n, { partySize: 2 }), ['tactics.ch1'], '2 人では party3 にならない');
+  assert.deepEqual(trophyIdsForChapterClear(1, n, { partySize: 3 }), ['tactics.ch2'], 'party3 は第 1 章だけ');
+  assert.deepEqual(trophyIdsForChapterClear(4, n, { regulation: 'egg' }), ['tactics.clear', 'tactics.egg']);
+  assert.deepEqual(trophyIdsForChapterClear(4, n, { regulation: 'red' }), ['tactics.clear', 'tactics.red']);
+  assert.deepEqual(trophyIdsForChapterClear(4, n, { regulation: 'blue' }), ['tactics.clear']);
+  assert.deepEqual(trophyIdsForChapterClear(3, n, { regulation: 'red' }), ['tactics.ch4'], '最終章でなければ red にならない');
+  assert.deepEqual(trophyIdsForChapterClear(0, n, { partySize: 1, rtaMode: 'tactics-ch1' }), ['tactics.ch1', 'tactics.rta1']);
+  assert.deepEqual(trophyIdsForChapterClear(0, n, { rtaMode: 'tactics-all5' }), ['tactics.ch1'], '全 5 章の RTA は第 1 章では完走でない');
+  assert.deepEqual(trophyIdsForChapterClear(4, n, { regulation: 'common', rtaMode: 'tactics-all5' }), ['tactics.clear', 'tactics.rta5']);
+  assert.deepEqual(trophyIdsForChapterClear(4, n, { rtaMode: 'tactics-ch1' }), ['tactics.clear']);
+});
+
+test('SPEC-019 戦闘勝利：エリート・ボスに全員生存・LL エクステ', () => {
+  const alive = { hp: 10, alive: true };
+  const dead = { hp: 0, alive: false };
+  assert.deepEqual(trophyIdsForCombatWin({ isElite: true, heroes: [alive] }), ['tactics.elite']);
+  assert.deepEqual(trophyIdsForCombatWin({ heroes: [alive] }), [], 'ふつうの戦闘');
+  assert.deepEqual(trophyIdsForCombatWin({ isBoss: true, heroes: [alive, { hp: 1 }, alive] }), ['tactics.allalive']);
+  assert.deepEqual(trophyIdsForCombatWin({ isBoss: true, heroes: [alive, dead] }), [], '倒れた味方がいる');
+  assert.deepEqual(trophyIdsForCombatWin({ isBoss: true, heroes: [alive, { hp: 0 }] }), [], 'HP 0 は倒れている');
+  assert.deepEqual(trophyIdsForCombatWin({ isBoss: true, heroes: [] }), []);
+  assert.deepEqual(trophyIdsForCombatWin({ isElite: true, heroes: [alive], gotLlExt: true, llExtSlots: [{ id: 1 }, null] }), ['tactics.elite', 'tactics.llext']);
+  assert.deepEqual(trophyIdsForCombatWin({ gotLlExt: true, llExtSlots: [{ id: 1 }, { id: 2 }] }), ['tactics.llext', 'tactics.llfull']);
+  assert.deepEqual(trophyIdsForCombatWin({ gotLlExt: false, llExtSlots: [{ id: 1 }, { id: 2 }] }), [], 'この勝利で手に入れていなければ送らない');
+  assert.deepEqual(trophyIdsForCombatWin(), []);
+});
+
+test('SPEC-019 送り方：同じ起動で重ねず、1 つずつ前の返事を待って送る', async () => {
+  resetAchievementsForTest();
+  const started = [];
+  const resolvers = [];
+  globalThis.window = {
+    BearkoGames: {
+      unlockTrophy: (id) => { started.push(id); return new Promise((res) => resolvers.push(res)); },
+    },
+  };
+  const warn = console.warn;
+  console.warn = () => {};
+  const tick = () => new Promise((r) => setTimeout(r, 0));
+  try {
+    reportChapterClear(4, 5, { regulation: 'red' });
+    reportCombatWin({ isBoss: true, heroes: [{ hp: 5 }] });
+    reportChapterClear(4, 5, { regulation: 'red' }); // 同じ起動の 2 度目は送らない
+    await tick();
+    assert.deepEqual(started, ['tactics.clear'], '最初の返事が来るまで次を送らない');
+    resolvers[0]({ ok: true });
+    await tick();
+    assert.deepEqual(started, ['tactics.clear', 'tactics.red']);
+    resolvers[1]({ ok: false, error: 'unknown_trophy' }); // 失敗しても次へ進む
+    await tick();
+    assert.deepEqual(started, ['tactics.clear', 'tactics.red', 'tactics.allalive']);
+    resolvers[2]({ ok: true });
+    await tick();
+    unlockAchievements(['tactics.red', 'tactics.elite']);
+    await tick();
+    assert.deepEqual(started, ['tactics.clear', 'tactics.red', 'tactics.allalive', 'tactics.elite']);
+  } finally {
+    console.warn = warn;
+    delete globalThis.window;
+    resetAchievementsForTest();
+  }
+});
+
+test('SPEC-019 送り方：SDK がないあいだは覚えず、あとで SDK が読めたら送る', async () => {
+  resetAchievementsForTest();
+  assert.doesNotThrow(() => reportCombatWin({ isElite: true, heroes: [] }));
+  const sent = [];
+  globalThis.window = { BearkoGames: { unlockTrophy: async (id) => { sent.push(id); return { ok: true }; } } };
+  try {
+    reportCombatWin({ isElite: true, heroes: [] });
+    await new Promise((r) => setTimeout(r, 0));
+    assert.deepEqual(sent, ['tactics.elite']);
+  } finally {
+    delete globalThis.window;
+    resetAchievementsForTest();
   }
 });

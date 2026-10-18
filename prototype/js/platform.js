@@ -1,15 +1,6 @@
-// SPEC-008・009・015: bearko.games 共通基盤（トロフィー・総合スコア・RTA）への窓口。
+// SPEC-008・009・015・019: bearko.games 共通基盤（アチーブメント・総合スコア・RTA）への窓口。
 // SDK（https://bearko.games/sdk/v1.js）が読めなくても何もしないで終わる。ゲームの進行は止めない。
 // ログイン状態は共通基盤が持つので、ここでは Cookie・localStorage に触らない。
-
-// クリアした章（0 始まり）に対応するトロフィー ID。純関数（tests/platform.test.mjs）
-export function trophyIdsForChapterClear(chapterIdx, chapterCount) {
-  const ids = [];
-  if (chapterIdx === 0) ids.push('tactics.ch1');
-  if (chapterIdx === 1) ids.push('tactics.ch2');
-  if (chapterCount > 0 && chapterIdx === chapterCount - 1) ids.push('tactics.clear');
-  return ids;
-}
 
 const sdk = () => (typeof window !== 'undefined' ? window.BearkoGames : undefined);
 
@@ -23,18 +14,95 @@ export function initPlatform(version) {
   }
 }
 
-export function reportChapterClear(chapterIdx, chapterCount) {
-  const bg = sdk();
-  if (!bg) return;
-  for (const id of trophyIdsForChapterClear(chapterIdx, chapterCount)) {
-    try {
-      Promise.resolve(bg.unlockTrophy(id))
-        .then((r) => { if (!r || !r.ok) console.warn('[platform] trophy', id, r && r.error); })
-        .catch((e) => console.warn('[platform] trophy', id, e));
-    } catch (e) {
-      console.warn('[platform] trophy', id, e);
-    }
+// ─── アチーブメント（SPEC-008・019） ───────────────────────────────
+// 本作は遊びの履歴を保存しないので、条件を満たしたその場で送る（「初めて」の 2 度目以降は共通基盤が無視する）
+
+const CHAPTER_IDS = ['tactics.ch1', 'tactics.ch2', 'tactics.ch3', 'tactics.ch4'];
+
+/**
+ * 章クリア（0 始まり）で送るアチーブメント ID。純関数（tests/platform.test.mjs）
+ * @param {{ partySize?: number, regulation?: string|null, rtaMode?: string|null }} [ctx]
+ *   partySize：runState.party.length、regulation：currentRegulationId、rtaMode：SPEC-015 の RTA（なければ null）
+ */
+export function trophyIdsForChapterClear(chapterIdx, chapterCount, ctx = {}) {
+  const { partySize = 0, regulation = null, rtaMode = null } = ctx || {};
+  const ids = [];
+  const last = chapterCount > 0 && chapterIdx === chapterCount - 1;
+  if (!last && CHAPTER_IDS[chapterIdx]) ids.push(CHAPTER_IDS[chapterIdx]);
+  if (chapterIdx === 0 && partySize === 3) ids.push('tactics.party3');
+  // RTA は最後の区切りを通ったら完走（区切りは SPEC-015 と同じ）
+  const cp = rtaCheckpointForChapterClear(rtaMode, chapterIdx, chapterCount);
+  if (rtaMode === 'tactics-ch1' && cp === 'ch1') ids.push('tactics.rta1');
+  if (last) {
+    ids.push('tactics.clear');
+    if (regulation === 'egg') ids.push('tactics.egg');
+    if (regulation === 'red') ids.push('tactics.red');
   }
+  if (rtaMode === 'tactics-all5' && cp === 'clear') ids.push('tactics.rta5');
+  return ids;
+}
+
+const heroAlive = (h) => !!h && h.alive !== false && (h.hp ?? 0) > 0;
+
+/**
+ * 戦闘勝利で送るアチーブメント ID。純関数（tests/platform.test.mjs）
+ * @param {{ isBoss?: boolean, isElite?: boolean, heroes?: any[], gotLlExt?: boolean, llExtSlots?: any[] }} ctx
+ *   heroes：勝った瞬間の combat.heroes、gotLlExt：この勝利で LL エクステがドロップした、llExtSlots：ドロップ後の枠
+ */
+export function trophyIdsForCombatWin(ctx = {}) {
+  const { isBoss = false, isElite = false, heroes = [], gotLlExt = false, llExtSlots = [] } = ctx || {};
+  const ids = [];
+  if (isElite) ids.push('tactics.elite');
+  // 勝った瞬間に全員が生きていること（前の戦闘で倒れたまま入った味方がいれば満たさない）
+  if (isBoss && Array.isArray(heroes) && heroes.length > 0 && heroes.every(heroAlive)) ids.push('tactics.allalive');
+  if (gotLlExt) {
+    ids.push('tactics.llext');
+    if (Array.isArray(llExtSlots) && llExtSlots.length >= 2 && llExtSlots.every(Boolean)) ids.push('tactics.llfull');
+  }
+  return ids;
+}
+
+// 同じ起動で送った ID。SDK があるときに送ったものだけ覚える
+const sentThisLaunch = new Set();
+// 1 つずつ順に送る（未ログインの最初の書き込みで仮アカウントができるので、前の返事を待つ）
+let sendChain = Promise.resolve();
+
+function sendOne(bg, id) {
+  try {
+    return Promise.resolve(bg.unlockTrophy(id))
+      .then((r) => { if (!r || !r.ok) console.warn('[platform] achievement', id, r && r.error); })
+      .catch((e) => console.warn('[platform] achievement', id, e));
+  } catch (e) {
+    console.warn('[platform] achievement', id, e);
+    return Promise.resolve();
+  }
+}
+
+/** アチーブメントを送る。SDK がなければ何もしない。同じ起動で同じ ID は送らない */
+export function unlockAchievements(ids) {
+  const bg = sdk();
+  if (!bg || typeof bg.unlockTrophy !== 'function' || !Array.isArray(ids)) return;
+  for (const id of ids) {
+    if (sentThisLaunch.has(id)) continue;
+    sentThisLaunch.add(id);
+    sendChain = sendChain.then(() => sendOne(bg, id));
+  }
+}
+
+/** テスト用：同じ起動で送った記録を消す */
+export function resetAchievementsForTest() {
+  sentThisLaunch.clear();
+  sendChain = Promise.resolve();
+}
+
+/** 章クリア（advanceToNextChapter）から呼ぶ */
+export function reportChapterClear(chapterIdx, chapterCount, ctx) {
+  unlockAchievements(trophyIdsForChapterClear(chapterIdx, chapterCount, ctx));
+}
+
+/** 戦闘勝利（endCombatWin）から呼ぶ */
+export function reportCombatWin(ctx) {
+  unlockAchievements(trophyIdsForCombatWin(ctx));
 }
 
 // SPEC-009: 総合スコア。挑戦の終わりの成績（共通基盤に送る形）。純関数（tests/platform.test.mjs）

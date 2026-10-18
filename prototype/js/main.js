@@ -1,4 +1,4 @@
-import { initPlatform, reportChapterClear, scoreMetrics, reportRunScore, rtaAvailable, rtaStart, rtaChapterClear, rtaAbort } from "./platform.js";
+import { initPlatform, reportChapterClear, reportCombatWin, scoreMetrics, reportRunScore, rtaAvailable, rtaStart, rtaChapterClear, rtaAbort } from "./platform.js";
 import { installModalA11y, showToast } from "./ui-kit.js";
 import { getSettings, mixVolume, onSettingsChange } from "./settings.js";
 import { installSettingsUI, openSettings } from "./settings-ui.js";
@@ -237,7 +237,7 @@ const MAP_START_X = 50;
  *  ランキングのバージョンフィルタの「現在」デフォルト値に使う。
  *  index.html / ui.json の表記と一致させること (Ver.X.Y.Z 形式)。 */
 const APP_VERSION = "1.3.0";
-// SPEC-008: bearko.games 共通基盤（トロフィー）。SDK がなければ何もしない
+// SPEC-008・019: bearko.games 共通基盤（アチーブメント）。SDK がなければ何もしない
 initPlatform(APP_VERSION);
 
 // ─── 状態変数 ────────────────────────────────────────────────────
@@ -1594,8 +1594,12 @@ function advanceToNextChapter() {
   if (!runState) return;
   // クリア済み章を記録（node選択画面のアンロックに使用）
   clearedChapters.add(runState.chapterIdx);
-  // SPEC-008: 章クリアのトロフィー（第 1・2 章と最終章）
-  reportChapterClear(runState.chapterIdx, CHAPTERS.length);
+  // SPEC-008・019: 章クリアのアチーブメント（各章・3 人パーティ・全章クリアのレギュレーション・RTA の完走）
+  reportChapterClear(runState.chapterIdx, CHAPTERS.length, {
+    partySize: Array.isArray(runState.party) ? runState.party.length : 0,
+    regulation: currentRegulationId,
+    rtaMode,
+  });
   // SPEC-015: RTA の区切り（IGT はターン数）
   if (rtaMode) rtaChapterClear(rtaMode, runState.chapterIdx, CHAPTERS.length, runState.totalTurns);
   const nextIdx = runState.chapterIdx + 1;
@@ -6066,6 +6070,8 @@ function endCombatWin() {
   const chapter = CHAPTERS[runState.chapterIdx];
   const isBoss = combat.isBoss;
   const isElite = combat.isElite;
+  // SPEC-019: 勝った瞬間の味方（combat は下で null になる）
+  const heroesAtWin = Array.isArray(combat.heroes) ? combat.heroes : [];
 
   // SPEC-007: ランキング用ターン累計（既存 combat.turn を runState に加算）
   runState.totalTurns = (runState.totalTurns || 0) + (combat.turn || 1);
@@ -6126,6 +6132,9 @@ function endCombatWin() {
       clog(`✨ LLエクステ「${droppedLlExt.name}」ドロップ！`);
     }
   }
+
+  // SPEC-019: 戦闘勝利のアチーブメント（エリート・ボスに全員生存・LL エクステ）
+  reportCombatWin({ isBoss, isElite, heroes: heroesAtWin, gotLlExt: !!droppedLlExt, llExtSlots: runState.llExtSlots });
 
   stopBgm();
   showCutin("win").then(() => {
