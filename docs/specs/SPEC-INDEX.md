@@ -14,7 +14,7 @@
 | SPEC-005 | パーティ編成（3v3）+ ターゲット指定システム | Accepted（β v1 実装済み。残りは #44） | [SPEC-005-party-3v3.md](./SPEC-005-party-3v3.md) |
 | SPEC-006 | カードキャスター（Phase 4 の進行状況のみ。本文のファイルはない） | 完了 | [SPEC-006-PHASE4-STATUS.md](./SPEC-006-PHASE4-STATUS.md) |
 | SPEC-007 | ランキング機能 + Absolute レギュレーション | Accepted（実装済み） | [SPEC-007-ranking-and-absolute.md](./SPEC-007-ranking-and-absolute.md) |
-| SPEC-008 | bearko.games 共通基盤との連携（トロフィー） | Accepted | [SPEC-008-platform-trophies.md](./SPEC-008-platform-trophies.md) |
+| SPEC-008 | bearko.games 共通基盤との連携（トロフィー。送るものは SPEC-019 で広げた） | Accepted | [SPEC-008-platform-trophies.md](./SPEC-008-platform-trophies.md) |
 | SPEC-009 | bearko.games 共通基盤との連携（総合スコア） | Accepted（1.2） | [SPEC-009-platform-score.md](./SPEC-009-platform-score.md) |
 | SPEC-010 | UI の土台（トークン・フォント・ボタン・モーダル・safe-area・reduced-motion） | Accepted | [SPEC-010-ui-foundation.md](./SPEC-010-ui-foundation.md) |
 | SPEC-011 | 設定（BGM・SE の音量、演出を減らす、言語） | Accepted | [SPEC-011-settings.md](./SPEC-011-settings.md) |
@@ -25,6 +25,7 @@
 | SPEC-016 | bearko.games 共通のアイコンへの入口（設定の行 → SDK の窓） | Accepted | [SPEC-016-shared-avatar.md](./SPEC-016-shared-avatar.md) |
 | SPEC-017 | ランキングの表示を固くする（数は数に直す）・GAS の数式インジェクション・CI の権限 | Accepted | [SPEC-017-ranking-hardening.md](./SPEC-017-ranking-hardening.md) |
 | SPEC-018 | 版権キャラクター（猿田彦）を表示しない | Accepted | [SPEC-018-excluded-heroes.md](./SPEC-018-excluded-heroes.md) |
+| SPEC-019 | bearko.games 共通基盤との連携（アチーブメント：名鑑 11 枚・エクステンション 3 個） | Accepted | [SPEC-019-platform-achievements.md](./SPEC-019-platform-achievements.md) |
 
 ## レビュー中・草案
 
