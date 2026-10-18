@@ -112,6 +112,21 @@ export async function submitScore(payload) {
  * @param {{regulation?: string, limit?: number}} opts
  * @returns {Promise<{ok: boolean, ranking?: Array, error?: string}>}
  */
+const num = (v) => (Number.isFinite(Number(v)) ? Number(v) : 0);
+
+/** ランキングの 1 行を整える（数は数に、文字は文字に）。純関数 */
+export function normalizeEntry(e) {
+  const x = e && typeof e === 'object' ? e : {};
+  const abs = x.absolute && typeof x.absolute === 'object'
+    ? { enemyHpMult: num(x.absolute.enemyHpMult), enemyDmgMult: num(x.absolute.enemyDmgMult), playerHpMult: num(x.absolute.playerHpMult), playerDmgMult: num(x.absolute.playerDmgMult) }
+    : null;
+  return {
+    ...x,
+    rank: num(x.rank), score: num(x.score), turns: num(x.turns), deckSize: num(x.deckSize), llExt: num(x.llExt),
+    playerName: String(x.playerName ?? ''), regulation: String(x.regulation ?? ''), absolute: abs,
+  };
+}
+
 export async function fetchRanking(opts = {}) {
   const url = getRankingApiUrl();
   if (!url) return { ok: false, error: "ランキング API URL が未設定です" };
@@ -123,7 +138,8 @@ export async function fetchRanking(opts = {}) {
     const res = await fetch(fullUrl, { method: "GET", mode: "cors", cache: "no-cache" });
     if (!res.ok) return { ok: false, error: `HTTP ${res.status}` };
     const data = await res.json().catch(() => ({}));
-    return { ok: !!data.ok, ranking: data.ranking || [], error: data.error };
+    // SPEC-017：画面は数を HTML にそのまま入れるので、ここで数に直す（送り先が変わっても HTML が入らないように）
+    return { ok: !!data.ok, ranking: Array.isArray(data.ranking) ? data.ranking.map(normalizeEntry) : [], error: data.error };
   } catch (e) {
     return { ok: false, error: String(e && e.message || e) };
   }

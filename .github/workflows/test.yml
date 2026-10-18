@@ -4,6 +4,9 @@ on:
   pull_request:
   push:
     branches: [main]
+# 読むだけ（GITHUB_TOKEN に書き込みの権限を持たせない）
+permissions:
+  contents: read
 jobs:
   node-test:
     runs-on: ubuntu-latest

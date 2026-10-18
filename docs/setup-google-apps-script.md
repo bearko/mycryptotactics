@@ -63,9 +63,10 @@ function doPost(e) {
     const sheet = _ensureSheet();
     sheet.appendRow([
       new Date(),
-      String(data.playerName || "anonymous").substring(0, 30),
+      // = + - @ で始まる名前はシートで数式として動くので、先頭に ' を付けて文字列にする（数式インジェクション対策。SPEC-017）
+      String(data.playerName || "anonymous").substring(0, 30).replace(/^[=+\-@\t\r]/, "'$&"),
       Number(data.score) || 0,
-      String(data.regulation || ""),
+      String(data.regulation || "").replace(/^[=+\-@\t\r]/, "'$&"),
       Number(data.turns) || 0,
       Number(data.deckSize) || 0,
       Number(data.llExt) || 0,
