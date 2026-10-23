@@ -8,7 +8,7 @@
 
 - **仕様駆動開発**：実装より先に SPEC を更新する。SPEC にない要件を勝手に追加しない
 - **静的サイト**：ビルドツール・パッケージマネージャは **追加しない**。素の HTML / ES Modules / CSS で動かす
-- **外部素材**：[bearko/mycryptoheroes](https://github.com/bearko/mycryptoheroes) の raw URL を参照する。再ホスト・コミットしない
+- **外部素材**：[bearko/mycryptoheroes](https://github.com/bearko/mycryptoheroes) の raw URL を参照する。再ホスト・コミットしない（例外：素材を組み合わせて本作のために作った画像は `prototype/` に置いてよい。PROJECT_CHARTER 2 章）
 - **無料運用**：Cloudflare Workers 無料プラン範囲。課金要素を入れない。**本作独自の**バックエンド・認証は置かず、ログイン・スコア・RTA・トロフィーは bearko.games 共通基盤につなぐ（ログインなしでも最後まで遊べること）
 - **1 名運用**：ジュニア相当の作者を支援する立場。難しい一発技ではなく、検証しやすい小さな変更を選ぶ
 
@@ -51,7 +51,7 @@
 ### 5. やってはいけないこと
 
 - `docs/charters/*.md` の **直接編集**（人間の確認なしには変えない）
-- mycryptoheroes 素材を **このリポジトリにコミット** する
+- mycryptoheroes 素材を **そのまま** このリポジトリにコミットする（組み合わせて本作のために作った画像は PROJECT_CHARTER 2 章の例外）
 - localStorage を **設定・解放状況・表示名（`mct.*`）以外** に使うこと、IndexedDB / Cookie を本作のコードで使うこと（PROJECT_CHARTER 3.1。共通基盤のログイン状態は共通基盤が管理する）
 - 外部 npm パッケージの追加（依存ゼロを維持）
 - `node_modules/` のコミット
@@ -138,4 +138,4 @@ Claude Code が新しいセッションで開いたときに、まず行うべ�
 
 ---
 
-*バージョン: 1.0 | 最終更新: 2026-04-30*
+*バージョン: 1.1 | 最終更新: 2026-10-23（素材の例外：PROJECT_CHARTER 3.2）*
